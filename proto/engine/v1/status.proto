@@ -2,186 +2,21 @@ syntax = "proto3";
 package engine.v1;
 option go_package = "github.com/aressim/internal/gen/engine/v1";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// status.proto
-//
-// The current operational state of a unit. Degrades from the capability
-// baseline (capabilities.proto) as the simulation runs.
-//
-// Design principle: effects-based representation over hitpoints.
-// A unit at 40% strength that is also suppressed behaves differently from
-// one at 40% strength that is not suppressed. The adjudicator must maintain
-// and evaluate all effect states independently.
-// ─────────────────────────────────────────────────────────────────────────────
-
+// Current operational health of a unit. Updated each tick by the adjudicator.
 message OperationalStatus {
-  // ── Strength ──────────────────────────────────────────────────────────────
-  // Personnel and equipment readiness as a fraction of TO&E.
-  // 1.0 = fully manned and equipped per table of organization and equipment.
-  float personnel_strength = 1;  // 0.0–1.0
-  float equipment_strength = 2;  // 0.0–1.0
-
-  // Composite combat power scalar. Computed every tick by the adjudicator:
-  //   combat_effectiveness = min(personnel_strength, equipment_strength)
-  //                        × morale × c2.c2_quality
-  // Read-only from the perspective of the bridge; set only by the adjudicator.
-  float combat_effectiveness = 3;  // 0.0–1.0
-
-  // ── Combat Effects ────────────────────────────────────────────────────────
-  // Outputs of the combat adjudicator. Multiple effects may be simultaneously
-  // active. The adjudicator evaluates and resets these each tick.
-  CombatEffects effects = 4;
-
-  // ── Logistics State ───────────────────────────────────────────────────────
-  float          fuel_level_liters = 5;  // Current fuel on hand
-  AmmunitionState ammo             = 6;
-  float          supply_days       = 7;  // Days of supply on hand (Phase 3: from commodity stocks)
-
-  // ── Morale and Fatigue ────────────────────────────────────────────────────
-  // Morale: degrades with attrition and friendly losses, improves with success.
-  // Fatigue: accumulates with operations tempo, resets with rest/reset orders.
-  // Both are inputs to the combat_effectiveness computation.
-  float          morale  = 8;   // 0.0–1.0
-  float          fatigue = 9;   // 0.0–1.0; high fatigue degrades effectiveness
-
-  // ── Readiness ─────────────────────────────────────────────────────────────
-  ReadinessState readiness = 10;
-
-  // ── C2 State ──────────────────────────────────────────────────────────────
-  C2Status c2 = 11;
-
-  // ── Logistics Connectivity (Phase 2) ──────────────────────────────────────
-  LogisticsConnectivity logistics = 12;
-
-  // ── Detection State (Phase 2) ─────────────────────────────────────────────
-  DetectionStatus detection = 13;
-
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
-  bool is_active = 14;  // False = destroyed, captured, or withdrawn from simulation
+  float personnel_strength   = 1; // 0.0–1.0 fraction of authorised strength
+  float equipment_strength   = 2; // 0.0–1.0 fraction of organic equipment
+  float combat_effectiveness = 3; // Derived composite score 0.0–1.0
+  float fuel_level_liters    = 5;
+  float morale               = 8; // 0.0–1.0
+  float fatigue              = 9; // 0.0–1.0; high fatigue degrades effectiveness
+  bool  is_active            = 14; // false = destroyed / withdrawn
+  CombatEffects combat_effects = 15;
 }
 
-// ─── COMBAT EFFECTS ───────────────────────────────────────────────────────────
-// Effects-based battle damage representation.
-//
-// Resolution sequence each tick:
-//   1. Fires resolve → suppression and attrition applied.
-//   2. Disruption checked → if attrition crosses threshold or HQ lost.
-//   3. Routing checked → if effectiveness < threshold under pressure.
-//   4. Exhaustion checked → if fuel/ammo below 10%.
-//
-// Doctrine note: fire suppresses more than it kills. Disruption of unit
-// cohesion frequently defeats formations before raw attrition does.
-
+// Transient combat states applied by the adjudicator.
 message CombatEffects {
-  // SUPPRESSION
-  // Unit cannot initiate offensive action (attack, fire mission) while active.
-  // Caused by: incoming direct or indirect fire within suppression radius.
-  // Recovery: no incoming fire for suppression_recovery_ticks consecutive ticks.
-  bool  suppressed                  = 1;
-  int32 suppression_ticks_remaining = 2;
-
-  // DISRUPTION
-  // C2 links are severed or degraded; orders cannot be efficiently passed.
-  // Unit reverts to last confirmed order; cannot receive new orders.
-  // Caused by: loss of parent HQ, comms jamming, or rapid attrition above threshold.
-  // Recovery: restored comms or after disruption_ticks_remaining reaches 0.
-  bool  disrupted                   = 3;
-  int32 disruption_ticks_remaining  = 4;
-
-  // ROUTING
-  // Unit cohesion has collapsed; unit moves away from enemy at full speed.
-  // Caused by: combat_effectiveness < 0.15 with active enemy pressure.
-  // Adjudicator sets the unit's active order to a WITHDRAW order targeting
-  // the direction of its parent unit.
-  bool  routing = 5;
-
-  // EXHAUSTION
-  // Fuel or ammunition critically low; offensive operations must cease.
-  // Caused by: fuel_level < 10% of capacity OR ammo primary rounds < 10%.
-  // Effect: weapon rate_of_fire multiplied by 0; movement limited to 25%.
-  bool  exhausted = 6;
-
-  // MOBILITY KILL
-  // Vehicle mobility degraded by mine strike, track damage, or terrain.
-  // Unit cannot move but may still fire.
-  bool  mobility_kill        = 7;
-  float mobility_reduction   = 8;  // 0.0–1.0 fraction of normal speed remaining
-
-  // OBSCURED
-  // Friendly sensor capability degraded by smoke, EW jamming, or weather.
-  // Caused by: smoke rounds landing within sensor_obscure_radius, or enemy EW.
-  bool  obscured              = 9;
-  float sensor_range_fraction = 10; // Fraction of normal sensor range currently available
-}
-
-// ─── AMMUNITION STATE ─────────────────────────────────────────────────────────
-// Represented as fractions of basic load for simplicity in Phase 1.
-// Phase 3: each fraction maps to a commodity stock quantity at the
-// connected logistics node for precise supply chain accounting.
-
-message AmmunitionState {
-  float primary_pct   = 1;  // Main weapon system rounds as fraction of basic load
-  float secondary_pct = 2;  // Secondary weapon system rounds
-  float missile_pct   = 3;  // Guided missiles (ATGM, SAM, AAM)
-  float mortar_pct    = 4;  // Mortar rounds (if organic)
-}
-
-// ─── READINESS ────────────────────────────────────────────────────────────────
-
-enum ReadinessState {
-  READINESS_UNSPECIFIED  = 0;
-  READINESS_DEPLOYED     = 1;  // In position, fully operational
-  READINESS_ALERT        = 2;  // Heightened readiness; weapons free
-  READINESS_MOVING       = 3;  // In transit; movement order active
-  READINESS_RESTING      = 4;  // Rest/recovery; restores fatigue, cannot engage
-  READINESS_REFITTING    = 5;  // Resupply and maintenance; cannot engage
-  READINESS_RESERVE      = 6;  // Uncommitted; awaiting orders
-  READINESS_DEGRADED     = 7;  // Operational but below 50% combat effectiveness
-  READINESS_COMBAT_INEFF = 8;  // Below 25% effectiveness; requires reconstitution
-}
-
-// ─── C2 STATUS ────────────────────────────────────────────────────────────────
-// Tracks the quality of command and control this tick.
-// Degraded C2 reduces: order execution responsiveness, fires coordination
-// effectiveness, and morale recovery rate.
-
-message C2Status {
-  bool  in_command_radius = 1;  // Within parent HQ command_radius_m
-  bool  comms_intact      = 2;  // False if jammed or parent HQ destroyed
-  float c2_quality        = 3;  // 0.0–1.0: effective C2 score this tick
-  // c2_quality = parent.capabilities.command.c2_effectiveness
-  //            × (in_command_radius ? 1.0 : 0.5)
-  //            × (comms_intact ? 1.0 : 0.3)
-}
-
-// ─── LOGISTICS CONNECTIVITY (Phase 2) ─────────────────────────────────────────
-// Recomputed every N ticks via SurrealDB graph traversal (supply.go).
-// When is_supplied = false, effectiveness_modifier degrades toward 0
-// at a rate defined by the scenario's supply degradation curve.
-
-message LogisticsConnectivity {
-  bool   is_supplied               = 1;
-  string nearest_node_id           = 2;  // Closest reachable logistics node of same side
-  float  supply_line_length_m      = 3;  // Route length in meters
-  bool   supply_line_interdicted   = 4;  // True if enemy action cut the route
-  float  effectiveness_modifier    = 5;  // 0.0–1.0: combat power penalty when unsupplied
-  // Phase 3: days_of_supply will be derived from commodity stock at nearest_node_id
-}
-
-// ─── DETECTION STATUS (Phase 2) ───────────────────────────────────────────────
-// Recomputed every tick in sensor.go for all active units.
-// The frontend filters CesiumJS entity visibility per side using this field.
-
-message DetectionStatus {
-  bool              detected_by_enemy  = 1;
-  repeated string   detecting_unit_ids = 2;
-  DetectionQuality  quality            = 3;  // Highest quality across all detecting units
-}
-
-enum DetectionQuality {
-  DETECTION_UNSPECIFIED = 0;  // Not detected (fog of war applies)
-  DETECTION_SUSPECTED   = 1;  // Unconfirmed contact: something detected, type unknown
-  DETECTION_DETECTED    = 2;  // Presence confirmed, type uncertain
-  DETECTION_IDENTIFIED  = 3;  // Type and approximate strength known
-  DETECTION_TRACKED     = 4;  // Continuously tracked; weapons can be directly cued
+  bool suppressed = 1; // Unit cannot initiate fire
+  bool disrupted  = 3; // Formation broken, movement penalty
+  bool routing    = 5; // Fleeing; control lost
 }

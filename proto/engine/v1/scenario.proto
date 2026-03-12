@@ -2,118 +2,34 @@ syntax = "proto3";
 package engine.v1;
 option go_package = "github.com/aressim/internal/gen/engine/v1";
 
-import "engine/v1/capabilities.proto";
 import "engine/v1/common.proto";
 import "engine/v1/unit.proto";
-import "engine/v1/logistics.proto";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// scenario.proto
-//
-// The container for a complete simulation state. Used for:
-//   1. Scenario files saved to disk (.aressim format; serialized binary proto)
-//   2. FullStateSnapshot sent to connecting multiplayer clients (events.proto)
-//   3. Adjudicator initialization on scenario load
-//
-// A Scenario represents the complete initial conditions plus settings.
-// The adjudicator's in-flight state (unit positions, status) is checkpointed
-// to SurrealDB every 5 ticks and can be rehydrated from there. The Scenario
-// proto is the authoritative record of how the simulation started.
-// ─────────────────────────────────────────────────────────────────────────────
 
 message Scenario {
-  string   id                  = 1;  // UUID
-  string   name                = 2;  // e.g. "Fulda Gap, 1985 – Blue Defense"
-  string   description         = 3;
-  string   classification      = 4;  // e.g. "UNCLASSIFIED // EXERCISE USE ONLY"
-  string   author              = 5;
-  double   start_time_unix     = 6;  // Wall-clock reference time for the scenario start
-  string   version             = 7;  // Schema version string for compatibility checks
-
-  SimulationSettings settings  = 8;
-  MapSettings        map       = 9;
-  VictoryConditions  victory   = 10;
-
-  // Initial order of battle
-  repeated Unit          units = 11;
-  repeated LogisticsNode nodes = 12;
-
-  // Phase 3: Strategic layer initial state
-  // repeated Nation               nations        = 13;
-  // repeated InfrastructureNode   infrastructure = 14;
-  // repeated Commodity            commodities    = 15;
+  string id             = 1; // UUID
+  string name           = 2;
+  string description    = 3;
+  string classification = 4;
+  string author         = 5;
+  double start_time_unix = 6;
+  string version        = 7;
+  SimulationSettings settings = 8;
+  MapSettings        map      = 9;
+  repeated Unit      units    = 11;
 }
 
-// ─── SIMULATION SETTINGS ──────────────────────────────────────────────────────
-
 message SimulationSettings {
-  float            tick_rate_hz         = 1;  // Adjudicator ticks per wall-clock second (default: 10)
-  float            time_scale           = 2;  // Sim-seconds per wall-second (default: 1.0; 60 = 1 min/sec)
-  bool             fog_of_war_enabled   = 3;  // Phase 2: enables DetectionStatus evaluation
-  bool             supply_enabled       = 4;  // Phase 2: enables supply chain graph resolution
-  bool             weather_enabled      = 5;  // Enables WeatherConditions modifiers on combat
-  bool             morale_enabled       = 6;  // Enables morale/fatigue computation
-  bool             c2_enabled           = 7;  // Enables C2 quality effects on effectiveness
-  AdjudicationModel adj_model           = 8;
-  int32            supply_tick_interval = 9;  // Ticks between supply resolution passes (default: 10)
+  float tick_rate_hz = 1; // Adjudicator ticks per wall-second (default 10)
+  float time_scale   = 2; // Sim-seconds per wall-second (default 1.0)
+}
+
+message MapSettings {
+  WeatherConditions initial_weather = 4;
 }
 
 enum AdjudicationModel {
   ADJ_MODEL_UNSPECIFIED   = 0;
-  ADJ_MODEL_DEFAULT       = 1;  // Balanced fidelity and performance
-  ADJ_MODEL_FAST          = 2;  // Reduced fidelity; designed for 1,000+ unit scenarios
-  ADJ_MODEL_HIGH_FIDELITY = 3;  // Full effects system including C2, morale, and EW
-}
-
-// ─── MAP SETTINGS ─────────────────────────────────────────────────────────────
-
-message MapSettings {
-  string            terrain_tileset_url = 1;  // CesiumJS Cesium World Terrain asset URL
-  string            imagery_url         = 2;  // Cesium Ion imagery asset URL
-  bool              use_3d_terrain      = 3;  // True = 3D terrain elevation; False = flat ellipsoid
-  WeatherConditions initial_weather     = 4;
-  repeated Polygon  operational_zones   = 5;  // Initial AO polygons rendered on COP
-}
-
-// ─── VICTORY CONDITIONS ───────────────────────────────────────────────────────
-// Defines the end-state criteria. The adjudicator checks these each tick and
-// emits a ScenarioStateEvent with SCENARIO_ENDED when any condition is met.
-
-message VictoryConditions {
-  repeated ObjectiveCondition objectives        = 1;
-  AttritionCondition          attrition         = 2;
-  float                       time_limit_seconds = 3;  // 0 = no time limit
-}
-
-message ObjectiveCondition {
-  string  objective_id      = 1;
-  string  name              = 2;
-  Polygon area              = 3;  // Objective area
-  string  required_side     = 4;  // Which side must control this area
-  float   hold_time_seconds = 5;  // How long the side must hold the area
-  int32   points            = 6;  // Victory points awarded
-}
-
-message AttritionCondition {
-  string  side               = 1;  // Side this condition applies to
-  float   max_loss_fraction  = 2;  // If this side loses more than this fraction, condition triggers
-  string  narrative          = 3;  // e.g. "Blue forces insufficient to continue operations"
-}
-
-// ─── SCENARIO TEMPLATE ────────────────────────────────────────────────────────
-// A named unit type template for spawning. Templates define default capability
-// values for each UnitType at a given echelon. The SpawnUnit bridge method
-// accepts a template_id to instantiate a fully-populated unit without the
-// player needing to fill every capability field manually.
-
-message UnitTemplate {
-  string       template_id      = 1;
-  string       display_name     = 2;  // e.g. "US M1A2 SEP v3 Tank Battalion"
-  string       nation           = 3;
-  UnitEchelon  echelon          = 4;
-  UnitDomain   domain           = 5;
-  UnitFunction function         = 6;
-  UnitType     type             = 7;
-  Capabilities capabilities     = 8;  // Pre-populated from real-world references
-  string       nato_symbol_sidc = 9;
+  ADJ_MODEL_DEFAULT       = 1;
+  ADJ_MODEL_FAST          = 2;
+  ADJ_MODEL_HIGH_FIDELITY = 3;
 }

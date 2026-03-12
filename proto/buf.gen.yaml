@@ -1,0 +1,11 @@
+version: v2
+plugins:
+  - plugin: go
+    out: ../internal/gen
+    opt:
+      - paths=source_relative
+  - plugin: es
+    out: ../frontend/src/proto
+    opt:
+      - target=ts
+      - import_extension=none

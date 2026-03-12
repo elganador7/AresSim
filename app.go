@@ -38,8 +38,6 @@ type App struct {
 	dbMgr      *db.Manager
 	dbClient   *db.Client
 	unitRepo   *repository.UnitRepo
-	nodeRepo   *repository.NodeRepo
-	linkRepo   *repository.LinkRepo
 	scenRepo   *repository.ScenarioRepo
 	checkpoint *db.CheckpointWriter
 }
@@ -91,10 +89,8 @@ func (a *App) startup(ctx context.Context) {
 
 	rawDB := a.dbClient.DB()
 	a.unitRepo = repository.NewUnitRepo(rawDB)
-	a.nodeRepo = repository.NewNodeRepo(rawDB)
-	a.linkRepo = repository.NewLinkRepo(rawDB)
 	a.scenRepo = repository.NewScenarioRepo(rawDB)
-	a.checkpoint = db.NewCheckpointWriter(a.unitRepo, a.nodeRepo, a.scenRepo)
+	a.checkpoint = db.NewCheckpointWriter(a.unitRepo, a.scenRepo)
 }
 
 // shutdown is called by Wails when the application is about to quit.
@@ -188,7 +184,6 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 			"schema_version":   scen.Version,
 			"tick_rate_hz":     scen.GetSettings().GetTickRateHz(),
 			"time_scale":       scen.GetSettings().GetTimeScale(),
-			"adj_model":        int(scen.GetSettings().GetAdjModel()),
 			"scenario_pb":      raw,
 			"last_tick":        0,
 			"last_sim_seconds": 0.0,
@@ -202,7 +197,6 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 	// Tell the frontend to rebuild from scratch.
 	a.emitProtoEvent("full_state_snapshot", &enginev1.FullStateSnapshot{
 		Units:        scen.Units,
-		Nodes:        scen.Nodes,
 		SimTime:      &enginev1.SimTime{},
 		Weather:      scen.GetMap().GetInitialWeather(),
 		ScenarioName: scen.Name,
@@ -232,7 +226,6 @@ func (a *App) RequestSync() BridgeResult {
 	}
 	a.emitProtoEvent("full_state_snapshot", &enginev1.FullStateSnapshot{
 		Units:        a.currentScenario.Units,
-		Nodes:        a.currentScenario.Nodes,
 		SimTime:      &enginev1.SimTime{},
 		Weather:      a.currentScenario.GetMap().GetInitialWeather(),
 		ScenarioName: a.currentScenario.Name,

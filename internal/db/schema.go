@@ -81,11 +81,8 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS exhausted         ON unit TYPE bool`,
 	`DEFINE FIELD IF NOT EXISTS mobility_kill     ON unit TYPE bool`,
 
-	// C2 hierarchy (denormalized IDs; graph edges are in c2_link table).
+	// C2 hierarchy
 	`DEFINE FIELD IF NOT EXISTS parent_unit_id    ON unit TYPE option<string>`,
-
-	// Orders blob: written when orders change, not every tick.
-	`DEFINE FIELD IF NOT EXISTS orders_pb         ON unit TYPE bytes`,
 
 	// Indexes
 	`DEFINE INDEX IF NOT EXISTS idx_unit_side     ON unit FIELDS side`,
@@ -93,73 +90,9 @@ var schemaStatements = []string{
 	`DEFINE INDEX IF NOT EXISTS idx_unit_domain   ON unit FIELDS domain`,
 	`DEFINE INDEX IF NOT EXISTS idx_unit_pos      ON unit FIELDS position`,
 
-	// ── logistics_node ────────────────────────────────────────────────────────
-
-	`DEFINE TABLE IF NOT EXISTS logistics_node SCHEMAFULL`,
-
-	`DEFINE FIELD IF NOT EXISTS name              ON logistics_node TYPE string`,
-	`DEFINE FIELD IF NOT EXISTS side              ON logistics_node TYPE string`,
-	`DEFINE FIELD IF NOT EXISTS nation_id         ON logistics_node TYPE option<string>`,
-	`DEFINE FIELD IF NOT EXISTS node_type         ON logistics_node TYPE int`,
-	`DEFINE FIELD IF NOT EXISTS position          ON logistics_node TYPE geometry<point>`,
-	`DEFINE FIELD IF NOT EXISTS alt_msl           ON logistics_node TYPE float`,
-
-	// Current stock levels (flat for fast update queries)
-	`DEFINE FIELD IF NOT EXISTS fuel_liters       ON logistics_node TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS ammo_units        ON logistics_node TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS food_rations      ON logistics_node TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS spare_parts       ON logistics_node TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS medical_supplies  ON logistics_node TYPE float`,
-
-	// Capacity ceiling (written once, not updated)
-	`DEFINE FIELD IF NOT EXISTS cap_fuel_liters   ON logistics_node TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS cap_ammo_units    ON logistics_node TYPE float`,
-
-	`DEFINE FIELD IF NOT EXISTS replenishment_rate    ON logistics_node TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS parent_node_id        ON logistics_node TYPE option<string>`,
-	`DEFINE FIELD IF NOT EXISTS health                ON logistics_node TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS is_active             ON logistics_node TYPE bool`,
-	`DEFINE FIELD IF NOT EXISTS is_supplied           ON logistics_node TYPE bool`,
-	`DEFINE FIELD IF NOT EXISTS strategic_source_id   ON logistics_node TYPE option<string>`,
-
-	`DEFINE INDEX IF NOT EXISTS idx_node_side     ON logistics_node FIELDS side`,
-	`DEFINE INDEX IF NOT EXISTS idx_node_active   ON logistics_node FIELDS is_active`,
-	`DEFINE INDEX IF NOT EXISTS idx_node_pos      ON logistics_node FIELDS position`,
-
-	// ── supply_link ───────────────────────────────────────────────────────────
-	// Graph relation. The adjudicator queries this with SurrealDB path syntax:
-	//   SELECT <-supply_link<-logistics_node FROM logistics_node:depot_id
-	// In Phase 2, traversal: SELECT ->supply_link->logistics_node FROM unit:id
-
-	`DEFINE TABLE IF NOT EXISTS supply_link TYPE RELATION SCHEMAFULL`,
-
-	`DEFINE FIELD IF NOT EXISTS link_type         ON supply_link TYPE int`,
-	`DEFINE FIELD IF NOT EXISTS bandwidth         ON supply_link TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS length_m          ON supply_link TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS is_active         ON supply_link TYPE bool`,
-	`DEFINE FIELD IF NOT EXISTS is_interdicted    ON supply_link TYPE bool`,
-	`DEFINE FIELD IF NOT EXISTS vulnerability     ON supply_link TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS commodity_id      ON supply_link TYPE option<string>`,
-
-	`DEFINE INDEX IF NOT EXISTS idx_link_active   ON supply_link FIELDS is_active`,
-
-	// ── c2_link ───────────────────────────────────────────────────────────────
-	// C2 hierarchy graph. Parent unit → child unit.
-	// Queried to determine command radius effects and disruption propagation.
-
-	`DEFINE TABLE IF NOT EXISTS c2_link TYPE RELATION SCHEMAFULL`,
-
-	// "organic" | "opcon" | "attached"
-	`DEFINE FIELD IF NOT EXISTS link_kind         ON c2_link TYPE string`,
-	`DEFINE FIELD IF NOT EXISTS established_at    ON c2_link TYPE float`,
-
-	`DEFINE INDEX IF NOT EXISTS idx_c2_in         ON c2_link FIELDS in`,
-	`DEFINE INDEX IF NOT EXISTS idx_c2_out        ON c2_link FIELDS out`,
-
 	// ── scenario ──────────────────────────────────────────────────────────────
-	// Scenario metadata + full proto blob for round-trip fidelity.
-	// The unit and logistics_node tables hold the live (checkpointed) state;
-	// scenario_pb holds the immutable initial conditions (order of battle).
+	// Scenario metadata + proto blob. The unit table holds live checkpointed
+	// state; scenario_pb holds the immutable initial order of battle.
 
 	`DEFINE TABLE IF NOT EXISTS scenario SCHEMAFULL`,
 

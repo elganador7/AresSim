@@ -2,86 +2,49 @@
 // @generated from file engine/v1/status.proto (package engine.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
-import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file engine/v1/status.proto.
  */
 export const file_engine_v1_status: GenFile = /*@__PURE__*/
-  fileDesc("ChZlbmdpbmUvdjEvc3RhdHVzLnByb3RvEgllbmdpbmUudjEi1QMKEU9wZXJhdGlvbmFsU3RhdHVzEhoKEnBlcnNvbm5lbF9zdHJlbmd0aBgBIAEoAhIaChJlcXVpcG1lbnRfc3RyZW5ndGgYAiABKAISHAoUY29tYmF0X2VmZmVjdGl2ZW5lc3MYAyABKAISKQoHZWZmZWN0cxgEIAEoCzIYLmVuZ2luZS52MS5Db21iYXRFZmZlY3RzEhkKEWZ1ZWxfbGV2ZWxfbGl0ZXJzGAUgASgCEigKBGFtbW8YBiABKAsyGi5lbmdpbmUudjEuQW1tdW5pdGlvblN0YXRlEhMKC3N1cHBseV9kYXlzGAcgASgCEg4KBm1vcmFsZRgIIAEoAhIPCgdmYXRpZ3VlGAkgASgCEiwKCXJlYWRpbmVzcxgKIAEoDjIZLmVuZ2luZS52MS5SZWFkaW5lc3NTdGF0ZRIfCgJjMhgLIAEoCzITLmVuZ2luZS52MS5DMlN0YXR1cxIzCglsb2dpc3RpY3MYDCABKAsyIC5lbmdpbmUudjEuTG9naXN0aWNzQ29ubmVjdGl2aXR5Ei0KCWRldGVjdGlvbhgNIAEoCzIaLmVuZ2luZS52MS5EZXRlY3Rpb25TdGF0dXMSEQoJaXNfYWN0aXZlGA4gASgIIocCCg1Db21iYXRFZmZlY3RzEhIKCnN1cHByZXNzZWQYASABKAgSIwobc3VwcHJlc3Npb25fdGlja3NfcmVtYWluaW5nGAIgASgFEhEKCWRpc3J1cHRlZBgDIAEoCBIiChpkaXNydXB0aW9uX3RpY2tzX3JlbWFpbmluZxgEIAEoBRIPCgdyb3V0aW5nGAUgASgIEhEKCWV4aGF1c3RlZBgGIAEoCBIVCg1tb2JpbGl0eV9raWxsGAcgASgIEhoKEm1vYmlsaXR5X3JlZHVjdGlvbhgIIAEoAhIQCghvYnNjdXJlZBgJIAEoCBIdChVzZW5zb3JfcmFuZ2VfZnJhY3Rpb24YCiABKAIiZgoPQW1tdW5pdGlvblN0YXRlEhMKC3ByaW1hcnlfcGN0GAEgASgCEhUKDXNlY29uZGFyeV9wY3QYAiABKAISEwoLbWlzc2lsZV9wY3QYAyABKAISEgoKbW9ydGFyX3BjdBgEIAEoAiJPCghDMlN0YXR1cxIZChFpbl9jb21tYW5kX3JhZGl1cxgBIAEoCBIUCgxjb21tc19pbnRhY3QYAiABKAgSEgoKYzJfcXVhbGl0eRgDIAEoAiKkAQoVTG9naXN0aWNzQ29ubmVjdGl2aXR5EhMKC2lzX3N1cHBsaWVkGAEgASgIEhcKD25lYXJlc3Rfbm9kZV9pZBgCIAEoCRIcChRzdXBwbHlfbGluZV9sZW5ndGhfbRgDIAEoAhIfChdzdXBwbHlfbGluZV9pbnRlcmRpY3RlZBgEIAEoCBIeChZlZmZlY3RpdmVuZXNzX21vZGlmaWVyGAUgASgCInYKD0RldGVjdGlvblN0YXR1cxIZChFkZXRlY3RlZF9ieV9lbmVteRgBIAEoCBIaChJkZXRlY3RpbmdfdW5pdF9pZHMYAiADKAkSLAoHcXVhbGl0eRgDIAEoDjIbLmVuZ2luZS52MS5EZXRlY3Rpb25RdWFsaXR5KukBCg5SZWFkaW5lc3NTdGF0ZRIZChVSRUFESU5FU1NfVU5TUEVDSUZJRUQQABIWChJSRUFESU5FU1NfREVQTE9ZRUQQARITCg9SRUFESU5FU1NfQUxFUlQQAhIUChBSRUFESU5FU1NfTU9WSU5HEAMSFQoRUkVBRElORVNTX1JFU1RJTkcQBBIXChNSRUFESU5FU1NfUkVGSVRUSU5HEAUSFQoRUkVBRElORVNTX1JFU0VSVkUQBhIWChJSRUFESU5FU1NfREVHUkFERUQQBxIaChZSRUFESU5FU1NfQ09NQkFUX0lORUZGEAgqjwEKEERldGVjdGlvblF1YWxpdHkSGQoVREVURUNUSU9OX1VOU1BFQ0lGSUVEEAASFwoTREVURUNUSU9OX1NVU1BFQ1RFRBABEhYKEkRFVEVDVElPTl9ERVRFQ1RFRBACEhgKFERFVEVDVElPTl9JREVOVElGSUVEEAMSFQoRREVURUNUSU9OX1RSQUNLRUQQBEIrWilnaXRodWIuY29tL2FyZXNzaW0vaW50ZXJuYWwvZ2VuL2VuZ2luZS92MWIGcHJvdG8z");
+  fileDesc("ChZlbmdpbmUvdjEvc3RhdHVzLnByb3RvEgllbmdpbmUudjEi6gEKEU9wZXJhdGlvbmFsU3RhdHVzEhoKEnBlcnNvbm5lbF9zdHJlbmd0aBgBIAEoAhIaChJlcXVpcG1lbnRfc3RyZW5ndGgYAiABKAISHAoUY29tYmF0X2VmZmVjdGl2ZW5lc3MYAyABKAISGQoRZnVlbF9sZXZlbF9saXRlcnMYBSABKAISDgoGbW9yYWxlGAggASgCEg8KB2ZhdGlndWUYCSABKAISEQoJaXNfYWN0aXZlGA4gASgIEjAKDmNvbWJhdF9lZmZlY3RzGA8gASgLMhguZW5naW5lLnYxLkNvbWJhdEVmZmVjdHMiRwoNQ29tYmF0RWZmZWN0cxISCgpzdXBwcmVzc2VkGAEgASgIEhEKCWRpc3J1cHRlZBgDIAEoCBIPCgdyb3V0aW5nGAUgASgIQitaKWdpdGh1Yi5jb20vYXJlc3NpbS9pbnRlcm5hbC9nZW4vZW5naW5lL3YxYgZwcm90bzM");
 
 /**
+ * Current operational health of a unit. Updated each tick by the adjudicator.
+ *
  * @generated from message engine.v1.OperationalStatus
  */
 export type OperationalStatus = Message<"engine.v1.OperationalStatus"> & {
   /**
-   * ── Strength ──────────────────────────────────────────────────────────────
-   * Personnel and equipment readiness as a fraction of TO&E.
-   * 1.0 = fully manned and equipped per table of organization and equipment.
-   *
-   * 0.0–1.0
+   * 0.0–1.0 fraction of authorised strength
    *
    * @generated from field: float personnel_strength = 1;
    */
   personnelStrength: number;
 
   /**
-   * 0.0–1.0
+   * 0.0–1.0 fraction of organic equipment
    *
    * @generated from field: float equipment_strength = 2;
    */
   equipmentStrength: number;
 
   /**
-   * Composite combat power scalar. Computed every tick by the adjudicator:
-   *   combat_effectiveness = min(personnel_strength, equipment_strength)
-   *                        × morale × c2.c2_quality
-   * Read-only from the perspective of the bridge; set only by the adjudicator.
-   *
-   * 0.0–1.0
+   * Derived composite score 0.0–1.0
    *
    * @generated from field: float combat_effectiveness = 3;
    */
   combatEffectiveness: number;
 
   /**
-   * ── Combat Effects ────────────────────────────────────────────────────────
-   * Outputs of the combat adjudicator. Multiple effects may be simultaneously
-   * active. The adjudicator evaluates and resets these each tick.
-   *
-   * @generated from field: engine.v1.CombatEffects effects = 4;
-   */
-  effects?: CombatEffects;
-
-  /**
-   * ── Logistics State ───────────────────────────────────────────────────────
-   *
-   * Current fuel on hand
-   *
    * @generated from field: float fuel_level_liters = 5;
    */
   fuelLevelLiters: number;
 
   /**
-   * @generated from field: engine.v1.AmmunitionState ammo = 6;
-   */
-  ammo?: AmmunitionState;
-
-  /**
-   * Days of supply on hand (Phase 3: from commodity stocks)
-   *
-   * @generated from field: float supply_days = 7;
-   */
-  supplyDays: number;
-
-  /**
-   * ── Morale and Fatigue ────────────────────────────────────────────────────
-   * Morale: degrades with attrition and friendly losses, improves with success.
-   * Fatigue: accumulates with operations tempo, resets with rest/reset orders.
-   * Both are inputs to the combat_effectiveness computation.
-   *
    * 0.0–1.0
    *
    * @generated from field: float morale = 8;
@@ -96,41 +59,16 @@ export type OperationalStatus = Message<"engine.v1.OperationalStatus"> & {
   fatigue: number;
 
   /**
-   * ── Readiness ─────────────────────────────────────────────────────────────
-   *
-   * @generated from field: engine.v1.ReadinessState readiness = 10;
-   */
-  readiness: ReadinessState;
-
-  /**
-   * ── C2 State ──────────────────────────────────────────────────────────────
-   *
-   * @generated from field: engine.v1.C2Status c2 = 11;
-   */
-  c2?: C2Status;
-
-  /**
-   * ── Logistics Connectivity (Phase 2) ──────────────────────────────────────
-   *
-   * @generated from field: engine.v1.LogisticsConnectivity logistics = 12;
-   */
-  logistics?: LogisticsConnectivity;
-
-  /**
-   * ── Detection State (Phase 2) ─────────────────────────────────────────────
-   *
-   * @generated from field: engine.v1.DetectionStatus detection = 13;
-   */
-  detection?: DetectionStatus;
-
-  /**
-   * ── Lifecycle ─────────────────────────────────────────────────────────────
-   *
-   * False = destroyed, captured, or withdrawn from simulation
+   * false = destroyed / withdrawn
    *
    * @generated from field: bool is_active = 14;
    */
   isActive: boolean;
+
+  /**
+   * @generated from field: engine.v1.CombatEffects combat_effects = 15;
+   */
+  combatEffects?: CombatEffects;
 };
 
 /**
@@ -141,92 +79,31 @@ export const OperationalStatusSchema: GenMessage<OperationalStatus> = /*@__PURE_
   messageDesc(file_engine_v1_status, 0);
 
 /**
+ * Transient combat states applied by the adjudicator.
+ *
  * @generated from message engine.v1.CombatEffects
  */
 export type CombatEffects = Message<"engine.v1.CombatEffects"> & {
   /**
-   * SUPPRESSION
-   * Unit cannot initiate offensive action (attack, fire mission) while active.
-   * Caused by: incoming direct or indirect fire within suppression radius.
-   * Recovery: no incoming fire for suppression_recovery_ticks consecutive ticks.
+   * Unit cannot initiate fire
    *
    * @generated from field: bool suppressed = 1;
    */
   suppressed: boolean;
 
   /**
-   * @generated from field: int32 suppression_ticks_remaining = 2;
-   */
-  suppressionTicksRemaining: number;
-
-  /**
-   * DISRUPTION
-   * C2 links are severed or degraded; orders cannot be efficiently passed.
-   * Unit reverts to last confirmed order; cannot receive new orders.
-   * Caused by: loss of parent HQ, comms jamming, or rapid attrition above threshold.
-   * Recovery: restored comms or after disruption_ticks_remaining reaches 0.
+   * Formation broken, movement penalty
    *
    * @generated from field: bool disrupted = 3;
    */
   disrupted: boolean;
 
   /**
-   * @generated from field: int32 disruption_ticks_remaining = 4;
-   */
-  disruptionTicksRemaining: number;
-
-  /**
-   * ROUTING
-   * Unit cohesion has collapsed; unit moves away from enemy at full speed.
-   * Caused by: combat_effectiveness < 0.15 with active enemy pressure.
-   * Adjudicator sets the unit's active order to a WITHDRAW order targeting
-   * the direction of its parent unit.
+   * Fleeing; control lost
    *
    * @generated from field: bool routing = 5;
    */
   routing: boolean;
-
-  /**
-   * EXHAUSTION
-   * Fuel or ammunition critically low; offensive operations must cease.
-   * Caused by: fuel_level < 10% of capacity OR ammo primary rounds < 10%.
-   * Effect: weapon rate_of_fire multiplied by 0; movement limited to 25%.
-   *
-   * @generated from field: bool exhausted = 6;
-   */
-  exhausted: boolean;
-
-  /**
-   * MOBILITY KILL
-   * Vehicle mobility degraded by mine strike, track damage, or terrain.
-   * Unit cannot move but may still fire.
-   *
-   * @generated from field: bool mobility_kill = 7;
-   */
-  mobilityKill: boolean;
-
-  /**
-   * 0.0–1.0 fraction of normal speed remaining
-   *
-   * @generated from field: float mobility_reduction = 8;
-   */
-  mobilityReduction: number;
-
-  /**
-   * OBSCURED
-   * Friendly sensor capability degraded by smoke, EW jamming, or weather.
-   * Caused by: smoke rounds landing within sensor_obscure_radius, or enemy EW.
-   *
-   * @generated from field: bool obscured = 9;
-   */
-  obscured: boolean;
-
-  /**
-   * Fraction of normal sensor range currently available
-   *
-   * @generated from field: float sensor_range_fraction = 10;
-   */
-  sensorRangeFraction: number;
 };
 
 /**
@@ -235,269 +112,4 @@ export type CombatEffects = Message<"engine.v1.CombatEffects"> & {
  */
 export const CombatEffectsSchema: GenMessage<CombatEffects> = /*@__PURE__*/
   messageDesc(file_engine_v1_status, 1);
-
-/**
- * @generated from message engine.v1.AmmunitionState
- */
-export type AmmunitionState = Message<"engine.v1.AmmunitionState"> & {
-  /**
-   * Main weapon system rounds as fraction of basic load
-   *
-   * @generated from field: float primary_pct = 1;
-   */
-  primaryPct: number;
-
-  /**
-   * Secondary weapon system rounds
-   *
-   * @generated from field: float secondary_pct = 2;
-   */
-  secondaryPct: number;
-
-  /**
-   * Guided missiles (ATGM, SAM, AAM)
-   *
-   * @generated from field: float missile_pct = 3;
-   */
-  missilePct: number;
-
-  /**
-   * Mortar rounds (if organic)
-   *
-   * @generated from field: float mortar_pct = 4;
-   */
-  mortarPct: number;
-};
-
-/**
- * Describes the message engine.v1.AmmunitionState.
- * Use `create(AmmunitionStateSchema)` to create a new message.
- */
-export const AmmunitionStateSchema: GenMessage<AmmunitionState> = /*@__PURE__*/
-  messageDesc(file_engine_v1_status, 2);
-
-/**
- * @generated from message engine.v1.C2Status
- */
-export type C2Status = Message<"engine.v1.C2Status"> & {
-  /**
-   * Within parent HQ command_radius_m
-   *
-   * @generated from field: bool in_command_radius = 1;
-   */
-  inCommandRadius: boolean;
-
-  /**
-   * False if jammed or parent HQ destroyed
-   *
-   * @generated from field: bool comms_intact = 2;
-   */
-  commsIntact: boolean;
-
-  /**
-   * 0.0–1.0: effective C2 score this tick
-   *
-   * @generated from field: float c2_quality = 3;
-   */
-  c2Quality: number;
-};
-
-/**
- * Describes the message engine.v1.C2Status.
- * Use `create(C2StatusSchema)` to create a new message.
- */
-export const C2StatusSchema: GenMessage<C2Status> = /*@__PURE__*/
-  messageDesc(file_engine_v1_status, 3);
-
-/**
- * @generated from message engine.v1.LogisticsConnectivity
- */
-export type LogisticsConnectivity = Message<"engine.v1.LogisticsConnectivity"> & {
-  /**
-   * @generated from field: bool is_supplied = 1;
-   */
-  isSupplied: boolean;
-
-  /**
-   * Closest reachable logistics node of same side
-   *
-   * @generated from field: string nearest_node_id = 2;
-   */
-  nearestNodeId: string;
-
-  /**
-   * Route length in meters
-   *
-   * @generated from field: float supply_line_length_m = 3;
-   */
-  supplyLineLengthM: number;
-
-  /**
-   * True if enemy action cut the route
-   *
-   * @generated from field: bool supply_line_interdicted = 4;
-   */
-  supplyLineInterdicted: boolean;
-
-  /**
-   * 0.0–1.0: combat power penalty when unsupplied
-   *
-   * @generated from field: float effectiveness_modifier = 5;
-   */
-  effectivenessModifier: number;
-};
-
-/**
- * Describes the message engine.v1.LogisticsConnectivity.
- * Use `create(LogisticsConnectivitySchema)` to create a new message.
- */
-export const LogisticsConnectivitySchema: GenMessage<LogisticsConnectivity> = /*@__PURE__*/
-  messageDesc(file_engine_v1_status, 4);
-
-/**
- * @generated from message engine.v1.DetectionStatus
- */
-export type DetectionStatus = Message<"engine.v1.DetectionStatus"> & {
-  /**
-   * @generated from field: bool detected_by_enemy = 1;
-   */
-  detectedByEnemy: boolean;
-
-  /**
-   * @generated from field: repeated string detecting_unit_ids = 2;
-   */
-  detectingUnitIds: string[];
-
-  /**
-   * Highest quality across all detecting units
-   *
-   * @generated from field: engine.v1.DetectionQuality quality = 3;
-   */
-  quality: DetectionQuality;
-};
-
-/**
- * Describes the message engine.v1.DetectionStatus.
- * Use `create(DetectionStatusSchema)` to create a new message.
- */
-export const DetectionStatusSchema: GenMessage<DetectionStatus> = /*@__PURE__*/
-  messageDesc(file_engine_v1_status, 5);
-
-/**
- * @generated from enum engine.v1.ReadinessState
- */
-export enum ReadinessState {
-  /**
-   * @generated from enum value: READINESS_UNSPECIFIED = 0;
-   */
-  READINESS_UNSPECIFIED = 0,
-
-  /**
-   * In position, fully operational
-   *
-   * @generated from enum value: READINESS_DEPLOYED = 1;
-   */
-  READINESS_DEPLOYED = 1,
-
-  /**
-   * Heightened readiness; weapons free
-   *
-   * @generated from enum value: READINESS_ALERT = 2;
-   */
-  READINESS_ALERT = 2,
-
-  /**
-   * In transit; movement order active
-   *
-   * @generated from enum value: READINESS_MOVING = 3;
-   */
-  READINESS_MOVING = 3,
-
-  /**
-   * Rest/recovery; restores fatigue, cannot engage
-   *
-   * @generated from enum value: READINESS_RESTING = 4;
-   */
-  READINESS_RESTING = 4,
-
-  /**
-   * Resupply and maintenance; cannot engage
-   *
-   * @generated from enum value: READINESS_REFITTING = 5;
-   */
-  READINESS_REFITTING = 5,
-
-  /**
-   * Uncommitted; awaiting orders
-   *
-   * @generated from enum value: READINESS_RESERVE = 6;
-   */
-  READINESS_RESERVE = 6,
-
-  /**
-   * Operational but below 50% combat effectiveness
-   *
-   * @generated from enum value: READINESS_DEGRADED = 7;
-   */
-  READINESS_DEGRADED = 7,
-
-  /**
-   * Below 25% effectiveness; requires reconstitution
-   *
-   * @generated from enum value: READINESS_COMBAT_INEFF = 8;
-   */
-  READINESS_COMBAT_INEFF = 8,
-}
-
-/**
- * Describes the enum engine.v1.ReadinessState.
- */
-export const ReadinessStateSchema: GenEnum<ReadinessState> = /*@__PURE__*/
-  enumDesc(file_engine_v1_status, 0);
-
-/**
- * @generated from enum engine.v1.DetectionQuality
- */
-export enum DetectionQuality {
-  /**
-   * Not detected (fog of war applies)
-   *
-   * @generated from enum value: DETECTION_UNSPECIFIED = 0;
-   */
-  DETECTION_UNSPECIFIED = 0,
-
-  /**
-   * Unconfirmed contact: something detected, type unknown
-   *
-   * @generated from enum value: DETECTION_SUSPECTED = 1;
-   */
-  DETECTION_SUSPECTED = 1,
-
-  /**
-   * Presence confirmed, type uncertain
-   *
-   * @generated from enum value: DETECTION_DETECTED = 2;
-   */
-  DETECTION_DETECTED = 2,
-
-  /**
-   * Type and approximate strength known
-   *
-   * @generated from enum value: DETECTION_IDENTIFIED = 3;
-   */
-  DETECTION_IDENTIFIED = 3,
-
-  /**
-   * Continuously tracked; weapons can be directly cued
-   *
-   * @generated from enum value: DETECTION_TRACKED = 4;
-   */
-  DETECTION_TRACKED = 4,
-}
-
-/**
- * Describes the enum engine.v1.DetectionQuality.
- */
-export const DetectionQualitySchema: GenEnum<DetectionQuality> = /*@__PURE__*/
-  enumDesc(file_engine_v1_status, 1);
 

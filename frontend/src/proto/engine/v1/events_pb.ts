@@ -6,175 +6,19 @@ import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2"
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Position, SimTime, WeatherConditions } from "./common_pb";
 import { file_engine_v1_common } from "./common_pb";
-import type { Order } from "./orders_pb";
-import { file_engine_v1_orders } from "./orders_pb";
 import type { FormationPosture, Unit } from "./unit_pb";
 import { file_engine_v1_unit } from "./unit_pb";
-import type { C2Status, LogisticsConnectivity, OperationalStatus } from "./status_pb";
+import type { OperationalStatus } from "./status_pb";
 import { file_engine_v1_status } from "./status_pb";
-import type { LogisticsNode } from "./logistics_pb";
-import { file_engine_v1_logistics } from "./logistics_pb";
-import type { AirStrikeResult, EngagementResult, IndirectFireResult } from "./combat_pb";
-import { file_engine_v1_combat } from "./combat_pb";
-import type { ContactReport } from "./intelligence_pb";
-import { file_engine_v1_intelligence } from "./intelligence_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file engine/v1/events.proto.
  */
 export const file_engine_v1_events: GenFile = /*@__PURE__*/
-  fileDesc("ChZlbmdpbmUvdjEvZXZlbnRzLnByb3RvEgllbmdpbmUudjEi2gYKCFNpbUV2ZW50EhAKCGV2ZW50X2lkGAEgASgJEiQKCHNpbV90aW1lGAIgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUSMgoKZnVsbF9zdGF0ZRgDIAEoCzIcLmVuZ2luZS52MS5GdWxsU3RhdGVTbmFwc2hvdEgAEjcKDnNjZW5hcmlvX3N0YXRlGAQgASgLMh0uZW5naW5lLnYxLlNjZW5hcmlvU3RhdGVFdmVudEgAEjIKDGJhdGNoX3VwZGF0ZRgFIAEoCzIaLmVuZ2luZS52MS5CYXRjaFVuaXRVcGRhdGVIABIzCgx1bml0X3NwYXduZWQYBiABKAsyGy5lbmdpbmUudjEuVW5pdFNwYXduZWRFdmVudEgAEjcKDnVuaXRfZGVzdHJveWVkGAcgASgLMh0uZW5naW5lLnYxLlVuaXREZXN0cm95ZWRFdmVudEgAEjIKC2RpcmVjdF9maXJlGAggASgLMhsuZW5naW5lLnYxLkVuZ2FnZW1lbnRSZXN1bHRIABI2Cg1pbmRpcmVjdF9maXJlGAkgASgLMh0uZW5naW5lLnYxLkluZGlyZWN0RmlyZVJlc3VsdEgAEjAKCmFpcl9zdHJpa2UYCiABKAsyGi5lbmdpbmUudjEuQWlyU3RyaWtlUmVzdWx0SAASNQoNc3VwcGx5X3N0YXR1cxgLIAEoCzIcLmVuZ2luZS52MS5TdXBwbHlTdGF0dXNFdmVudEgAEjEKC25vZGVfc3RhdHVzGAwgASgLMhouZW5naW5lLnYxLk5vZGVTdGF0dXNFdmVudEgAEisKB2NvbnRhY3QYDSABKAsyGC5lbmdpbmUudjEuQ29udGFjdFJlcG9ydEgAEi0KCWMyX3N0YXR1cxgOIAEoCzIYLmVuZ2luZS52MS5DMlN0YXR1c0V2ZW50SAASLgoJbmFycmF0aXZlGA8gASgLMhkuZW5naW5lLnYxLk5hcnJhdGl2ZUV2ZW50SAASNQoNY2xpZW50X2pvaW5lZBgQIAEoCzIcLmVuZ2luZS52MS5DbGllbnRKb2luZWRFdmVudEgAEjEKC2NsaWVudF9sZWZ0GBEgASgLMhouZW5naW5lLnYxLkNsaWVudExlZnRFdmVudEgAQgkKB3BheWxvYWQiyAEKEUZ1bGxTdGF0ZVNuYXBzaG90Eh4KBXVuaXRzGAEgAygLMg8uZW5naW5lLnYxLlVuaXQSJwoFbm9kZXMYAiADKAsyGC5lbmdpbmUudjEuTG9naXN0aWNzTm9kZRIkCghzaW1fdGltZRgDIAEoCzISLmVuZ2luZS52MS5TaW1UaW1lEi0KB3dlYXRoZXIYBCABKAsyHC5lbmdpbmUudjEuV2VhdGhlckNvbmRpdGlvbnMSFQoNc2NlbmFyaW9fbmFtZRgFIAEoCSJpChJTY2VuYXJpb1N0YXRlRXZlbnQSKwoFc3RhdGUYASABKA4yHC5lbmdpbmUudjEuU2NlbmFyaW9QbGF5U3RhdGUSEgoKdGltZV9zY2FsZRgCIAEoAhISCgplbmRfcmVhc29uGAMgASgJIl0KD0JhdGNoVW5pdFVwZGF0ZRIkCgZkZWx0YXMYASADKAsyFC5lbmdpbmUudjEuVW5pdERlbHRhEiQKCHNpbV90aW1lGAIgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUinwEKCVVuaXREZWx0YRIPCgd1bml0X2lkGAEgASgJEiUKCHBvc2l0aW9uGAIgASgLMhMuZW5naW5lLnYxLlBvc2l0aW9uEiwKBnN0YXR1cxgDIAEoCzIcLmVuZ2luZS52MS5PcGVyYXRpb25hbFN0YXR1cxIsCgdwb3N0dXJlGAQgASgOMhsuZW5naW5lLnYxLkZvcm1hdGlvblBvc3R1cmUiMQoQVW5pdFNwYXduZWRFdmVudBIdCgR1bml0GAEgASgLMg8uZW5naW5lLnYxLlVuaXQidgoSVW5pdERlc3Ryb3llZEV2ZW50Eg8KB3VuaXRfaWQYASABKAkSDQoFY2F1c2UYAiABKAkSKgoNbGFzdF9wb3NpdGlvbhgDIAEoCzITLmVuZ2luZS52MS5Qb3NpdGlvbhIUCgxkZXN0cm95ZWRfYnkYBCABKAkiXAoRU3VwcGx5U3RhdHVzRXZlbnQSDwoHdW5pdF9pZBgBIAEoCRI2Cgxjb25uZWN0aXZpdHkYAiABKAsyIC5lbmdpbmUudjEuTG9naXN0aWNzQ29ubmVjdGl2aXR5IkoKD05vZGVTdGF0dXNFdmVudBIPCgdub2RlX2lkGAEgASgJEiYKBG5vZGUYAiABKAsyGC5lbmdpbmUudjEuTG9naXN0aWNzTm9kZSJJCg1DMlN0YXR1c0V2ZW50Eg8KB3VuaXRfaWQYASABKAkSJwoKbmV3X3N0YXR1cxgCIAEoCzITLmVuZ2luZS52MS5DMlN0YXR1cyJPCg5OYXJyYXRpdmVFdmVudBIMCgR0ZXh0GAEgASgJEhAKCGNhdGVnb3J5GAIgASgJEg8KB3VuaXRfaWQYAyABKAkSDAoEc2lkZRgEIAEoCSJJChFDbGllbnRKb2luZWRFdmVudBIRCgljbGllbnRfaWQYASABKAkSEwoLcGxheWVyX25hbWUYAiABKAkSDAoEc2lkZRgDIAEoCSJJCg9DbGllbnRMZWZ0RXZlbnQSEQoJY2xpZW50X2lkGAEgASgJEhMKC3BsYXllcl9uYW1lGAIgASgJEg4KBnJlYXNvbhgDIAEoCSK+AgoNQ2xpZW50TWVzc2FnZRIRCgljbGllbnRfaWQYASABKAkSEwoLc2NlbmFyaW9faWQYAiABKAkSMAoKc3Bhd25fdW5pdBgDIAEoCzIaLmVuZ2luZS52MS5TcGF3blVuaXRBY3Rpb25IABIyCgtpc3N1ZV9vcmRlchgEIAEoCzIbLmVuZ2luZS52MS5Jc3N1ZU9yZGVyQWN0aW9uSAASMgoLZGVsZXRlX3VuaXQYBSABKAsyGy5lbmdpbmUudjEuRGVsZXRlVW5pdEFjdGlvbkgAEjEKCXNldF9zcGVlZBgGIAEoCzIcLmVuZ2luZS52MS5TZXRTaW1TcGVlZEFjdGlvbkgAEi4KCXBhdXNlX3NpbRgHIAEoCzIZLmVuZ2luZS52MS5QYXVzZVNpbUFjdGlvbkgAQggKBmFjdGlvbiIwCg9TcGF3blVuaXRBY3Rpb24SHQoEdW5pdBgBIAEoCzIPLmVuZ2luZS52MS5Vbml0IkQKEElzc3VlT3JkZXJBY3Rpb24SDwoHdW5pdF9pZBgBIAEoCRIfCgVvcmRlchgCIAEoCzIQLmVuZ2luZS52MS5PcmRlciIjChBEZWxldGVVbml0QWN0aW9uEg8KB3VuaXRfaWQYASABKAkiJwoRU2V0U2ltU3BlZWRBY3Rpb24SEgoKdGltZV9zY2FsZRgBIAEoAiIgCg5QYXVzZVNpbUFjdGlvbhIOCgZwYXVzZWQYASABKAgqbAoRU2NlbmFyaW9QbGF5U3RhdGUSGAoUU0NFTkFSSU9fVU5TUEVDSUZJRUQQABITCg9TQ0VOQVJJT19QQVVTRUQQARIUChBTQ0VOQVJJT19SVU5OSU5HEAISEgoOU0NFTkFSSU9fRU5ERUQQA0IrWilnaXRodWIuY29tL2FyZXNzaW0vaW50ZXJuYWwvZ2VuL2VuZ2luZS92MWIGcHJvdG8z", [file_engine_v1_common, file_engine_v1_orders, file_engine_v1_unit, file_engine_v1_status, file_engine_v1_logistics, file_engine_v1_combat, file_engine_v1_intelligence]);
+  fileDesc("ChZlbmdpbmUvdjEvZXZlbnRzLnByb3RvEgllbmdpbmUudjEinwEKEUZ1bGxTdGF0ZVNuYXBzaG90Eh4KBXVuaXRzGAEgAygLMg8uZW5naW5lLnYxLlVuaXQSJAoIc2ltX3RpbWUYAyABKAsyEi5lbmdpbmUudjEuU2ltVGltZRItCgd3ZWF0aGVyGAQgASgLMhwuZW5naW5lLnYxLldlYXRoZXJDb25kaXRpb25zEhUKDXNjZW5hcmlvX25hbWUYBSABKAkiVQoSU2NlbmFyaW9TdGF0ZUV2ZW50EisKBXN0YXRlGAEgASgOMhwuZW5naW5lLnYxLlNjZW5hcmlvUGxheVN0YXRlEhIKCnRpbWVfc2NhbGUYAiABKAIiXQoPQmF0Y2hVbml0VXBkYXRlEiQKBmRlbHRhcxgBIAMoCzIULmVuZ2luZS52MS5Vbml0RGVsdGESJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSKfAQoJVW5pdERlbHRhEg8KB3VuaXRfaWQYASABKAkSJQoIcG9zaXRpb24YAiABKAsyEy5lbmdpbmUudjEuUG9zaXRpb24SLAoGc3RhdHVzGAMgASgLMhwuZW5naW5lLnYxLk9wZXJhdGlvbmFsU3RhdHVzEiwKB3Bvc3R1cmUYBCABKA4yGy5lbmdpbmUudjEuRm9ybWF0aW9uUG9zdHVyZSJXChBVbml0U3Bhd25lZEV2ZW50Eh0KBHVuaXQYASABKAsyDy5lbmdpbmUudjEuVW5pdBIkCghzaW1fdGltZRgCIAEoCzISLmVuZ2luZS52MS5TaW1UaW1lIloKElVuaXREZXN0cm95ZWRFdmVudBIPCgd1bml0X2lkGAEgASgJEg0KBWNhdXNlGAIgASgJEiQKCHNpbV90aW1lGAMgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUiTwoOTmFycmF0aXZlRXZlbnQSDAoEdGV4dBgBIAEoCRIQCghjYXRlZ29yeRgCIAEoCRIPCgd1bml0X2lkGAMgASgJEgwKBHNpZGUYBCABKAkqbAoRU2NlbmFyaW9QbGF5U3RhdGUSGAoUU0NFTkFSSU9fVU5TUEVDSUZJRUQQABITCg9TQ0VOQVJJT19QQVVTRUQQARIUChBTQ0VOQVJJT19SVU5OSU5HEAISEgoOU0NFTkFSSU9fRU5ERUQQA0IrWilnaXRodWIuY29tL2FyZXNzaW0vaW50ZXJuYWwvZ2VuL2VuZ2luZS92MWIGcHJvdG8z", [file_engine_v1_common, file_engine_v1_unit, file_engine_v1_status]);
 
 /**
- * The envelope for all backend-to-frontend events.
- * Wails emits this as a base64-encoded protobuf binary via runtime.EventsEmit.
- * The frontend decodes and dispatches on the payload type.
- *
- * @generated from message engine.v1.SimEvent
- */
-export type SimEvent = Message<"engine.v1.SimEvent"> & {
-  /**
-   * UUID for deduplication and ordering validation
-   *
-   * @generated from field: string event_id = 1;
-   */
-  eventId: string;
-
-  /**
-   * @generated from field: engine.v1.SimTime sim_time = 2;
-   */
-  simTime?: SimTime;
-
-  /**
-   * @generated from oneof engine.v1.SimEvent.payload
-   */
-  payload: {
-    /**
-     * Lifecycle
-     *
-     * Sent on connect or scenario load
-     *
-     * @generated from field: engine.v1.FullStateSnapshot full_state = 3;
-     */
-    value: FullStateSnapshot;
-    case: "fullState";
-  } | {
-    /**
-     * Pause, resume, end
-     *
-     * @generated from field: engine.v1.ScenarioStateEvent scenario_state = 4;
-     */
-    value: ScenarioStateEvent;
-    case: "scenarioState";
-  } | {
-    /**
-     * Per-tick update (the most frequent event)
-     *
-     * @generated from field: engine.v1.BatchUnitUpdate batch_update = 5;
-     */
-    value: BatchUnitUpdate;
-    case: "batchUpdate";
-  } | {
-    /**
-     * Unit lifecycle
-     *
-     * @generated from field: engine.v1.UnitSpawnedEvent unit_spawned = 6;
-     */
-    value: UnitSpawnedEvent;
-    case: "unitSpawned";
-  } | {
-    /**
-     * @generated from field: engine.v1.UnitDestroyedEvent unit_destroyed = 7;
-     */
-    value: UnitDestroyedEvent;
-    case: "unitDestroyed";
-  } | {
-    /**
-     * Combat
-     *
-     * @generated from field: engine.v1.EngagementResult direct_fire = 8;
-     */
-    value: EngagementResult;
-    case: "directFire";
-  } | {
-    /**
-     * @generated from field: engine.v1.IndirectFireResult indirect_fire = 9;
-     */
-    value: IndirectFireResult;
-    case: "indirectFire";
-  } | {
-    /**
-     * @generated from field: engine.v1.AirStrikeResult air_strike = 10;
-     */
-    value: AirStrikeResult;
-    case: "airStrike";
-  } | {
-    /**
-     * Logistics (Phase 2)
-     *
-     * @generated from field: engine.v1.SupplyStatusEvent supply_status = 11;
-     */
-    value: SupplyStatusEvent;
-    case: "supplyStatus";
-  } | {
-    /**
-     * @generated from field: engine.v1.NodeStatusEvent node_status = 12;
-     */
-    value: NodeStatusEvent;
-    case: "nodeStatus";
-  } | {
-    /**
-     * Intelligence (Phase 2)
-     *
-     * @generated from field: engine.v1.ContactReport contact = 13;
-     */
-    value: ContactReport;
-    case: "contact";
-  } | {
-    /**
-     * C2
-     *
-     * @generated from field: engine.v1.C2StatusEvent c2_status = 14;
-     */
-    value: C2StatusEvent;
-    case: "c2Status";
-  } | {
-    /**
-     * Narrative: human-readable event log entry
-     *
-     * @generated from field: engine.v1.NarrativeEvent narrative = 15;
-     */
-    value: NarrativeEvent;
-    case: "narrative";
-  } | {
-    /**
-     * Multiplayer (Phase 3)
-     *
-     * @generated from field: engine.v1.ClientJoinedEvent client_joined = 16;
-     */
-    value: ClientJoinedEvent;
-    case: "clientJoined";
-  } | {
-    /**
-     * @generated from field: engine.v1.ClientLeftEvent client_left = 17;
-     */
-    value: ClientLeftEvent;
-    case: "clientLeft";
-  } | { case: undefined; value?: undefined };
-};
-
-/**
- * Describes the message engine.v1.SimEvent.
- * Use `create(SimEventSchema)` to create a new message.
- */
-export const SimEventSchema: GenMessage<SimEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 0);
-
-/**
- * Sent once when the frontend connects or when a scenario is loaded.
- * The frontend discards all existing entity state and rebuilds from this.
- *
  * @generated from message engine.v1.FullStateSnapshot
  */
 export type FullStateSnapshot = Message<"engine.v1.FullStateSnapshot"> & {
@@ -182,11 +26,6 @@ export type FullStateSnapshot = Message<"engine.v1.FullStateSnapshot"> & {
    * @generated from field: repeated engine.v1.Unit units = 1;
    */
   units: Unit[];
-
-  /**
-   * @generated from field: repeated engine.v1.LogisticsNode nodes = 2;
-   */
-  nodes: LogisticsNode[];
 
   /**
    * @generated from field: engine.v1.SimTime sim_time = 3;
@@ -209,7 +48,7 @@ export type FullStateSnapshot = Message<"engine.v1.FullStateSnapshot"> & {
  * Use `create(FullStateSnapshotSchema)` to create a new message.
  */
 export const FullStateSnapshotSchema: GenMessage<FullStateSnapshot> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 1);
+  messageDesc(file_engine_v1_events, 0);
 
 /**
  * @generated from message engine.v1.ScenarioStateEvent
@@ -221,18 +60,9 @@ export type ScenarioStateEvent = Message<"engine.v1.ScenarioStateEvent"> & {
   state: ScenarioPlayState;
 
   /**
-   * Current sim speed multiplier
-   *
    * @generated from field: float time_scale = 2;
    */
   timeScale: number;
-
-  /**
-   * Populated when state = SCENARIO_ENDED
-   *
-   * @generated from field: string end_reason = 3;
-   */
-  endReason: string;
 };
 
 /**
@@ -240,7 +70,7 @@ export type ScenarioStateEvent = Message<"engine.v1.ScenarioStateEvent"> & {
  * Use `create(ScenarioStateEventSchema)` to create a new message.
  */
 export const ScenarioStateEventSchema: GenMessage<ScenarioStateEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 2);
+  messageDesc(file_engine_v1_events, 1);
 
 /**
  * @generated from message engine.v1.BatchUnitUpdate
@@ -252,8 +82,6 @@ export type BatchUnitUpdate = Message<"engine.v1.BatchUnitUpdate"> & {
   deltas: UnitDelta[];
 
   /**
-   * Tick sim-time (duplicated here for convenience)
-   *
    * @generated from field: engine.v1.SimTime sim_time = 2;
    */
   simTime?: SimTime;
@@ -264,12 +92,9 @@ export type BatchUnitUpdate = Message<"engine.v1.BatchUnitUpdate"> & {
  * Use `create(BatchUnitUpdateSchema)` to create a new message.
  */
 export const BatchUnitUpdateSchema: GenMessage<BatchUnitUpdate> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 3);
+  messageDesc(file_engine_v1_events, 2);
 
 /**
- * A partial update for a single unit. Only fields that changed are populated.
- * The frontend merges this into its Zustand store using the unit_id as key.
- *
  * @generated from message engine.v1.UnitDelta
  */
 export type UnitDelta = Message<"engine.v1.UnitDelta"> & {
@@ -279,22 +104,21 @@ export type UnitDelta = Message<"engine.v1.UnitDelta"> & {
   unitId: string;
 
   /**
-   * Position is always included if the unit moved this tick.
+   * present if unit moved
    *
    * @generated from field: engine.v1.Position position = 2;
    */
   position?: Position;
 
   /**
-   * Status is included only if any status field changed this tick.
-   * The frontend replaces the entire OperationalStatus for the unit on receipt.
+   * present if status changed
    *
    * @generated from field: engine.v1.OperationalStatus status = 3;
    */
   status?: OperationalStatus;
 
   /**
-   * Posture is included only if it changed.
+   * present if posture changed
    *
    * @generated from field: engine.v1.FormationPosture posture = 4;
    */
@@ -306,18 +130,21 @@ export type UnitDelta = Message<"engine.v1.UnitDelta"> & {
  * Use `create(UnitDeltaSchema)` to create a new message.
  */
 export const UnitDeltaSchema: GenMessage<UnitDelta> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 4);
+  messageDesc(file_engine_v1_events, 3);
 
 /**
  * @generated from message engine.v1.UnitSpawnedEvent
  */
 export type UnitSpawnedEvent = Message<"engine.v1.UnitSpawnedEvent"> & {
   /**
-   * Full unit record; frontend adds it to the entity map
-   *
    * @generated from field: engine.v1.Unit unit = 1;
    */
   unit?: Unit;
+
+  /**
+   * @generated from field: engine.v1.SimTime sim_time = 2;
+   */
+  simTime?: SimTime;
 };
 
 /**
@@ -325,7 +152,7 @@ export type UnitSpawnedEvent = Message<"engine.v1.UnitSpawnedEvent"> & {
  * Use `create(UnitSpawnedEventSchema)` to create a new message.
  */
 export const UnitSpawnedEventSchema: GenMessage<UnitSpawnedEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 5);
+  messageDesc(file_engine_v1_events, 4);
 
 /**
  * @generated from message engine.v1.UnitDestroyedEvent
@@ -337,25 +164,16 @@ export type UnitDestroyedEvent = Message<"engine.v1.UnitDestroyedEvent"> & {
   unitId: string;
 
   /**
-   * "direct_fire", "indirect_fire", "air_strike", "supply_failure"
+   * "combat" | "withdrawal" | "scenario"
    *
    * @generated from field: string cause = 2;
    */
   cause: string;
 
   /**
-   * Position at time of destruction for wreck marker
-   *
-   * @generated from field: engine.v1.Position last_position = 3;
+   * @generated from field: engine.v1.SimTime sim_time = 3;
    */
-  lastPosition?: Position;
-
-  /**
-   * Unit ID of the destroying unit (if applicable)
-   *
-   * @generated from field: string destroyed_by = 4;
-   */
-  destroyedBy: string;
+  simTime?: SimTime;
 };
 
 /**
@@ -363,106 +181,30 @@ export type UnitDestroyedEvent = Message<"engine.v1.UnitDestroyedEvent"> & {
  * Use `create(UnitDestroyedEventSchema)` to create a new message.
  */
 export const UnitDestroyedEventSchema: GenMessage<UnitDestroyedEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 6);
-
-/**
- * @generated from message engine.v1.SupplyStatusEvent
- */
-export type SupplyStatusEvent = Message<"engine.v1.SupplyStatusEvent"> & {
-  /**
-   * @generated from field: string unit_id = 1;
-   */
-  unitId: string;
-
-  /**
-   * Updated connectivity state
-   *
-   * @generated from field: engine.v1.LogisticsConnectivity connectivity = 2;
-   */
-  connectivity?: LogisticsConnectivity;
-};
-
-/**
- * Describes the message engine.v1.SupplyStatusEvent.
- * Use `create(SupplyStatusEventSchema)` to create a new message.
- */
-export const SupplyStatusEventSchema: GenMessage<SupplyStatusEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 7);
-
-/**
- * @generated from message engine.v1.NodeStatusEvent
- */
-export type NodeStatusEvent = Message<"engine.v1.NodeStatusEvent"> & {
-  /**
-   * @generated from field: string node_id = 1;
-   */
-  nodeId: string;
-
-  /**
-   * Updated node state (stock levels, health, is_active)
-   *
-   * @generated from field: engine.v1.LogisticsNode node = 2;
-   */
-  node?: LogisticsNode;
-};
-
-/**
- * Describes the message engine.v1.NodeStatusEvent.
- * Use `create(NodeStatusEventSchema)` to create a new message.
- */
-export const NodeStatusEventSchema: GenMessage<NodeStatusEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 8);
-
-/**
- * @generated from message engine.v1.C2StatusEvent
- */
-export type C2StatusEvent = Message<"engine.v1.C2StatusEvent"> & {
-  /**
-   * @generated from field: string unit_id = 1;
-   */
-  unitId: string;
-
-  /**
-   * @generated from field: engine.v1.C2Status new_status = 2;
-   */
-  newStatus?: C2Status;
-};
-
-/**
- * Describes the message engine.v1.C2StatusEvent.
- * Use `create(C2StatusEventSchema)` to create a new message.
- */
-export const C2StatusEventSchema: GenMessage<C2StatusEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 9);
+  messageDesc(file_engine_v1_events, 5);
 
 /**
  * @generated from message engine.v1.NarrativeEvent
  */
 export type NarrativeEvent = Message<"engine.v1.NarrativeEvent"> & {
   /**
-   * e.g. "1-64 AR engages T-90 company; 3 vehicles destroyed"
-   *
    * @generated from field: string text = 1;
    */
   text: string;
 
   /**
-   * "combat", "logistics", "c2", "intelligence", "scenario"
+   * "combat" | "scenario" | "c2"
    *
    * @generated from field: string category = 2;
    */
   category: string;
 
   /**
-   * Primary unit to highlight on COP click
-   *
    * @generated from field: string unit_id = 3;
    */
   unitId: string;
 
   /**
-   * "Blue" or "Red"; drives event log color coding
-   *
    * @generated from field: string side = 4;
    */
   side: string;
@@ -473,212 +215,7 @@ export type NarrativeEvent = Message<"engine.v1.NarrativeEvent"> & {
  * Use `create(NarrativeEventSchema)` to create a new message.
  */
 export const NarrativeEventSchema: GenMessage<NarrativeEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 10);
-
-/**
- * @generated from message engine.v1.ClientJoinedEvent
- */
-export type ClientJoinedEvent = Message<"engine.v1.ClientJoinedEvent"> & {
-  /**
-   * @generated from field: string client_id = 1;
-   */
-  clientId: string;
-
-  /**
-   * @generated from field: string player_name = 2;
-   */
-  playerName: string;
-
-  /**
-   * Side assigned to this client
-   *
-   * @generated from field: string side = 3;
-   */
-  side: string;
-};
-
-/**
- * Describes the message engine.v1.ClientJoinedEvent.
- * Use `create(ClientJoinedEventSchema)` to create a new message.
- */
-export const ClientJoinedEventSchema: GenMessage<ClientJoinedEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 11);
-
-/**
- * @generated from message engine.v1.ClientLeftEvent
- */
-export type ClientLeftEvent = Message<"engine.v1.ClientLeftEvent"> & {
-  /**
-   * @generated from field: string client_id = 1;
-   */
-  clientId: string;
-
-  /**
-   * @generated from field: string player_name = 2;
-   */
-  playerName: string;
-
-  /**
-   * "disconnect", "timeout", "kicked"
-   *
-   * @generated from field: string reason = 3;
-   */
-  reason: string;
-};
-
-/**
- * Describes the message engine.v1.ClientLeftEvent.
- * Use `create(ClientLeftEventSchema)` to create a new message.
- */
-export const ClientLeftEventSchema: GenMessage<ClientLeftEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 12);
-
-/**
- * @generated from message engine.v1.ClientMessage
- */
-export type ClientMessage = Message<"engine.v1.ClientMessage"> & {
-  /**
-   * @generated from field: string client_id = 1;
-   */
-  clientId: string;
-
-  /**
-   * @generated from field: string scenario_id = 2;
-   */
-  scenarioId: string;
-
-  /**
-   * @generated from oneof engine.v1.ClientMessage.action
-   */
-  action: {
-    /**
-     * @generated from field: engine.v1.SpawnUnitAction spawn_unit = 3;
-     */
-    value: SpawnUnitAction;
-    case: "spawnUnit";
-  } | {
-    /**
-     * @generated from field: engine.v1.IssueOrderAction issue_order = 4;
-     */
-    value: IssueOrderAction;
-    case: "issueOrder";
-  } | {
-    /**
-     * @generated from field: engine.v1.DeleteUnitAction delete_unit = 5;
-     */
-    value: DeleteUnitAction;
-    case: "deleteUnit";
-  } | {
-    /**
-     * @generated from field: engine.v1.SetSimSpeedAction set_speed = 6;
-     */
-    value: SetSimSpeedAction;
-    case: "setSpeed";
-  } | {
-    /**
-     * @generated from field: engine.v1.PauseSimAction pause_sim = 7;
-     */
-    value: PauseSimAction;
-    case: "pauseSim";
-  } | { case: undefined; value?: undefined };
-};
-
-/**
- * Describes the message engine.v1.ClientMessage.
- * Use `create(ClientMessageSchema)` to create a new message.
- */
-export const ClientMessageSchema: GenMessage<ClientMessage> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 13);
-
-/**
- * @generated from message engine.v1.SpawnUnitAction
- */
-export type SpawnUnitAction = Message<"engine.v1.SpawnUnitAction"> & {
-  /**
-   * @generated from field: engine.v1.Unit unit = 1;
-   */
-  unit?: Unit;
-};
-
-/**
- * Describes the message engine.v1.SpawnUnitAction.
- * Use `create(SpawnUnitActionSchema)` to create a new message.
- */
-export const SpawnUnitActionSchema: GenMessage<SpawnUnitAction> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 14);
-
-/**
- * @generated from message engine.v1.IssueOrderAction
- */
-export type IssueOrderAction = Message<"engine.v1.IssueOrderAction"> & {
-  /**
-   * @generated from field: string unit_id = 1;
-   */
-  unitId: string;
-
-  /**
-   * @generated from field: engine.v1.Order order = 2;
-   */
-  order?: Order;
-};
-
-/**
- * Describes the message engine.v1.IssueOrderAction.
- * Use `create(IssueOrderActionSchema)` to create a new message.
- */
-export const IssueOrderActionSchema: GenMessage<IssueOrderAction> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 15);
-
-/**
- * @generated from message engine.v1.DeleteUnitAction
- */
-export type DeleteUnitAction = Message<"engine.v1.DeleteUnitAction"> & {
-  /**
-   * @generated from field: string unit_id = 1;
-   */
-  unitId: string;
-};
-
-/**
- * Describes the message engine.v1.DeleteUnitAction.
- * Use `create(DeleteUnitActionSchema)` to create a new message.
- */
-export const DeleteUnitActionSchema: GenMessage<DeleteUnitAction> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 16);
-
-/**
- * @generated from message engine.v1.SetSimSpeedAction
- */
-export type SetSimSpeedAction = Message<"engine.v1.SetSimSpeedAction"> & {
-  /**
-   * @generated from field: float time_scale = 1;
-   */
-  timeScale: number;
-};
-
-/**
- * Describes the message engine.v1.SetSimSpeedAction.
- * Use `create(SetSimSpeedActionSchema)` to create a new message.
- */
-export const SetSimSpeedActionSchema: GenMessage<SetSimSpeedAction> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 17);
-
-/**
- * @generated from message engine.v1.PauseSimAction
- */
-export type PauseSimAction = Message<"engine.v1.PauseSimAction"> & {
-  /**
-   * @generated from field: bool paused = 1;
-   */
-  paused: boolean;
-};
-
-/**
- * Describes the message engine.v1.PauseSimAction.
- * Use `create(PauseSimActionSchema)` to create a new message.
- */
-export const PauseSimActionSchema: GenMessage<PauseSimAction> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 18);
+  messageDesc(file_engine_v1_events, 6);
 
 /**
  * @generated from enum engine.v1.ScenarioPlayState

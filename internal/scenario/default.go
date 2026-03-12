@@ -22,7 +22,6 @@ func Default() *enginev1.Scenario {
 		Settings: &enginev1.SimulationSettings{
 			TickRateHz: 10,
 			TimeScale:  1.0,
-			AdjModel:   enginev1.AdjudicationModel_ADJ_MODEL_DEFAULT,
 		},
 		Map: &enginev1.MapSettings{
 			InitialWeather: &enginev1.WeatherConditions{

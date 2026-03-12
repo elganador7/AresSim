@@ -2,89 +2,40 @@ syntax = "proto3";
 package engine.v1;
 option go_package = "github.com/aressim/internal/gen/engine/v1";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// common.proto
-//
-// Shared primitives used across all other proto files.
-// All geospatial types use WGS84. All distances are in meters.
-// All speeds are in meters per second. All times are sim-seconds unless noted.
-// ─────────────────────────────────────────────────────────────────────────────
-
-// WGS84 position. The canonical coordinate type for all geospatial fields.
 message Position {
-  double lat     = 1;  // Decimal degrees, -90 to +90
-  double lon     = 2;  // Decimal degrees, -180 to +180
-  double alt_msl = 3;  // Meters above mean sea level
-  double heading = 4;  // True north bearing, 0–360 degrees
-  double speed   = 5;  // Current speed, meters per second
+  double lat      = 1; // Decimal degrees -90..+90
+  double lon      = 2; // Decimal degrees -180..+180
+  double alt_msl  = 3; // Meters above mean sea level
+  double heading  = 4; // True north bearing 0–360°
+  double speed    = 5; // Meters per second
 }
 
-// A bounding polygon for areas of operations, objectives, engagement zones, etc.
-message Polygon {
-  repeated Position vertices = 1;
-  string            label    = 2;
-  PolygonType       type     = 3;
-}
-
-enum PolygonType {
-  POLYGON_TYPE_UNSPECIFIED     = 0;
-  POLYGON_TYPE_AREA_OF_OPS     = 1;
-  POLYGON_TYPE_OBJECTIVE       = 2;
-  POLYGON_TYPE_ENGAGEMENT_ZONE = 3;
-  POLYGON_TYPE_NO_FIRE_ZONE    = 4;
-  POLYGON_TYPE_MINEFIELD       = 5;
-  POLYGON_TYPE_EXCLUSION_ZONE  = 6;
-  POLYGON_TYPE_RECON_ZONE      = 7;
-}
-
-// Simulation-internal time reference. Decoupled from wall-clock time so that
-// time-scale changes (fast-forward, pause) do not affect determinism.
 message SimTime {
-  double seconds_elapsed = 1;  // Seconds since scenario start
-  int64  tick_number     = 2;  // Absolute tick counter (monotonically increasing)
-}
-
-// Terrain type at a given position. Used as a modifier input in combat
-// resolution and as a movement speed selector. The adjudicator looks up terrain
-// from the map layer at a unit's current position each tick.
-enum TerrainType {
-  TERRAIN_UNSPECIFIED = 0;
-  TERRAIN_OPEN        = 1;  // Fields, steppe, desert — no protection bonus
-  TERRAIN_URBAN       = 2;  // Built-up areas: high protection for defenders
-  TERRAIN_FOREST      = 3;  // Concealment, moderate protection, slows vehicles
-  TERRAIN_HILLS       = 4;  // Observation advantage, hull-down positions
-  TERRAIN_MOUNTAINS   = 5;  // Strong defense, near-impassable to vehicles
-  TERRAIN_WETLANDS    = 6;  // Canalized movement, poor for armor
-  TERRAIN_COAST       = 7;  // Littoral: sea/land transition
-  TERRAIN_RIVERLINE   = 8;  // Major crossing obstacle
-  TERRAIN_DESERT      = 9;  // Open, poor cover, extreme temperature effects
-}
-
-// Environmental conditions. Affects sensor performance, aviation, and weapon
-// accuracy. Shared by combat.proto, scenario.proto, and events.proto.
-message WeatherConditions {
-  WeatherState state            = 1;
-  float        visibility_km    = 2;  // Optical line-of-sight in kilometers
-  float        wind_speed_mps   = 3;  // Affects smoke drift, aircraft stability
-  bool         precipitation    = 4;  // Degrades optical sensors, affects aviation
-  float        temperature_c    = 5;  // Celsius; affects engine starts at extremes
-  float        cloud_ceiling_m  = 6;  // Meters AGL; limits fixed-wing CAS
+  double seconds_elapsed = 1;
+  int64  tick_number     = 2;
 }
 
 enum WeatherState {
-  WEATHER_UNSPECIFIED  = 0;
-  WEATHER_CLEAR        = 1;
-  WEATHER_OVERCAST     = 2;
-  WEATHER_RAIN         = 3;
-  WEATHER_SNOW         = 4;
-  WEATHER_FOG          = 5;  // Severe optical degradation
-  WEATHER_DUST_STORM   = 6;  // Severe: radar and optical both degraded
-  WEATHER_THUNDERSTORM = 7;
+  WEATHER_UNSPECIFIED = 0;
+  WEATHER_CLEAR       = 1;
+  WEATHER_OVERCAST    = 2;
+  WEATHER_FOG         = 3;
+  WEATHER_RAIN        = 4;
+  WEATHER_HEAVY_RAIN  = 5;
+  WEATHER_SNOW        = 6;
+  WEATHER_BLIZZARD    = 7;
 }
 
-// Standardized result wrapper for adjudicator operations exposed over the
-// Wails bridge. Keeps error handling uniform across all bridge methods.
+message WeatherConditions {
+  WeatherState state           = 1;
+  float        visibility_km   = 2;
+  float        wind_speed_mps  = 3;
+  bool         precipitation   = 4;
+  float        temperature_c   = 5;
+  float        cloud_ceiling_m = 6;
+}
+
 message OperationResult {
   bool   success = 1;
-  string error   = 2;  // Empty string on success
+  string error   = 2;
 }
