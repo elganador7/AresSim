@@ -1,0 +1,228 @@
+syntax = "proto3";
+package engine.v1;
+option go_package = "github.com/aressim/internal/gen/engine/v1";
+
+import "engine/v1/common.proto";
+import "engine/v1/capabilities.proto";
+import "engine/v1/status.proto";
+import "engine/v1/orders.proto";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// unit.proto
+//
+// The core unit identity model. Describes what a unit *is*, how it is
+// organized, and where it sits in the C2 hierarchy.
+//
+// What it can do → capabilities.proto
+// How it currently is → status.proto
+// What it has been told to do → orders.proto
+//
+// The separation of identity, capabilities, status, and orders is deliberate.
+// It allows the adjudicator to cache each concern independently and update
+// only the fields that changed each tick, minimizing bridge traffic.
+// ─────────────────────────────────────────────────────────────────────────────
+
+message Unit {
+  // ── Identity ──────────────────────────────────────────────────────────────
+  string id           = 1;   // UUID; primary key in SurrealDB
+  string display_name = 2;   // Short designator, e.g. "1-64 AR"
+  string full_name    = 3;   // Full name, e.g. "1st Battalion, 64th Armor Regiment"
+  string side         = 4;   // "Blue", "Red", "Neutral", or custom faction name
+  string nation_id    = 5;   // Phase 3: owning nation; maps to Nation.id in strategic.proto
+
+  // ── Classification ────────────────────────────────────────────────────────
+  UnitEchelon  echelon  = 6;
+  UnitDomain   domain   = 7;
+  UnitFunction function = 8;
+  UnitType     type     = 9;
+
+  // ── Geospatial ────────────────────────────────────────────────────────────
+  Position position = 10;
+
+  // ── Capabilities ──────────────────────────────────────────────────────────
+  // Baseline capability values at 100% strength. Loaded from a unit type
+  // template on spawn and stored per-unit in SurrealDB. This allows templates
+  // to be overridden for specific named units (e.g., an upgraded T-90M vs T-90).
+  Capabilities capabilities = 11;
+
+  // ── Status ────────────────────────────────────────────────────────────────
+  // Current operational state. Updated by the adjudicator each tick.
+  OperationalStatus status = 12;
+
+  // ── Orders ────────────────────────────────────────────────────────────────
+  // The order queue. The adjudicator processes the first PENDING order each
+  // tick. Completed orders are retained for the event log (state = COMPLETE).
+  repeated Order orders = 13;
+
+  // ── C2 Hierarchy ──────────────────────────────────────────────────────────
+  // Graph relationships. SurrealDB stores these as edges; these fields are the
+  // denormalized IDs for quick access without a graph traversal every tick.
+  string          parent_unit_id    = 14;  // Commanding HQ unit ID
+  repeated string subordinate_ids   = 15;  // Direct organic subordinates
+  repeated string attached_unit_ids = 16;  // OPCON or attached (non-organic)
+
+  // ── Posture ───────────────────────────────────────────────────────────────
+  // Tactical formation posture. Affects movement speed, protection modifiers,
+  // and sensor signature. Set explicitly by an order or defaulted by the
+  // adjudicator based on the active order type.
+  FormationPosture posture = 17;
+
+  // ── Visualization ─────────────────────────────────────────────────────────
+  // NATO APP-6D Symbol Identification Code for COP rendering in CesiumJS.
+  // Example: "SFGPUCI----E" = friendly ground armor unit, echelon unknown.
+  // The frontend uses this to render the correct MIL-STD-2525D symbol.
+  string nato_symbol_sidc = 18;
+}
+
+// ─── ECHELON ──────────────────────────────────────────────────────────────────
+// Organizational size. The adjudicator uses echelon to scale default capability
+// values when instantiating a unit from a type template. A battalion-echelon
+// armor unit has proportionally more weapon systems than a company.
+
+enum UnitEchelon {
+  ECHELON_UNSPECIFIED = 0;
+  ECHELON_FIRETEAM    = 1;   // 2–4 personnel
+  ECHELON_SQUAD       = 2;   // 8–13 personnel
+  ECHELON_SECTION     = 3;   // 10–20 personnel
+  ECHELON_PLATOON     = 4;   // 30–50 personnel
+  ECHELON_COMPANY     = 5;   // 80–200 personnel (Battery / Troop equivalent)
+  ECHELON_BATTALION   = 6;   // 300–1,000 personnel (Squadron equivalent)
+  ECHELON_BRIGADE     = 7;   // 2,000–5,000 personnel (Regiment equivalent)
+  ECHELON_DIVISION    = 8;   // 10,000–20,000 personnel
+  ECHELON_CORPS       = 9;   // 30,000–50,000 personnel
+  ECHELON_ARMY        = 10;  // 100,000+ personnel
+  ECHELON_ARMY_GROUP  = 11;  // Theater-strategic
+}
+
+// ─── DOMAIN ───────────────────────────────────────────────────────────────────
+// Determines which movement rules, terrain modifiers, and engagement geometry
+// apply. Cross-domain engagements (e.g., air attacking ground) use the
+// defender's domain to select protection modifiers.
+
+enum UnitDomain {
+  DOMAIN_UNSPECIFIED = 0;
+  DOMAIN_LAND        = 1;
+  DOMAIN_AIR         = 2;
+  DOMAIN_SEA         = 3;
+  DOMAIN_SUBSURFACE  = 4;  // Submarine
+  DOMAIN_SPACE       = 5;  // Phase 3: satellite and space-based assets
+  DOMAIN_CYBER       = 6;  // Phase 3: cyber operations units
+}
+
+// ─── FUNCTION ─────────────────────────────────────────────────────────────────
+// High-level functional category. Determines which capability templates are
+// valid for this unit and how the adjudicator weights its role in interactions.
+
+enum UnitFunction {
+  FUNCTION_UNSPECIFIED        = 0;
+  FUNCTION_MANEUVER           = 1;  // Primary ground combat: armor, infantry, marines
+  FUNCTION_FIRES              = 2;  // Indirect fire: artillery, MLRS, mortars, naval gunfire
+  FUNCTION_AIR_DEFENSE        = 3;  // SHORAD, HIMAD, point defense
+  FUNCTION_AVIATION           = 4;  // Rotary and fixed wing
+  FUNCTION_LOGISTICS          = 5;  // Supply, maintenance, medical, transport
+  FUNCTION_INTELLIGENCE       = 6;  // Reconnaissance, SIGINT, HUMINT, ISR
+  FUNCTION_ENGINEER           = 7;  // Combat engineer, bridging, obstacle, construction
+  FUNCTION_COMMAND            = 8;  // HQ, C2 nodes; projects C2 quality over subordinates
+  FUNCTION_ELECTRONIC_WARFARE = 9;  // Jamming, deception, direction finding
+  FUNCTION_SPECIAL_OPERATIONS = 10; // SOF: SF, Rangers, SEAL, Spetsnaz
+}
+
+// ─── TYPE ─────────────────────────────────────────────────────────────────────
+// Specific unit type within a domain/function. Drives capability template
+// lookup in the adjudicator. Values are numbered by domain block to allow
+// easy extension without renumbering.
+
+enum UnitType {
+  UNIT_TYPE_UNSPECIFIED = 0;
+
+  // ── Land Maneuver (1–9) ───────────────────────────────────────────────────
+  UNIT_TYPE_ARMOR               = 1;   // Main Battle Tank (M1A2, T-90, Challenger 2)
+  UNIT_TYPE_MECHANIZED_INFANTRY = 2;   // IFV/APC mounted (Bradley, BMP, CV90)
+  UNIT_TYPE_LIGHT_INFANTRY      = 3;
+  UNIT_TYPE_AIRBORNE            = 4;   // Parachute-qualified infantry
+  UNIT_TYPE_AIR_ASSAULT         = 5;   // Helicopter-inserted infantry
+  UNIT_TYPE_MARINE              = 6;   // Amphibious assault infantry
+  UNIT_TYPE_SPECIAL_FORCES      = 7;
+  UNIT_TYPE_CAVALRY             = 8;   // Reconnaissance and screening
+
+  // ── Land Fires (10–19) ────────────────────────────────────────────────────
+  UNIT_TYPE_SP_ARTILLERY        = 10;  // Self-propelled (M109, 2S19 Msta, AS-90)
+  UNIT_TYPE_TOWED_ARTILLERY     = 11;  // Towed (M777, D-30, FH-70)
+  UNIT_TYPE_ROCKET_ARTILLERY    = 12;  // MLRS, HIMARS, BM-21 Grad, Tornado-G
+  UNIT_TYPE_MORTAR              = 13;  // 60mm, 81mm, 120mm
+  UNIT_TYPE_COASTAL_DEFENSE     = 14;  // Anti-ship missile batteries
+
+  // ── Land Air Defense (20–29) ──────────────────────────────────────────────
+  UNIT_TYPE_SHORAD              = 20;  // Short-range AD (Stinger, Igla, Gepard, Tunguska)
+  UNIT_TYPE_HIMAD               = 21;  // High/medium-altitude AD (Patriot, S-300, S-400)
+  UNIT_TYPE_MANPADS_TEAM        = 22;  // Man-portable air defense team
+
+  // ── Aviation (30–49) ──────────────────────────────────────────────────────
+  UNIT_TYPE_ATTACK_HELICOPTER    = 30;  // Apache AH-64, Ka-52, Tiger
+  UNIT_TYPE_TRANSPORT_HELICOPTER = 31;  // UH-60, CH-47, Mi-8, Mi-17
+  UNIT_TYPE_FIGHTER              = 32;  // F-16, MiG-29, Su-27, Gripen
+  UNIT_TYPE_MULTIROLE            = 33;  // F-35, Su-35, Typhoon, Rafale
+  UNIT_TYPE_ATTACK_AIRCRAFT      = 34;  // A-10, Su-25, L-39
+  UNIT_TYPE_BOMBER               = 35;  // B-52, Tu-95, Tu-22M
+  UNIT_TYPE_TRANSPORT_AIRCRAFT   = 36;  // C-17, Il-76, C-130
+  UNIT_TYPE_AWACS                = 37;  // E-3, A-50, E-7
+  UNIT_TYPE_ISR_AIRCRAFT         = 38;  // U-2, RC-135, Il-20
+  UNIT_TYPE_UAV_RECON            = 39;  // RQ-4, Bayraktar TB2 (recon role)
+  UNIT_TYPE_UCAV                 = 40;  // MQ-9, Bayraktar TB2 (strike role), Shahed-136
+  UNIT_TYPE_EW_AIRCRAFT          = 41;  // EA-18G Growler, Il-22PP
+
+  // ── Naval Surface (50–59) ─────────────────────────────────────────────────
+  UNIT_TYPE_AIRCRAFT_CARRIER    = 50;
+  UNIT_TYPE_DESTROYER           = 51;
+  UNIT_TYPE_FRIGATE             = 52;
+  UNIT_TYPE_CORVETTE            = 53;
+  UNIT_TYPE_PATROL_BOAT         = 54;
+  UNIT_TYPE_AMPHIBIOUS_SHIP     = 55;
+  UNIT_TYPE_REPLENISHMENT_SHIP  = 56;
+
+  // ── Naval Subsurface (57–59) ──────────────────────────────────────────────
+  UNIT_TYPE_ATTACK_SUBMARINE    = 57;
+  UNIT_TYPE_SSBN                = 58;  // Ballistic missile submarine
+  UNIT_TYPE_MINE_WARFARE        = 59;
+
+  // ── Logistics (70–79) ─────────────────────────────────────────────────────
+  UNIT_TYPE_SUPPLY_COMPANY      = 70;
+  UNIT_TYPE_FUEL_COMPANY        = 71;
+  UNIT_TYPE_MAINTENANCE_COMPANY = 72;
+  UNIT_TYPE_MEDICAL_COMPANY     = 73;
+  UNIT_TYPE_TRANSPORT_COMPANY   = 74;
+
+  // ── Engineer (80–89) ──────────────────────────────────────────────────────
+  UNIT_TYPE_COMBAT_ENGINEER     = 80;
+  UNIT_TYPE_BRIDGE_ENGINEER     = 81;
+  UNIT_TYPE_CONSTRUCTION        = 82;
+  UNIT_TYPE_MINE_CLEARING       = 83;
+
+  // ── Command (90–99) ───────────────────────────────────────────────────────
+  UNIT_TYPE_COMMAND_POST        = 90;
+  UNIT_TYPE_SIGNAL              = 91;
+
+  // ── EW / Intel (100–109) ──────────────────────────────────────────────────
+  UNIT_TYPE_SIGINT              = 100;
+  UNIT_TYPE_JAMMING             = 101;
+  UNIT_TYPE_DECEPTION           = 102;
+}
+
+// ─── FORMATION POSTURE ────────────────────────────────────────────────────────
+// Current tactical formation. The adjudicator applies posture modifiers to
+// the base capability values to compute effective speed and protection for a
+// given tick.
+//
+// Posture is set explicitly by an order (e.g., DefendParams sets DUG_IN)
+// or defaulted by the adjudicator (e.g., MOVE order → TRAVELING posture).
+
+enum FormationPosture {
+  POSTURE_UNSPECIFIED   = 0;
+  POSTURE_TRAVELING     = 1;  // Column; max speed; lowest protection and concealment
+  POSTURE_BOUNDING      = 2;  // Alternating bounds; moderate speed; moderate protection
+  POSTURE_DELIBERATE    = 3;  // Slow and methodical; highest firepower; moderate protection
+  POSTURE_HASTY_DEFENSE = 4;  // Impromptu positions; high protection; limited mobility
+  POSTURE_DUG_IN        = 5;  // Prepared fortifications; maximum protection; low mobility
+  POSTURE_DISPERSED     = 6;  // Wide spacing; low signature; degraded C2 and mutual support
+  POSTURE_ASSAULT       = 7;  // Attack formation; high firepower exposure; lower protection
+}

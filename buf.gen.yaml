@@ -1,0 +1,14 @@
+version: v1
+plugins:
+  # Go: outputs to internal/gen/engine/
+  - plugin: go
+    out: internal/gen
+    opt: paths=source_relative
+
+  # TypeScript: outputs to frontend/src/proto/
+  # Uses @bufbuild/protoc-gen-es
+  - plugin: es
+    out: frontend/src/proto
+    opt:
+      - target=ts
+      - import_extension=none

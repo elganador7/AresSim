@@ -1,0 +1,292 @@
+syntax = "proto3";
+package engine.v1;
+option go_package = "github.com/aressim/internal/gen/engine/v1";
+
+import "engine/v1/common.proto";
+import "engine/v1/capabilities.proto";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// orders.proto
+//
+// The task queue that drives unit behavior. Orders model doctrine-aligned
+// tactical tasks at the operational level.
+//
+// The adjudicator processes the front-most PENDING order each tick. When an
+// order reaches state ORDER_STATE_COMPLETE, it is popped and the next order
+// becomes active. New orders can be appended or prepended at any time,
+// subject to C2 status (a disrupted unit cannot receive new orders).
+//
+// Order types are aligned with US Army operational doctrine and equivalent
+// counterpart tasks for opposing forces.
+// ─────────────────────────────────────────────────────────────────────────────
+
+message Order {
+  string     order_id   = 1;
+  string     issued_by  = 2;  // Unit ID of issuing HQ; empty = player-issued
+  OrderType  type       = 3;
+  int32      priority   = 4;  // Lower number = higher priority (0 = highest)
+  OrderState state      = 5;
+  SimTime    issued_at  = 6;
+  SimTime    execute_at = 7;  // Delayed start; all-zeros = execute immediately
+
+  oneof parameters {
+    MoveParams        move         = 10;
+    AttackParams      attack       = 11;
+    DefendParams      defend       = 12;
+    PatrolParams      patrol       = 13;
+    HoldParams        hold         = 14;
+    WithdrawParams    withdraw     = 15;
+    FireMissionParams fire_mission = 16;
+    AirStrikeParams   air_strike   = 17;
+    ResupplyParams    resupply     = 18;
+    ReconParams       recon        = 19;
+    AttachParams      attach       = 20;
+    ScreenParams      screen       = 21;
+    EstablishCPParams establish_cp = 22;
+  }
+}
+
+enum OrderType {
+  ORDER_UNSPECIFIED     = 0;
+
+  // ── Maneuver ──────────────────────────────────────────────────────────────
+  ORDER_MOVE            = 1;   // Move to a position or along a route
+  ORDER_ATTACK          = 2;   // Close with and destroy enemy force
+  ORDER_DEFEND          = 3;   // Occupy and hold a position or area
+  ORDER_PATROL          = 4;   // Cyclic route for security/recon
+  ORDER_HOLD            = 5;   // Remain in place for a duration
+  ORDER_WITHDRAW        = 6;   // Displace to the rear under pressure
+  ORDER_SCREEN          = 7;   // Security: observe, report, and delay; avoid decisive engagement
+  ORDER_GUARD           = 8;   // Protect the main body's flank or rear; allow no intelligence
+  ORDER_COVER           = 9;   // Protect main force while it disengages; accept decisive engagement
+  ORDER_EXPLOIT         = 10;  // Pursue and prevent reconstitution of a broken enemy
+
+  // ── Fires ─────────────────────────────────────────────────────────────────
+  ORDER_FIRE_MISSION    = 11;  // Indirect fire: suppress, neutralize, or destroy
+  ORDER_AIR_STRIKE      = 12;  // Close air support coordination
+  ORDER_COUNTER_BATTERY = 13;  // Target enemy indirect fire systems
+  ORDER_SMOKE           = 14;  // Obscuration fires to screen movement
+
+  // ── Logistics ─────────────────────────────────────────────────────────────
+  ORDER_RESUPPLY        = 15;  // Move to logistics node for full resupply
+  ORDER_REARM           = 16;  // Ammunition resupply only
+  ORDER_REFUEL          = 17;  // Fuel resupply only
+  ORDER_EVACUATE        = 18;  // CASEVAC or equipment recovery
+
+  // ── C2 ────────────────────────────────────────────────────────────────────
+  ORDER_ATTACH          = 19;  // Transfer OPCON to another HQ
+  ORDER_ESTABLISH_CP    = 20;  // Set up command post at a position
+
+  // ── Intelligence ──────────────────────────────────────────────────────────
+  ORDER_RECON           = 21;  // Reconnaissance of an area
+  ORDER_OBSERVE         = 22;  // Establish a static observation post
+}
+
+enum OrderState {
+  ORDER_STATE_UNSPECIFIED = 0;
+  ORDER_STATE_PENDING     = 1;  // Queued, waiting to become active
+  ORDER_STATE_ACTIVE      = 2;  // Currently executing
+  ORDER_STATE_COMPLETE    = 3;  // Successfully completed
+  ORDER_STATE_FAILED      = 4;  // Could not complete (unit destroyed, route blocked, etc.)
+  ORDER_STATE_CANCELLED   = 5;  // Superseded by a higher-priority order
+}
+
+// ─── MOVE ─────────────────────────────────────────────────────────────────────
+// Move to a destination, optionally via intermediate waypoints.
+// The adjudicator selects the terrain speed from MobilityCapabilities
+// based on the terrain type along the route.
+
+message MoveParams {
+  Position          destination        = 1;
+  repeated Position waypoints          = 2;  // Optional intermediate route points
+  MoveType          move_type          = 3;
+  float             speed_override_mps = 4;  // 0 = use unit's standard speed for move_type
+}
+
+enum MoveType {
+  MOVE_TYPE_UNSPECIFIED    = 0;
+  MOVE_TYPE_TACTICAL       = 1;  // Bounding overwatch; security maintained; moderate speed
+  MOVE_TYPE_ROAD_MARCH     = 2;  // Column formation; maximum road speed; reduced security
+  MOVE_TYPE_INFILTRATION   = 3;  // Small elements; avoid detection; use forest/night
+  MOVE_TYPE_AIR_ASSAULT    = 4;  // Helicopter lift and insertion
+  MOVE_TYPE_ADMINISTRATIVE = 5;  // Logistics/administrative movement; not tactically significant
+}
+
+// ─── ATTACK ───────────────────────────────────────────────────────────────────
+// Close with and destroy a designated enemy unit or seize an objective.
+// If both target_unit_id and attack_objective are set, the unit attacks the
+// objective area and engages any enemy within kinetic range.
+
+message AttackParams {
+  string      target_unit_id          = 1;  // Specific unit ID to target (optional)
+  Polygon     attack_objective        = 2;  // Area objective (optional)
+  AttackType  attack_type             = 3;
+  Position    axis_of_advance         = 4;  // Direction of attack (bearing reference point)
+  bool        fire_and_movement       = 5;  // True = suppressive fire + bounds; False = direct assault
+  string      supporting_fires_unit   = 6;  // Unit ID providing supporting indirect fire
+  string      support_aviation_unit   = 7;  // Aviation unit ID for CAS support
+}
+
+enum AttackType {
+  ATTACK_TYPE_UNSPECIFIED   = 0;
+  ATTACK_TYPE_HASTY         = 1;  // Immediate, minimum planning; capitalize on opportunity
+  ATTACK_TYPE_DELIBERATE    = 2;  // Planned and coordinated with all supporting fires
+  ATTACK_TYPE_SPOILING      = 3;  // Pre-empt enemy assembly or attack preparation
+  ATTACK_TYPE_COUNTERATTACK = 4;  // Restore lost positions or destroy penetrating enemy
+  ATTACK_TYPE_RAID          = 5;  // Strike and withdraw without holding terrain
+  ATTACK_TYPE_FEINT         = 6;  // Deception: simulate attack without intent to close
+  ATTACK_TYPE_DEMONSTRATION = 7;  // Visible show of force to fix enemy attention
+}
+
+// ─── DEFEND ───────────────────────────────────────────────────────────────────
+
+message DefendParams {
+  Position    position              = 1;  // Center of defensive position
+  Polygon     defensive_area        = 2;  // Entire defensive area (optional)
+  DefenseType defense_type          = 3;
+  bool        prepare_positions     = 4;  // Unit begins fortifying (improves protection over time)
+  float       preparation_time_hours = 5; // Hours until full fortification benefit realized
+}
+
+enum DefenseType {
+  DEFENSE_TYPE_UNSPECIFIED   = 0;
+  DEFENSE_TYPE_AREA          = 1;  // Hold terrain; maximum depth and mutual support
+  DEFENSE_TYPE_MOBILE        = 2;  // Counterattack from prepared positions; trade space
+  DEFENSE_TYPE_PERIMETER     = 3;  // 360-degree defense; isolated position
+  DEFENSE_TYPE_REVERSE_SLOPE = 4;  // Deny direct fire; maximize protection
+}
+
+// ─── PATROL ───────────────────────────────────────────────────────────────────
+
+message PatrolParams {
+  repeated Position waypoints = 1;
+  bool              loop      = 2;  // True = repeat indefinitely; False = complete once
+  PatrolType        type      = 3;
+}
+
+enum PatrolType {
+  PATROL_TYPE_UNSPECIFIED = 0;
+  PATROL_TYPE_ROUTE       = 1;  // Security: check MSRs and adjacent terrain
+  PATROL_TYPE_AREA        = 2;  // Saturation patrol of a defined zone
+  PATROL_TYPE_COMBAT      = 3;  // Seek out and engage enemy patrols
+  PATROL_TYPE_RECON       = 4;  // Observe and report; avoid contact
+}
+
+// ─── SCREEN ───────────────────────────────────────────────────────────────────
+// Cavalry/recon mission: observe, report, and delay. Avoid decisive engagement.
+
+message ScreenParams {
+  Polygon  screen_line      = 1;  // Area/line to screen
+  bool     delay_if_hit     = 2;  // True = trade space for time if engaged
+  float    delay_time_hours = 3;  // How long to delay before withdrawing
+}
+
+// ─── HOLD ─────────────────────────────────────────────────────────────────────
+
+message HoldParams {
+  float duration_seconds = 1;  // 0 = indefinite; hold until order is superseded
+}
+
+// ─── WITHDRAW ─────────────────────────────────────────────────────────────────
+
+message WithdrawParams {
+  Position destination       = 1;
+  bool     under_pressure    = 2;   // True = enemy contact; use covered/concealed route
+  string   covering_unit_id  = 3;   // Unit providing covering fire during withdrawal
+}
+
+// ─── FIRE MISSION ─────────────────────────────────────────────────────────────
+// Indirect fire mission tasked to an artillery or rocket unit.
+// The adjudicator validates the firing unit has an active fire support
+// coordination channel (CommandCapabilities.has_fscoord = true) before
+// processing.
+
+message FireMissionParams {
+  Position         target_position    = 1;
+  string           target_unit_id     = 2;   // If known; drives more accurate damage assessment
+  FireMissionType  mission_type       = 3;
+  AmmunitionType   ammo_requested     = 4;
+  int32            rounds             = 5;   // 0 = fire for effect at battery discretion
+  float            time_on_target     = 6;   // Sim seconds until rounds must land (0 = immediate)
+  string           observer_unit_id   = 7;   // Unit providing spot/adjust; required for precision
+  bool             repeat             = 8;   // True = continue firing until cancelled
+}
+
+enum FireMissionType {
+  FIRE_MISSION_UNSPECIFIED     = 0;
+  FIRE_MISSION_SUPPRESS        = 1;  // Degrade enemy action without destroying
+  FIRE_MISSION_NEUTRALIZE      = 2;  // Render temporarily ineffective
+  FIRE_MISSION_DESTROY         = 3;  // Physical destruction of target
+  FIRE_MISSION_DISRUPT         = 4;  // Break up enemy formation or preparation
+  FIRE_MISSION_INTERDICT       = 5;  // Ongoing fires to deny movement through an area
+  FIRE_MISSION_COUNTER_BATTERY = 6;
+  FIRE_MISSION_SMOKE           = 7;
+  FIRE_MISSION_ILLUMINATION    = 8;
+}
+
+// ─── AIR STRIKE ───────────────────────────────────────────────────────────────
+
+message AirStrikeParams {
+  Position     target_position  = 1;
+  string       target_unit_id   = 2;  // If known
+  string       aircraft_unit_id = 3;  // Assigned aviation unit
+  MunitionType munition         = 4;
+  int32        sorties          = 5;  // Number of attack passes
+  bool         has_jtac         = 6;  // Joint terminal attack controller directing the strike
+}
+
+enum MunitionType {
+  MUNITION_UNSPECIFIED   = 0;
+  MUNITION_UNGUIDED_BOMB = 1;
+  MUNITION_GUIDED_BOMB   = 2;  // JDAM, Paveway
+  MUNITION_CLUSTER_BOMB  = 3;
+  MUNITION_AGM           = 4;  // Maverick, Brimstone, Kh-25
+  MUNITION_ROCKET_POD    = 5;  // 70mm/80mm unguided rockets
+  MUNITION_CANNON_STRAFE = 6;  // 20–30mm gun strafe
+  MUNITION_CRUISE_MISSILE= 7;
+}
+
+// ─── RESUPPLY ─────────────────────────────────────────────────────────────────
+// Order the unit to move to the nearest accessible logistics node and refit.
+// If a specific node_id is not set, the adjudicator resolves the nearest
+// reachable node of the unit's side.
+
+message ResupplyParams {
+  string logistics_node_id    = 1;  // Empty = adjudicator selects nearest node
+  bool   priority_fuel        = 2;
+  bool   priority_ammo        = 3;
+  bool   priority_maintenance = 4;
+}
+
+// ─── RECON ────────────────────────────────────────────────────────────────────
+
+message ReconParams {
+  Polygon   recon_area    = 1;
+  ReconType type          = 2;
+  bool      avoid_contact = 3;  // False = engage if contacted; True = break contact and report
+}
+
+enum ReconType {
+  RECON_TYPE_UNSPECIFIED = 0;
+  RECON_TYPE_ZONE        = 1;  // Systematic coverage of an entire zone
+  RECON_TYPE_ROUTE       = 2;  // Specific route clearance/inspection
+  RECON_TYPE_AREA        = 3;  // Specific named area or objective
+  RECON_TYPE_FORCE       = 4;  // Determine enemy strength by probing contact
+}
+
+// ─── ESTABLISH COMMAND POST ───────────────────────────────────────────────────
+
+message EstablishCPParams {
+  Position position                = 1;
+  bool     dig_in                  = 2;  // Begin fortification on arrival
+  float    planned_duration_hours  = 3;
+}
+
+// ─── ATTACH (C2 TRANSFER) ─────────────────────────────────────────────────────
+// Transfer the unit's command relationship to a new parent HQ.
+// Updates the C2 graph edges in SurrealDB.
+
+message AttachParams {
+  string new_parent_unit_id = 1;
+  bool   opcon              = 2;  // False = organic attachment; True = OPCON only
+}

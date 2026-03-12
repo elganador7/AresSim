@@ -1,0 +1,14 @@
+version: v1
+name: buf.build/aressim/engine
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - STANDARD
+  except:
+    # Allow enum values without package prefix for readability
+    # (e.g., UNIT_TYPE_ARMOR rather than ENGINE_V1_UNIT_TYPE_ARMOR)
+    - ENUM_VALUE_PREFIX
+    # Allow oneof fields to not have a prefix
+    - ONEOF_LOWER_SNAKE_CASE

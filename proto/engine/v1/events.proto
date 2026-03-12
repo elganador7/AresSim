@@ -1,0 +1,209 @@
+syntax = "proto3";
+package engine.v1;
+option go_package = "github.com/aressim/internal/gen/engine/v1";
+
+import "engine/v1/common.proto";
+import "engine/v1/orders.proto";
+import "engine/v1/unit.proto";
+import "engine/v1/status.proto";
+import "engine/v1/logistics.proto";
+import "engine/v1/combat.proto";
+import "engine/v1/intelligence.proto";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// events.proto
+//
+// All event types streamed from the adjudicator to the frontend via the Wails
+// bridge (and to multiplayer clients via WebSocket in Phase 3).
+//
+// The frontend is intentionally stateless: it discards all prior state on a
+// FullStateSnapshot and rebuilds the world incrementally from subsequent events.
+// This makes reconnect (multiplayer) and scenario-load identical code paths.
+//
+// Event emission contract:
+//   - FullStateSnapshot: emitted once on scenario load or client connect.
+//   - BatchUnitUpdate: emitted every tick; contains only changed units.
+//   - All other events: emitted on demand when the triggering condition occurs.
+//
+// Performance note: at 10 Hz with 1,000 units each moving, per-unit events
+// would generate 10,000 messages/sec. BatchUnitUpdate consolidates all position
+// changes into a single binary message per tick (~50–200 KB at that scale).
+// ─────────────────────────────────────────────────────────────────────────────
+
+// The envelope for all backend-to-frontend events.
+// Wails emits this as a base64-encoded protobuf binary via runtime.EventsEmit.
+// The frontend decodes and dispatches on the payload type.
+message SimEvent {
+  string  event_id = 1;  // UUID for deduplication and ordering validation
+  SimTime sim_time = 2;
+
+  oneof payload {
+    // Lifecycle
+    FullStateSnapshot  full_state     = 3;   // Sent on connect or scenario load
+    ScenarioStateEvent scenario_state = 4;   // Pause, resume, end
+
+    // Per-tick update (the most frequent event)
+    BatchUnitUpdate    batch_update   = 5;
+
+    // Unit lifecycle
+    UnitSpawnedEvent   unit_spawned   = 6;
+    UnitDestroyedEvent unit_destroyed = 7;
+
+    // Combat
+    EngagementResult   direct_fire    = 8;
+    IndirectFireResult indirect_fire  = 9;
+    AirStrikeResult    air_strike     = 10;
+
+    // Logistics (Phase 2)
+    SupplyStatusEvent  supply_status  = 11;
+    NodeStatusEvent    node_status    = 12;
+
+    // Intelligence (Phase 2)
+    ContactReport      contact        = 13;
+
+    // C2
+    C2StatusEvent      c2_status      = 14;
+
+    // Narrative: human-readable event log entry
+    NarrativeEvent     narrative      = 15;
+
+    // Multiplayer (Phase 3)
+    ClientJoinedEvent  client_joined  = 16;
+    ClientLeftEvent    client_left    = 17;
+  }
+}
+
+// ─── LIFECYCLE ────────────────────────────────────────────────────────────────
+
+// Sent once when the frontend connects or when a scenario is loaded.
+// The frontend discards all existing entity state and rebuilds from this.
+message FullStateSnapshot {
+  repeated Unit          units         = 1;
+  repeated LogisticsNode nodes         = 2;
+  SimTime                sim_time      = 3;
+  WeatherConditions      weather       = 4;
+  string                 scenario_name = 5;
+}
+
+message ScenarioStateEvent {
+  ScenarioPlayState state       = 1;
+  float             time_scale  = 2;  // Current sim speed multiplier
+  string            end_reason  = 3;  // Populated when state = SCENARIO_ENDED
+}
+
+enum ScenarioPlayState {
+  SCENARIO_UNSPECIFIED = 0;
+  SCENARIO_PAUSED      = 1;
+  SCENARIO_RUNNING     = 2;
+  SCENARIO_ENDED       = 3;
+}
+
+// ─── PER-TICK BATCH UPDATE ────────────────────────────────────────────────────
+// Emitted every tick by the adjudicator. Contains only the UnitDelta records
+// for units whose position or status changed during this tick.
+// Units that did not change are omitted to minimize bridge bandwidth.
+
+message BatchUnitUpdate {
+  repeated UnitDelta deltas   = 1;
+  SimTime            sim_time = 2;  // Tick sim-time (duplicated here for convenience)
+}
+
+// A partial update for a single unit. Only fields that changed are populated.
+// The frontend merges this into its Zustand store using the unit_id as key.
+message UnitDelta {
+  string            unit_id  = 1;
+
+  // Position is always included if the unit moved this tick.
+  Position          position = 2;
+
+  // Status is included only if any status field changed this tick.
+  // The frontend replaces the entire OperationalStatus for the unit on receipt.
+  OperationalStatus status   = 3;
+
+  // Posture is included only if it changed.
+  FormationPosture  posture  = 4;
+}
+
+// ─── UNIT LIFECYCLE ───────────────────────────────────────────────────────────
+
+message UnitSpawnedEvent {
+  Unit unit = 1;  // Full unit record; frontend adds it to the entity map
+}
+
+message UnitDestroyedEvent {
+  string   unit_id       = 1;
+  string   cause         = 2;  // "direct_fire", "indirect_fire", "air_strike", "supply_failure"
+  Position last_position = 3;  // Position at time of destruction for wreck marker
+  string   destroyed_by  = 4;  // Unit ID of the destroying unit (if applicable)
+}
+
+// ─── LOGISTICS (Phase 2) ──────────────────────────────────────────────────────
+
+message SupplyStatusEvent {
+  string                unit_id      = 1;
+  LogisticsConnectivity connectivity = 2;  // Updated connectivity state
+}
+
+message NodeStatusEvent {
+  string        node_id = 1;
+  LogisticsNode node    = 2;  // Updated node state (stock levels, health, is_active)
+}
+
+// ─── C2 ───────────────────────────────────────────────────────────────────────
+
+message C2StatusEvent {
+  string   unit_id    = 1;
+  C2Status new_status = 2;
+}
+
+// ─── NARRATIVE ────────────────────────────────────────────────────────────────
+// Human-readable entries for the COP event log panel.
+// Displayed in chronological order; the primary unit is highlighted on the map.
+
+message NarrativeEvent {
+  string text     = 1;  // e.g. "1-64 AR engages T-90 company; 3 vehicles destroyed"
+  string category = 2;  // "combat", "logistics", "c2", "intelligence", "scenario"
+  string unit_id  = 3;  // Primary unit to highlight on COP click
+  string side     = 4;  // "Blue" or "Red"; drives event log color coding
+}
+
+// ─── MULTIPLAYER (Phase 3) ────────────────────────────────────────────────────
+
+message ClientJoinedEvent {
+  string client_id   = 1;
+  string player_name = 2;
+  string side        = 3;  // Side assigned to this client
+}
+
+message ClientLeftEvent {
+  string client_id   = 1;
+  string player_name = 2;
+  string reason      = 3;  // "disconnect", "timeout", "kicked"
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inbound commands (frontend → backend, Phase 3 multiplayer)
+//
+// In single-player mode, commands arrive via Wails bridge method calls.
+// In multiplayer mode, the host encodes these as ClientMessage protos
+// sent over the WebSocket connection.
+// ─────────────────────────────────────────────────────────────────────────────
+
+message ClientMessage {
+  string client_id   = 1;
+  string scenario_id = 2;
+
+  oneof action {
+    SpawnUnitAction   spawn_unit  = 3;
+    IssueOrderAction  issue_order = 4;
+    DeleteUnitAction  delete_unit = 5;
+    SetSimSpeedAction set_speed   = 6;
+    PauseSimAction    pause_sim   = 7;
+  }
+}
+
+message SpawnUnitAction   { Unit   unit    = 1; }
+message IssueOrderAction  { string unit_id = 1; Order order = 2; }
+message DeleteUnitAction  { string unit_id = 1; }
+message SetSimSpeedAction { float  time_scale = 1; }
+message PauseSimAction    { bool   paused     = 1; }
