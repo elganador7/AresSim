@@ -1,0 +1,286 @@
+/* app.css — AresSim COP shell styles */
+
+/* ─── LAYOUT ──────────────────────────────────────────────────────────────── */
+
+.app-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0f1115;
+}
+
+.cesium-container {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hud-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none; /* let clicks through to Cesium by default */
+}
+
+/* Children that need interaction re-enable pointer events */
+.hud-overlay > * {
+  pointer-events: auto;
+}
+
+/* ─── TOP BAR ─────────────────────────────────────────────────────────────── */
+
+.top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: rgba(15, 17, 21, 0.85);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  color: #d1d5db;
+  user-select: none;
+}
+
+.top-bar-left,
+.top-bar-center,
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.top-bar-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.scenario-name {
+  font-weight: 600;
+  color: #f9fafb;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.state-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.sim-time {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f9fafb;
+  letter-spacing: 0.08em;
+}
+
+.time-scale {
+  font-size: 11px;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.tick-label {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+/* ─── EVENT LOG ───────────────────────────────────────────────────────────── */
+
+.event-log {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  width: 380px;
+  max-height: 240px;
+  background: rgba(15, 17, 21, 0.88);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+}
+
+.event-log-header {
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #9ca3af;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.event-count {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.event-log-empty {
+  padding: 12px 10px;
+  color: #4b5563;
+  font-style: italic;
+}
+
+.event-log-entries {
+  overflow-y: auto;
+  flex: 1;
+  padding: 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.event-entry {
+  padding: 3px 10px;
+  line-height: 1.5;
+  color: #d1d5db;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.entry-category {
+  font-weight: 700;
+  font-size: 10px;
+}
+
+/* ─── UNIT PANEL ──────────────────────────────────────────────────────────── */
+
+.unit-panel {
+  position: absolute;
+  top: 56px;
+  right: 16px;
+  width: 260px;
+  background: rgba(15, 17, 21, 0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.unit-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.unit-side-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.unit-display-name {
+  flex: 1;
+  font-weight: 700;
+  font-size: 13px;
+  color: #f9fafb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unit-panel-close {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.unit-panel-close:hover {
+  color: #d1d5db;
+}
+
+.unit-panel-body {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.unit-full-name {
+  font-size: 10px;
+  color: #6b7280;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.unit-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.stat-label {
+  color: #6b7280;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  color: #e5e7eb;
+  font-size: 12px;
+  text-align: right;
+}
+
+.position-value {
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.unit-status-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.status-flag {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.status-flag.suppressed {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.status-flag.disrupted {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.status-flag.routing {
+  background: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.unit-position {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}

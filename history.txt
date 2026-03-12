@@ -1,0 +1,5 @@
+#V2
+DEFINE INDEX test_hnsw ON unit FIELDS position HNSW DIMENSION 2;
+DEFINE TABLE IF NOT EXISTS _idx_test SCHEMAFULL;
+DEFINE FIELD IF NOT EXISTS pos ON _idx_test TYPE geometry<point>;
+DEFINE INDEX test_geo ON _idx_test FIELDS pos;
