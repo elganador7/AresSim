@@ -11,16 +11,17 @@
  * Phase 1 as a placeholder div; CesiumJS is wired in Phase 2.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { initBridge } from "./bridge/bridge";
 import { useSimStore } from "./store/simStore";
 import CesiumGlobe from "./components/CesiumGlobe";
+import ScenarioEditor from "./components/editor/ScenarioEditor";
 import { RequestSync } from "../wailsjs/go/main/App";
 import "./app.css";
 
 // ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
 
-function TopBar() {
+function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
   const scenarioName = useSimStore((s) => s.scenarioName);
   const scenarioState = useSimStore((s) => s.scenarioState);
   const simSeconds = useSimStore((s) => s.simSeconds);
@@ -62,6 +63,24 @@ function TopBar() {
 
       <div className="top-bar-right">
         <span className="tick-label">T:{tickNumber}</span>
+        <button
+          onClick={onOpenEditor}
+          style={{
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: 3,
+            color: "#9ca3af",
+            fontFamily: "Courier New, monospace",
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            padding: "3px 9px",
+            cursor: "pointer",
+            textTransform: "uppercase",
+          }}
+        >
+          Editor
+        </button>
       </div>
     </div>
   );
@@ -222,13 +241,22 @@ function UnitPanel() {
 // ─── ROOT COMPONENT ───────────────────────────────────────────────────────────
 
 export default function App() {
+  const [view, setView] = useState<"sim" | "editor">("sim");
+
   useEffect(() => {
     initBridge();
-    // Pull current state from Go — handles the race where domReady fires
-    // before EventsOn listeners are registered.
     RequestSync().catch((e) => console.warn("[App] RequestSync:", e));
     console.log("[App] AresSim frontend initialized");
   }, []);
+
+  if (view === "editor") {
+    return (
+      <ScenarioEditor
+        onExit={() => setView("sim")}
+        onPlay={() => setView("sim")}
+      />
+    );
+  }
 
   return (
     <div className="app-shell">
@@ -236,7 +264,7 @@ export default function App() {
 
       {/* HUD overlay layer */}
       <div className="hud-overlay">
-        <TopBar />
+        <TopBar onOpenEditor={() => setView("editor")} />
         <EventLog />
         <UnitPanel />
       </div>

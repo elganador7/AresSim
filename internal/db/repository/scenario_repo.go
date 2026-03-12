@@ -89,6 +89,21 @@ func (r *ScenarioRepo) WriteCheckpointMarker(ctx context.Context, scenarioID str
 	return nil
 }
 
+// Delete removes a scenario and all its checkpoint markers from the database.
+func (r *ScenarioRepo) Delete(ctx context.Context, scenarioID string) error {
+	rid := models.RecordID{Table: "scenario", ID: scenarioID}
+	if _, err := surrealdb.Delete[ScenarioRecord](ctx, r.db, rid); err != nil {
+		return fmt.Errorf("delete scenario %s: %w", scenarioID, err)
+	}
+	if _, err := surrealdb.Query[any](ctx, r.db,
+		"DELETE checkpoint WHERE scenario_id = $sid",
+		map[string]any{"sid": scenarioID},
+	); err != nil {
+		return fmt.Errorf("delete checkpoints for scenario %s: %w", scenarioID, err)
+	}
+	return nil
+}
+
 // LatestCheckpointTick returns the highest tick_number recorded for a scenario.
 // Returns 0 if no checkpoints exist (new scenario).
 func (r *ScenarioRepo) LatestCheckpointTick(ctx context.Context, scenarioID string) (int64, error) {

@@ -1,0 +1,454 @@
+/* editor.css — Scenario Editor styles */
+
+/* ─── SHELL ──────────────────────────────────────────────────────────────────── */
+
+.editor-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: #0a0c10;
+  font-family: "Courier New", monospace;
+  color: #d1d5db;
+  overflow: hidden;
+}
+
+/* ─── TOOLBAR ─────────────────────────────────────────────────────────────────── */
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  background: rgba(15, 17, 21, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 12px;
+  gap: 8px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.editor-toolbar-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #f9fafb;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.editor-toolbar-spacer {
+  flex: 1;
+}
+
+.editor-dirty-badge {
+  font-size: 10px;
+  color: #f59e0b;
+  letter-spacing: 0.08em;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ─── BUTTONS ─────────────────────────────────────────────────────────────────── */
+
+.btn {
+  padding: 5px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #d1d5db;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn:active {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.btn-primary {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #93c5fd;
+}
+
+.btn-primary:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.7);
+}
+
+.btn-success {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.5);
+  color: #86efac;
+}
+
+.btn-success:hover {
+  background: rgba(34, 197, 94, 0.3);
+  border-color: rgba(34, 197, 94, 0.7);
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.6);
+}
+
+.btn-sm {
+  padding: 3px 8px;
+  font-size: 10px;
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ─── BODY ────────────────────────────────────────────────────────────────────── */
+
+.editor-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ─── PANELS ──────────────────────────────────────────────────────────────────── */
+
+.editor-panel {
+  background: #0f1115;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.editor-panel-left {
+  width: 270px;
+}
+
+.editor-panel-right {
+  width: 300px;
+  border-right: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.editor-panel-center {
+  flex: 1;
+  position: relative;
+  background: #000;
+}
+
+.panel-section {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.panel-section-header {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #6b7280;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.panel-scroll {
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* ─── FORM FIELDS ─────────────────────────────────────────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field-label {
+  font-size: 10px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.field-input,
+.field-select,
+.field-textarea {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  color: #e5e7eb;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  padding: 5px 8px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.field-input:focus,
+.field-select:focus,
+.field-textarea:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.field-select {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+
+.field-select option {
+  background: #1a1d24;
+  color: #e5e7eb;
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 56px;
+  line-height: 1.5;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* ─── UNIT LIST ───────────────────────────────────────────────────────────────── */
+
+.unit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.unit-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.1s;
+  border: 1px solid transparent;
+}
+
+.unit-list-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.unit-list-item.selected {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.unit-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.unit-list-name {
+  flex: 1;
+  font-size: 12px;
+  color: #e5e7eb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unit-list-side {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.unit-list-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.unit-list-item:hover .unit-list-actions {
+  opacity: 1;
+}
+
+.unit-list-empty {
+  padding: 16px 10px;
+  font-size: 11px;
+  color: #4b5563;
+  font-style: italic;
+  text-align: center;
+}
+
+/* ─── PLACEMENT HINT ──────────────────────────────────────────────────────────── */
+
+.placement-hint {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(59, 130, 246, 0.85);
+  color: #fff;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 6px 16px;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+/* ─── LOAD MODAL ──────────────────────────────────────────────────────────────── */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: #13161d;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  width: 480px;
+  max-height: 480px;
+  display: flex;
+  flex-direction: column;
+  font-family: "Courier New", monospace;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #f9fafb;
+  text-transform: uppercase;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: #d1d5db;
+}
+
+.modal-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.modal-scenario-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+  transition: background 0.1s;
+}
+
+.modal-scenario-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.modal-scenario-name {
+  font-size: 13px;
+  color: #e5e7eb;
+  font-weight: 600;
+}
+
+.modal-scenario-meta {
+  font-size: 10px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.modal-empty {
+  padding: 32px;
+  text-align: center;
+  color: #4b5563;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* ─── STATUS BAR ──────────────────────────────────────────────────────────────── */
+
+.editor-status {
+  height: 24px;
+  background: rgba(15, 17, 21, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 16px;
+  font-size: 10px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.status-item {
+  display: flex;
+  gap: 4px;
+}
+
+.status-value {
+  color: #9ca3af;
+}

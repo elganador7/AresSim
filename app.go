@@ -263,6 +263,82 @@ func (a *App) SetSimSpeed(timeScale float32) BridgeResult {
 	return ok()
 }
 
+// ─── SCENARIO EDITOR BRIDGE ───────────────────────────────────────────────────
+
+// SaveScenario persists an edited scenario proto to SurrealDB without
+// starting the simulation. Used by the scenario editor's Save button.
+func (a *App) SaveScenario(protoB64 string) BridgeResult {
+	raw, err := base64.StdEncoding.DecodeString(protoB64)
+	if err != nil {
+		return fail(fmt.Errorf("base64 decode: %w", err))
+	}
+	scen := &enginev1.Scenario{}
+	if err := proto.Unmarshal(raw, scen); err != nil {
+		return fail(fmt.Errorf("proto unmarshal: %w", err))
+	}
+	if a.scenRepo == nil {
+		return failMsg("database not ready")
+	}
+	if err := a.scenRepo.Save(a.ctx, scen.Id, map[string]any{
+		"name":             scen.Name,
+		"description":      scen.Description,
+		"author":           scen.Author,
+		"classification":   scen.Classification,
+		"start_time_unix":  scen.StartTimeUnix,
+		"schema_version":   scen.Version,
+		"tick_rate_hz":     scen.GetSettings().GetTickRateHz(),
+		"time_scale":       scen.GetSettings().GetTimeScale(),
+		"scenario_pb":      raw,
+		"last_tick":        0,
+		"last_sim_seconds": 0.0,
+	}); err != nil {
+		return fail(err)
+	}
+	return ok()
+}
+
+// GetScenario fetches a stored scenario by ID and returns it as a
+// base64-encoded proto binary string. Used by the scenario editor to
+// load an existing scenario for editing.
+func (a *App) GetScenario(id string) (string, error) {
+	if a.scenRepo == nil {
+		return "", fmt.Errorf("database not ready")
+	}
+	rec, err := a.scenRepo.Get(a.ctx, id)
+	if err != nil {
+		return "", err
+	}
+	rawAny, ok := rec["scenario_pb"]
+	if !ok {
+		return "", fmt.Errorf("scenario %s has no proto blob", id)
+	}
+	// SurrealDB returns bytes as []byte or []uint8.
+	var raw []byte
+	switch v := rawAny.(type) {
+	case []byte:
+		raw = v
+	case string:
+		raw, err = base64.StdEncoding.DecodeString(v)
+		if err != nil {
+			return "", fmt.Errorf("decode stored proto: %w", err)
+		}
+	default:
+		return "", fmt.Errorf("unexpected scenario_pb type %T", rawAny)
+	}
+	return base64.StdEncoding.EncodeToString(raw), nil
+}
+
+// DeleteScenario removes a scenario and its checkpoint history from the database.
+func (a *App) DeleteScenario(id string) BridgeResult {
+	if a.scenRepo == nil {
+		return failMsg("database not ready")
+	}
+	if err := a.scenRepo.Delete(a.ctx, id); err != nil {
+		return fail(err)
+	}
+	return ok()
+}
+
 // ─── EVENT EMISSION ───────────────────────────────────────────────────────────
 
 // emitProtoEvent marshals a proto message to binary, base64-encodes it,
