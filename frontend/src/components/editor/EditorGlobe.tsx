@@ -1,14 +1,19 @@
 /**
  * EditorGlobe.tsx
  *
- * Cesium globe for the scenario editor. Subscribed to editorStore (not simStore).
+ * CesiumJS globe for the scenario editor.
+ *
  * Supports:
  *  - Rendering unit draft entities colour-coded by side
- *  - Left-click on empty terrain → onMapClick(lat, lon)
+ *  - Left-click on terrain → onMapClick(lat, lon)  [click-to-place fallback]
  *  - Left-click on entity → onUnitClick(unitId)
+ *  - HTML5 dragover / drop on the container div → onUnitDrop(lat, lon, payload)
+ *
+ * All three callbacks are kept in refs to avoid remounting Cesium when
+ * parent components create new function references.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Viewer,
   Ion,
@@ -19,20 +24,32 @@ import {
   Cartographic,
   ScreenSpaceEventType,
   Math as CesiumMath,
-  PointGraphics,
-  LabelGraphics,
-  HorizontalOrigin,
-  VerticalOrigin,
   Cartesian2,
+  ConstantProperty,
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { useEditorStore, type UnitDraft } from "../../store/editorStore";
+import type { DragPayload } from "./UnitPalette";
 
-interface Props {
-  onMapClick: (lat: number, lon: number) => void;
-  onUnitClick: (unitId: string) => void;
-  /** When true, the cursor indicates placement mode */
-  placementMode: boolean;
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+
+function getDropLatLon(
+  viewer: Viewer,
+  container: HTMLDivElement,
+  clientX: number,
+  clientY: number,
+): { lat: number; lon: number } | null {
+  const rect = container.getBoundingClientRect();
+  const canvasPos = new Cartesian2(clientX - rect.left, clientY - rect.top);
+  const ray = viewer.camera.getPickRay(canvasPos);
+  if (!ray) return null;
+  const pos = viewer.scene.globe.pick(ray, viewer.scene);
+  if (!pos) return null;
+  const carto = Cartographic.fromCartesian(pos);
+  return {
+    lat: CesiumMath.toDegrees(carto.latitude),
+    lon: CesiumMath.toDegrees(carto.longitude),
+  };
 }
 
 const SIDE_COLORS: Record<string, Color> = {
@@ -41,22 +58,46 @@ const SIDE_COLORS: Record<string, Color> = {
   Neutral: Color.fromCssColorString("#f59e0b"),
 };
 
-export default function EditorGlobe({ onMapClick, onUnitClick, placementMode }: Props) {
+// ─── PROPS ────────────────────────────────────────────────────────────────────
+
+interface Props {
+  onMapClick: (lat: number, lon: number) => void;
+  onUnitClick: (unitId: string) => void;
+  onUnitDrop: (lat: number, lon: number, payload: DragPayload) => void;
+  placementMode: boolean;
+}
+
+// ─── COMPONENT ────────────────────────────────────────────────────────────────
+
+export default function EditorGlobe({
+  onMapClick,
+  onUnitClick,
+  onUnitDrop,
+  placementMode,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
-  // Mount Cesium viewer once
+  // Stable callback refs — updated every render, no need to remount Cesium
+  const onMapClickRef = useRef(onMapClick);
+  const onUnitClickRef = useRef(onUnitClick);
+  const onUnitDropRef = useRef(onUnitDrop);
+  useEffect(() => { onMapClickRef.current = onMapClick; }, [onMapClick]);
+  useEffect(() => { onUnitClickRef.current = onUnitClick; }, [onUnitClick]);
+  useEffect(() => { onUnitDropRef.current = onUnitDrop; }, [onUnitDrop]);
+
+  // ── Mount Cesium once ──────────────────────────────────────────────────────
   useEffect(() => {
-    if (!containerRef.current || viewerRef.current) return;
+    const container = containerRef.current;
+    if (!container || viewerRef.current) return;
 
     Ion.defaultAccessToken = "";
 
-    const osmProvider = new OpenStreetMapImageryProvider({
-      url: "https://tile.openstreetmap.org/",
-    });
-
-    const viewer = new Viewer(containerRef.current, {
-      baseLayer: new ImageryLayer(osmProvider),
+    const viewer = new Viewer(container, {
+      baseLayer: new ImageryLayer(
+        new OpenStreetMapImageryProvider({ url: "https://tile.openstreetmap.org/" }),
+      ),
       timeline: false,
       animation: false,
       geocoder: false,
@@ -70,90 +111,129 @@ export default function EditorGlobe({ onMapClick, onUnitClick, placementMode }: 
     });
     viewerRef.current = viewer;
 
-    // Initial camera: Mediterranean
     viewer.camera.setView({
       destination: Cartesian3.fromDegrees(25.8, 35.8, 2_000_000),
     });
 
-    // Click handler
-    viewer.screenSpaceEventHandler.setInputAction((evt: { position: Cartesian2 }) => {
-      const ray = viewer.camera.getPickRay(evt.position);
-      if (!ray) return;
+    // ── Cesium click handler ───────────────────────────────────────────────
+    viewer.screenSpaceEventHandler.setInputAction(
+      (evt: { position: Cartesian2 }) => {
+        // Check for entity click first
+        const picked = viewer.scene.pick(evt.position);
+        if (picked?.id) {
+          const uid = picked.id.properties?.unitId?.getValue?.();
+          if (uid) {
+            onUnitClickRef.current(uid);
+            return;
+          }
+        }
+        // Globe click → placement
+        const ray = viewer.camera.getPickRay(evt.position);
+        if (!ray) return;
+        const pos = viewer.scene.globe.pick(ray, viewer.scene);
+        if (!pos) return;
+        const carto = Cartographic.fromCartesian(pos);
+        onMapClickRef.current(
+          CesiumMath.toDegrees(carto.latitude),
+          CesiumMath.toDegrees(carto.longitude),
+        );
+      },
+      ScreenSpaceEventType.LEFT_CLICK,
+    );
 
-      // Check if we clicked an entity first
-      const picked = viewer.scene.pick(evt.position);
-      if (picked && picked.id && typeof picked.id.properties?.unitId?.getValue === "function") {
-        const uid = picked.id.properties.unitId.getValue();
-        onUnitClick(uid);
+    // ── HTML5 drag-and-drop (native DOM, not React synthetic) ─────────────
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
+    };
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(true);
+    };
+    const handleDragLeave = (e: DragEvent) => {
+      if (!container.contains(e.relatedTarget as Node | null)) {
+        setIsDragOver(false);
+      }
+    };
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
+      const raw = e.dataTransfer?.getData("text/plain");
+      if (!raw || !viewerRef.current) return;
+      let payload: DragPayload;
+      try {
+        payload = JSON.parse(raw) as DragPayload;
+      } catch {
         return;
       }
+      const coords = getDropLatLon(viewerRef.current, container, e.clientX, e.clientY);
+      if (!coords) return;
+      onUnitDropRef.current(coords.lat, coords.lon, payload);
+    };
 
-      // Otherwise: terrain / globe click
-      const globe = viewer.scene.globe;
-      const pos = globe.pick(ray, viewer.scene);
-      if (!pos) return;
-      const carto = Cartographic.fromCartesian(pos);
-      onMapClick(
-        CesiumMath.toDegrees(carto.latitude),
-        CesiumMath.toDegrees(carto.longitude),
-      );
-    }, ScreenSpaceEventType.LEFT_CLICK);
+    container.addEventListener("dragover", handleDragOver);
+    container.addEventListener("dragenter", handleDragEnter);
+    container.addEventListener("dragleave", handleDragLeave);
+    container.addEventListener("drop", handleDrop);
 
     return () => {
+      container.removeEventListener("dragover", handleDragOver);
+      container.removeEventListener("dragenter", handleDragEnter);
+      container.removeEventListener("dragleave", handleDragLeave);
+      container.removeEventListener("drop", handleDrop);
       viewer.destroy();
       viewerRef.current = null;
     };
-  }, [onMapClick, onUnitClick]);
+  }, []); // empty — Cesium mounts once, callbacks use refs
 
-  // Sync units from editorStore
+  // ── Sync units from editorStore ───────────────────────────────────────────
   useEffect(() => {
-    const sync = (units: UnitDraft[]) => {
+    const syncUnits = (units: UnitDraft[]) => {
       const viewer = viewerRef.current;
       if (!viewer) return;
 
-      const current = new Set(units.map((u) => u.id));
+      const currentIds = new Set(units.map((u) => `editor-${u.id}`));
 
       // Remove stale entities
-      viewer.entities.values
-        .filter((e) => e.properties?.unitId !== undefined)
-        .forEach((e) => {
-          const uid = e.properties?.unitId?.getValue();
-          if (!current.has(uid)) viewer.entities.remove(e);
-        });
+      for (const entity of [...viewer.entities.values]) {
+        if (entity.properties?.unitId !== undefined && !currentIds.has(entity.id as string)) {
+          viewer.entities.remove(entity);
+        }
+      }
 
       for (const unit of units) {
         const color = SIDE_COLORS[unit.side] ?? Color.GRAY;
         const pos = Cartesian3.fromDegrees(unit.lon, unit.lat, unit.altMsl);
-        const existing = viewer.entities.getById(`editor-${unit.id}`);
+        const entityId = `editor-${unit.id}`;
+        const existing = viewer.entities.getById(entityId);
 
         if (existing) {
-          (existing.position as unknown as { setValue: (p: Cartesian3) => void }).setValue(pos);
+          (existing.position as unknown as { setValue(p: Cartesian3): void }).setValue(pos);
           if (existing.point) {
-            existing.point.color = new PointGraphics({ color }).color;
+            existing.point.color = new ConstantProperty(color);
           }
           if (existing.label) {
-            existing.label.text = new LabelGraphics({ text: unit.displayName }).text;
+            existing.label.text = new ConstantProperty(unit.displayName);
           }
         } else {
           viewer.entities.add({
-            id: `editor-${unit.id}`,
+            id: entityId,
             position: pos,
             point: {
               pixelSize: 12,
               color,
               outlineColor: Color.WHITE,
               outlineWidth: 1.5,
+              disableDepthTestDistance: Number.POSITIVE_INFINITY,
             },
             label: {
               text: unit.displayName,
-              font: "11px Courier New",
+              font: "bold 11px 'Courier New'",
               fillColor: Color.WHITE,
               outlineColor: Color.BLACK,
               outlineWidth: 2,
               style: 2, // FILL_AND_OUTLINE
-              pixelOffset: new Cartesian2(0, -20),
-              horizontalOrigin: HorizontalOrigin.CENTER,
-              verticalOrigin: VerticalOrigin.BOTTOM,
+              pixelOffset: new Cartesian2(0, -18),
               disableDepthTestDistance: Number.POSITIVE_INFINITY,
             },
             properties: { unitId: unit.id },
@@ -162,39 +242,29 @@ export default function EditorGlobe({ onMapClick, onUnitClick, placementMode }: 
       }
     };
 
-    sync(useEditorStore.getState().draft.units);
-    const unsub = useEditorStore.subscribe((state, prev) => {
-      if (state.draft.units !== prev.draft.units) {
-        sync(state.draft.units);
-      }
+    syncUnits(useEditorStore.getState().draft.units);
+    return useEditorStore.subscribe((state, prev) => {
+      if (state.draft.units !== prev.draft.units) syncUnits(state.draft.units);
     });
-    return unsub;
   }, []);
 
-  // Highlight selected unit
+  // ── Highlight selected unit ───────────────────────────────────────────────
   useEffect(() => {
     const highlight = (selectedId: string | null) => {
       const viewer = viewerRef.current;
       if (!viewer) return;
       for (const entity of viewer.entities.values) {
-        const uid = entity.properties?.unitId?.getValue();
-        if (!uid) continue;
+        const uid = entity.properties?.unitId?.getValue?.();
+        if (!uid || !entity.point) continue;
         const selected = uid === selectedId;
-        if (entity.point) {
-          entity.point.pixelSize = selected
-            ? new PointGraphics({ pixelSize: 18 }).pixelSize
-            : new PointGraphics({ pixelSize: 12 }).pixelSize;
-          entity.point.outlineWidth = selected
-            ? new PointGraphics({ outlineWidth: 3 }).outlineWidth
-            : new PointGraphics({ outlineWidth: 1.5 }).outlineWidth;
-        }
+        entity.point.pixelSize = new ConstantProperty(selected ? 18 : 12);
+        entity.point.outlineWidth = new ConstantProperty(selected ? 3 : 1.5);
       }
     };
     highlight(useEditorStore.getState().selectedUnitId);
-    const unsub = useEditorStore.subscribe((s, p) => {
+    return useEditorStore.subscribe((s, p) => {
       if (s.selectedUnitId !== p.selectedUnitId) highlight(s.selectedUnitId);
     });
-    return unsub;
   }, []);
 
   return (
@@ -204,6 +274,7 @@ export default function EditorGlobe({ onMapClick, onUnitClick, placementMode }: 
         width: "100%",
         height: "100%",
         cursor: placementMode ? "crosshair" : "default",
+        outline: isDragOver ? "2px inset rgba(99,102,241,0.55)" : "none",
       }}
     />
   );

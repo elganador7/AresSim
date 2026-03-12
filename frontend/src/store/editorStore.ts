@@ -51,12 +51,24 @@ export interface ScenarioDraft {
   units: UnitDraft[];
 }
 
+export interface PendingDrop {
+  lat: number;
+  lon: number;
+  domain: number;
+  unitType: number;
+  defaultEchelon: number;
+  label: string;
+  domainColor: string;
+}
+
 interface EditorState {
   draft: ScenarioDraft;
   selectedUnitId: string | null;
   /** ID of unit being edited in the form, or "new" when adding, or null */
   editingUnitId: string | null;
   isDirty: boolean;
+  /** Drag-drop pending — shown in DropConfirmDialog */
+  pendingDrop: PendingDrop | null;
   /** Position set by clicking the globe — auto-fills lat/lon in unit form */
   pendingPosition: { lat: number; lon: number } | null;
 
@@ -70,6 +82,7 @@ interface EditorState {
   selectUnit: (id: string | null) => void;
   setEditingUnit: (id: string | null) => void;
   setPendingPosition: (pos: { lat: number; lon: number } | null) => void;
+  setPendingDrop: (drop: PendingDrop | null) => void;
   markClean: () => void;
 }
 
@@ -125,6 +138,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   selectedUnitId: null,
   editingUnitId: null,
   isDirty: false,
+  pendingDrop: null,
   pendingPosition: null,
 
   newDraft: () =>
@@ -148,6 +162,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       isDirty: true,
       editingUnitId: null,
       pendingPosition: null,
+      pendingDrop: null,
     })),
 
   updateUnit: (id, patch) =>
@@ -175,6 +190,8 @@ export const useEditorStore = create<EditorState>((set) => ({
   setEditingUnit: (id) => set({ editingUnitId: id }),
 
   setPendingPosition: (pos) => set({ pendingPosition: pos }),
+
+  setPendingDrop: (drop) => set({ pendingDrop: drop }),
 
   markClean: () => set({ isDirty: false }),
 }));
