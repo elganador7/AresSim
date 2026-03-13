@@ -24,25 +24,40 @@ const (
 
 // MockLoop runs the movement and adjudication engine.
 // defs maps definitionId → DefStats (speed, range, strength).
+// getScale is called each tick to read the current time-scale multiplier;
+// at 2× the sim advances 2 seconds of game-time per real second.
 // Returns when ctx is cancelled.
-func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefStats, emit EmitFn) {
+func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefStats, getScale func() float64, emit EmitFn) {
 	ticker := time.NewTicker(tickInterval)
 	defer ticker.Stop()
 
-	tick := int64(0)
+	tick       := int64(0)
+	simSeconds := 0.0
+
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
 			tick++
+			timeScale := getScale()
+			simSeconds += timeScale
 
 			// ── Movement ──────────────────────────────────────────────────
-			deltas := processTick(units, defs)
+			deltas := processTick(units, defs, timeScale)
 			emit("batch_update", &enginev1.BatchUnitUpdate{
 				Deltas:  deltas,
-				SimTime: &enginev1.SimTime{SecondsElapsed: float64(tick), TickNumber: tick},
+				SimTime: &enginev1.SimTime{SecondsElapsed: simSeconds, TickNumber: tick},
 			})
+
+			// ── Sensor detection ──────────────────────────────────────────
+			detections := SensorTick(units, defs)
+			for side, ids := range detections {
+				emit("detection_update", &enginev1.DetectionUpdate{
+					DetectingSide:   side,
+					DetectedUnitIds: ids,
+				})
+			}
 
 			// ── Adjudication ──────────────────────────────────────────────
 			kills := AdjudicateTick(units, defs)
@@ -76,9 +91,10 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 	}
 }
 
-// processTick advances all active units with move orders by one second and
+// processTick advances all active units with move orders by one tick and
 // returns a UnitDelta for every unit that changed position or order state.
-func processTick(units []*enginev1.Unit, defs map[string]DefStats) []*enginev1.UnitDelta {
+// timeScale multiplies how many sim-seconds of movement occur per real second.
+func processTick(units []*enginev1.Unit, defs map[string]DefStats, timeScale float64) []*enginev1.UnitDelta {
 	deltas := make([]*enginev1.UnitDelta, 0, len(units))
 
 	for _, u := range units {
@@ -99,7 +115,7 @@ func processTick(units []*enginev1.Unit, defs map[string]DefStats) []*enginev1.U
 		}
 
 		distM := haversineM(pos.Lat, pos.Lon, wp.Lat, wp.Lon)
-		canMoveM := cruiseSpeed * tickInterval.Seconds()
+		canMoveM := cruiseSpeed * tickInterval.Seconds() * timeScale
 
 		var newLat, newLon float64
 		var remainingWaypoints []*enginev1.Waypoint

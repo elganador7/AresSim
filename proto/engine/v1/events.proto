@@ -63,6 +63,17 @@ message UnitDestroyedEvent {
   SimTime sim_time = 3;
 }
 
+// ── Sensor / detection update ─────────────────────────────────────────────────
+// Emitted every tick with the *full current set* of unit IDs detected by each
+// side. The frontend replaces its per-side detection set on receipt.
+// A message with an empty detected_unit_ids list means the side currently has
+// no contacts.
+
+message DetectionUpdate {
+  string          detecting_side    = 1; // "Blue" | "Red" | "Neutral"
+  repeated string detected_unit_ids = 2;
+}
+
 // ── Narrative log ─────────────────────────────────────────────────────────────
 
 message NarrativeEvent {

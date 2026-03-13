@@ -16,6 +16,7 @@ import {
   UnitSpawnedEventSchema,
   UnitDestroyedEventSchema,
   NarrativeEventSchema,
+  DetectionUpdateSchema,
 } from "@proto/engine/v1/events_pb";
 import type {
   FullStateSnapshot,
@@ -217,6 +218,18 @@ export function initBridge(): void {
     }
     const { simSeconds } = useSimStore.getState();
     store.appendEventLog(protoEventToLogEntry(ev, simSeconds));
+  });
+
+  // ── Sensor detection updates ───────────────────────────────────────────
+  EventsOn("sim:detection_update", (b64: string) => {
+    let ev;
+    try {
+      ev = fromBinary(DetectionUpdateSchema, b64ToBytes(b64));
+    } catch (e) {
+      console.error("[bridge] detection_update decode failed", e);
+      return;
+    }
+    store.setDetections(ev.detectingSide, ev.detectedUnitIds);
   });
 
   console.log("[bridge] event listeners registered");

@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"math"
 	"os"
 	"os/signal"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 
 	"path/filepath"
@@ -39,6 +41,10 @@ type App struct {
 	// simCancel cancels the currently running sim loop goroutine.
 	// Separate from ctx so we can restart the loop without touching the Wails context.
 	simCancel context.CancelFunc
+
+	// simTimeScale stores math.Float64bits(timeScale) atomically so SetSimSpeed
+	// can update it from the Wails thread while MockLoop reads it each tick.
+	simTimeScale atomic.Uint64
 
 	// currentScenario is the last loaded scenario, kept so RequestSync can
 	// re-emit the full state snapshot on demand.
@@ -208,6 +214,20 @@ func (a *App) domReady(_ context.Context) {
 	slog.Info("dom ready")
 }
 
+// getSimTimeScale reads the current time scale atomically.
+func (a *App) getSimTimeScale() float64 {
+	bits := a.simTimeScale.Load()
+	if bits == 0 {
+		return 1.0 // zero value before first store — default to real-time
+	}
+	return math.Float64frombits(bits)
+}
+
+// setSimTimeScale stores a new time scale atomically.
+func (a *App) setSimTimeScale(v float64) {
+	a.simTimeScale.Store(math.Float64bits(v))
+}
+
 // ─── BRIDGE METHODS ───────────────────────────────────────────────────────────
 // These are the Go methods exposed to the TypeScript frontend.
 // Parameter and return types must be JSON-serializable (Wails uses JSON IPC).
@@ -294,13 +314,16 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 		TimeScale: scen.GetSettings().GetTimeScale(),
 	})
 
+	// Initialise time scale to 1× (reset on every new scenario load).
+	a.setSimTimeScale(1.0)
+
 	// Cancel any previous sim loop, then start a new one.
 	if a.simCancel != nil {
 		a.simCancel()
 	}
 	simCtx, simCancel := context.WithCancel(a.ctx)
 	a.simCancel = simCancel
-	go sim.MockLoop(simCtx, scen.Units, a.buildDefs(), a.emitProtoEvent)
+	go sim.MockLoop(simCtx, scen.Units, a.buildDefs(), a.getSimTimeScale, a.emitProtoEvent)
 	slog.Info("scenario loaded", "name", scen.Name, "units", len(scen.Units))
 }
 
@@ -337,7 +360,7 @@ func (a *App) PauseSim(paused bool) BridgeResult {
 		if a.simCancel == nil && a.currentScenario != nil {
 			simCtx, simCancel := context.WithCancel(a.ctx)
 			a.simCancel = simCancel
-			go sim.MockLoop(simCtx, a.currentScenario.Units, a.buildDefs(), a.emitProtoEvent)
+			go sim.MockLoop(simCtx, a.currentScenario.Units, a.buildDefs(), a.getSimTimeScale, a.emitProtoEvent)
 		}
 	}
 	state := enginev1.ScenarioPlayState_SCENARIO_PAUSED
@@ -346,7 +369,7 @@ func (a *App) PauseSim(paused bool) BridgeResult {
 	}
 	a.emitProtoEvent("scenario_state", &enginev1.ScenarioStateEvent{
 		State:     state,
-		TimeScale: 1.0,
+		TimeScale: float32(a.getSimTimeScale()),
 	})
 	return ok()
 }
@@ -445,20 +468,23 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 	for _, row := range rows {
 		id := extractRecordID(row["id"])
 		defs[id] = sim.DefStats{
-			CruiseSpeedMps: toFloat64(row["cruise_speed_mps"]),
-			CombatRangeM:   toFloat64(row["combat_range_m"]),
-			BaseStrength:   toFloat64(row["base_strength"]),
+			CruiseSpeedMps:  toFloat64(row["cruise_speed_mps"]),
+			CombatRangeM:    toFloat64(row["combat_range_m"]),
+			BaseStrength:    toFloat64(row["base_strength"]),
+			DetectionRangeM: toFloat64(row["detection_range_m"]),
 		}
 	}
 	return defs
 }
 
 // SetSimSpeed sets the simulation time scale multiplier.
-// timeScale = 1.0 is real-time, 60.0 is 1 minute per second.
+// timeScale = 1.0 is real-time; 2.0 = 2× speed (2 sim-seconds per tick), etc.
+// The running MockLoop reads this atomically at the start of each tick.
 func (a *App) SetSimSpeed(timeScale float32) BridgeResult {
 	if timeScale <= 0 || timeScale > 3600 {
 		return failMsg("timeScale must be between 0 and 3600")
 	}
+	a.setSimTimeScale(float64(timeScale))
 	a.emitProtoEvent("scenario_state", &enginev1.ScenarioStateEvent{
 		State:     enginev1.ScenarioPlayState_SCENARIO_RUNNING,
 		TimeScale: timeScale,

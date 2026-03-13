@@ -16,7 +16,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/events.proto.
  */
 export const file_engine_v1_events: GenFile = /*@__PURE__*/
-  fileDesc("ChZlbmdpbmUvdjEvZXZlbnRzLnByb3RvEgllbmdpbmUudjEinwEKEUZ1bGxTdGF0ZVNuYXBzaG90Eh4KBXVuaXRzGAEgAygLMg8uZW5naW5lLnYxLlVuaXQSJAoIc2ltX3RpbWUYAyABKAsyEi5lbmdpbmUudjEuU2ltVGltZRItCgd3ZWF0aGVyGAQgASgLMhwuZW5naW5lLnYxLldlYXRoZXJDb25kaXRpb25zEhUKDXNjZW5hcmlvX25hbWUYBSABKAkiVQoSU2NlbmFyaW9TdGF0ZUV2ZW50EisKBXN0YXRlGAEgASgOMhwuZW5naW5lLnYxLlNjZW5hcmlvUGxheVN0YXRlEhIKCnRpbWVfc2NhbGUYAiABKAIiXQoPQmF0Y2hVbml0VXBkYXRlEiQKBmRlbHRhcxgBIAMoCzIULmVuZ2luZS52MS5Vbml0RGVsdGESJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSLJAQoJVW5pdERlbHRhEg8KB3VuaXRfaWQYASABKAkSJQoIcG9zaXRpb24YAiABKAsyEy5lbmdpbmUudjEuUG9zaXRpb24SLAoGc3RhdHVzGAMgASgLMhwuZW5naW5lLnYxLk9wZXJhdGlvbmFsU3RhdHVzEiwKB3Bvc3R1cmUYBCABKA4yGy5lbmdpbmUudjEuRm9ybWF0aW9uUG9zdHVyZRIoCgptb3ZlX29yZGVyGAUgASgLMhQuZW5naW5lLnYxLk1vdmVPcmRlciJXChBVbml0U3Bhd25lZEV2ZW50Eh0KBHVuaXQYASABKAsyDy5lbmdpbmUudjEuVW5pdBIkCghzaW1fdGltZRgCIAEoCzISLmVuZ2luZS52MS5TaW1UaW1lIloKElVuaXREZXN0cm95ZWRFdmVudBIPCgd1bml0X2lkGAEgASgJEg0KBWNhdXNlGAIgASgJEiQKCHNpbV90aW1lGAMgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUiTwoOTmFycmF0aXZlRXZlbnQSDAoEdGV4dBgBIAEoCRIQCghjYXRlZ29yeRgCIAEoCRIPCgd1bml0X2lkGAMgASgJEgwKBHNpZGUYBCABKAkqbAoRU2NlbmFyaW9QbGF5U3RhdGUSGAoUU0NFTkFSSU9fVU5TUEVDSUZJRUQQABITCg9TQ0VOQVJJT19QQVVTRUQQARIUChBTQ0VOQVJJT19SVU5OSU5HEAISEgoOU0NFTkFSSU9fRU5ERUQQA0IrWilnaXRodWIuY29tL2FyZXNzaW0vaW50ZXJuYWwvZ2VuL2VuZ2luZS92MWIGcHJvdG8z", [file_engine_v1_common, file_engine_v1_unit, file_engine_v1_status]);
+  fileDesc("ChZlbmdpbmUvdjEvZXZlbnRzLnByb3RvEgllbmdpbmUudjEinwEKEUZ1bGxTdGF0ZVNuYXBzaG90Eh4KBXVuaXRzGAEgAygLMg8uZW5naW5lLnYxLlVuaXQSJAoIc2ltX3RpbWUYAyABKAsyEi5lbmdpbmUudjEuU2ltVGltZRItCgd3ZWF0aGVyGAQgASgLMhwuZW5naW5lLnYxLldlYXRoZXJDb25kaXRpb25zEhUKDXNjZW5hcmlvX25hbWUYBSABKAkiVQoSU2NlbmFyaW9TdGF0ZUV2ZW50EisKBXN0YXRlGAEgASgOMhwuZW5naW5lLnYxLlNjZW5hcmlvUGxheVN0YXRlEhIKCnRpbWVfc2NhbGUYAiABKAIiXQoPQmF0Y2hVbml0VXBkYXRlEiQKBmRlbHRhcxgBIAMoCzIULmVuZ2luZS52MS5Vbml0RGVsdGESJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSLJAQoJVW5pdERlbHRhEg8KB3VuaXRfaWQYASABKAkSJQoIcG9zaXRpb24YAiABKAsyEy5lbmdpbmUudjEuUG9zaXRpb24SLAoGc3RhdHVzGAMgASgLMhwuZW5naW5lLnYxLk9wZXJhdGlvbmFsU3RhdHVzEiwKB3Bvc3R1cmUYBCABKA4yGy5lbmdpbmUudjEuRm9ybWF0aW9uUG9zdHVyZRIoCgptb3ZlX29yZGVyGAUgASgLMhQuZW5naW5lLnYxLk1vdmVPcmRlciJXChBVbml0U3Bhd25lZEV2ZW50Eh0KBHVuaXQYASABKAsyDy5lbmdpbmUudjEuVW5pdBIkCghzaW1fdGltZRgCIAEoCzISLmVuZ2luZS52MS5TaW1UaW1lIloKElVuaXREZXN0cm95ZWRFdmVudBIPCgd1bml0X2lkGAEgASgJEg0KBWNhdXNlGAIgASgJEiQKCHNpbV90aW1lGAMgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUiRAoPRGV0ZWN0aW9uVXBkYXRlEhYKDmRldGVjdGluZ19zaWRlGAEgASgJEhkKEWRldGVjdGVkX3VuaXRfaWRzGAIgAygJIk8KDk5hcnJhdGl2ZUV2ZW50EgwKBHRleHQYASABKAkSEAoIY2F0ZWdvcnkYAiABKAkSDwoHdW5pdF9pZBgDIAEoCRIMCgRzaWRlGAQgASgJKmwKEVNjZW5hcmlvUGxheVN0YXRlEhgKFFNDRU5BUklPX1VOU1BFQ0lGSUVEEAASEwoPU0NFTkFSSU9fUEFVU0VEEAESFAoQU0NFTkFSSU9fUlVOTklORxACEhIKDlNDRU5BUklPX0VOREVEEANCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common, file_engine_v1_unit, file_engine_v1_status]);
 
 /**
  * @generated from message engine.v1.FullStateSnapshot
@@ -191,6 +191,30 @@ export const UnitDestroyedEventSchema: GenMessage<UnitDestroyedEvent> = /*@__PUR
   messageDesc(file_engine_v1_events, 5);
 
 /**
+ * @generated from message engine.v1.DetectionUpdate
+ */
+export type DetectionUpdate = Message<"engine.v1.DetectionUpdate"> & {
+  /**
+   * "Blue" | "Red" | "Neutral"
+   *
+   * @generated from field: string detecting_side = 1;
+   */
+  detectingSide: string;
+
+  /**
+   * @generated from field: repeated string detected_unit_ids = 2;
+   */
+  detectedUnitIds: string[];
+};
+
+/**
+ * Describes the message engine.v1.DetectionUpdate.
+ * Use `create(DetectionUpdateSchema)` to create a new message.
+ */
+export const DetectionUpdateSchema: GenMessage<DetectionUpdate> = /*@__PURE__*/
+  messageDesc(file_engine_v1_events, 6);
+
+/**
  * @generated from message engine.v1.NarrativeEvent
  */
 export type NarrativeEvent = Message<"engine.v1.NarrativeEvent"> & {
@@ -222,7 +246,7 @@ export type NarrativeEvent = Message<"engine.v1.NarrativeEvent"> & {
  * Use `create(NarrativeEventSchema)` to create a new message.
  */
 export const NarrativeEventSchema: GenMessage<NarrativeEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 6);
+  messageDesc(file_engine_v1_events, 7);
 
 /**
  * @generated from enum engine.v1.ScenarioPlayState

@@ -67,12 +67,31 @@ const ROUTE_COLOR: Record<string, Color> = {
   Neutral: Color.fromCssColorString("#fcd34d"),
 };
 
-/** Returns true if the unit should be shown in the given view. */
-function isVisible(unit: Unit, view: ActiveView): boolean {
+type Detections = Map<string, Set<string>>;
+
+/**
+ * Returns true if the unit should be shown in the given view.
+ * Own-side units are always visible. Enemy units are visible only if
+ * detected by at least one sensor on the viewing side.
+ */
+function isVisible(unit: Unit, view: ActiveView, detections: Detections): boolean {
   if (view === "debug") return true;
-  if (view === "blue")  return unit.side === "Blue";
-  if (view === "red")   return unit.side === "Red";
+  if (view === "blue") {
+    return unit.side === "Blue" || (detections.get("Blue")?.has(unit.id) ?? false);
+  }
+  if (view === "red") {
+    return unit.side === "Red" || (detections.get("Red")?.has(unit.id) ?? false);
+  }
   return false;
+}
+
+/**
+ * Returns true if this unit is a sensor track (detected enemy) rather than
+ * an own-side unit in the current view. Tracks get a different visual style.
+ */
+function isTrack(unit: Unit, view: ActiveView): boolean {
+  if (view === "debug") return false;
+  return view === "blue" ? unit.side !== "Blue" : unit.side !== "Red";
 }
 
 /** Returns true if the active view is allowed to issue move orders to a unit. */
@@ -199,6 +218,7 @@ export default function CesiumGlobe() {
       unit: Unit,
       view: ActiveView,
       selectedId: string | null,
+      detections: Detections,
     ) => {
       const routeId = `${unit.id}_route`;
       const destId  = `${unit.id}_dest`;
@@ -212,7 +232,10 @@ export default function CesiumGlobe() {
         return;
       }
 
-      const visible = isVisible(unit, view);
+      const visible    = isVisible(unit, view, detections);
+      const track      = isTrack(unit, view);
+      // Tracks: dimmer billboard + no route/dest arrows (we don't know their orders)
+      const trackAlpha = track ? 0.55 : 1.0;
       const pos = Cartesian3.fromDegrees(
         unit.position.lon, unit.position.lat, unit.position.altMsl,
       );
@@ -225,17 +248,22 @@ export default function CesiumGlobe() {
         existing.show = visible;
         if (existing.billboard) {
           existing.billboard.scale = new ConstantProperty(isSelected ? 1.4 : 1.0);
+          existing.billboard.color = new ConstantProperty(Color.WHITE.withAlpha(trackAlpha));
         }
       } else {
         const def = defInfoRef.current[unit.definitionId];
         const entity = makeEntity(unit, def?.generalType ?? 0);
         entity.show = visible;
         viewer.entities.add(entity);
+        // Apply initial track alpha after adding.
+        if (entity.billboard) {
+          entity.billboard.color = new ConstantProperty(Color.WHITE.withAlpha(trackAlpha));
+        }
       }
 
-      // Route / destination entities.
+      // Route / destination entities — only for own-side units (not tracks).
       const order = unit.moveOrder;
-      if (order && order.waypoints.length > 0) {
+      if (!track && order && order.waypoints.length > 0) {
         const routeColor = ROUTE_COLOR[unit.side] ?? Color.YELLOW;
         const positions: Cartesian3[] = [
           Cartesian3.fromDegrees(unit.position.lon, unit.position.lat),
@@ -318,8 +346,9 @@ export default function CesiumGlobe() {
       units: Map<string, Unit>,
       view: ActiveView,
       selectedId: string | null,
+      detections: Detections,
     ) => {
-      units.forEach((unit) => syncUnit(unit, view, selectedId));
+      units.forEach((unit) => syncUnit(unit, view, selectedId, detections));
 
       // Remove stale unit entities (route/dest/range are managed by syncUnit).
       const storeIds = new Set(units.keys());
@@ -334,10 +363,10 @@ export default function CesiumGlobe() {
         .forEach((id) => viewer.entities.removeById(id));
     };
 
-    // ── Reapply fog-of-war when view changes ───────────────────────────────
-    const applyView = (units: Map<string, Unit>, view: ActiveView) => {
+    // ── Reapply fog-of-war when view or detections change ──────────────────
+    const applyView = (units: Map<string, Unit>, view: ActiveView, detections: Detections) => {
       units.forEach((unit) => {
-        const visible = isVisible(unit, view);
+        const visible = isVisible(unit, view, detections);
         const e = viewer.entities.getById(unit.id);
         if (e) e.show = visible;
         const r = viewer.entities.getById(`${unit.id}_route`);
@@ -372,28 +401,31 @@ export default function CesiumGlobe() {
           };
         });
         defInfoRef.current = map;
-        const { units, activeView, selectedUnitId } = useSimStore.getState();
-        syncUnits(units, activeView, selectedUnitId);
+        const { units, activeView, selectedUnitId, detections } = useSimStore.getState();
+        syncUnits(units, activeView, selectedUnitId, detections);
       })
       .catch(console.error);
 
     // Initial render with whatever is already in the store.
-    const { units: initUnits, activeView: initView, selectedUnitId: initSel } =
-      useSimStore.getState();
-    syncUnits(initUnits, initView, initSel);
+    const { units: initUnits, activeView: initView, selectedUnitId: initSel,
+            detections: initDet } = useSimStore.getState();
+    syncUnits(initUnits, initView, initSel, initDet);
 
     // ── Store subscriptions (imperatively driven, no React re-renders) ─────
     const unsub = useSimStore.subscribe((state, prev) => {
-      const unitsChanged     = state.units         !== prev.units;
-      const viewChanged      = state.activeView    !== prev.activeView;
-      const selectionChanged = state.selectedUnitId !== prev.selectedUnitId;
+      const unitsChanged      = state.units          !== prev.units;
+      const viewChanged       = state.activeView     !== prev.activeView;
+      const selectionChanged  = state.selectedUnitId !== prev.selectedUnitId;
+      const detectionsChanged = state.detections     !== prev.detections;
 
       if (unitsChanged) {
-        syncUnits(state.units, state.activeView, state.selectedUnitId);
-        return; // syncUnits covers view + selection + range rings
+        syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
+        return; // syncUnits covers everything
       }
-      if (viewChanged) {
-        applyView(state.units, state.activeView);
+      if (viewChanged || detectionsChanged) {
+        // Re-run full visibility + track-style pass.
+        syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
+        return;
       }
       if (selectionChanged) {
         // Re-sync old and new selected units so billboard scale and range
@@ -401,7 +433,7 @@ export default function CesiumGlobe() {
         [prev.selectedUnitId, state.selectedUnitId].forEach((id) => {
           if (!id) return;
           const unit = state.units.get(id);
-          if (unit) syncUnit(unit, state.activeView, state.selectedUnitId);
+          if (unit) syncUnit(unit, state.activeView, state.selectedUnitId, state.detections);
         });
         updateCursor(state.units, state.selectedUnitId, state.activeView);
       }

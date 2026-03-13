@@ -6,9 +6,10 @@ import (
 
 // DefStats holds the per-definition values the sim loop needs each tick.
 type DefStats struct {
-	CruiseSpeedMps float64
-	CombatRangeM   float64
-	BaseStrength   float64
+	CruiseSpeedMps  float64
+	CombatRangeM    float64
+	BaseStrength    float64
+	DetectionRangeM float64
 }
 
 // Kill represents a single combat outcome from one engagement check.
@@ -97,6 +98,63 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats) []Kill {
 		}
 	}
 	return results
+}
+
+// ─── SENSOR DETECTION ─────────────────────────────────────────────────────────
+
+// DetectionSet maps each detecting side to the full set of enemy unit IDs
+// currently within sensor range of at least one unit on that side.
+type DetectionSet map[string][]string
+
+// SensorTick scans all active units and builds the current detection picture.
+// For each detector unit, any enemy unit within its DetectionRangeM is added
+// to the detector's side's contact set. Returns the full set for every side
+// that has at least one active unit (empty slice = no contacts this tick).
+func SensorTick(units []*enginev1.Unit, defs map[string]DefStats) DetectionSet {
+	// Use intermediate sets to avoid duplicate entries.
+	bySet := make(map[string]map[string]bool)
+
+	// Collect all active sides so we can emit an empty update when a side
+	// has no contacts (clearing stale frontend state).
+	for _, u := range units {
+		if unitIsActive(u) {
+			if bySet[u.Side] == nil {
+				bySet[u.Side] = make(map[string]bool)
+			}
+		}
+	}
+
+	for _, detector := range units {
+		if !unitIsActive(detector) {
+			continue
+		}
+		rangeM := defs[detector.DefinitionId].DetectionRangeM
+		if rangeM <= 0 {
+			continue
+		}
+		for _, target := range units {
+			if !unitIsActive(target) || target.Side == detector.Side {
+				continue
+			}
+			dist := haversineM(
+				detector.GetPosition().GetLat(), detector.GetPosition().GetLon(),
+				target.GetPosition().GetLat(), target.GetPosition().GetLon(),
+			)
+			if dist <= rangeM {
+				bySet[detector.Side][target.Id] = true
+			}
+		}
+	}
+
+	result := make(DetectionSet, len(bySet))
+	for side, ids := range bySet {
+		list := make([]string, 0, len(ids))
+		for id := range ids {
+			list = append(list, id)
+		}
+		result[side] = list
+	}
+	return result
 }
 
 // unitIsActive returns true if u is not yet destroyed.

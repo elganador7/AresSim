@@ -15,7 +15,7 @@ import { initBridge } from "./bridge/bridge";
 import { useSimStore } from "./store/simStore";
 import CesiumGlobe from "./components/CesiumGlobe";
 import ScenarioEditor from "./components/editor/ScenarioEditor";
-import { RequestSync, PauseSim, CancelMoveOrder } from "../wailsjs/go/main/App";
+import { RequestSync, PauseSim, CancelMoveOrder, SetSimSpeed } from "../wailsjs/go/main/App";
 import "./app.css";
 
 // ─── VIEW SWITCHER ────────────────────────────────────────────────────────────
@@ -53,6 +53,8 @@ function ViewSwitcher() {
 
 // ─── TOP BAR ──────────────────────────────────────────────────────────────────
 
+const SPEED_PRESETS = [0.5, 1, 2, 5, 10, 30] as const;
+
 function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
   const scenarioName  = useSimStore((s) => s.scenarioName);
   const scenarioState = useSimStore((s) => s.scenarioState);
@@ -78,6 +80,27 @@ function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
     PauseSim(scenarioState === "running").catch(console.error);
   };
 
+  // Find nearest preset index for the current timeScale.
+  const currentIdx = (() => {
+    let best = 0;
+    let bestDiff = Infinity;
+    SPEED_PRESETS.forEach((p, i) => {
+      const d = Math.abs(p - timeScale);
+      if (d < bestDiff) { bestDiff = d; best = i; }
+    });
+    return best;
+  })();
+
+  const canSlower = scenarioState === "running" && currentIdx > 0;
+  const canFaster = scenarioState === "running" && currentIdx < SPEED_PRESETS.length - 1;
+
+  const stepSpeed = (delta: -1 | 1) => {
+    const next = SPEED_PRESETS[currentIdx + delta];
+    if (next !== undefined) SetSimSpeed(next).catch(console.error);
+  };
+
+  const isActive = scenarioState === "running" || scenarioState === "paused";
+
   return (
     <div className="top-bar">
       <div className="top-bar-left">
@@ -92,10 +115,28 @@ function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
 
       <div className="top-bar-center">
         <span className="sim-time">{formatSimTime(simSeconds)}</span>
-        {scenarioState === "running" && (
-          <span className="time-scale">×{timeScale.toFixed(1)}</span>
+
+        {isActive && (
+          <div className="speed-control">
+            <button
+              className="speed-step-btn"
+              onClick={() => stepSpeed(-1)}
+              disabled={!canSlower}
+              title="Slower"
+            >◄</button>
+            <span className="speed-label">
+              ×{Number.isInteger(timeScale) ? timeScale : timeScale.toFixed(1)}
+            </span>
+            <button
+              className="speed-step-btn"
+              onClick={() => stepSpeed(1)}
+              disabled={!canFaster}
+              title="Faster"
+            >►</button>
+          </div>
         )}
-        {(scenarioState === "running" || scenarioState === "paused") && (
+
+        {isActive && (
           <button
             className="pause-btn"
             onClick={handlePauseToggle}

@@ -81,8 +81,14 @@ export interface SimStore {
 
   // ── View ─────────────────────────────────────────────────────────────────
   // Controls fog of war: "debug" shows all units; "blue"/"red" shows own
-  // side only (detected enemies added later by the adjudicator).
+  // side plus any enemy units detected by that side's sensors.
   activeView: "debug" | "blue" | "red";
+
+  // ── Detections ───────────────────────────────────────────────────────────
+  // Maps detecting side → set of enemy unit IDs currently in sensor range.
+  // Updated every tick by the adjudicator's sensor pass. Replaced in full
+  // (not merged) so stale contacts are automatically cleared.
+  detections: Map<string, Set<string>>;
 
   // ── Selection ────────────────────────────────────────────────────────────
   selectedUnitId: string | null;
@@ -102,6 +108,7 @@ export interface SimStore {
   appendEventLog: (entry: EventLogEntry) => void;
   selectUnit: (id: string | null) => void;
   setActiveView: (view: "debug" | "blue" | "red") => void;
+  setDetections: (side: string, ids: string[]) => void;
 }
 
 export interface EventLogEntry {
@@ -123,6 +130,7 @@ export const useSimStore = create<SimStore>((set) => ({
   tickNumber: 0,
   units: new Map(),
   activeView: "debug",
+  detections: new Map(),
   selectedUnitId: null,
   eventLog: [],
 
@@ -176,4 +184,11 @@ export const useSimStore = create<SimStore>((set) => ({
 
   selectUnit: (selectedUnitId) => set({ selectedUnitId }),
   setActiveView: (activeView) => set({ activeView }),
+
+  setDetections: (side, ids) =>
+    set((state) => {
+      const updated = new Map(state.detections);
+      updated.set(side, new Set(ids));
+      return { detections: updated };
+    }),
 }));
