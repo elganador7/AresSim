@@ -17,22 +17,28 @@ import (
 type EmitFn func(eventName string, msg proto.Message)
 
 const (
-	tickInterval  = time.Second // one tick per second
-	arrivalRadius = 50.0        // metres — snap to waypoint when this close
-	earthRadiusM  = 6_371_000.0
+	tickInterval = time.Second  // one tick per second
+	earthRadiusM = 6_371_000.0
+	// Snap-to-waypoint is handled by canMoveM >= distM (unit covers the
+	// remaining distance in one tick). arrivalRadius was removed because the
+	// movement logic is already correct without it.
 )
 
 // MockLoop runs the movement and adjudication engine.
 // defs maps definitionId → DefStats (speed, range, strength).
+// startSeconds is the accumulated sim time to resume from (pass 0 for a fresh
+// scenario; pass the value from the previous run when resuming after pause).
 // getScale is called each tick to read the current time-scale multiplier;
 // at 2× the sim advances 2 seconds of game-time per real second.
+// reportSeconds is called after each tick with the new accumulated sim time so
+// the caller can persist it across pause/resume cycles.
 // Returns when ctx is cancelled.
-func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefStats, getScale func() float64, emit EmitFn) {
+func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefStats, startSeconds float64, getScale func() float64, reportSeconds func(float64), emit EmitFn) {
 	ticker := time.NewTicker(tickInterval)
 	defer ticker.Stop()
 
 	tick       := int64(0)
-	simSeconds := 0.0
+	simSeconds := startSeconds
 
 	for {
 		select {
@@ -42,6 +48,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 			tick++
 			timeScale := getScale()
 			simSeconds += timeScale
+			reportSeconds(simSeconds)
 
 			// ── Movement ──────────────────────────────────────────────────
 			deltas := processTick(units, defs, timeScale)
@@ -62,10 +69,15 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 			// ── Adjudication ──────────────────────────────────────────────
 			kills := AdjudicateTick(units, defs)
 			for _, k := range kills {
+				attackerID := ""
+				if k.Attacker != nil {
+					attackerID = k.Attacker.Id
+				}
 				emit("unit_destroyed", &enginev1.UnitDestroyedEvent{
-					UnitId:  k.Victim.Id,
-					Cause:   "combat",
-					SimTime: &enginev1.SimTime{SecondsElapsed: float64(tick), TickNumber: tick},
+					UnitId:     k.Victim.Id,
+					Cause:      "combat",
+					AttackerId: attackerID,
+					SimTime:    &enginev1.SimTime{SecondsElapsed: simSeconds, TickNumber: tick},
 				})
 
 				var narrative string

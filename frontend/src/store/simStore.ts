@@ -135,6 +135,9 @@ export const useSimStore = create<SimStore>((set) => ({
   eventLog: [],
 
   loadSnapshot: (units, scenarioName) =>
+    // Replaces the entire units Map reference. Zustand notifies all subscribers
+    // because the reference changed, so CesiumGlobe's subscription fires and
+    // does a full syncUnits pass. This is correct: a snapshot is a full rebuild.
     set({
       scenarioName,
       scenarioState: "paused",

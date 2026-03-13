@@ -91,6 +91,9 @@ function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
     return best;
   })();
 
+  // Speed controls are intentionally disabled while paused: changing speed
+  // while the MockLoop is stopped has no effect until the loop restarts, and
+  // the atomic update would be silently lost if the user forgets to resume.
   const canSlower = scenarioState === "running" && currentIdx > 0;
   const canFaster = scenarioState === "running" && currentIdx < SPEED_PRESETS.length - 1;
 

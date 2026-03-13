@@ -422,9 +422,24 @@ export default function CesiumGlobe() {
         syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
         return; // syncUnits covers everything
       }
-      if (viewChanged || detectionsChanged) {
-        // Re-run full visibility + track-style pass.
+      if (viewChanged) {
+        // View change affects all units — full pass required.
         syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
+        return;
+      }
+      if (detectionsChanged) {
+        // Sensor tick fires every real second. Instead of a full syncUnits pass
+        // over all units, only re-sync units whose visibility or track-status
+        // actually changed. At 100+ units this avoids rebuilding every entity.
+        state.units.forEach((unit) => {
+          const wasVisible = isVisible(unit, state.activeView, prev.detections);
+          const nowVisible = isVisible(unit, state.activeView, state.detections);
+          const wasTrack   = isTrack(unit, prev.activeView);
+          const nowTrack   = isTrack(unit, state.activeView);
+          if (wasVisible !== nowVisible || wasTrack !== nowTrack) {
+            syncUnit(unit, state.activeView, state.selectedUnitId, state.detections);
+          }
+        });
         return;
       }
       if (selectionChanged) {

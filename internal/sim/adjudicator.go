@@ -24,6 +24,12 @@ type Kill struct {
 // destroys the other. If ranges are equal, higher base_strength wins; a tie
 // annihilates both. Killed units are mutated in-place (IsActive = false,
 // MoveOrder cleared) so subsequent ticks skip them automatically.
+//
+// Each unit can participate in at most one engagement per tick: once a unit is
+// marked killed it is skipped in all subsequent pair checks within the same
+// tick. This means cascading kills (A kills B, B would have killed C) are
+// resolved in iteration order. Future work: track per-pair engagement time so
+// combat resolution is proportional to sim-seconds elapsed.
 func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats) []Kill {
 	killed := make(map[string]bool)
 	var results []Kill
@@ -158,8 +164,11 @@ func SensorTick(units []*enginev1.Unit, defs map[string]DefStats) DetectionSet {
 }
 
 // unitIsActive returns true if u is not yet destroyed.
-// Treats nil Status as active (proto3 defaults bool to false, so we can't
-// rely on GetIsActive() alone for units that haven't had status set yet).
+// Treats nil Status as active because proto3 defaults bool fields to false,
+// meaning a freshly constructed Unit with no Status set would incorrectly
+// appear destroyed if we relied solely on GetStatus().GetIsActive().
+// FUTURE: change OperationalStatus.is_active to an enum or optional bool so
+// the "not yet set" vs "explicitly false" distinction is encoded in the schema.
 func unitIsActive(u *enginev1.Unit) bool {
 	if u.Status == nil {
 		return true

@@ -58,9 +58,10 @@ message UnitSpawnedEvent {
 }
 
 message UnitDestroyedEvent {
-  string  unit_id  = 1;
-  string  cause    = 2; // "combat" | "withdrawal" | "scenario"
-  SimTime sim_time = 3;
+  string  unit_id     = 1;
+  string  cause       = 2; // "combat" | "withdrawal" | "scenario"
+  SimTime sim_time    = 3;
+  string  attacker_id = 4; // unit ID of the attacker; empty for mutual annihilation
 }
 
 // ── Sensor / detection update ─────────────────────────────────────────────────

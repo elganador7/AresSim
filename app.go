@@ -19,6 +19,7 @@ import (
 	"github.com/aressim/internal/db"
 	"github.com/aressim/internal/db/repository"
 	"github.com/aressim/internal/library"
+	"github.com/surrealdb/surrealdb.go/pkg/models"
 	"github.com/aressim/internal/scenario"
 	"github.com/aressim/internal/sim"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -46,9 +47,24 @@ type App struct {
 	// can update it from the Wails thread while MockLoop reads it each tick.
 	simTimeScale atomic.Uint64
 
+	// simSecondsAtomic stores math.Float64bits(simSeconds) atomically.
+	// MockLoop updates this each tick via reportSeconds; PauseSim reads it
+	// before restarting the loop so simSeconds survives pause/resume cycles.
+	simSecondsAtomic atomic.Uint64
+
 	// currentScenario is the last loaded scenario, kept so RequestSync can
 	// re-emit the full state snapshot on demand.
 	currentScenario *enginev1.Scenario
+
+	// defsCache caches the result of buildDefs() so we don't re-query SurrealDB
+	// on every MoveUnit call. Invalidated when a unit definition is saved or deleted.
+	defsCacheMu sync.RWMutex
+	defsCache   map[string]sim.DefStats
+
+	// lastDetections stores the most recent DetectionSet emitted by SensorTick.
+	// RequestSync re-emits these so reconnecting frontends see current contacts.
+	lastDetMu      sync.RWMutex
+	lastDetections map[string][]string
 
 	dbMgr       *db.Manager
 	dbClient    *db.Client
@@ -228,6 +244,118 @@ func (a *App) setSimTimeScale(v float64) {
 	a.simTimeScale.Store(math.Float64bits(v))
 }
 
+// getSimSeconds reads the accumulated sim time atomically.
+func (a *App) getSimSeconds() float64 {
+	return math.Float64frombits(a.simSecondsAtomic.Load())
+}
+
+// setSimSeconds stores the accumulated sim time atomically.
+// Called by MockLoop via the reportSeconds callback each tick.
+func (a *App) setSimSeconds(v float64) {
+	a.simSecondsAtomic.Store(math.Float64bits(v))
+}
+
+// getCachedDefs returns the cached DefStats map, building it from the DB if
+// the cache is empty. The cache is invalidated when definitions are modified.
+func (a *App) getCachedDefs() map[string]sim.DefStats {
+	a.defsCacheMu.RLock()
+	if a.defsCache != nil {
+		d := a.defsCache
+		a.defsCacheMu.RUnlock()
+		return d
+	}
+	a.defsCacheMu.RUnlock()
+
+	// Cache miss — build from DB.
+	d := a.buildDefs()
+	a.defsCacheMu.Lock()
+	a.defsCache = d
+	a.defsCacheMu.Unlock()
+	return d
+}
+
+// invalidateDefsCache clears the DefStats cache so the next call to
+// getCachedDefs re-queries the database.
+func (a *App) invalidateDefsCache() {
+	a.defsCacheMu.Lock()
+	a.defsCache = nil
+	a.defsCacheMu.Unlock()
+}
+
+// storeLastDetection records the most recent sensor result for one side so
+// RequestSync can replay it to reconnecting clients.
+func (a *App) storeLastDetection(side string, ids []string) {
+	a.lastDetMu.Lock()
+	if a.lastDetections == nil {
+		a.lastDetections = make(map[string][]string)
+	}
+	cp := make([]string, len(ids))
+	copy(cp, ids)
+	a.lastDetections[side] = cp
+	a.lastDetMu.Unlock()
+}
+
+// makeEmitFn returns an EmitFn that:
+//   - intercepts detection_update to keep lastDetections current
+//   - intercepts batch_update to trigger periodic checkpoint writes
+//   - forwards everything to emitProtoEvent for the frontend
+func (a *App) makeEmitFn() sim.EmitFn {
+	var ticksSinceCheckpoint int
+	return func(name string, msg proto.Message) {
+		switch name {
+		case "detection_update":
+			if du, ok := msg.(*enginev1.DetectionUpdate); ok {
+				a.storeLastDetection(du.DetectingSide, du.DetectedUnitIds)
+			}
+		case "batch_update":
+			if bu, ok := msg.(*enginev1.BatchUnitUpdate); ok && bu.SimTime != nil {
+				ticksSinceCheckpoint++
+				if ticksSinceCheckpoint >= db.CheckpointInterval {
+					ticksSinceCheckpoint = 0
+					go a.writeCheckpoint(bu.SimTime.TickNumber, bu.SimTime.SecondsElapsed)
+				}
+			}
+		}
+		a.emitProtoEvent(name, msg)
+	}
+}
+
+// writeCheckpoint persists the current in-memory unit positions and scenario
+// progress to SurrealDB. Called asynchronously every CheckpointInterval ticks.
+// Errors are non-fatal — the sim continues and the next checkpoint will retry.
+func (a *App) writeCheckpoint(tick int64, simSeconds float64) {
+	if a.checkpoint == nil || a.currentScenario == nil {
+		return
+	}
+	units := make([]repository.UnitRecord, 0, len(a.currentScenario.Units))
+	for _, u := range a.currentScenario.Units {
+		if u.Status != nil && !u.Status.IsActive {
+			continue // don't persist destroyed units
+		}
+		pos := u.GetPosition()
+		units = append(units, repository.UnitRecord{
+			"id": models.RecordID{Table: "unit", ID: u.Id},
+			// GeoJSON coordinate order for geometry<point>: [longitude, latitude]
+			"position": map[string]any{
+				"type":        "Point",
+				"coordinates": []float64{pos.GetLon(), pos.GetLat()},
+			},
+			"alt_msl": pos.GetAltMsl(),
+			"heading": pos.GetHeading(),
+			"speed":   pos.GetSpeed(),
+		})
+	}
+	snap := db.Snapshot{
+		ScenarioID: a.currentScenario.Id,
+		Tick:       tick,
+		SimSeconds: simSeconds,
+		Units:      units,
+	}
+	if err := a.checkpoint.Write(a.ctx, snap); err != nil {
+		slog.Warn("checkpoint write failed", "tick", tick, "err", err)
+	}
+}
+
 // ─── BRIDGE METHODS ───────────────────────────────────────────────────────────
 // These are the Go methods exposed to the TypeScript frontend.
 // Parameter and return types must be JSON-serializable (Wails uses JSON IPC).
@@ -314,8 +442,13 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 		TimeScale: scen.GetSettings().GetTimeScale(),
 	})
 
-	// Initialise time scale to 1× (reset on every new scenario load).
+	// Reset sim clock and time scale on every new scenario load.
 	a.setSimTimeScale(1.0)
+	a.setSimSeconds(0)
+	// Clear stale detections from a previous scenario.
+	a.lastDetMu.Lock()
+	a.lastDetections = nil
+	a.lastDetMu.Unlock()
 
 	// Cancel any previous sim loop, then start a new one.
 	if a.simCancel != nil {
@@ -323,27 +456,38 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 	}
 	simCtx, simCancel := context.WithCancel(a.ctx)
 	a.simCancel = simCancel
-	go sim.MockLoop(simCtx, scen.Units, a.buildDefs(), a.getSimTimeScale, a.emitProtoEvent)
+	go sim.MockLoop(simCtx, scen.Units, a.getCachedDefs(), 0, a.getSimTimeScale, a.setSimSeconds, a.makeEmitFn())
 	slog.Info("scenario loaded", "name", scen.Name, "units", len(scen.Units))
 }
 
-// RequestSync re-emits the full state snapshot and current scenario state.
-// The frontend calls this after registering its event listeners to guarantee
-// it receives the initial state even if domReady fired first.
+// RequestSync re-emits the full state snapshot, scenario state, and last known
+// sensor detections. The frontend calls this after registering its event
+// listeners to guarantee it receives the initial state even if domReady fired
+// first. Re-emitting detections ensures reconnecting clients don't see a blank
+// fog-of-war until the next SensorTick fires.
 func (a *App) RequestSync() BridgeResult {
 	if a.currentScenario == nil {
 		return failMsg("no scenario loaded")
 	}
 	a.emitProtoEvent("full_state_snapshot", &enginev1.FullStateSnapshot{
 		Units:        a.currentScenario.Units,
-		SimTime:      &enginev1.SimTime{},
+		SimTime:      &enginev1.SimTime{SecondsElapsed: a.getSimSeconds()},
 		Weather:      a.currentScenario.GetMap().GetInitialWeather(),
 		ScenarioName: a.currentScenario.Name,
 	})
 	a.emitProtoEvent("scenario_state", &enginev1.ScenarioStateEvent{
 		State:     enginev1.ScenarioPlayState_SCENARIO_RUNNING,
-		TimeScale: a.currentScenario.GetSettings().GetTimeScale(),
+		TimeScale: float32(a.getSimTimeScale()),
 	})
+	// Re-emit each side's current detection set so contacts aren't lost on reconnect.
+	a.lastDetMu.RLock()
+	for side, ids := range a.lastDetections {
+		a.emitProtoEvent("detection_update", &enginev1.DetectionUpdate{
+			DetectingSide:   side,
+			DetectedUnitIds: ids,
+		})
+	}
+	a.lastDetMu.RUnlock()
 	return ok()
 }
 
@@ -360,7 +504,8 @@ func (a *App) PauseSim(paused bool) BridgeResult {
 		if a.simCancel == nil && a.currentScenario != nil {
 			simCtx, simCancel := context.WithCancel(a.ctx)
 			a.simCancel = simCancel
-			go sim.MockLoop(simCtx, a.currentScenario.Units, a.buildDefs(), a.getSimTimeScale, a.emitProtoEvent)
+			// Resume from the accumulated sim time so the clock doesn't reset.
+			go sim.MockLoop(simCtx, a.currentScenario.Units, a.getCachedDefs(), a.getSimSeconds(), a.getSimTimeScale, a.setSimSeconds, a.makeEmitFn())
 		}
 	}
 	state := enginev1.ScenarioPlayState_SCENARIO_PAUSED
@@ -376,17 +521,28 @@ func (a *App) PauseSim(paused bool) BridgeResult {
 
 // MoveUnit issues a movement order to a unit, sending it toward the given
 // lat/lon at its cruise speed. The sim loop processes one step per tick.
+//
+// Note: heading is set to the bearing toward the destination at order time.
+// It remains at this value for up to one tick until processTick updates it.
+// This is a known one-tick visual stutter and is intentional.
 func (a *App) MoveUnit(unitID string, lat, lon float64) BridgeResult {
 	if a.currentScenario == nil {
 		return failMsg("no scenario loaded")
 	}
-	defs := a.buildDefs()
+	defs := a.getCachedDefs()
 
 	for _, u := range a.currentScenario.Units {
 		if u.Id != unitID {
 			continue
 		}
 		oldPos := u.GetPosition()
+
+		// Warn if a land unit is being sent to an implausible location.
+		// Full domain validation (e.g. ocean tile detection) is future work.
+		if lat < -90 || lat > 90 || lon < -180 || lon > 180 {
+			slog.Warn("MoveUnit: target coordinates out of range", "id", unitID, "lat", lat, "lon", lon)
+			return failMsg("target coordinates out of range")
+		}
 
 		cruiseSpeed := defs[u.DefinitionId].CruiseSpeedMps
 		if cruiseSpeed <= 0 {
@@ -588,6 +744,7 @@ func (a *App) SaveUnitDefinition(jsonStr string) BridgeResult {
 	if err := a.unitDefRepo.Save(a.ctx, id, rec); err != nil {
 		return fail(err)
 	}
+	a.invalidateDefsCache()
 	return ok()
 }
 
@@ -599,6 +756,7 @@ func (a *App) DeleteUnitDefinition(id string) BridgeResult {
 	if err := a.unitDefRepo.Delete(a.ctx, stripTablePrefix(id)); err != nil {
 		return fail(err)
 	}
+	a.invalidateDefsCache()
 	return ok()
 }
 
