@@ -1,0 +1,174 @@
+syntax = "proto3";
+package engine.v1;
+option go_package = "github.com/aressim/internal/gen/engine/v1";
+
+import "engine/v1/unit.proto";   // UnitDomain
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Unit Definition hierarchy
+//
+// Every platform in the simulation is described by four levels:
+//
+//   Domain          — the physical environment the platform operates in
+//   Form            — how the platform physically manifests within that domain
+//   GeneralType     — the tactical role or capability class
+//   specific_type   — the exact platform / class name (free-form string,
+//                     e.g. "F-35A Lightning II", "Nimitz Class")
+//
+// Examples
+//   Air  › Manned Fixed Wing   › Fighter          › F-35A Lightning II
+//   Air  › Manned Fixed Wing   › Multirole        › F/A-18E Super Hornet
+//   Air  › Manned Rotary Wing  › Attack Helicopter› AH-64E Apache Guardian
+//   Air  › Unmanned Fixed Wing › ISR UAV          › RQ-4 Global Hawk
+//   Sea  › Manned Surface Ship › Aircraft Carrier › Nimitz Class
+//   Sea  › Manned Surface Ship › Destroyer        › Arleigh Burke Class
+//   Sea  › Manned Submarine    › Attack Submarine › Virginia Class
+//   Land › Tracked Vehicle     › Main Battle Tank › M1A2 SEPv3 Abrams
+//   Land › Wheeled Vehicle     › IFV              › M2A3 Bradley
+//   Land › Dismounted Infantry › Special Forces   › Army Special Forces ODA
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── FORM ─────────────────────────────────────────────────────────────────────
+// Second level of the hierarchy: how the platform physically manifests.
+// Values are grouped by domain in bands of 10 so future insertions stay ordered.
+
+enum UnitForm {
+  FORM_UNSPECIFIED = 0;
+
+  // ── Air (10–19) ────────────────────────────────────────────────────────────
+  FORM_MANNED_FIXED_WING    = 10;  // Conventional aircraft with fixed wings
+  FORM_MANNED_ROTARY_WING   = 11;  // Helicopters and tiltrotors
+  FORM_UNMANNED_FIXED_WING  = 12;  // Fixed-wing drones (UCAV, ISR)
+  FORM_UNMANNED_ROTARY_WING = 13;  // Rotary-wing drones
+
+  // ── Sea (20–29) ────────────────────────────────────────────────────────────
+  FORM_MANNED_SURFACE_SHIP  = 20;  // Crewed surface combatants and auxiliaries
+  FORM_MANNED_SUBMARINE     = 21;  // Crewed subsurface vessels
+  FORM_UNMANNED_SURFACE     = 22;  // USV / MUSV
+  FORM_UNMANNED_SUBSURFACE  = 23;  // UUV / XLUUV
+
+  // ── Land (30–39) ───────────────────────────────────────────────────────────
+  FORM_DISMOUNTED_INFANTRY  = 30;  // Personnel on foot
+  FORM_WHEELED_VEHICLE      = 31;  // Trucks, APCs, wheeled IFVs
+  FORM_TRACKED_VEHICLE      = 32;  // Tanks, tracked IFVs, tracked SPGs
+  FORM_TOWED_SYSTEM         = 33;  // Artillery, radars towed by a prime mover
+  FORM_STATIC_INSTALLATION  = 34;  // Fixed sites: HQs, depots, SAM batteries
+}
+
+// ── GENERAL TYPE ──────────────────────────────────────────────────────────────
+// Third level: tactical role or capability class within a Form.
+// Values are grouped by domain in bands of 10.
+
+enum UnitGeneralType {
+  GENERAL_TYPE_UNSPECIFIED = 0;
+
+  // ── Air — Fixed Wing (10–19) ───────────────────────────────────────────────
+  GENERAL_TYPE_FIGHTER              = 10;  // Air-superiority / interceptor
+  GENERAL_TYPE_MULTIROLE            = 11;  // Air-to-air and air-to-ground
+  GENERAL_TYPE_ATTACK_AIRCRAFT      = 12;  // Dedicated CAS / strike
+  GENERAL_TYPE_BOMBER               = 13;  // Strategic / theatre bombing
+  GENERAL_TYPE_TRANSPORT_AIRCRAFT   = 14;  // Airlift / paradrop
+  GENERAL_TYPE_MARITIME_PATROL      = 15;  // ASW / ISR over water
+  GENERAL_TYPE_AEW                  = 16;  // Airborne early warning & control
+  GENERAL_TYPE_TANKER               = 17;  // Aerial refuelling
+  GENERAL_TYPE_ISR_FIXED_WING       = 18;  // Dedicated reconnaissance
+
+  // ── Air — Rotary Wing (20–29) ──────────────────────────────────────────────
+  GENERAL_TYPE_ATTACK_HELICOPTER    = 20;  // Anti-armour / CAS helicopter
+  GENERAL_TYPE_UTILITY_HELICOPTER   = 21;  // Troop lift / medevac
+  GENERAL_TYPE_NAVAL_HELICOPTER     = 22;  // ASW / ASuW shipborne helicopter
+
+  // ── Air — Unmanned (30–39) ─────────────────────────────────────────────────
+  GENERAL_TYPE_ISR_UAV              = 30;  // Persistent surveillance drone
+  GENERAL_TYPE_UCAV                 = 31;  // Unmanned combat air vehicle
+  GENERAL_TYPE_LOITERING_MUNITION   = 32;  // Kamikaze / loitering drone
+
+  // ── Sea — Surface (40–49) ──────────────────────────────────────────────────
+  GENERAL_TYPE_AIRCRAFT_CARRIER     = 40;  // Fixed-wing carrier aviation
+  GENERAL_TYPE_CRUISER              = 41;  // Large AAW / strike combatant
+  GENERAL_TYPE_DESTROYER            = 42;  // Multi-mission surface combatant
+  GENERAL_TYPE_FRIGATE              = 43;  // ASW / escort combatant
+  GENERAL_TYPE_CORVETTE             = 44;  // Small fast combatant
+  GENERAL_TYPE_PATROL_VESSEL        = 45;  // Coastal / inshore patrol
+  GENERAL_TYPE_AMPHIBIOUS_ASSAULT   = 46;  // LHA / LHD / LPD
+  GENERAL_TYPE_MINE_WARFARE         = 47;  // MCM / minelayer
+
+  // ── Sea — Subsurface (50–59) ───────────────────────────────────────────────
+  GENERAL_TYPE_ATTACK_SUBMARINE     = 50;  // SSN / SSK hunter-killer
+  GENERAL_TYPE_BALLISTIC_MISSILE_SUB = 51; // SSBN strategic deterrent
+  GENERAL_TYPE_CRUISE_MISSILE_SUB   = 52;  // SSGN land-attack submarine
+
+  // ── Land — Armour & Mechanised (60–69) ────────────────────────────────────
+  GENERAL_TYPE_MAIN_BATTLE_TANK     = 60;  // MBT
+  GENERAL_TYPE_INFANTRY_FIGHTING_VEHICLE = 61; // IFV / MICV
+  GENERAL_TYPE_ARMORED_PERSONNEL_CARRIER = 62; // APC
+  GENERAL_TYPE_RECONNAISSANCE_VEHICLE    = 63; // Wheeled or tracked scout
+
+  // ── Land — Fires (70–79) ──────────────────────────────────────────────────
+  GENERAL_TYPE_SELF_PROPELLED_ARTILLERY  = 70;
+  GENERAL_TYPE_TOWED_ARTILLERY           = 71;
+  GENERAL_TYPE_ROCKET_ARTILLERY          = 72;  // MLRS / HIMARS
+  GENERAL_TYPE_AIR_DEFENSE              = 73;   // SAM / SHORAD / MANPADS
+
+  // ── Land — Infantry (80–89) ───────────────────────────────────────────────
+  GENERAL_TYPE_SPECIAL_FORCES       = 80;
+  GENERAL_TYPE_LIGHT_INFANTRY       = 81;
+  GENERAL_TYPE_AIRBORNE_INFANTRY    = 82;
+  GENERAL_TYPE_MARINE_INFANTRY      = 83;
+
+  // ── Land — Support (90–99) ────────────────────────────────────────────────
+  GENERAL_TYPE_ENGINEER             = 90;
+  GENERAL_TYPE_LOGISTICS            = 91;
+  GENERAL_TYPE_MEDICAL              = 92;
+  GENERAL_TYPE_COMMAND              = 93;
+  GENERAL_TYPE_ELECTRONIC_WARFARE   = 94;
+}
+
+// ── UNIT DEFINITION ───────────────────────────────────────────────────────────
+// Canonical template describing a specific platform type.
+// A live Unit instance references a definition by definition_id.
+// Definitions are authored once (in YAML / DB) and loaded at scenario start.
+
+message UnitDefinition {
+  // ── Identity ─────────────────────────────────────────────────────────────
+  string id          = 1;  // Slug, e.g. "f35a-block4" or "nimitz-class"
+  string name        = 2;  // Display name, e.g. "F-35A Lightning II (Block 4)"
+  string description = 3;  // Free-text notes
+
+  // ── Hierarchy ─────────────────────────────────────────────────────────────
+  UnitDomain      domain        = 4;  // Air / Sea / Land / Subsurface
+  UnitForm        form          = 5;  // Manned Fixed Wing / Manned Surface Ship …
+  UnitGeneralType general_type  = 6;  // Fighter / Aircraft Carrier …
+  string          specific_type = 7;  // "F-35A Lightning II" / "Nimitz Class" …
+
+  // ── Origin ────────────────────────────────────────────────────────────────
+  string nation_of_origin = 8;  // ISO 3166-1 alpha-3 (e.g. "USA", "GBR", "RUS")
+  int32  service_entry_year = 9;
+
+  // ── Combat characteristics ────────────────────────────────────────────────
+  // base_strength: normalised 0–1 combat power; adjudicator base value for
+  // engagement resolution. 1.0 = full-strength front-line platform.
+  float base_strength   = 10;
+
+  // combat_range_m: maximum engagement range in metres.
+  float combat_range_m  = 11;
+
+  // accuracy: direct-fire / weapon accuracy coefficient 0–1.
+  float accuracy        = 12;
+
+  // ── Mobility ──────────────────────────────────────────────────────────────
+  float max_speed_mps    = 20;  // Maximum dash speed (m/s)
+  float cruise_speed_mps = 21;  // Nominal patrol / transit speed (m/s)
+  float max_range_km     = 22;  // Unrefuelled operational range (km)
+
+  // ── Survivability ─────────────────────────────────────────────────────────
+  // Probability 0–1 of surviving a single hit at baseline engagement odds.
+  float survivability   = 30;
+
+  // ── Sensors ───────────────────────────────────────────────────────────────
+  float detection_range_m = 40;  // Nominal detection range vs. same-domain targets (m)
+
+  // ── Logistics ─────────────────────────────────────────────────────────────
+  float fuel_capacity_liters = 50;
+  float fuel_burn_rate_lph   = 51;  // Litres per hour at cruise speed
+}
