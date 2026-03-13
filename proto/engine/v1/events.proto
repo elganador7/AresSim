@@ -42,10 +42,12 @@ message BatchUnitUpdate {
 }
 
 message UnitDelta {
-  string            unit_id  = 1;
-  Position          position = 2; // present if unit moved
-  OperationalStatus status   = 3; // present if status changed
-  FormationPosture  posture  = 4; // present if posture changed
+  string            unit_id    = 1;
+  Position          position   = 2; // present if unit moved
+  OperationalStatus status     = 3; // present if status changed
+  FormationPosture  posture    = 4; // present if posture changed
+  // move_order present when order changes; empty MoveOrder clears the order.
+  MoveOrder         move_order = 5;
 }
 
 // ── Unit lifecycle ────────────────────────────────────────────────────────────

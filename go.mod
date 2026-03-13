@@ -6,6 +6,7 @@ require (
 	github.com/surrealdb/surrealdb.go v1.4.0
 	github.com/wailsapp/wails/v2 v2.11.0
 	google.golang.org/protobuf v1.36.11
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

@@ -37,8 +37,7 @@ func Default() *enginev1.Scenario {
 				DisplayName:    "DDG-51",
 				FullName:       "USS Arleigh Burke (DDG-51)",
 				Side:           "Blue",
-				Domain:         enginev1.UnitDomain_DOMAIN_SEA,
-				Type:           enginev1.UnitType_UNIT_TYPE_DESTROYER,
+				DefinitionId:   "destroyer-arleigh-burke-class",
 				NatoSymbolSidc: "SFSPCLDD--E----",
 				Position: &enginev1.Position{
 					Lat:     36.20,
@@ -62,8 +61,7 @@ func Default() *enginev1.Scenario {
 				DisplayName:    "DDG-67",
 				FullName:       "USS Cole (DDG-67)",
 				Side:           "Blue",
-				Domain:         enginev1.UnitDomain_DOMAIN_SEA,
-				Type:           enginev1.UnitType_UNIT_TYPE_DESTROYER,
+				DefinitionId:   "destroyer-arleigh-burke-class",
 				NatoSymbolSidc: "SFSPCLDD--E----",
 				Position: &enginev1.Position{
 					Lat:     35.40,

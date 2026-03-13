@@ -38,8 +38,7 @@ export default function DropConfirmDialog({ drop, onConfirm, onCancel }: Props) 
       ...blankUnit(drop.lat, drop.lon),
       displayName: designator.trim() || drop.label,
       side,
-      domain: drop.domain,
-      unitType: drop.unitType,
+      definitionId: drop.definitionId,
       lat: drop.lat,
       lon: drop.lon,
     };

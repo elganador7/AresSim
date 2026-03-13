@@ -39,3 +39,17 @@ message OperationResult {
   bool   success = 1;
   string error   = 2;
 }
+
+// A single geographic point in a movement route.
+message Waypoint {
+  double lat     = 1;
+  double lon     = 2;
+  double alt_msl = 3;
+}
+
+// An ordered list of waypoints describing a unit's intended route.
+// The first waypoint is the current destination; subsequent waypoints
+// are queued and visited in order.
+message MoveOrder {
+  repeated Waypoint waypoints = 1;
+}

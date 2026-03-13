@@ -94,6 +94,72 @@
   color: #6b7280;
 }
 
+.pause-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  color: #9ca3af;
+  font-size: 13px;
+  padding: 1px 7px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.pause-btn:hover { color: #f9fafb; background: rgba(255, 255, 255, 0.1); }
+
+.editor-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  color: #9ca3af;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 9px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.editor-btn:hover { color: #f9fafb; background: rgba(255, 255, 255, 0.1); }
+
+/* ─── VIEW SWITCHER ────────────────────────────────────────────────────────── */
+
+.view-switcher {
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  background: rgba(15, 17, 21, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+
+.view-btn {
+  padding: 5px 18px;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  border: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  color: #4b5563;
+  background: transparent;
+  transition: color 0.12s, background 0.12s;
+}
+
+.view-btn:last-child { border-right: none; }
+.view-btn:hover { color: #9ca3af; background: rgba(255, 255, 255, 0.04); }
+
+.view-btn-debug-active { background: rgba(255, 255, 255, 0.08) !important; color: #e5e7eb !important; }
+.view-btn-blue-active  { background: rgba(59, 130, 246, 0.22) !important; color: #93c5fd !important; }
+.view-btn-red-active   { background: rgba(239, 68, 68, 0.22)  !important; color: #fca5a5 !important; }
+
 /* ─── EVENT LOG ───────────────────────────────────────────────────────────── */
 
 .event-log {
@@ -157,7 +223,7 @@
 
 .unit-panel {
   position: absolute;
-  top: 56px;
+  top: 88px;
   right: 16px;
   width: 260px;
   background: rgba(15, 17, 21, 0.92);
@@ -220,6 +286,60 @@
   color: #6b7280;
   margin-bottom: 4px;
   line-height: 1.4;
+}
+
+.move-hint {
+  font-size: 10px;
+  font-style: italic;
+  color: #22c55e;
+  padding: 4px 6px;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+
+.move-hint-locked {
+  color: #6b7280;
+  background: rgba(107, 114, 128, 0.08);
+  border-color: rgba(107, 114, 128, 0.2);
+}
+
+.move-order-info {
+  background: rgba(96, 165, 250, 0.06);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  border-radius: 3px;
+  padding: 6px;
+  margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.move-order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+}
+
+.cancel-order-btn {
+  margin-top: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  align-self: flex-start;
+}
+
+.cancel-order-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
 }
 
 .unit-stat-row {

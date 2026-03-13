@@ -29,6 +29,16 @@ export interface Position {
   speed: number;
 }
 
+export interface Waypoint {
+  lat: number;
+  lon: number;
+  altMsl: number;
+}
+
+export interface MoveOrder {
+  waypoints: Waypoint[];
+}
+
 export interface UnitStatus {
   personnelStrength: number;
   equipmentStrength: number;
@@ -48,11 +58,11 @@ export interface Unit {
   fullName: string;
   side: string;  // "Blue" | "Red" | "Neutral"
   natoPendingSymbol: string;  // NATO APP-6D SIDC code
-  domain: number;
-  unitType: number;
+  definitionId: string;
   position: Position;
   status: UnitStatus;
   parentUnitId?: string;
+  moveOrder?: MoveOrder;
 }
 
 export type ScenarioState = "idle" | "paused" | "running" | "ended";
@@ -68,6 +78,11 @@ export interface SimStore {
   // ── Units ────────────────────────────────────────────────────────────────
   // Map keyed by unit ID for O(1) lookup and incremental delta merges.
   units: Map<string, Unit>;
+
+  // ── View ─────────────────────────────────────────────────────────────────
+  // Controls fog of war: "debug" shows all units; "blue"/"red" shows own
+  // side only (detected enemies added later by the adjudicator).
+  activeView: "debug" | "blue" | "red";
 
   // ── Selection ────────────────────────────────────────────────────────────
   selectedUnitId: string | null;
@@ -86,6 +101,7 @@ export interface SimStore {
   setSimTime: (seconds: number, tick: number) => void;
   appendEventLog: (entry: EventLogEntry) => void;
   selectUnit: (id: string | null) => void;
+  setActiveView: (view: "debug" | "blue" | "red") => void;
 }
 
 export interface EventLogEntry {
@@ -106,6 +122,7 @@ export const useSimStore = create<SimStore>((set) => ({
   simSeconds: 0,
   tickNumber: 0,
   units: new Map(),
+  activeView: "debug",
   selectedUnitId: null,
   eventLog: [],
 
@@ -158,4 +175,5 @@ export const useSimStore = create<SimStore>((set) => ({
     }),
 
   selectUnit: (selectedUnitId) => set({ selectedUnitId }),
+  setActiveView: (activeView) => set({ activeView }),
 }));

@@ -12,7 +12,10 @@ import (
 // this constant, the database is wiped and rebuilt from scratch. This is
 // acceptable for a single-player desktop application where the database is
 // purely derived state (the authoritative record lives in scenario files).
-const schemaVersion = 2
+const schemaVersion = 7
+
+// SchemaVersion returns the current schema version for logging.
+func SchemaVersion() int { return schemaVersion }
 
 // EnsureSchema checks the stored schema version. If it differs from
 // schemaVersion (or no version record exists), it wipes all tables and
@@ -40,7 +43,7 @@ func EnsureSchema(ctx context.Context, db *surrealdb.DB) error {
 
 	if stored != schemaVersion {
 		// Wipe all user tables and rebuild.
-		for _, tbl := range []string{"unit", "scenario", "checkpoint", "schema_meta"} {
+		for _, tbl := range []string{"unit", "scenario", "checkpoint", "unit_definition", "schema_meta"} {
 			if _, err := surrealdb.Query[any](ctx, db,
 				fmt.Sprintf("REMOVE TABLE IF EXISTS %s", tbl), nil); err != nil {
 				return fmt.Errorf("wipe table %s: %w", tbl, err)
@@ -100,11 +103,9 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS side              ON unit TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS nation_id         ON unit TYPE option<string>`,
 	`DEFINE FIELD IF NOT EXISTS nato_symbol_sidc  ON unit TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS definition_id     ON unit TYPE option<string>`,
 
-	// Classification (stored as int32 proto enum values)
-	`DEFINE FIELD IF NOT EXISTS domain            ON unit TYPE int`,
-	`DEFINE FIELD IF NOT EXISTS unit_function     ON unit TYPE int`,
-	`DEFINE FIELD IF NOT EXISTS unit_type         ON unit TYPE int`,
+	// Posture (stored as int32 proto enum value)
 	`DEFINE FIELD IF NOT EXISTS posture           ON unit TYPE int`,
 
 	// Geospatial — geometry<point> enables spatial range queries in Phase 2.
@@ -114,28 +115,19 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS heading           ON unit TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS speed             ON unit TYPE float`,
 
-	// Capabilities: immutable blob; written once at spawn, never updated.
-	`DEFINE FIELD IF NOT EXISTS capabilities_pb   ON unit TYPE bytes`,
-
 	// Status: mutable scalar fields; updated every checkpoint.
 	`DEFINE FIELD IF NOT EXISTS personnel_strength    ON unit TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS equipment_strength    ON unit TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS combat_effectiveness  ON unit TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS fuel_level_liters     ON unit TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS ammo_primary_pct      ON unit TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS ammo_secondary_pct    ON unit TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS ammo_missile_pct      ON unit TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS morale                ON unit TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS fatigue               ON unit TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS readiness             ON unit TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS is_active             ON unit TYPE bool`,
 
-	// Combat effect flags (bool; fast for casualty reports and analytics).
+	// Combat effect flags
 	`DEFINE FIELD IF NOT EXISTS suppressed        ON unit TYPE bool`,
 	`DEFINE FIELD IF NOT EXISTS disrupted         ON unit TYPE bool`,
 	`DEFINE FIELD IF NOT EXISTS routing           ON unit TYPE bool`,
-	`DEFINE FIELD IF NOT EXISTS exhausted         ON unit TYPE bool`,
-	`DEFINE FIELD IF NOT EXISTS mobility_kill     ON unit TYPE bool`,
 
 	// C2 hierarchy
 	`DEFINE FIELD IF NOT EXISTS parent_unit_id    ON unit TYPE option<string>`,
@@ -143,8 +135,34 @@ var schemaStatements = []string{
 	// Indexes
 	`DEFINE INDEX IF NOT EXISTS idx_unit_side     ON unit FIELDS side`,
 	`DEFINE INDEX IF NOT EXISTS idx_unit_active   ON unit FIELDS is_active`,
-	`DEFINE INDEX IF NOT EXISTS idx_unit_domain   ON unit FIELDS domain`,
 	`DEFINE INDEX IF NOT EXISTS idx_unit_pos      ON unit FIELDS position`,
+
+	// ── unit_definition ───────────────────────────────────────────────────────
+	// Canonical platform templates. Units reference these by definition_id slug.
+	// Stored as flat scalar fields for queryability.
+
+	`DEFINE TABLE IF NOT EXISTS unit_definition SCHEMAFULL`,
+
+	`DEFINE FIELD IF NOT EXISTS name               ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS description        ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS domain             ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS form               ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS general_type       ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS specific_type      ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS nation_of_origin   ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS service_entry_year ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS base_strength      ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS combat_range_m     ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS accuracy           ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS max_speed_mps      ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS cruise_speed_mps   ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS max_range_km       ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS survivability      ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS detection_range_m  ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS fuel_capacity_liters ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS fuel_burn_rate_lph ON unit_definition TYPE float`,
+
+	`DEFINE INDEX IF NOT EXISTS idx_unitdef_domain ON unit_definition FIELDS domain`,
 
 	// ── scenario ──────────────────────────────────────────────────────────────
 	// Scenario metadata + proto blob. The unit table holds live checkpointed
@@ -160,8 +178,8 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS schema_version    ON scenario TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS tick_rate_hz      ON scenario TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS time_scale        ON scenario TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS adj_model         ON scenario TYPE int`,
-	`DEFINE FIELD IF NOT EXISTS scenario_pb       ON scenario TYPE bytes`,
+	`DEFINE FIELD IF NOT EXISTS adj_model         ON scenario TYPE option<int>`,
+	`DEFINE FIELD IF NOT EXISTS scenario_pb       ON scenario TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS last_tick         ON scenario TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS last_sim_seconds  ON scenario TYPE float`,
 

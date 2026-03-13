@@ -6,7 +6,7 @@
  */
 
 import { EventsOn } from "../../wailsjs/runtime/runtime";
-import { useSimStore, Unit, EventLogEntry } from "../store/simStore";
+import { useSimStore, Unit, MoveOrder, EventLogEntry } from "../store/simStore";
 import { fromBinary } from "@bufbuild/protobuf";
 
 import {
@@ -25,6 +25,7 @@ import type {
   UnitDelta,
 } from "@proto/engine/v1/events_pb";
 import type { Unit as ProtoUnit } from "@proto/engine/v1/unit_pb";
+import type { MoveOrder as ProtoMoveOrder } from "@proto/engine/v1/common_pb";
 import type { OperationalStatus } from "@proto/engine/v1/status_pb";
 import { ScenarioPlayState } from "@proto/engine/v1/events_pb";
 
@@ -40,6 +41,17 @@ function b64ToBytes(b64: string): Uint8Array {
 }
 
 // ─── PROTO → STORE CONVERTERS ─────────────────────────────────────────────────
+
+function protoMoveOrderToStore(m: ProtoMoveOrder | undefined): MoveOrder | undefined {
+  if (!m) return undefined;
+  return {
+    waypoints: m.waypoints.map((wp) => ({
+      lat: wp.lat,
+      lon: wp.lon,
+      altMsl: wp.altMsl,
+    })),
+  };
+}
 
 function protoStatusToStore(s?: OperationalStatus): Unit["status"] {
   return {
@@ -63,8 +75,7 @@ export function protoUnitToStore(u: ProtoUnit): Unit {
     fullName: u.fullName,
     side: u.side,
     natoPendingSymbol: u.natoSymbolSidc,
-    domain: u.domain,
-    unitType: u.type,
+    definitionId: u.definitionId,
     position: {
       lat: u.position?.lat ?? 0,
       lon: u.position?.lon ?? 0,
@@ -74,6 +85,7 @@ export function protoUnitToStore(u: ProtoUnit): Unit {
     },
     status: protoStatusToStore(u.status),
     parentUnitId: u.parentUnitId || undefined,
+    moveOrder: protoMoveOrderToStore(u.moveOrder),
   };
 }
 
@@ -92,6 +104,12 @@ function applyDelta(delta: UnitDelta): void {
   }
   if (delta.status) {
     patch.status = protoStatusToStore(delta.status);
+  }
+  // moveOrder present in delta = update (empty waypoints = clear order)
+  if (delta.moveOrder !== undefined) {
+    patch.moveOrder = delta.moveOrder.waypoints.length > 0
+      ? protoMoveOrderToStore(delta.moveOrder)
+      : undefined;
   }
 
   store.applyUnitDelta(delta.unitId, patch);

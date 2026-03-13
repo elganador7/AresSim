@@ -3,6 +3,8 @@ package main
 import (
 	"embed"
 	"log"
+	"log/slog"
+	"os"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -19,6 +21,11 @@ import (
 var assets embed.FS
 
 func main() {
+	// Structured text logs to stderr — visible in the `wails dev` terminal.
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	})))
+
 	app := NewApp()
 
 	err := wails.Run(&options.App{
@@ -48,6 +55,9 @@ func main() {
 		},
 
 		// Platform-specific options.
+		// Enable browser DevTools in dev builds (right-click → Inspect, or Cmd+Option+I).
+		EnableDefaultContextMenu: true,
+
 		Mac: &mac.Options{
 			TitleBar: mac.TitleBarHiddenInset(),
 			About: &mac.AboutInfo{

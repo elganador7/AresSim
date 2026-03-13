@@ -9,12 +9,15 @@ package db
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -32,6 +35,12 @@ const (
 	healthCheckTimeout = 15 * time.Second
 	// shutdownGracePeriod is how long we wait for a clean shutdown before SIGKILL.
 	shutdownGracePeriod = 5 * time.Second
+
+	// UseInMemoryDB controls whether SurrealDB runs with the in-memory backend
+	// instead of the file-based surrealkv store. Set to true during development
+	// to avoid LOCK file conflicts and schema migration friction. All repository
+	// and schema code remains active — only the storage layer changes.
+	UseInMemoryDB = true
 )
 
 // Config holds all tunable parameters for the SurrealDB subprocess.
@@ -95,8 +104,21 @@ func (m *Manager) Start(ctx context.Context) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	if err := os.MkdirAll(m.cfg.DataDir, 0o700); err != nil {
-		return fmt.Errorf("create data dir %q: %w", m.cfg.DataDir, err)
+	// Kill any orphaned surreal processes from previous unclean exits.
+	// This is always needed — in-memory mode leaves no LOCK file, so port
+	// exhaustion is the only symptom of leaked processes.
+	killOrphanedSurrealProcesses(m.cfg.Port)
+
+	if !UseInMemoryDB {
+		if err := os.MkdirAll(m.cfg.DataDir, 0o700); err != nil {
+			return fmt.Errorf("create data dir %q: %w", m.cfg.DataDir, err)
+		}
+
+		// Remove a stale LOCK file left behind by a previous unclean shutdown.
+		lockPath := filepath.Join(m.cfg.DataDir, "surreal.db", "LOCK")
+		if err := os.Remove(lockPath); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("remove stale lock file: %w", err)
+		}
 	}
 
 	binary, err := m.resolveBinary()
@@ -117,6 +139,12 @@ func (m *Manager) Start(ctx context.Context) error {
 	// In production builds this will be suppressed by --log warn.
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
+
+	// Isolate SurrealDB in its own process group so that Ctrl-C on the
+	// terminal sends SIGINT only to the Wails process. Our signal handler
+	// (registered in app.go startup) will then call Manager.Stop() which
+	// sends SIGINT to SurrealDB gracefully before the parent exits.
+	setProcGroup(cmd)
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("start surreal process: %w", err)
@@ -184,11 +212,16 @@ func (m *Manager) DBName() string { return m.cfg.Database }
 // buildArgs constructs the surreal start argument list.
 // Compatible with SurrealDB 2.x and 3.x.
 func (m *Manager) buildArgs() []string {
-	dbPath := filepath.Join(m.cfg.DataDir, "surreal.db")
-	// SurrealDB 3.x requires an explicit engine prefix. The path must be a
-	// valid URI — spaces (e.g. "Application Support" on macOS) must be
-	// percent-encoded or SurrealDB exits immediately with status 1.
-	dbURI := (&url.URL{Scheme: "surrealkv", Host: "", Path: dbPath}).String()
+	var datastore string
+	if UseInMemoryDB {
+		datastore = "memory"
+	} else {
+		dbPath := filepath.Join(m.cfg.DataDir, "surreal.db")
+		// SurrealDB 3.x requires an explicit engine prefix. The path must be a
+		// valid URI — spaces (e.g. "Application Support" on macOS) must be
+		// percent-encoded or SurrealDB exits immediately with status 1.
+		datastore = (&url.URL{Scheme: "surrealkv", Host: "", Path: dbPath}).String()
+	}
 	return []string{
 		"start",
 		"--bind", fmt.Sprintf("127.0.0.1:%d", m.cfg.Port),
@@ -196,7 +229,7 @@ func (m *Manager) buildArgs() []string {
 		"--password", m.cfg.Password,
 		"--log", "warn",
 		"--no-banner",
-		dbURI,
+		datastore,
 	}
 }
 
@@ -270,6 +303,74 @@ func (m *Manager) waitReady(ctx context.Context, port int, exitCh <-chan error) 
 		time.Sleep(healthCheckInterval)
 	}
 	return fmt.Errorf("timeout after %s", healthCheckTimeout)
+}
+
+// killOrphanedSurrealProcesses kills any `surreal` processes listening on ports
+// in the range [preferredPort, preferredPort+9]. This covers both the file-based
+// and in-memory cases — in-memory mode leaves no LOCK file, so port occupation
+// is the only evidence of a leaked process from a previous unclean exit.
+func killOrphanedSurrealProcesses(preferredPort int) {
+	if runtime.GOOS == "windows" {
+		return
+	}
+	for port := preferredPort; port < preferredPort+10; port++ {
+		// lsof -ti tcp:<port> returns the PID of the process bound to that port.
+		out, err := exec.Command("lsof", "-ti", fmt.Sprintf("tcp:%d", port)).Output()
+		if err != nil || len(out) == 0 {
+			continue
+		}
+		for _, field := range strings.Fields(string(out)) {
+			pid, err := strconv.Atoi(field)
+			if err != nil {
+				continue
+			}
+			proc, err := os.FindProcess(pid)
+			if err != nil {
+				continue
+			}
+			slog.Info("killing orphaned surreal process", "pid", pid, "port", port)
+			_ = proc.Signal(os.Interrupt)
+			time.Sleep(300 * time.Millisecond)
+			_ = proc.Kill()
+		}
+	}
+}
+
+// killStaleProcess checks whether any OS process is holding the SurrealDB LOCK
+// file open and, if so, terminates it. This handles the case where a previous
+// app instance was killed with Ctrl-C before the graceful shutdown could run.
+//
+// On macOS/Linux we use lsof(8) which is available on all supported platforms.
+// On Windows we skip the check (the stale lock removal is sufficient because
+// Windows releases file locks when the process dies).
+func killStaleProcess(lockPath string) {
+	if runtime.GOOS == "windows" {
+		return
+	}
+	if _, err := os.Stat(lockPath); os.IsNotExist(err) {
+		return // No lock file — nothing to do.
+	}
+
+	// lsof -t returns one PID per line for every process that has the file open.
+	out, err := exec.Command("lsof", "-t", lockPath).Output()
+	if err != nil || len(out) == 0 {
+		return // lsof not available or no process holds the file.
+	}
+
+	for _, field := range strings.Fields(string(out)) {
+		pid, err := strconv.Atoi(field)
+		if err != nil {
+			continue
+		}
+		proc, err := os.FindProcess(pid)
+		if err != nil {
+			continue
+		}
+		slog.Info("killing stale surreal process", "pid", pid)
+		_ = proc.Signal(os.Interrupt) // Graceful first.
+		time.Sleep(600 * time.Millisecond)
+		_ = proc.Kill() // Force-kill if still alive.
+	}
 }
 
 // findFreePort returns the first free TCP port in [preferred, preferred+9].

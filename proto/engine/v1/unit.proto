@@ -13,32 +13,6 @@ enum UnitDomain {
   DOMAIN_SUBSURFACE  = 4;
 }
 
-enum UnitType {
-  UNIT_TYPE_UNSPECIFIED        = 0;
-  // Land
-  UNIT_TYPE_ARMOR              = 1;
-  UNIT_TYPE_MECHANIZED_INFANTRY = 2;
-  UNIT_TYPE_LIGHT_INFANTRY     = 3;
-  UNIT_TYPE_AIRBORNE           = 4;
-  UNIT_TYPE_SPECIAL_FORCES     = 7;
-  UNIT_TYPE_CAVALRY            = 8;
-  UNIT_TYPE_SP_ARTILLERY       = 10;
-  UNIT_TYPE_TOWED_ARTILLERY    = 11;
-  // Air
-  UNIT_TYPE_FIGHTER            = 32;
-  UNIT_TYPE_MULTIROLE          = 33;
-  UNIT_TYPE_ATTACK_AIRCRAFT    = 34;
-  UNIT_TYPE_TRANSPORT_AIRCRAFT = 36;
-  UNIT_TYPE_UAV_RECON          = 39;
-  // Sea
-  UNIT_TYPE_AIRCRAFT_CARRIER   = 50;
-  UNIT_TYPE_DESTROYER          = 51;
-  UNIT_TYPE_FRIGATE            = 52;
-  UNIT_TYPE_CORVETTE           = 53;
-  UNIT_TYPE_PATROL_BOAT        = 54;
-  UNIT_TYPE_ATTACK_SUBMARINE   = 57;
-}
-
 enum FormationPosture {
   POSTURE_UNSPECIFIED  = 0;
   POSTURE_TRAVELING    = 1;
@@ -56,10 +30,7 @@ message Unit {
   string display_name = 2; // Short designator e.g. "DDG-51"
   string full_name    = 3; // Full name e.g. "USS Arleigh Burke (DDG-51)"
   string side         = 4; // "Blue" | "Red" | "Neutral"
-
-  // Classification
-  UnitDomain  domain  = 7;
-  UnitType    type    = 9;
+  string definition_id = 5; // References UnitDefinition.id slug
 
   // Geospatial
   Position position = 10;
@@ -75,4 +46,7 @@ message Unit {
 
   // NATO APP-6D symbol identifier code
   string nato_symbol_sidc = 18;
+
+  // Current movement order. Cleared when all waypoints are reached.
+  MoveOrder move_order = 20;
 }

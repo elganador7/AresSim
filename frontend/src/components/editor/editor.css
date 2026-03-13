@@ -572,6 +572,15 @@
   flex-shrink: 0;
 }
 
+.palette-unit-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
 .palette-grip {
   font-size: 11px;
   color: #374151;
@@ -743,4 +752,177 @@
 
 .drop-dialog-footer .btn {
   flex: 1;
+}
+
+/* ── Unit Definition Manager ─────────────────────────────────────────────── */
+
+.defmgr-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 200;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.defmgr-shell {
+  display: flex;
+  flex-direction: column;
+  width: 900px;
+  max-width: 95vw;
+  background: #0f1117;
+  border: 1px solid #2a2d36;
+  border-radius: 6px;
+  margin: 24px auto;
+  overflow: hidden;
+}
+
+.defmgr-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #161920;
+  border-bottom: 1px solid #2a2d36;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.defmgr-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.defmgr-status {
+  font-size: 11px;
+  color: #22c55e;
+}
+
+.defmgr-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.defmgr-sidebar {
+  width: 220px;
+  min-width: 220px;
+  overflow-y: auto;
+  border-right: 1px solid #2a2d36;
+  padding: 8px 0;
+}
+
+.defmgr-domain-group {
+  margin-bottom: 8px;
+}
+
+.defmgr-domain-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px 4px;
+}
+
+.defmgr-item {
+  padding: 5px 12px 5px 22px;
+  font-size: 11px;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.1s;
+  position: relative;
+}
+
+.defmgr-item:hover { background: #1a1d25; }
+.defmgr-item.selected { background: #1e2233; color: #e2e8f0; }
+
+.defmgr-item-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.defmgr-item-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.defmgr-empty {
+  padding: 16px 12px;
+  font-size: 11px;
+  color: #475569;
+  text-align: center;
+}
+
+.defmgr-form-panel {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.defmgr-empty-form {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #475569;
+}
+
+/* ── Definition Form ─────────────────────────────────────────────────────── */
+
+.defform-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.defform-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px 8px;
+}
+
+.defform-error {
+  padding: 6px 16px;
+  font-size: 11px;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border-top: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.defform-footer {
+  padding: 10px 16px;
+  border-top: 1px solid #2a2d36;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Palette empty state ─────────────────────────────────────────────────── */
+
+.palette-empty {
+  padding: 12px;
+  font-size: 11px;
+  color: #475569;
+  text-align: center;
+  line-height: 1.5;
 }

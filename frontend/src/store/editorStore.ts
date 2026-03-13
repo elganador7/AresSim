@@ -15,8 +15,7 @@ export interface UnitDraft {
   displayName: string;
   fullName: string;
   side: "Blue" | "Red" | "Neutral";
-  domain: number;        // UnitDomain enum value
-  unitType: number;      // UnitType enum value
+  definitionId: string;
   natoSymbolSidc: string;
   lat: number;
   lon: number;
@@ -53,10 +52,32 @@ export interface ScenarioDraft {
 export interface PendingDrop {
   lat: number;
   lon: number;
-  domain: number;
-  unitType: number;
+  domain: number;      // kept for display color
+  definitionId: string;
   label: string;
   domainColor: string;
+}
+
+export interface UnitDefinitionDraft {
+  id: string;
+  name: string;
+  description: string;
+  domain: number;
+  form: number;
+  generalType: number;
+  specificType: string;
+  nationOfOrigin: string;
+  serviceEntryYear: number;
+  baseStrength: number;
+  combatRangeM: number;
+  accuracy: number;
+  maxSpeedMps: number;
+  cruiseSpeedMps: number;
+  maxRangeKm: number;
+  survivability: number;
+  detectionRangeM: number;
+  fuelCapacityLiters: number;
+  fuelBurnRateLph: number;
 }
 
 interface EditorState {
@@ -69,6 +90,7 @@ interface EditorState {
   pendingDrop: PendingDrop | null;
   /** Position set by clicking the globe — auto-fills lat/lon in unit form */
   pendingPosition: { lat: number; lon: number } | null;
+  unitDefinitions: UnitDefinitionDraft[];
 
   // Actions
   newDraft: () => void;
@@ -82,6 +104,9 @@ interface EditorState {
   setPendingPosition: (pos: { lat: number; lon: number } | null) => void;
   setPendingDrop: (drop: PendingDrop | null) => void;
   markClean: () => void;
+  loadUnitDefinitions: (defs: UnitDefinitionDraft[]) => void;
+  upsertUnitDefinition: (def: UnitDefinitionDraft) => void;
+  removeUnitDefinition: (id: string) => void;
 }
 
 // ─── DEFAULT VALUES ────────────────────────────────────────────────────────────
@@ -111,8 +136,7 @@ export function blankUnit(lat = 35.0, lon = 25.0): UnitDraft {
     displayName: "UNIT-1",
     fullName: "",
     side: "Blue",
-    domain: 1,          // DOMAIN_LAND
-    unitType: 1,        // UNIT_TYPE_ARMOR
+    definitionId: "",
     natoSymbolSidc: "",
     lat,
     lon,
@@ -137,6 +161,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   isDirty: false,
   pendingDrop: null,
   pendingPosition: null,
+  unitDefinitions: [],
 
   newDraft: () =>
     set({
@@ -191,4 +216,17 @@ export const useEditorStore = create<EditorState>((set) => ({
   setPendingDrop: (drop) => set({ pendingDrop: drop }),
 
   markClean: () => set({ isDirty: false }),
+
+  loadUnitDefinitions: (defs) => set({ unitDefinitions: defs }),
+  upsertUnitDefinition: (def) =>
+    set((s) => {
+      const existing = s.unitDefinitions.find((d) => d.id === def.id);
+      return {
+        unitDefinitions: existing
+          ? s.unitDefinitions.map((d) => (d.id === def.id ? def : d))
+          : [...s.unitDefinitions, def],
+      };
+    }),
+  removeUnitDefinition: (id) =>
+    set((s) => ({ unitDefinitions: s.unitDefinitions.filter((d) => d.id !== id) })),
 }));

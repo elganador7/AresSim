@@ -26,10 +26,15 @@ import {
   Math as CesiumMath,
   Cartesian2,
   ConstantProperty,
+  VerticalOrigin,
+  HorizontalOrigin,
+  NearFarScalar,
+  HeightReference,
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { useEditorStore, type UnitDraft } from "../../store/editorStore";
 import type { DragPayload } from "./UnitPalette";
+import { getUnitBillboardUrl } from "../../utils/unitBillboard";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -52,10 +57,10 @@ function getDropLatLon(
   };
 }
 
-const SIDE_COLORS: Record<string, Color> = {
-  Blue: Color.fromCssColorString("#3b82f6"),
-  Red: Color.fromCssColorString("#ef4444"),
-  Neutral: Color.fromCssColorString("#f59e0b"),
+const LABEL_COLORS: Record<string, Color> = {
+  Blue:    Color.fromCssColorString("#dbeafe"),
+  Red:     Color.fromCssColorString("#fee2e2"),
+  Neutral: Color.fromCssColorString("#fef3c7"),
 };
 
 // ─── PROPS ────────────────────────────────────────────────────────────────────
@@ -192,6 +197,11 @@ export default function EditorGlobe({
       const viewer = viewerRef.current;
       if (!viewer) return;
 
+      // Build definitionId → generalType lookup from current editor definitions.
+      const defs = useEditorStore.getState().unitDefinitions;
+      const defMap: Record<string, number> = {};
+      defs.forEach((d) => { defMap[d.id] = d.generalType; });
+
       const currentIds = new Set(units.map((u) => `editor-${u.id}`));
 
       // Remove stale entities
@@ -202,15 +212,18 @@ export default function EditorGlobe({
       }
 
       for (const unit of units) {
-        const color = SIDE_COLORS[unit.side] ?? Color.GRAY;
-        const pos = Cartesian3.fromDegrees(unit.lon, unit.lat, unit.altMsl);
-        const entityId = `editor-${unit.id}`;
-        const existing = viewer.entities.getById(entityId);
+        const generalType = defMap[unit.definitionId] ?? 0;
+        const labelColor  = LABEL_COLORS[unit.side] ?? Color.WHITE;
+        const pos         = Cartesian3.fromDegrees(unit.lon, unit.lat, unit.altMsl);
+        const entityId    = `editor-${unit.id}`;
+        const existing    = viewer.entities.getById(entityId);
 
         if (existing) {
           (existing.position as unknown as { setValue(p: Cartesian3): void }).setValue(pos);
-          if (existing.point) {
-            existing.point.color = new ConstantProperty(color);
+          if (existing.billboard) {
+            existing.billboard.image = new ConstantProperty(
+              getUnitBillboardUrl(generalType, unit.side),
+            );
           }
           if (existing.label) {
             existing.label.text = new ConstantProperty(unit.displayName);
@@ -219,21 +232,26 @@ export default function EditorGlobe({
           viewer.entities.add({
             id: entityId,
             position: pos,
-            point: {
-              pixelSize: 12,
-              color,
-              outlineColor: Color.WHITE,
-              outlineWidth: 1.5,
+            billboard: {
+              image: getUnitBillboardUrl(generalType, unit.side),
+              width: 36,
+              height: 36,
+              verticalOrigin: VerticalOrigin.CENTER,
+              horizontalOrigin: HorizontalOrigin.CENTER,
+              scaleByDistance: new NearFarScalar(1.5e5, 1.2, 8e6, 0.4),
               disableDepthTestDistance: Number.POSITIVE_INFINITY,
+              heightReference: HeightReference.CLAMP_TO_GROUND,
             },
             label: {
               text: unit.displayName,
               font: "bold 11px 'Courier New'",
-              fillColor: Color.WHITE,
+              fillColor: labelColor,
               outlineColor: Color.BLACK,
               outlineWidth: 2,
               style: 2, // FILL_AND_OUTLINE
-              pixelOffset: new Cartesian2(0, -18),
+              verticalOrigin: VerticalOrigin.BOTTOM,
+              horizontalOrigin: HorizontalOrigin.CENTER,
+              pixelOffset: new Cartesian2(0, -22),
               disableDepthTestDistance: Number.POSITIVE_INFINITY,
             },
             properties: { unitId: unit.id },
@@ -255,10 +273,9 @@ export default function EditorGlobe({
       if (!viewer) return;
       for (const entity of viewer.entities.values) {
         const uid = entity.properties?.unitId?.getValue?.();
-        if (!uid || !entity.point) continue;
-        const selected = uid === selectedId;
-        entity.point.pixelSize = new ConstantProperty(selected ? 18 : 12);
-        entity.point.outlineWidth = new ConstantProperty(selected ? 3 : 1.5);
+        if (!uid || !entity.billboard) continue;
+        const isSelected = uid === selectedId;
+        entity.billboard.scale = new ConstantProperty(isSelected ? 1.4 : 1.0);
       }
     };
     highlight(useEditorStore.getState().selectedUnitId);

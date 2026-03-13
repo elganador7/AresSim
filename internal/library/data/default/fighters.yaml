@@ -1,0 +1,1015 @@
+library:
+  id: "default-fighters-v1"
+  name: "Fixed Wing Fighter Aircraft"
+  description: "Comprehensive library of fixed-wing manned fighter and multirole aircraft currently in service with major air forces worldwide."
+  version: "1.0.0"
+  author: "AresSim Default Library"
+
+# ─── ENUM REFERENCE ───────────────────────────────────────────────────────────
+# domain:       2 = AIR
+# form:        10 = MANNED_FIXED_WING
+# general_type:10 = FIGHTER (air-superiority / interceptor)
+#              11 = MULTIROLE (air-to-air and air-to-ground capable)
+#
+# Speed reference (m/s at altitude, speed-of-sound ≈ 343 m/s):
+#   Mach 1.6 = 549   Mach 1.8 = 617   Mach 2.0 = 686
+#   Mach 2.25 = 772  Mach 2.35 = 807  Mach 3.0 = 1029
+# ─────────────────────────────────────────────────────────────────────────────
+
+definitions:
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # UNITED STATES
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: f22a-raptor
+    name: "F-22A Raptor"
+    description: "5th-generation air-superiority stealth fighter; the most capable air-to-air platform in US inventory. Supercruises at Mach 1.82 without afterburner."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "F-22A Raptor"
+    nation_of_origin: "USA"
+    service_entry_year: 2005
+    base_strength: 0.97
+    combat_range_m: 180000
+    accuracy: 0.95
+    max_speed_mps: 686
+    cruise_speed_mps: 625
+    max_range_km: 2960
+    survivability: 0.86
+    detection_range_m: 370000
+    fuel_capacity_liters: 8200
+    fuel_burn_rate_lph: 3500
+
+  - id: f15c-eagle
+    name: "F-15C Eagle"
+    description: "4th-generation dedicated air-superiority fighter with unmatched kill ratio. Still operated by USAF, Japan, and Saudi Arabia."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "F-15C Eagle"
+    nation_of_origin: "USA"
+    service_entry_year: 1979
+    base_strength: 0.82
+    combat_range_m: 120000
+    accuracy: 0.87
+    max_speed_mps: 807
+    cruise_speed_mps: 272
+    max_range_km: 3765
+    survivability: 0.68
+    detection_range_m: 185000
+    fuel_capacity_liters: 6103
+    fuel_burn_rate_lph: 4200
+
+  - id: f15ex-eagle-ii
+    name: "F-15EX Eagle II"
+    description: "Advanced 4th-generation air superiority fighter with EPAWSS electronic warfare suite and APG-82 AESA radar. USAF's newest Eagle variant."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "F-15EX Eagle II"
+    nation_of_origin: "USA"
+    service_entry_year: 2021
+    base_strength: 0.88
+    combat_range_m: 165000
+    accuracy: 0.91
+    max_speed_mps: 807
+    cruise_speed_mps: 272
+    max_range_km: 4400
+    survivability: 0.72
+    detection_range_m: 300000
+    fuel_capacity_liters: 6103
+    fuel_burn_rate_lph: 4000
+
+  - id: f16c-fighting-falcon
+    name: "F-16C Fighting Falcon"
+    description: "4th-generation lightweight multirole fighter; most widely exported Western fighter jet. Block 40/50/52 variants in widespread service."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "F-16C Fighting Falcon"
+    nation_of_origin: "USA"
+    service_entry_year: 1978
+    base_strength: 0.73
+    combat_range_m: 100000
+    accuracy: 0.82
+    max_speed_mps: 686
+    cruise_speed_mps: 272
+    max_range_km: 4220
+    survivability: 0.58
+    detection_range_m: 130000
+    fuel_capacity_liters: 3985
+    fuel_burn_rate_lph: 2800
+
+  - id: f16v-viper
+    name: "F-16V Viper"
+    description: "Upgraded F-16 Block 70/72 with APG-83 AESA radar, modernized avionics and Link 16. In service with Taiwan, Greece, Slovakia, Bahrain."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "F-16V Viper (Block 70/72)"
+    nation_of_origin: "USA"
+    service_entry_year: 2017
+    base_strength: 0.80
+    combat_range_m: 120000
+    accuracy: 0.88
+    max_speed_mps: 686
+    cruise_speed_mps: 272
+    max_range_km: 4220
+    survivability: 0.61
+    detection_range_m: 250000
+    fuel_capacity_liters: 3985
+    fuel_burn_rate_lph: 2700
+
+  - id: fa18e-super-hornet
+    name: "F/A-18E Super Hornet"
+    description: "4.5th-generation carrier-based multirole fighter. Single-seat variant; primary USN strike fighter."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "F/A-18E Super Hornet"
+    nation_of_origin: "USA"
+    service_entry_year: 1999
+    base_strength: 0.79
+    combat_range_m: 120000
+    accuracy: 0.86
+    max_speed_mps: 617
+    cruise_speed_mps: 260
+    max_range_km: 2346
+    survivability: 0.62
+    detection_range_m: 200000
+    fuel_capacity_liters: 6531
+    fuel_burn_rate_lph: 3200
+
+  - id: fa18f-super-hornet
+    name: "F/A-18F Super Hornet"
+    description: "Two-seat tandem carrier-based multirole fighter. Also operated by Royal Australian Air Force."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "F/A-18F Super Hornet"
+    nation_of_origin: "USA"
+    service_entry_year: 2002
+    base_strength: 0.78
+    combat_range_m: 120000
+    accuracy: 0.85
+    max_speed_mps: 617
+    cruise_speed_mps: 260
+    max_range_km: 2346
+    survivability: 0.62
+    detection_range_m: 200000
+    fuel_capacity_liters: 6531
+    fuel_burn_rate_lph: 3200
+
+  - id: f35a-lightning
+    name: "F-35A Lightning II (CTOL)"
+    description: "5th-generation conventional take-off and landing multirole stealth fighter. Operated by USAF, NATO allies, Japan, South Korea, Australia, Israel and others."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "F-35A Lightning II"
+    nation_of_origin: "USA"
+    service_entry_year: 2016
+    base_strength: 0.93
+    combat_range_m: 165000
+    accuracy: 0.93
+    max_speed_mps: 549
+    cruise_speed_mps: 292
+    max_range_km: 2220
+    survivability: 0.82
+    detection_range_m: 350000
+    fuel_capacity_liters: 8278
+    fuel_burn_rate_lph: 3000
+
+  - id: f35b-lightning
+    name: "F-35B Lightning II (STOVL)"
+    description: "5th-generation short take-off / vertical landing variant. Operated by USMC, UK Royal Navy/RAF, Italian Navy and Japan (MSDF)."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "F-35B Lightning II"
+    nation_of_origin: "USA"
+    service_entry_year: 2015
+    base_strength: 0.90
+    combat_range_m: 160000
+    accuracy: 0.92
+    max_speed_mps: 549
+    cruise_speed_mps: 292
+    max_range_km: 1670
+    survivability: 0.80
+    detection_range_m: 340000
+    fuel_capacity_liters: 6125
+    fuel_burn_rate_lph: 3200
+
+  - id: f35c-lightning
+    name: "F-35C Lightning II (CV)"
+    description: "5th-generation carrier variant with larger wing and strengthened undercarriage. Primary future USN carrier-based fighter."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "F-35C Lightning II"
+    nation_of_origin: "USA"
+    service_entry_year: 2019
+    base_strength: 0.91
+    combat_range_m: 165000
+    accuracy: 0.92
+    max_speed_mps: 549
+    cruise_speed_mps: 292
+    max_range_km: 2520
+    survivability: 0.81
+    detection_range_m: 345000
+    fuel_capacity_liters: 9070
+    fuel_burn_rate_lph: 2900
+
+  - id: fa18c-hornet
+    name: "F/A-18C Hornet"
+    description: "4th-generation carrier-based multirole fighter. Legacy Hornet still operated by Finland (transitioning), Canada (CF-18A), and Kuwait."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "F/A-18C Hornet"
+    nation_of_origin: "USA"
+    service_entry_year: 1987
+    base_strength: 0.68
+    combat_range_m: 80000
+    accuracy: 0.80
+    max_speed_mps: 617
+    cruise_speed_mps: 257
+    max_range_km: 1990
+    survivability: 0.55
+    detection_range_m: 120000
+    fuel_capacity_liters: 4926
+    fuel_burn_rate_lph: 2900
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # RUSSIA
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: su27s-flanker-b
+    name: "Su-27S Flanker-B"
+    description: "4th-generation dedicated air-superiority fighter. Long range and high agility; backbone of Russian, Ukrainian, and several export air forces."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "Su-27S Flanker-B"
+    nation_of_origin: "RUS"
+    service_entry_year: 1985
+    base_strength: 0.77
+    combat_range_m: 100000
+    accuracy: 0.80
+    max_speed_mps: 807
+    cruise_speed_mps: 295
+    max_range_km: 3530
+    survivability: 0.64
+    detection_range_m: 150000
+    fuel_capacity_liters: 9400
+    fuel_burn_rate_lph: 5200
+
+  - id: su30sm-flanker-h
+    name: "Su-30SM Flanker-H"
+    description: "4th-generation twin-seat multirole derivative of the Su-27. Thrust vectoring, canards, and updated avionics. Primary VKS multirole platform."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "Su-30SM Flanker-H"
+    nation_of_origin: "RUS"
+    service_entry_year: 2012
+    base_strength: 0.83
+    combat_range_m: 110000
+    accuracy: 0.84
+    max_speed_mps: 772
+    cruise_speed_mps: 295
+    max_range_km: 3000
+    survivability: 0.66
+    detection_range_m: 180000
+    fuel_capacity_liters: 9640
+    fuel_burn_rate_lph: 5000
+
+  - id: su35s-flanker-e
+    name: "Su-35S Flanker-E"
+    description: "4++ generation air superiority fighter. Irbis-E PESA radar with 400 km range; 3D thrust-vectoring; the most capable non-stealth Russian fighter."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "Su-35S Flanker-E"
+    nation_of_origin: "RUS"
+    service_entry_year: 2014
+    base_strength: 0.88
+    combat_range_m: 200000
+    accuracy: 0.87
+    max_speed_mps: 772
+    cruise_speed_mps: 295
+    max_range_km: 3600
+    survivability: 0.70
+    detection_range_m: 400000
+    fuel_capacity_liters: 11500
+    fuel_burn_rate_lph: 5500
+
+  - id: su57-felon
+    name: "Su-57 Felon"
+    description: "Russia's 5th-generation stealth multirole fighter. Internal weapons bays, AESA radar suite, supercruise capability. Limited production numbers."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "Su-57 Felon"
+    nation_of_origin: "RUS"
+    service_entry_year: 2020
+    base_strength: 0.92
+    combat_range_m: 300000
+    accuracy: 0.90
+    max_speed_mps: 686
+    cruise_speed_mps: 617
+    max_range_km: 5500
+    survivability: 0.78
+    detection_range_m: 400000
+    fuel_capacity_liters: 11000
+    fuel_burn_rate_lph: 4500
+
+  - id: mig29s-fulcrum-c
+    name: "MiG-29S Fulcrum-C"
+    description: "4th-generation lightweight multirole fighter. Widely exported; in service with Russia, Ukraine, Poland, India, Algeria, Syria, Cuba, and many others."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "MiG-29S Fulcrum-C"
+    nation_of_origin: "RUS"
+    service_entry_year: 1983
+    base_strength: 0.67
+    combat_range_m: 80000
+    accuracy: 0.76
+    max_speed_mps: 772
+    cruise_speed_mps: 280
+    max_range_km: 2100
+    survivability: 0.54
+    detection_range_m: 100000
+    fuel_capacity_liters: 4360
+    fuel_burn_rate_lph: 3000
+
+  - id: mig29m-fulcrum-e
+    name: "MiG-29M/M2 Fulcrum-E"
+    description: "Modernized MiG-29 with new fly-by-wire system, enlarged fuel capacity, and Zhuk-ME radar. Operated by Egypt, Algeria, and the Russian Navy."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "MiG-29M Fulcrum-E"
+    nation_of_origin: "RUS"
+    service_entry_year: 2013
+    base_strength: 0.73
+    combat_range_m: 100000
+    accuracy: 0.80
+    max_speed_mps: 772
+    cruise_speed_mps: 280
+    max_range_km: 2900
+    survivability: 0.57
+    detection_range_m: 140000
+    fuel_capacity_liters: 5300
+    fuel_burn_rate_lph: 2900
+
+  - id: mig31bm-foxhound
+    name: "MiG-31BM Foxhound"
+    description: "Dedicated long-range supersonic interceptor. Carries the R-37M missile with a 300 km+ range; Zaslon PESA radar with 400 km detection range. Maximum speed Mach 2.83."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "MiG-31BM Foxhound"
+    nation_of_origin: "RUS"
+    service_entry_year: 1981
+    base_strength: 0.82
+    combat_range_m: 300000
+    accuracy: 0.84
+    max_speed_mps: 972
+    cruise_speed_mps: 807
+    max_range_km: 3000
+    survivability: 0.64
+    detection_range_m: 400000
+    fuel_capacity_liters: 15500
+    fuel_burn_rate_lph: 7000
+
+  - id: mig35s-fulcrum-f
+    name: "MiG-35S Fulcrum-F"
+    description: "4++ generation multirole derivative of MiG-29 with Zhuk-AE AESA radar, IRST, and enhanced avionics. Limited production for VKS."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "MiG-35S Fulcrum-F"
+    nation_of_origin: "RUS"
+    service_entry_year: 2019
+    base_strength: 0.75
+    combat_range_m: 110000
+    accuracy: 0.82
+    max_speed_mps: 772
+    cruise_speed_mps: 280
+    max_range_km: 3100
+    survivability: 0.58
+    detection_range_m: 200000
+    fuel_capacity_liters: 5200
+    fuel_burn_rate_lph: 2800
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # CHINA
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: j20a-mighty-dragon
+    name: "J-20A Mighty Dragon"
+    description: "China's 5th-generation stealth air-superiority fighter with WS-10C engines. Internal weapons bays with PL-15 BVR and PL-10 WVR missiles."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "J-20A Mighty Dragon"
+    nation_of_origin: "CHN"
+    service_entry_year: 2017
+    base_strength: 0.91
+    combat_range_m: 200000
+    accuracy: 0.90
+    max_speed_mps: 686
+    cruise_speed_mps: 292
+    max_range_km: 5500
+    survivability: 0.80
+    detection_range_m: 300000
+    fuel_capacity_liters: 11000
+    fuel_burn_rate_lph: 4200
+
+  - id: j20b-mighty-dragon
+    name: "J-20B Mighty Dragon"
+    description: "Improved J-20 variant with WS-15 Emei high-thrust turbofan enabling sustained supercruise. Enhanced sensors and reduced radar cross-section."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "J-20B Mighty Dragon"
+    nation_of_origin: "CHN"
+    service_entry_year: 2023
+    base_strength: 0.94
+    combat_range_m: 200000
+    accuracy: 0.92
+    max_speed_mps: 686
+    cruise_speed_mps: 617
+    max_range_km: 5500
+    survivability: 0.83
+    detection_range_m: 350000
+    fuel_capacity_liters: 11000
+    fuel_burn_rate_lph: 4000
+
+  - id: j11b-flanker
+    name: "J-11B"
+    description: "China's reverse-engineered and domestically produced Su-27SK derivative with Chinese avionics and WS-10A engines. Air-superiority role."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "J-11B"
+    nation_of_origin: "CHN"
+    service_entry_year: 2003
+    base_strength: 0.76
+    combat_range_m: 100000
+    accuracy: 0.79
+    max_speed_mps: 807
+    cruise_speed_mps: 295
+    max_range_km: 3530
+    survivability: 0.64
+    detection_range_m: 160000
+    fuel_capacity_liters: 9400
+    fuel_burn_rate_lph: 5100
+
+  - id: j16-flanker
+    name: "J-16"
+    description: "4th-generation twin-seat multirole strike fighter derived from Su-30MKK. AESA radar, PL-15/PL-10 missiles, and PL-12D anti-radiation missiles."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "J-16"
+    nation_of_origin: "CHN"
+    service_entry_year: 2013
+    base_strength: 0.83
+    combat_range_m: 130000
+    accuracy: 0.85
+    max_speed_mps: 772
+    cruise_speed_mps: 295
+    max_range_km: 4000
+    survivability: 0.67
+    detection_range_m: 220000
+    fuel_capacity_liters: 9640
+    fuel_burn_rate_lph: 5000
+
+  - id: j10c-vigorous-dragon
+    name: "J-10C Vigorous Dragon"
+    description: "4.5th-generation single-engine delta-canard multirole fighter with KLJ-7A AESA radar and PL-15 BVR missile. Exported to Pakistan."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "J-10C Vigorous Dragon"
+    nation_of_origin: "CHN"
+    service_entry_year: 2018
+    base_strength: 0.78
+    combat_range_m: 150000
+    accuracy: 0.85
+    max_speed_mps: 686
+    cruise_speed_mps: 275
+    max_range_km: 1850
+    survivability: 0.62
+    detection_range_m: 200000
+    fuel_capacity_liters: 4500
+    fuel_burn_rate_lph: 2800
+
+  - id: j15-flying-shark
+    name: "J-15 Flying Shark"
+    description: "Carrier-based naval fighter derived from the Su-33. Operates from PLAN Liaoning and Shandong carriers. Now joined by the J-15T catapult variant."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "J-15 Flying Shark"
+    nation_of_origin: "CHN"
+    service_entry_year: 2013
+    base_strength: 0.78
+    combat_range_m: 110000
+    accuracy: 0.82
+    max_speed_mps: 772
+    cruise_speed_mps: 280
+    max_range_km: 3500
+    survivability: 0.63
+    detection_range_m: 180000
+    fuel_capacity_liters: 9400
+    fuel_burn_rate_lph: 5000
+
+  - id: jf17-thunder-blk3
+    name: "JF-17 Thunder Block III"
+    description: "4th-generation lightweight single-engine multirole fighter jointly developed by Pakistan and China. Block III features KLJ-7A AESA radar and PL-15 integration."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "JF-17 Thunder Block III"
+    nation_of_origin: "CHN"
+    service_entry_year: 2021
+    base_strength: 0.68
+    combat_range_m: 100000
+    accuracy: 0.80
+    max_speed_mps: 549
+    cruise_speed_mps: 265
+    max_range_km: 1350
+    survivability: 0.52
+    detection_range_m: 150000
+    fuel_capacity_liters: 2300
+    fuel_burn_rate_lph: 2200
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # EUROPE
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: eurofighter-typhoon-t3
+    name: "Eurofighter Typhoon Tranche 3"
+    description: "4.5th-generation twin-engine canard-delta multirole fighter. Operated by UK, Germany, Italy, Spain, Saudi Arabia, Qatar, Kuwait. Tranche 3 includes Captor-E AESA radar and Meteor integration."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "Eurofighter Typhoon Tranche 3"
+    nation_of_origin: "GBR"
+    service_entry_year: 2003
+    base_strength: 0.87
+    combat_range_m: 200000
+    accuracy: 0.89
+    max_speed_mps: 686
+    cruise_speed_mps: 515
+    max_range_km: 3790
+    survivability: 0.72
+    detection_range_m: 250000
+    fuel_capacity_liters: 4996
+    fuel_burn_rate_lph: 3400
+
+  - id: eurofighter-typhoon-t1t2
+    name: "Eurofighter Typhoon Tranche 1/2"
+    description: "Earlier Typhoon tranches with Captor-M pulse-Doppler radar. AMRAAM capable but lacks Meteor. In service with Germany, Spain, Austria, Italy, and others."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "Eurofighter Typhoon Tranche 1/2"
+    nation_of_origin: "GBR"
+    service_entry_year: 2003
+    base_strength: 0.82
+    combat_range_m: 120000
+    accuracy: 0.85
+    max_speed_mps: 686
+    cruise_speed_mps: 515
+    max_range_km: 3790
+    survivability: 0.70
+    detection_range_m: 180000
+    fuel_capacity_liters: 4996
+    fuel_burn_rate_lph: 3500
+
+  - id: rafale-f3r
+    name: "Dassault Rafale F3-R"
+    description: "4.5th-generation twin-engine omnirole canard-delta fighter. RBE2-AA AESA radar, OSF IRST, Meteor and MICA BVR missiles. Exported to India, Egypt, Greece, Qatar, UAE, Indonesia, Croatia."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "Dassault Rafale F3-R"
+    nation_of_origin: "FRA"
+    service_entry_year: 2001
+    base_strength: 0.86
+    combat_range_m: 200000
+    accuracy: 0.90
+    max_speed_mps: 617
+    cruise_speed_mps: 290
+    max_range_km: 3700
+    survivability: 0.71
+    detection_range_m: 200000
+    fuel_capacity_liters: 4700
+    fuel_burn_rate_lph: 3200
+
+  - id: jas39c-gripen
+    name: "Saab JAS 39C Gripen"
+    description: "4th-generation lightweight single-engine canard-delta multirole fighter. Operated by Sweden, Czech Republic, Hungary, South Africa, and Thailand."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "JAS 39C Gripen"
+    nation_of_origin: "SWE"
+    service_entry_year: 1997
+    base_strength: 0.73
+    combat_range_m: 100000
+    accuracy: 0.83
+    max_speed_mps: 686
+    cruise_speed_mps: 280
+    max_range_km: 3200
+    survivability: 0.59
+    detection_range_m: 150000
+    fuel_capacity_liters: 2268
+    fuel_burn_rate_lph: 2000
+
+  - id: jas39e-gripen
+    name: "Saab JAS 39E Gripen"
+    description: "4.5th-generation advanced Gripen with AESA radar, expanded fuel capacity, and Meteor BVR integration. Operated by Sweden and Brazil."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "JAS 39E Gripen"
+    nation_of_origin: "SWE"
+    service_entry_year: 2020
+    base_strength: 0.81
+    combat_range_m: 200000
+    accuracy: 0.88
+    max_speed_mps: 686
+    cruise_speed_mps: 285
+    max_range_km: 4000
+    survivability: 0.64
+    detection_range_m: 250000
+    fuel_capacity_liters: 3400
+    fuel_burn_rate_lph: 2200
+
+  - id: mirage2000-5
+    name: "Dassault Mirage 2000-5"
+    description: "4th-generation single-engine delta-wing multirole fighter. RDY-2 multimode radar, MICA BVR missiles. Operated by France, India, Greece, Qatar, UAE, Taiwan, Peru."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "Mirage 2000-5"
+    nation_of_origin: "FRA"
+    service_entry_year: 1997
+    base_strength: 0.73
+    combat_range_m: 100000
+    accuracy: 0.82
+    max_speed_mps: 748
+    cruise_speed_mps: 275
+    max_range_km: 1850
+    survivability: 0.57
+    detection_range_m: 130000
+    fuel_capacity_liters: 3160
+    fuel_burn_rate_lph: 2500
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # ISRAEL
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: f15i-raam
+    name: "F-15I Ra'am"
+    description: "Israeli Air Force dedicated long-range strike variant of the F-15D with conformal tanks, Israeli EW suite (Elisra SPS-2110), and Python 4/5 missiles."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "F-15I Ra'am"
+    nation_of_origin: "ISR"
+    service_entry_year: 1998
+    base_strength: 0.87
+    combat_range_m: 130000
+    accuracy: 0.90
+    max_speed_mps: 807
+    cruise_speed_mps: 272
+    max_range_km: 4450
+    survivability: 0.70
+    detection_range_m: 200000
+    fuel_capacity_liters: 6103
+    fuel_burn_rate_lph: 4100
+
+  - id: f16i-sufa
+    name: "F-16I Sufa"
+    description: "Israeli Air Force heavily modified F-16D Block 52+ with conformal tanks, Israeli avionics, Python 5 missiles, and Litening targeting pod."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "F-16I Sufa"
+    nation_of_origin: "ISR"
+    service_entry_year: 2004
+    base_strength: 0.81
+    combat_range_m: 100000
+    accuracy: 0.88
+    max_speed_mps: 686
+    cruise_speed_mps: 272
+    max_range_km: 4100
+    survivability: 0.63
+    detection_range_m: 170000
+    fuel_capacity_liters: 5580
+    fuel_burn_rate_lph: 2700
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # INDIA
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: su30mki-flanker
+    name: "Su-30MKI Flanker-H"
+    description: "Indian Air Force's primary multirole fighter; a highly modified Su-30 with French avionics, Israeli EW, thrust-vectoring AL-31FP engines, and N011M BARS PESA radar."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "Su-30MKI Flanker-H"
+    nation_of_origin: "IND"
+    service_entry_year: 2002
+    base_strength: 0.84
+    combat_range_m: 120000
+    accuracy: 0.84
+    max_speed_mps: 772
+    cruise_speed_mps: 295
+    max_range_km: 3000
+    survivability: 0.67
+    detection_range_m: 200000
+    fuel_capacity_liters: 9640
+    fuel_burn_rate_lph: 5000
+
+  - id: mig29k-fulcrum-d
+    name: "MiG-29K Fulcrum-D"
+    description: "Carrier-based multirole variant of the MiG-29 with folding wings, Zhuk-ME PESA radar, and air-to-ground capability. Operated by Indian Navy (INS Vikrant/Vikramaditya)."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "MiG-29K Fulcrum-D"
+    nation_of_origin: "RUS"
+    service_entry_year: 2010
+    base_strength: 0.72
+    combat_range_m: 100000
+    accuracy: 0.79
+    max_speed_mps: 686
+    cruise_speed_mps: 275
+    max_range_km: 1600
+    survivability: 0.56
+    detection_range_m: 130000
+    fuel_capacity_liters: 5800
+    fuel_burn_rate_lph: 3100
+
+  - id: tejas-mk1a
+    name: "HAL Tejas Mk1A"
+    description: "India's domestically developed 4th-generation lightweight delta-wing multirole fighter. EL/M-2052 AESA radar, BVR capability with Derby/Astra missiles."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "HAL Tejas Mk1A"
+    nation_of_origin: "IND"
+    service_entry_year: 2025
+    base_strength: 0.70
+    combat_range_m: 80000
+    accuracy: 0.80
+    max_speed_mps: 549
+    cruise_speed_mps: 265
+    max_range_km: 1850
+    survivability: 0.55
+    detection_range_m: 150000
+    fuel_capacity_liters: 2458
+    fuel_burn_rate_lph: 2200
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # JAPAN
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: f15j-eagle
+    name: "F-15J Eagle"
+    description: "Japanese license-built air-superiority variant of the F-15C with AAM-3/AAM-4/AAM-5 missiles. Upgraded MSIP-II aircraft receiving J/APG-2 AESA radar."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "F-15J Eagle"
+    nation_of_origin: "JPN"
+    service_entry_year: 1981
+    base_strength: 0.80
+    combat_range_m: 120000
+    accuracy: 0.86
+    max_speed_mps: 807
+    cruise_speed_mps: 272
+    max_range_km: 3765
+    survivability: 0.66
+    detection_range_m: 185000
+    fuel_capacity_liters: 6103
+    fuel_burn_rate_lph: 4200
+
+  - id: f2-viper-zero
+    name: "Mitsubishi F-2"
+    description: "Japan's 4th-generation multirole fighter developed from the F-16, with 25% larger composite wing, J/APG-1 AESA radar, and ASM-1C anti-ship missile integration."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "Mitsubishi F-2"
+    nation_of_origin: "JPN"
+    service_entry_year: 2000
+    base_strength: 0.78
+    combat_range_m: 100000
+    accuracy: 0.84
+    max_speed_mps: 600
+    cruise_speed_mps: 270
+    max_range_km: 4000
+    survivability: 0.61
+    detection_range_m: 180000
+    fuel_capacity_liters: 4750
+    fuel_burn_rate_lph: 2900
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # SOUTH KOREA
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: f15k-slam-eagle
+    name: "F-15K Slam Eagle"
+    description: "South Korean advanced strike/air superiority variant of the F-15E with AN/APG-63(V)1 radar, CFTs, and Taurus KEPD 350 stand-off cruise missile."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "F-15K Slam Eagle"
+    nation_of_origin: "KOR"
+    service_entry_year: 2005
+    base_strength: 0.86
+    combat_range_m: 130000
+    accuracy: 0.89
+    max_speed_mps: 807
+    cruise_speed_mps: 272
+    max_range_km: 4400
+    survivability: 0.70
+    detection_range_m: 200000
+    fuel_capacity_liters: 6103
+    fuel_burn_rate_lph: 4000
+
+  - id: kf21-boramae
+    name: "KAI KF-21 Boramae"
+    description: "South Korea's indigenously developed 4.5th-generation twin-engine multirole fighter. AESA radar, 10 hardpoints, entering service 2026. METEOR BVR planned."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "KAI KF-21 Boramae"
+    nation_of_origin: "KOR"
+    service_entry_year: 2026
+    base_strength: 0.82
+    combat_range_m: 150000
+    accuracy: 0.87
+    max_speed_mps: 617
+    cruise_speed_mps: 280
+    max_range_km: 2900
+    survivability: 0.65
+    detection_range_m: 250000
+    fuel_capacity_liters: 4800
+    fuel_burn_rate_lph: 3000
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # TAIWAN
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: f-ck1-ching-kuo
+    name: "AIDC F-CK-1 Ching-kuo"
+    description: "Taiwan's indigenously designed lightweight multirole fighter. GD-53 Golden Dragon multimode radar; armed with TC-2 BVRAAM (Tien Chien II)."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "AIDC F-CK-1C/D Ching-kuo"
+    nation_of_origin: "TWN"
+    service_entry_year: 1994
+    base_strength: 0.62
+    combat_range_m: 60000
+    accuracy: 0.76
+    max_speed_mps: 617
+    cruise_speed_mps: 260
+    max_range_km: 1100
+    survivability: 0.50
+    detection_range_m: 90000
+    fuel_capacity_liters: 2000
+    fuel_burn_rate_lph: 2000
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # UNITED ARAB EMIRATES
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: f16e-desert-falcon
+    name: "F-16E/F Block 60 Desert Falcon"
+    description: "The most capable F-16 variant; UAE-specific Block 60 with AESA radar, CFTs, internal FLIR/laser, and the APG-80 AESA radar. Only operated by UAE."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "F-16E Block 60 Desert Falcon"
+    nation_of_origin: "USA"
+    service_entry_year: 2004
+    base_strength: 0.83
+    combat_range_m: 130000
+    accuracy: 0.89
+    max_speed_mps: 686
+    cruise_speed_mps: 272
+    max_range_km: 4220
+    survivability: 0.65
+    detection_range_m: 260000
+    fuel_capacity_liters: 5985
+    fuel_burn_rate_lph: 2700
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # IRAN
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: f14a-tomcat-iriaf
+    name: "F-14A Tomcat (IRIAF)"
+    description: "Iran is the world's last operator of the F-14 Tomcat. Severely degraded by sanctions and lack of spares; estimated ~20-30 are airworthy. AWG-9 radar and AIM-54 Phoenix still theoretically operational."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "F-14A Tomcat (IRIAF)"
+    nation_of_origin: "IRN"
+    service_entry_year: 1976
+    base_strength: 0.50
+    combat_range_m: 100000
+    accuracy: 0.58
+    max_speed_mps: 807
+    cruise_speed_mps: 265
+    max_range_km: 3200
+    survivability: 0.42
+    detection_range_m: 185000
+    fuel_capacity_liters: 9344
+    fuel_burn_rate_lph: 4800
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # SAUDI ARABIA
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: f15sa-strike-eagle
+    name: "F-15SA"
+    description: "Saudi Arabia's advanced F-15S/SA upgrade with APG-63(V)3 AESA radar, digital flight controls, 3D TVC nozzles, and expanded weapons suite. Among the most capable F-15 variants."
+    domain: 2
+    form: 10
+    general_type: 10
+    specific_type: "F-15SA"
+    nation_of_origin: "USA"
+    service_entry_year: 2016
+    base_strength: 0.88
+    combat_range_m: 140000
+    accuracy: 0.90
+    max_speed_mps: 807
+    cruise_speed_mps: 272
+    max_range_km: 4400
+    survivability: 0.71
+    detection_range_m: 280000
+    fuel_capacity_liters: 6103
+    fuel_burn_rate_lph: 4000
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # ALGERIA
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: su30mka-flanker
+    name: "Su-30MKA Flanker-H"
+    description: "Algeria's highly capable Su-30MK variant with French and Russian avionics. Thrust vectoring, BARS PESA radar. Largest Su-30 operator in Africa."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "Su-30MKA Flanker-H"
+    nation_of_origin: "DZA"
+    service_entry_year: 2007
+    base_strength: 0.82
+    combat_range_m: 110000
+    accuracy: 0.83
+    max_speed_mps: 772
+    cruise_speed_mps: 295
+    max_range_km: 3000
+    survivability: 0.65
+    detection_range_m: 180000
+    fuel_capacity_liters: 9640
+    fuel_burn_rate_lph: 5000
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # UKRAINE / OTHER CIS OPERATORS
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - id: mig29-ukraine
+    name: "MiG-29 (Ukraine)"
+    description: "Ukrainian Air Force MiG-29 variants, some upgraded with Western avionics under wartime cooperation. Receiving AIM-120C-7 AMRAAM integration."
+    domain: 2
+    form: 10
+    general_type: 11
+    specific_type: "MiG-29 (UAF Upgraded)"
+    nation_of_origin: "UKR"
+    service_entry_year: 1985
+    base_strength: 0.66
+    combat_range_m: 100000
+    accuracy: 0.78
+    max_speed_mps: 772
+    cruise_speed_mps: 280
+    max_range_km: 2100
+    survivability: 0.52
+    detection_range_m: 130000
+    fuel_capacity_liters: 4360
+    fuel_burn_rate_lph: 3000

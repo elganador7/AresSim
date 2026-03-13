@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/common.proto.
  */
 export const file_engine_v1_common: GenFile = /*@__PURE__*/
-  fileDesc("ChZlbmdpbmUvdjEvY29tbW9uLnByb3RvEgllbmdpbmUudjEiVQoIUG9zaXRpb24SCwoDbGF0GAEgASgBEgsKA2xvbhgCIAEoARIPCgdhbHRfbXNsGAMgASgBEg8KB2hlYWRpbmcYBCABKAESDQoFc3BlZWQYBSABKAEiNwoHU2ltVGltZRIXCg9zZWNvbmRzX2VsYXBzZWQYASABKAESEwoLdGlja19udW1iZXIYAiABKAMisQEKEVdlYXRoZXJDb25kaXRpb25zEiYKBXN0YXRlGAEgASgOMhcuZW5naW5lLnYxLldlYXRoZXJTdGF0ZRIVCg12aXNpYmlsaXR5X2ttGAIgASgCEhYKDndpbmRfc3BlZWRfbXBzGAMgASgCEhUKDXByZWNpcGl0YXRpb24YBCABKAgSFQoNdGVtcGVyYXR1cmVfYxgFIAEoAhIXCg9jbG91ZF9jZWlsaW5nX20YBiABKAIiMQoPT3BlcmF0aW9uUmVzdWx0Eg8KB3N1Y2Nlc3MYASABKAgSDQoFZXJyb3IYAiABKAkqswEKDFdlYXRoZXJTdGF0ZRIXChNXRUFUSEVSX1VOU1BFQ0lGSUVEEAASEQoNV0VBVEhFUl9DTEVBUhABEhQKEFdFQVRIRVJfT1ZFUkNBU1QQAhIPCgtXRUFUSEVSX0ZPRxADEhAKDFdFQVRIRVJfUkFJThAEEhYKEldFQVRIRVJfSEVBVllfUkFJThAFEhAKDFdFQVRIRVJfU05PVxAGEhQKEFdFQVRIRVJfQkxJWlpBUkQQB0IrWilnaXRodWIuY29tL2FyZXNzaW0vaW50ZXJuYWwvZ2VuL2VuZ2luZS92MWIGcHJvdG8z");
+  fileDesc("ChZlbmdpbmUvdjEvY29tbW9uLnByb3RvEgllbmdpbmUudjEiVQoIUG9zaXRpb24SCwoDbGF0GAEgASgBEgsKA2xvbhgCIAEoARIPCgdhbHRfbXNsGAMgASgBEg8KB2hlYWRpbmcYBCABKAESDQoFc3BlZWQYBSABKAEiNwoHU2ltVGltZRIXCg9zZWNvbmRzX2VsYXBzZWQYASABKAESEwoLdGlja19udW1iZXIYAiABKAMisQEKEVdlYXRoZXJDb25kaXRpb25zEiYKBXN0YXRlGAEgASgOMhcuZW5naW5lLnYxLldlYXRoZXJTdGF0ZRIVCg12aXNpYmlsaXR5X2ttGAIgASgCEhYKDndpbmRfc3BlZWRfbXBzGAMgASgCEhUKDXByZWNpcGl0YXRpb24YBCABKAgSFQoNdGVtcGVyYXR1cmVfYxgFIAEoAhIXCg9jbG91ZF9jZWlsaW5nX20YBiABKAIiMQoPT3BlcmF0aW9uUmVzdWx0Eg8KB3N1Y2Nlc3MYASABKAgSDQoFZXJyb3IYAiABKAkiNQoIV2F5cG9pbnQSCwoDbGF0GAEgASgBEgsKA2xvbhgCIAEoARIPCgdhbHRfbXNsGAMgASgBIjMKCU1vdmVPcmRlchImCgl3YXlwb2ludHMYASADKAsyEy5lbmdpbmUudjEuV2F5cG9pbnQqswEKDFdlYXRoZXJTdGF0ZRIXChNXRUFUSEVSX1VOU1BFQ0lGSUVEEAASEQoNV0VBVEhFUl9DTEVBUhABEhQKEFdFQVRIRVJfT1ZFUkNBU1QQAhIPCgtXRUFUSEVSX0ZPRxADEhAKDFdFQVRIRVJfUkFJThAEEhYKEldFQVRIRVJfSEVBVllfUkFJThAFEhAKDFdFQVRIRVJfU05PVxAGEhQKEFdFQVRIRVJfQkxJWlpBUkQQB0IrWilnaXRodWIuY29tL2FyZXNzaW0vaW50ZXJuYWwvZ2VuL2VuZ2luZS92MWIGcHJvdG8z");
 
 /**
  * @generated from message engine.v1.Position
@@ -144,6 +144,56 @@ export type OperationResult = Message<"engine.v1.OperationResult"> & {
  */
 export const OperationResultSchema: GenMessage<OperationResult> = /*@__PURE__*/
   messageDesc(file_engine_v1_common, 3);
+
+/**
+ * A single geographic point in a movement route.
+ *
+ * @generated from message engine.v1.Waypoint
+ */
+export type Waypoint = Message<"engine.v1.Waypoint"> & {
+  /**
+   * @generated from field: double lat = 1;
+   */
+  lat: number;
+
+  /**
+   * @generated from field: double lon = 2;
+   */
+  lon: number;
+
+  /**
+   * @generated from field: double alt_msl = 3;
+   */
+  altMsl: number;
+};
+
+/**
+ * Describes the message engine.v1.Waypoint.
+ * Use `create(WaypointSchema)` to create a new message.
+ */
+export const WaypointSchema: GenMessage<Waypoint> = /*@__PURE__*/
+  messageDesc(file_engine_v1_common, 4);
+
+/**
+ * An ordered list of waypoints describing a unit's intended route.
+ * The first waypoint is the current destination; subsequent waypoints
+ * are queued and visited in order.
+ *
+ * @generated from message engine.v1.MoveOrder
+ */
+export type MoveOrder = Message<"engine.v1.MoveOrder"> & {
+  /**
+   * @generated from field: repeated engine.v1.Waypoint waypoints = 1;
+   */
+  waypoints: Waypoint[];
+};
+
+/**
+ * Describes the message engine.v1.MoveOrder.
+ * Use `create(MoveOrderSchema)` to create a new message.
+ */
+export const MoveOrderSchema: GenMessage<MoveOrder> = /*@__PURE__*/
+  messageDesc(file_engine_v1_common, 5);
 
 /**
  * @generated from enum engine.v1.WeatherState

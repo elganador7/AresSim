@@ -13,7 +13,7 @@
  *   4. Confirm → addUnit to editorStore
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { create, toBinary } from "@bufbuild/protobuf";
 import { ScenarioSchema } from "@proto/engine/v1/scenario_pb";
 import { UnitSchema } from "@proto/engine/v1/unit_pb";
@@ -34,6 +34,7 @@ import {
 import EditorGlobe from "./EditorGlobe";
 import UnitPalette, { type DragPayload } from "./UnitPalette";
 import DropConfirmDialog from "./DropConfirmDialog";
+import UnitDefinitionManager from "./UnitDefinitionManager";
 import "./editor.css";
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
@@ -75,8 +76,7 @@ function draftToProtoB64(draft: ScenarioDraft): string {
         displayName: u.displayName,
         fullName: u.fullName,
         side: u.side,
-        domain: u.domain,
-        type: u.unitType,
+        definitionId: u.definitionId,
         natoSymbolSidc: u.natoSymbolSidc,
         position: create(PositionSchema, {
           lat: u.lat,
@@ -457,12 +457,12 @@ function LoadModal({
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  useState(() => {
+  useEffect(() => {
     ListScenarios()
       .then((rows) =>
         setScenarios(
           rows.map((r) => ({
-            id: String((r.id as { id?: unknown })?.id ?? r.id ?? ""),
+            id: String(r.id ?? ""),
             name: String(r.name ?? "Unnamed"),
             author: String(r.author ?? ""),
             description: String(r.description ?? ""),
@@ -471,7 +471,7 @@ function LoadModal({
       )
       .catch(console.error)
       .finally(() => setLoading(false));
-  });
+  }, []);
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -544,6 +544,7 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
   } = useEditorStore();
 
   const [showLoadModal, setShowLoadModal] = useState(false);
+  const [showDefManager, setShowDefManager] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -558,10 +559,16 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
     setSaving(true);
     try {
       const res = await SaveScenario(draftToProtoB64(draft));
-      if (res.success) { markClean(); flash("Saved."); }
-      else flash(`Error: ${res.error}`);
+      if (res.success) {
+        markClean();
+        flash("Saved.");
+      } else {
+        console.error("[editor] SaveScenario failed:", res.error);
+        alert(`Save failed:\n${res.error}`);
+      }
     } catch (e) {
-      flash(`Error: ${e}`);
+      console.error("[editor] SaveScenario threw:", e);
+      alert(`Save error:\n${e}`);
     } finally {
       setSaving(false);
     }
@@ -572,13 +579,22 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
     try {
       const b64 = draftToProtoB64(draft);
       const save = await SaveScenario(b64);
-      if (!save.success) { flash(`Save error: ${save.error}`); return; }
+      if (!save.success) {
+        console.error("[editor] SaveScenario failed:", save.error);
+        alert(`Save failed:\n${save.error}`);
+        return;
+      }
       const load = await LoadScenarioFromProto(b64);
-      if (!load.success) { flash(`Load error: ${load.error}`); return; }
+      if (!load.success) {
+        console.error("[editor] LoadScenarioFromProto failed:", load.error);
+        alert(`Load failed:\n${load.error}`);
+        return;
+      }
       markClean();
       onPlay();
     } catch (e) {
-      flash(`Error: ${e}`);
+      console.error("[editor] handlePlay threw:", e);
+      alert(`Play error:\n${e}`);
     } finally {
       setSaving(false);
     }
@@ -610,8 +626,7 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
           displayName: u.displayName,
           fullName: u.fullName,
           side: (u.side as UnitDraft["side"]) || "Blue",
-          domain: u.domain,
-          unitType: u.type,
+          definitionId: u.definitionId,
           natoSymbolSidc: u.natoSymbolSidc,
           lat: u.position?.lat ?? 0,
           lon: u.position?.lon ?? 0,
@@ -663,6 +678,7 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
         <span className="editor-toolbar-spacer" />
         <button className="btn" onClick={() => newDraft()}>New</button>
         <button className="btn" onClick={() => setShowLoadModal(true)}>Open</button>
+        <button className="btn" onClick={() => setShowDefManager(true)}>Definitions</button>
         <button className="btn btn-primary" onClick={handleSave} disabled={saving}>Save</button>
         <button className="btn btn-success" onClick={handlePlay} disabled={saving}>▶ Play</button>
       </div>
@@ -726,6 +742,10 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
           onClose={() => setShowLoadModal(false)}
           onSelect={handleLoadSelect}
         />
+      )}
+
+      {showDefManager && (
+        <UnitDefinitionManager onClose={() => setShowDefManager(false)} />
       )}
     </div>
   );

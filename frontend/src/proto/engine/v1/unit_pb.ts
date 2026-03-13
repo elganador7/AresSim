@@ -4,7 +4,7 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { Position } from "./common_pb";
+import type { MoveOrder, Position } from "./common_pb";
 import { file_engine_v1_common } from "./common_pb";
 import type { OperationalStatus } from "./status_pb";
 import { file_engine_v1_status } from "./status_pb";
@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/unit.proto.
  */
 export const file_engine_v1_unit: GenFile = /*@__PURE__*/
-  fileDesc("ChRlbmdpbmUvdjEvdW5pdC5wcm90bxIJZW5naW5lLnYxIsgCCgRVbml0EgoKAmlkGAEgASgJEhQKDGRpc3BsYXlfbmFtZRgCIAEoCRIRCglmdWxsX25hbWUYAyABKAkSDAoEc2lkZRgEIAEoCRIlCgZkb21haW4YByABKA4yFS5lbmdpbmUudjEuVW5pdERvbWFpbhIhCgR0eXBlGAkgASgOMhMuZW5naW5lLnYxLlVuaXRUeXBlEiUKCHBvc2l0aW9uGAogASgLMhMuZW5naW5lLnYxLlBvc2l0aW9uEiwKBnN0YXR1cxgMIAEoCzIcLmVuZ2luZS52MS5PcGVyYXRpb25hbFN0YXR1cxIWCg5wYXJlbnRfdW5pdF9pZBgOIAEoCRIsCgdwb3N0dXJlGBEgASgOMhsuZW5naW5lLnYxLkZvcm1hdGlvblBvc3R1cmUSGAoQbmF0b19zeW1ib2xfc2lkYxgSIAEoCSpsCgpVbml0RG9tYWluEhYKEkRPTUFJTl9VTlNQRUNJRklFRBAAEg8KC0RPTUFJTl9MQU5EEAESDgoKRE9NQUlOX0FJUhACEg4KCkRPTUFJTl9TRUEQAxIVChFET01BSU5fU1VCU1VSRkFDRRAEKrAECghVbml0VHlwZRIZChVVTklUX1RZUEVfVU5TUEVDSUZJRUQQABITCg9VTklUX1RZUEVfQVJNT1IQARIhCh1VTklUX1RZUEVfTUVDSEFOSVpFRF9JTkZBTlRSWRACEhwKGFVOSVRfVFlQRV9MSUdIVF9JTkZBTlRSWRADEhYKElVOSVRfVFlQRV9BSVJCT1JORRAEEhwKGFVOSVRfVFlQRV9TUEVDSUFMX0ZPUkNFUxAHEhUKEVVOSVRfVFlQRV9DQVZBTFJZEAgSGgoWVU5JVF9UWVBFX1NQX0FSVElMTEVSWRAKEh0KGVVOSVRfVFlQRV9UT1dFRF9BUlRJTExFUlkQCxIVChFVTklUX1RZUEVfRklHSFRFUhAgEhcKE1VOSVRfVFlQRV9NVUxUSVJPTEUQIRIdChlVTklUX1RZUEVfQVRUQUNLX0FJUkNSQUZUECISIAocVU5JVF9UWVBFX1RSQU5TUE9SVF9BSVJDUkFGVBAkEhcKE1VOSVRfVFlQRV9VQVZfUkVDT04QJxIeChpVTklUX1RZUEVfQUlSQ1JBRlRfQ0FSUklFUhAyEhcKE1VOSVRfVFlQRV9ERVNUUk9ZRVIQMxIVChFVTklUX1RZUEVfRlJJR0FURRA0EhYKElVOSVRfVFlQRV9DT1JWRVRURRA1EhkKFVVOSVRfVFlQRV9QQVRST0xfQk9BVBA2Eh4KGlVOSVRfVFlQRV9BVFRBQ0tfU1VCTUFSSU5FEDkqywEKEEZvcm1hdGlvblBvc3R1cmUSFwoTUE9TVFVSRV9VTlNQRUNJRklFRBAAEhUKEVBPU1RVUkVfVFJBVkVMSU5HEAESFAoQUE9TVFVSRV9CT1VORElORxACEhYKElBPU1RVUkVfREVMSUJFUkFURRADEhkKFVBPU1RVUkVfSEFTVFlfREVGRU5TRRAEEhIKDlBPU1RVUkVfRFVHX0lOEAUSFQoRUE9TVFVSRV9ESVNQRVJTRUQQBhITCg9QT1NUVVJFX0FTU0FVTFQQB0IrWilnaXRodWIuY29tL2FyZXNzaW0vaW50ZXJuYWwvZ2VuL2VuZ2luZS92MWIGcHJvdG8z", [file_engine_v1_common, file_engine_v1_status]);
+  fileDesc("ChRlbmdpbmUvdjEvdW5pdC5wcm90bxIJZW5naW5lLnYxIr8CCgRVbml0EgoKAmlkGAEgASgJEhQKDGRpc3BsYXlfbmFtZRgCIAEoCRIRCglmdWxsX25hbWUYAyABKAkSDAoEc2lkZRgEIAEoCRIVCg1kZWZpbml0aW9uX2lkGAUgASgJEiUKCHBvc2l0aW9uGAogASgLMhMuZW5naW5lLnYxLlBvc2l0aW9uEiwKBnN0YXR1cxgMIAEoCzIcLmVuZ2luZS52MS5PcGVyYXRpb25hbFN0YXR1cxIWCg5wYXJlbnRfdW5pdF9pZBgOIAEoCRIsCgdwb3N0dXJlGBEgASgOMhsuZW5naW5lLnYxLkZvcm1hdGlvblBvc3R1cmUSGAoQbmF0b19zeW1ib2xfc2lkYxgSIAEoCRIoCgptb3ZlX29yZGVyGBQgASgLMhQuZW5naW5lLnYxLk1vdmVPcmRlcipsCgpVbml0RG9tYWluEhYKEkRPTUFJTl9VTlNQRUNJRklFRBAAEg8KC0RPTUFJTl9MQU5EEAESDgoKRE9NQUlOX0FJUhACEg4KCkRPTUFJTl9TRUEQAxIVChFET01BSU5fU1VCU1VSRkFDRRAEKssBChBGb3JtYXRpb25Qb3N0dXJlEhcKE1BPU1RVUkVfVU5TUEVDSUZJRUQQABIVChFQT1NUVVJFX1RSQVZFTElORxABEhQKEFBPU1RVUkVfQk9VTkRJTkcQAhIWChJQT1NUVVJFX0RFTElCRVJBVEUQAxIZChVQT1NUVVJFX0hBU1RZX0RFRkVOU0UQBBISCg5QT1NUVVJFX0RVR19JThAFEhUKEVBPU1RVUkVfRElTUEVSU0VEEAYSEwoPUE9TVFVSRV9BU1NBVUxUEAdCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common, file_engine_v1_status]);
 
 /**
  * @generated from message engine.v1.Unit
@@ -51,16 +51,11 @@ export type Unit = Message<"engine.v1.Unit"> & {
   side: string;
 
   /**
-   * Classification
+   * References UnitDefinition.id slug
    *
-   * @generated from field: engine.v1.UnitDomain domain = 7;
+   * @generated from field: string definition_id = 5;
    */
-  domain: UnitDomain;
-
-  /**
-   * @generated from field: engine.v1.UnitType type = 9;
-   */
-  type: UnitType;
+  definitionId: string;
 
   /**
    * Geospatial
@@ -96,6 +91,13 @@ export type Unit = Message<"engine.v1.Unit"> & {
    * @generated from field: string nato_symbol_sidc = 18;
    */
   natoSymbolSidc: string;
+
+  /**
+   * Current movement order. Cleared when all waypoints are reached.
+   *
+   * @generated from field: engine.v1.MoveOrder move_order = 20;
+   */
+  moveOrder?: MoveOrder;
 };
 
 /**
@@ -140,123 +142,6 @@ export enum UnitDomain {
  */
 export const UnitDomainSchema: GenEnum<UnitDomain> = /*@__PURE__*/
   enumDesc(file_engine_v1_unit, 0);
-
-/**
- * @generated from enum engine.v1.UnitType
- */
-export enum UnitType {
-  /**
-   * @generated from enum value: UNIT_TYPE_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * Land
-   *
-   * @generated from enum value: UNIT_TYPE_ARMOR = 1;
-   */
-  ARMOR = 1,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_MECHANIZED_INFANTRY = 2;
-   */
-  MECHANIZED_INFANTRY = 2,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_LIGHT_INFANTRY = 3;
-   */
-  LIGHT_INFANTRY = 3,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_AIRBORNE = 4;
-   */
-  AIRBORNE = 4,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_SPECIAL_FORCES = 7;
-   */
-  SPECIAL_FORCES = 7,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_CAVALRY = 8;
-   */
-  CAVALRY = 8,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_SP_ARTILLERY = 10;
-   */
-  SP_ARTILLERY = 10,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_TOWED_ARTILLERY = 11;
-   */
-  TOWED_ARTILLERY = 11,
-
-  /**
-   * Air
-   *
-   * @generated from enum value: UNIT_TYPE_FIGHTER = 32;
-   */
-  FIGHTER = 32,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_MULTIROLE = 33;
-   */
-  MULTIROLE = 33,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_ATTACK_AIRCRAFT = 34;
-   */
-  ATTACK_AIRCRAFT = 34,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_TRANSPORT_AIRCRAFT = 36;
-   */
-  TRANSPORT_AIRCRAFT = 36,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_UAV_RECON = 39;
-   */
-  UAV_RECON = 39,
-
-  /**
-   * Sea
-   *
-   * @generated from enum value: UNIT_TYPE_AIRCRAFT_CARRIER = 50;
-   */
-  AIRCRAFT_CARRIER = 50,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_DESTROYER = 51;
-   */
-  DESTROYER = 51,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_FRIGATE = 52;
-   */
-  FRIGATE = 52,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_CORVETTE = 53;
-   */
-  CORVETTE = 53,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_PATROL_BOAT = 54;
-   */
-  PATROL_BOAT = 54,
-
-  /**
-   * @generated from enum value: UNIT_TYPE_ATTACK_SUBMARINE = 57;
-   */
-  ATTACK_SUBMARINE = 57,
-}
-
-/**
- * Describes the enum engine.v1.UnitType.
- */
-export const UnitTypeSchema: GenEnum<UnitType> = /*@__PURE__*/
-  enumDesc(file_engine_v1_unit, 1);
 
 /**
  * @generated from enum engine.v1.FormationPosture
@@ -307,5 +192,5 @@ export enum FormationPosture {
  * Describes the enum engine.v1.FormationPosture.
  */
 export const FormationPostureSchema: GenEnum<FormationPosture> = /*@__PURE__*/
-  enumDesc(file_engine_v1_unit, 2);
+  enumDesc(file_engine_v1_unit, 1);
 
