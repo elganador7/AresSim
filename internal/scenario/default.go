@@ -39,7 +39,6 @@ func Default() *enginev1.Scenario {
 				Side:           "Blue",
 				Domain:         enginev1.UnitDomain_DOMAIN_SEA,
 				Type:           enginev1.UnitType_UNIT_TYPE_DESTROYER,
-				Echelon:        enginev1.UnitEchelon_ECHELON_COMPANY,
 				NatoSymbolSidc: "SFSPCLDD--E----",
 				Position: &enginev1.Position{
 					Lat:     36.20,
@@ -65,7 +64,6 @@ func Default() *enginev1.Scenario {
 				Side:           "Blue",
 				Domain:         enginev1.UnitDomain_DOMAIN_SEA,
 				Type:           enginev1.UnitType_UNIT_TYPE_DESTROYER,
-				Echelon:        enginev1.UnitEchelon_ECHELON_COMPANY,
 				NatoSymbolSidc: "SFSPCLDD--E----",
 				Position: &enginev1.Position{
 					Lat:     35.40,

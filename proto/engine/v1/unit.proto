@@ -5,21 +5,6 @@ option go_package = "github.com/aressim/internal/gen/engine/v1";
 import "engine/v1/common.proto";
 import "engine/v1/status.proto";
 
-enum UnitEchelon {
-  ECHELON_UNSPECIFIED = 0;
-  ECHELON_FIRETEAM    = 1;
-  ECHELON_SQUAD       = 2;
-  ECHELON_SECTION     = 3;
-  ECHELON_PLATOON     = 4;
-  ECHELON_COMPANY     = 5;
-  ECHELON_BATTALION   = 6;
-  ECHELON_BRIGADE     = 7;
-  ECHELON_DIVISION    = 8;
-  ECHELON_CORPS       = 9;
-  ECHELON_ARMY        = 10;
-  ECHELON_ARMY_GROUP  = 11;
-}
-
 enum UnitDomain {
   DOMAIN_UNSPECIFIED = 0;
   DOMAIN_LAND        = 1;
@@ -73,7 +58,6 @@ message Unit {
   string side         = 4; // "Blue" | "Red" | "Neutral"
 
   // Classification
-  UnitEchelon echelon = 6;
   UnitDomain  domain  = 7;
   UnitType    type    = 9;
 

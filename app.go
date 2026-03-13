@@ -81,11 +81,11 @@ func (a *App) startup(ctx context.Context) {
 		return
 	}
 
-	if err := db.ApplySchema(ctx, a.dbClient.DB()); err != nil {
-		slog.Error("schema apply", "err", err)
+	if err := db.EnsureSchema(ctx, a.dbClient.DB()); err != nil {
+		slog.Error("schema ensure", "err", err)
 		return
 	}
-	slog.Info("schema applied")
+	slog.Info("schema ready", "version", 2)
 
 	rawDB := a.dbClient.DB()
 	a.unitRepo = repository.NewUnitRepo(rawDB)

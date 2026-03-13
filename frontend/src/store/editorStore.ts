@@ -17,7 +17,6 @@ export interface UnitDraft {
   side: "Blue" | "Red" | "Neutral";
   domain: number;        // UnitDomain enum value
   unitType: number;      // UnitType enum value
-  echelon: number;       // UnitEchelon enum value
   natoSymbolSidc: string;
   lat: number;
   lon: number;
@@ -56,7 +55,6 @@ export interface PendingDrop {
   lon: number;
   domain: number;
   unitType: number;
-  defaultEchelon: number;
   label: string;
   domainColor: string;
 }
@@ -115,7 +113,6 @@ export function blankUnit(lat = 35.0, lon = 25.0): UnitDraft {
     side: "Blue",
     domain: 1,          // DOMAIN_LAND
     unitType: 1,        // UNIT_TYPE_ARMOR
-    echelon: 5,         // ECHELON_COMPANY
     natoSymbolSidc: "",
     lat,
     lon,

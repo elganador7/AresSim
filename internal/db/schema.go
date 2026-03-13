@@ -12,7 +12,53 @@ import (
 // this constant, the database is wiped and rebuilt from scratch. This is
 // acceptable for a single-player desktop application where the database is
 // purely derived state (the authoritative record lives in scenario files).
-const schemaVersion = 1
+const schemaVersion = 2
+
+// EnsureSchema checks the stored schema version. If it differs from
+// schemaVersion (or no version record exists), it wipes all tables and
+// rebuilds the schema from scratch, then writes the new version record.
+// For a single-player app with derived-only DB state this is safe.
+func EnsureSchema(ctx context.Context, db *surrealdb.DB) error {
+	const versionKey = "schema_meta:version"
+
+	type versionRecord struct {
+		Value int `json:"value"`
+	}
+
+	// Read stored version (may not exist yet).
+	results, err := surrealdb.Query[[]versionRecord](ctx, db,
+		"SELECT value FROM schema_meta:version",
+		nil,
+	)
+	stored := 0
+	if err == nil {
+		rows := flattenVersionResults(results)
+		if len(rows) > 0 {
+			stored = rows[0].Value
+		}
+	}
+
+	if stored != schemaVersion {
+		// Wipe all user tables and rebuild.
+		for _, tbl := range []string{"unit", "scenario", "checkpoint", "schema_meta"} {
+			if _, err := surrealdb.Query[any](ctx, db,
+				fmt.Sprintf("REMOVE TABLE IF EXISTS %s", tbl), nil); err != nil {
+				return fmt.Errorf("wipe table %s: %w", tbl, err)
+			}
+		}
+		if err := ApplySchema(ctx, db); err != nil {
+			return err
+		}
+		// Persist the new version.
+		if _, err := surrealdb.Query[any](ctx, db,
+			fmt.Sprintf("UPSERT schema_meta:version SET value = %d", schemaVersion),
+			nil,
+		); err != nil {
+			return fmt.Errorf("write schema version: %w", err)
+		}
+	}
+	return nil
+}
 
 // ApplySchema runs all DEFINE statements against the connected database.
 // Every statement is idempotent (IF NOT EXISTS), so this is safe to call on
@@ -24,6 +70,17 @@ func ApplySchema(ctx context.Context, db *surrealdb.DB) error {
 		}
 	}
 	return nil
+}
+
+func flattenVersionResults[T any](results *[]surrealdb.QueryResult[[]T]) []T {
+	if results == nil {
+		return nil
+	}
+	var out []T
+	for _, r := range *results {
+		out = append(out, r.Result...)
+	}
+	return out
 }
 
 // schemaStatements contains every DEFINE statement in dependency order.
@@ -45,7 +102,6 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS nato_symbol_sidc  ON unit TYPE string`,
 
 	// Classification (stored as int32 proto enum values)
-	`DEFINE FIELD IF NOT EXISTS echelon           ON unit TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS domain            ON unit TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS unit_function     ON unit TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS unit_type         ON unit TYPE int`,

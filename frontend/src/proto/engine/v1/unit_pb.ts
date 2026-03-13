@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/unit.proto.
  */
 export const file_engine_v1_unit: GenFile = /*@__PURE__*/
-  fileDesc("ChRlbmdpbmUvdjEvdW5pdC5wcm90bxIJZW5naW5lLnYxIvECCgRVbml0EgoKAmlkGAEgASgJEhQKDGRpc3BsYXlfbmFtZRgCIAEoCRIRCglmdWxsX25hbWUYAyABKAkSDAoEc2lkZRgEIAEoCRInCgdlY2hlbG9uGAYgASgOMhYuZW5naW5lLnYxLlVuaXRFY2hlbG9uEiUKBmRvbWFpbhgHIAEoDjIVLmVuZ2luZS52MS5Vbml0RG9tYWluEiEKBHR5cGUYCSABKA4yEy5lbmdpbmUudjEuVW5pdFR5cGUSJQoIcG9zaXRpb24YCiABKAsyEy5lbmdpbmUudjEuUG9zaXRpb24SLAoGc3RhdHVzGAwgASgLMhwuZW5naW5lLnYxLk9wZXJhdGlvbmFsU3RhdHVzEhYKDnBhcmVudF91bml0X2lkGA4gASgJEiwKB3Bvc3R1cmUYESABKA4yGy5lbmdpbmUudjEuRm9ybWF0aW9uUG9zdHVyZRIYChBuYXRvX3N5bWJvbF9zaWRjGBIgASgJKo0CCgtVbml0RWNoZWxvbhIXChNFQ0hFTE9OX1VOU1BFQ0lGSUVEEAASFAoQRUNIRUxPTl9GSVJFVEVBTRABEhEKDUVDSEVMT05fU1FVQUQQAhITCg9FQ0hFTE9OX1NFQ1RJT04QAxITCg9FQ0hFTE9OX1BMQVRPT04QBBITCg9FQ0hFTE9OX0NPTVBBTlkQBRIVChFFQ0hFTE9OX0JBVFRBTElPThAGEhMKD0VDSEVMT05fQlJJR0FERRAHEhQKEEVDSEVMT05fRElWSVNJT04QCBIRCg1FQ0hFTE9OX0NPUlBTEAkSEAoMRUNIRUxPTl9BUk1ZEAoSFgoSRUNIRUxPTl9BUk1ZX0dST1VQEAsqbAoKVW5pdERvbWFpbhIWChJET01BSU5fVU5TUEVDSUZJRUQQABIPCgtET01BSU5fTEFORBABEg4KCkRPTUFJTl9BSVIQAhIOCgpET01BSU5fU0VBEAMSFQoRRE9NQUlOX1NVQlNVUkZBQ0UQBCqwBAoIVW5pdFR5cGUSGQoVVU5JVF9UWVBFX1VOU1BFQ0lGSUVEEAASEwoPVU5JVF9UWVBFX0FSTU9SEAESIQodVU5JVF9UWVBFX01FQ0hBTklaRURfSU5GQU5UUlkQAhIcChhVTklUX1RZUEVfTElHSFRfSU5GQU5UUlkQAxIWChJVTklUX1RZUEVfQUlSQk9STkUQBBIcChhVTklUX1RZUEVfU1BFQ0lBTF9GT1JDRVMQBxIVChFVTklUX1RZUEVfQ0FWQUxSWRAIEhoKFlVOSVRfVFlQRV9TUF9BUlRJTExFUlkQChIdChlVTklUX1RZUEVfVE9XRURfQVJUSUxMRVJZEAsSFQoRVU5JVF9UWVBFX0ZJR0hURVIQIBIXChNVTklUX1RZUEVfTVVMVElST0xFECESHQoZVU5JVF9UWVBFX0FUVEFDS19BSVJDUkFGVBAiEiAKHFVOSVRfVFlQRV9UUkFOU1BPUlRfQUlSQ1JBRlQQJBIXChNVTklUX1RZUEVfVUFWX1JFQ09OECcSHgoaVU5JVF9UWVBFX0FJUkNSQUZUX0NBUlJJRVIQMhIXChNVTklUX1RZUEVfREVTVFJPWUVSEDMSFQoRVU5JVF9UWVBFX0ZSSUdBVEUQNBIWChJVTklUX1RZUEVfQ09SVkVUVEUQNRIZChVVTklUX1RZUEVfUEFUUk9MX0JPQVQQNhIeChpVTklUX1RZUEVfQVRUQUNLX1NVQk1BUklORRA5KssBChBGb3JtYXRpb25Qb3N0dXJlEhcKE1BPU1RVUkVfVU5TUEVDSUZJRUQQABIVChFQT1NUVVJFX1RSQVZFTElORxABEhQKEFBPU1RVUkVfQk9VTkRJTkcQAhIWChJQT1NUVVJFX0RFTElCRVJBVEUQAxIZChVQT1NUVVJFX0hBU1RZX0RFRkVOU0UQBBISCg5QT1NUVVJFX0RVR19JThAFEhUKEVBPU1RVUkVfRElTUEVSU0VEEAYSEwoPUE9TVFVSRV9BU1NBVUxUEAdCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common, file_engine_v1_status]);
+  fileDesc("ChRlbmdpbmUvdjEvdW5pdC5wcm90bxIJZW5naW5lLnYxIsgCCgRVbml0EgoKAmlkGAEgASgJEhQKDGRpc3BsYXlfbmFtZRgCIAEoCRIRCglmdWxsX25hbWUYAyABKAkSDAoEc2lkZRgEIAEoCRIlCgZkb21haW4YByABKA4yFS5lbmdpbmUudjEuVW5pdERvbWFpbhIhCgR0eXBlGAkgASgOMhMuZW5naW5lLnYxLlVuaXRUeXBlEiUKCHBvc2l0aW9uGAogASgLMhMuZW5naW5lLnYxLlBvc2l0aW9uEiwKBnN0YXR1cxgMIAEoCzIcLmVuZ2luZS52MS5PcGVyYXRpb25hbFN0YXR1cxIWCg5wYXJlbnRfdW5pdF9pZBgOIAEoCRIsCgdwb3N0dXJlGBEgASgOMhsuZW5naW5lLnYxLkZvcm1hdGlvblBvc3R1cmUSGAoQbmF0b19zeW1ib2xfc2lkYxgSIAEoCSpsCgpVbml0RG9tYWluEhYKEkRPTUFJTl9VTlNQRUNJRklFRBAAEg8KC0RPTUFJTl9MQU5EEAESDgoKRE9NQUlOX0FJUhACEg4KCkRPTUFJTl9TRUEQAxIVChFET01BSU5fU1VCU1VSRkFDRRAEKrAECghVbml0VHlwZRIZChVVTklUX1RZUEVfVU5TUEVDSUZJRUQQABITCg9VTklUX1RZUEVfQVJNT1IQARIhCh1VTklUX1RZUEVfTUVDSEFOSVpFRF9JTkZBTlRSWRACEhwKGFVOSVRfVFlQRV9MSUdIVF9JTkZBTlRSWRADEhYKElVOSVRfVFlQRV9BSVJCT1JORRAEEhwKGFVOSVRfVFlQRV9TUEVDSUFMX0ZPUkNFUxAHEhUKEVVOSVRfVFlQRV9DQVZBTFJZEAgSGgoWVU5JVF9UWVBFX1NQX0FSVElMTEVSWRAKEh0KGVVOSVRfVFlQRV9UT1dFRF9BUlRJTExFUlkQCxIVChFVTklUX1RZUEVfRklHSFRFUhAgEhcKE1VOSVRfVFlQRV9NVUxUSVJPTEUQIRIdChlVTklUX1RZUEVfQVRUQUNLX0FJUkNSQUZUECISIAocVU5JVF9UWVBFX1RSQU5TUE9SVF9BSVJDUkFGVBAkEhcKE1VOSVRfVFlQRV9VQVZfUkVDT04QJxIeChpVTklUX1RZUEVfQUlSQ1JBRlRfQ0FSUklFUhAyEhcKE1VOSVRfVFlQRV9ERVNUUk9ZRVIQMxIVChFVTklUX1RZUEVfRlJJR0FURRA0EhYKElVOSVRfVFlQRV9DT1JWRVRURRA1EhkKFVVOSVRfVFlQRV9QQVRST0xfQk9BVBA2Eh4KGlVOSVRfVFlQRV9BVFRBQ0tfU1VCTUFSSU5FEDkqywEKEEZvcm1hdGlvblBvc3R1cmUSFwoTUE9TVFVSRV9VTlNQRUNJRklFRBAAEhUKEVBPU1RVUkVfVFJBVkVMSU5HEAESFAoQUE9TVFVSRV9CT1VORElORxACEhYKElBPU1RVUkVfREVMSUJFUkFURRADEhkKFVBPU1RVUkVfSEFTVFlfREVGRU5TRRAEEhIKDlBPU1RVUkVfRFVHX0lOEAUSFQoRUE9TVFVSRV9ESVNQRVJTRUQQBhITCg9QT1NUVVJFX0FTU0FVTFQQB0IrWilnaXRodWIuY29tL2FyZXNzaW0vaW50ZXJuYWwvZ2VuL2VuZ2luZS92MWIGcHJvdG8z", [file_engine_v1_common, file_engine_v1_status]);
 
 /**
  * @generated from message engine.v1.Unit
@@ -53,11 +53,6 @@ export type Unit = Message<"engine.v1.Unit"> & {
   /**
    * Classification
    *
-   * @generated from field: engine.v1.UnitEchelon echelon = 6;
-   */
-  echelon: UnitEchelon;
-
-  /**
    * @generated from field: engine.v1.UnitDomain domain = 7;
    */
   domain: UnitDomain;
@@ -111,77 +106,6 @@ export const UnitSchema: GenMessage<Unit> = /*@__PURE__*/
   messageDesc(file_engine_v1_unit, 0);
 
 /**
- * @generated from enum engine.v1.UnitEchelon
- */
-export enum UnitEchelon {
-  /**
-   * @generated from enum value: ECHELON_UNSPECIFIED = 0;
-   */
-  ECHELON_UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: ECHELON_FIRETEAM = 1;
-   */
-  ECHELON_FIRETEAM = 1,
-
-  /**
-   * @generated from enum value: ECHELON_SQUAD = 2;
-   */
-  ECHELON_SQUAD = 2,
-
-  /**
-   * @generated from enum value: ECHELON_SECTION = 3;
-   */
-  ECHELON_SECTION = 3,
-
-  /**
-   * @generated from enum value: ECHELON_PLATOON = 4;
-   */
-  ECHELON_PLATOON = 4,
-
-  /**
-   * @generated from enum value: ECHELON_COMPANY = 5;
-   */
-  ECHELON_COMPANY = 5,
-
-  /**
-   * @generated from enum value: ECHELON_BATTALION = 6;
-   */
-  ECHELON_BATTALION = 6,
-
-  /**
-   * @generated from enum value: ECHELON_BRIGADE = 7;
-   */
-  ECHELON_BRIGADE = 7,
-
-  /**
-   * @generated from enum value: ECHELON_DIVISION = 8;
-   */
-  ECHELON_DIVISION = 8,
-
-  /**
-   * @generated from enum value: ECHELON_CORPS = 9;
-   */
-  ECHELON_CORPS = 9,
-
-  /**
-   * @generated from enum value: ECHELON_ARMY = 10;
-   */
-  ECHELON_ARMY = 10,
-
-  /**
-   * @generated from enum value: ECHELON_ARMY_GROUP = 11;
-   */
-  ECHELON_ARMY_GROUP = 11,
-}
-
-/**
- * Describes the enum engine.v1.UnitEchelon.
- */
-export const UnitEchelonSchema: GenEnum<UnitEchelon> = /*@__PURE__*/
-  enumDesc(file_engine_v1_unit, 0);
-
-/**
  * @generated from enum engine.v1.UnitDomain
  */
 export enum UnitDomain {
@@ -215,7 +139,7 @@ export enum UnitDomain {
  * Describes the enum engine.v1.UnitDomain.
  */
 export const UnitDomainSchema: GenEnum<UnitDomain> = /*@__PURE__*/
-  enumDesc(file_engine_v1_unit, 1);
+  enumDesc(file_engine_v1_unit, 0);
 
 /**
  * @generated from enum engine.v1.UnitType
@@ -332,7 +256,7 @@ export enum UnitType {
  * Describes the enum engine.v1.UnitType.
  */
 export const UnitTypeSchema: GenEnum<UnitType> = /*@__PURE__*/
-  enumDesc(file_engine_v1_unit, 2);
+  enumDesc(file_engine_v1_unit, 1);
 
 /**
  * @generated from enum engine.v1.FormationPosture
@@ -383,5 +307,5 @@ export enum FormationPosture {
  * Describes the enum engine.v1.FormationPosture.
  */
 export const FormationPostureSchema: GenEnum<FormationPosture> = /*@__PURE__*/
-  enumDesc(file_engine_v1_unit, 3);
+  enumDesc(file_engine_v1_unit, 2);
 

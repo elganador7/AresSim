@@ -9,7 +9,7 @@
  * Drop flow:
  *   1. User drags unit type from palette → drops on globe
  *   2. EditorGlobe fires onUnitDrop(lat, lon, payload)
- *   3. DropConfirmDialog asks for Designator + Side + Echelon
+ *   3. DropConfirmDialog asks for Designator + Side
  *   4. Confirm → addUnit to editorStore
  */
 
@@ -77,7 +77,6 @@ function draftToProtoB64(draft: ScenarioDraft): string {
         side: u.side,
         domain: u.domain,
         type: u.unitType,
-        echelon: u.echelon,
         natoSymbolSidc: u.natoSymbolSidc,
         position: create(PositionSchema, {
           lat: u.lat,
@@ -613,7 +612,6 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
           side: (u.side as UnitDraft["side"]) || "Blue",
           domain: u.domain,
           unitType: u.type,
-          echelon: u.echelon,
           natoSymbolSidc: u.natoSymbolSidc,
           lat: u.position?.lat ?? 0,
           lon: u.position?.lon ?? 0,

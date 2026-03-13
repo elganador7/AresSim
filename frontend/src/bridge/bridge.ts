@@ -63,7 +63,6 @@ export function protoUnitToStore(u: ProtoUnit): Unit {
     fullName: u.fullName,
     side: u.side,
     natoPendingSymbol: u.natoSymbolSidc,
-    echelon: u.echelon,
     domain: u.domain,
     unitType: u.type,
     position: {

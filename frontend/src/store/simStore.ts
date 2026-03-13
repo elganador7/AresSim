@@ -48,7 +48,6 @@ export interface Unit {
   fullName: string;
   side: string;  // "Blue" | "Red" | "Neutral"
   natoPendingSymbol: string;  // NATO APP-6D SIDC code
-  echelon: number;
   domain: number;
   unitType: number;
   position: Position;
