@@ -1,10 +1,13 @@
 package sim
 
 import (
+	"math"
 	"testing"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
 )
+
+func approxEqual(a, b float64) bool { return math.Abs(a-b) < 1e-9 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -18,12 +21,44 @@ func makeUnit(id, side, defID string, lat, lon float64) *enginev1.Unit {
 	}
 }
 
-func makeDef(combatRangeM, detectionRangeM, baseStrength float64) DefStats {
+func makeDef(detectionRangeM, baseStrength float64) DefStats {
 	return DefStats{
 		CruiseSpeedMps:  10,
-		CombatRangeM:    combatRangeM,
 		BaseStrength:    baseStrength,
 		DetectionRangeM: detectionRangeM,
+	}
+}
+
+// constRng is a deterministic Rng that always returns a fixed value.
+// Use constRng(0) for "always hit" and constRng(1) for "always miss".
+type constRng float64
+
+func (c constRng) Float64() float64 { return float64(c) }
+
+// alwaysHit and alwaysMiss are convenience instances.
+const alwaysHit = constRng(0.0)
+const alwaysMiss = constRng(1.0)
+
+func makeWeaponCatalog(id string, rangeM, prob float64, domains ...enginev1.UnitDomain) map[string]WeaponStats {
+	return map[string]WeaponStats{
+		id: {RangeM: rangeM, ProbabilityOfHit: prob, DomainTargets: domains},
+	}
+}
+
+func addWeapons(u *enginev1.Unit, weaponID string, qty int32) {
+	u.Weapons = append(u.Weapons, &enginev1.WeaponState{
+		WeaponId: weaponID, CurrentQty: qty, MaxQty: qty,
+	})
+}
+
+// munitionFromShot builds an InFlightMunition from a FiredShot for use in
+// ResolveArrivals tests. SpeedMps=0 means the munition has already arrived.
+func munitionFromShot(shot FiredShot) *InFlightMunition {
+	return &InFlightMunition{
+		ID:             NextMunitionID(),
+		ShooterID:      shot.Shooter.Id,
+		TargetID:       shot.Target.Id,
+		HitProbability: shot.HitProbability,
 	}
 }
 
@@ -76,161 +111,347 @@ func TestKillUnit_NilStatus_InitializesStatus(t *testing.T) {
 	}
 }
 
+// ─── rangeDegradedPoh ─────────────────────────────────────────────────────────
+
+func TestRangeDegradedPoh_AtZeroRange(t *testing.T) {
+	// At distance 0, full basePoh applies (factor = 1.0).
+	got := rangeDegradedPoh(0.8, 0, 100_000)
+	if got != 0.8 {
+		t.Errorf("expected 0.8 at dist=0, got %f", got)
+	}
+}
+
+func TestRangeDegradedPoh_AtMaxRange(t *testing.T) {
+	// At max range, factor = 1.0 - 0.7 = 0.3, so result = basePoh * 0.3.
+	got := rangeDegradedPoh(1.0, 100_000, 100_000)
+	if !approxEqual(got, 0.3) {
+		t.Errorf("expected ~0.3 at max range, got %f", got)
+	}
+}
+
+func TestRangeDegradedPoh_AtHalfRange(t *testing.T) {
+	// At half range, factor = 1.0 - 0.35 = 0.65, so result = 0.8 * 0.65 = 0.52.
+	got := rangeDegradedPoh(0.8, 50_000, 100_000)
+	want := 0.8 * 0.65
+	if got != want {
+		t.Errorf("expected %f at half range, got %f", want, got)
+	}
+}
+
+func TestRangeDegradedPoh_FloorAt30Pct(t *testing.T) {
+	// Beyond max range the factor is clamped to 0.3 minimum.
+	got := rangeDegradedPoh(1.0, 200_000, 100_000)
+	if got != 0.3 {
+		t.Errorf("expected 0.3 floor beyond max range, got %f", got)
+	}
+}
+
+func TestRangeDegradedPoh_ZeroMaxRange(t *testing.T) {
+	// Zero rangeM guard: returns basePoh unchanged.
+	got := rangeDegradedPoh(0.75, 0, 0)
+	if got != 0.75 {
+		t.Errorf("expected 0.75 with zero rangeM, got %f", got)
+	}
+}
+
 // ─── AdjudicateTick ───────────────────────────────────────────────────────────
 
-func TestAdjudicate_NoUnits(t *testing.T) {
-	kills := AdjudicateTick(nil, nil)
-	if len(kills) != 0 {
-		t.Errorf("expected 0 kills with no units, got %d", len(kills))
+func TestAdjudicateTick_NoUnits_NoShots(t *testing.T) {
+	adj := AdjudicateTick(nil, nil, nil)
+	if len(adj.Shots) != 0 {
+		t.Errorf("expected 0 shots with no units, got %d", len(adj.Shots))
 	}
 }
 
-func TestAdjudicate_FriendlyFire_NotAllowed(t *testing.T) {
-	// Two Blue units within range of each other — no combat.
+func TestAdjudicateTick_FriendlyFire_NoShots(t *testing.T) {
 	a := makeUnit("a", "Blue", "def", 0, 0)
-	b := makeUnit("b", "Blue", "def", 0, 0.001)
-	defs := map[string]DefStats{"def": makeDef(50_000, 0, 1)}
+	b := makeUnit("b", "Blue", "def", 0, 0)
+	addWeapons(a, "gun", 5)
+	addWeapons(b, "gun", 5)
+	defs := map[string]DefStats{
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	kills := AdjudicateTick([]*enginev1.Unit{a, b}, defs)
-	if len(kills) != 0 {
-		t.Errorf("friendly fire: expected 0 kills, got %d", len(kills))
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	if len(adj.Shots) != 0 {
+		t.Errorf("friendly fire: expected 0 shots, got %d", len(adj.Shots))
 	}
 }
 
-func TestAdjudicate_OutOfRange_NoKill(t *testing.T) {
-	// Units 200 km apart, combat range 50 km — no engagement.
+func TestAdjudicateTick_OutOfRange_NoShots(t *testing.T) {
 	a := makeUnit("a", "Blue", "def", 0, 0)
 	b := makeUnit("b", "Red", "def", 0, 1.8) // ~200 km at equator
-	defs := map[string]DefStats{"def": makeDef(50_000, 0, 1)}
-
-	kills := AdjudicateTick([]*enginev1.Unit{a, b}, defs)
-	if len(kills) != 0 {
-		t.Errorf("out-of-range: expected 0 kills, got %d", len(kills))
-	}
-}
-
-func TestAdjudicate_LongerRangeWins(t *testing.T) {
-	// a (Blue, 100 km range) vs b (Red, 10 km range), both within 100 km.
-	// a should destroy b.
-	a := makeUnit("a", "Blue", "long_range", 0, 0)
-	b := makeUnit("b", "Red", "short_range", 0, 0.1) // ~11 km
+	addWeapons(a, "gun", 5)
 	defs := map[string]DefStats{
-		"long_range":  makeDef(100_000, 0, 1),
-		"short_range": makeDef(10_000, 0, 1),
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
 	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	kills := AdjudicateTick([]*enginev1.Unit{a, b}, defs)
-	if len(kills) != 1 {
-		t.Fatalf("expected 1 kill, got %d", len(kills))
-	}
-	if kills[0].Victim.Id != "b" {
-		t.Errorf("expected b to be killed, got %s", kills[0].Victim.Id)
-	}
-	if kills[0].Attacker.Id != "a" {
-		t.Errorf("expected a to be attacker, got %s", kills[0].Attacker.Id)
-	}
-	if unitIsActive(b) {
-		t.Error("b should be marked inactive after being killed")
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	if len(adj.Shots) != 0 {
+		t.Errorf("out-of-range: expected 0 shots, got %d", len(adj.Shots))
 	}
 }
 
-func TestAdjudicate_ShorterRangeLoses(t *testing.T) {
-	// Reverse: Red has longer range.
-	a := makeUnit("a", "Blue", "short_range", 0, 0)
-	b := makeUnit("b", "Red", "long_range", 0, 0.1)
+func TestAdjudicateTick_InRange_ShotFired(t *testing.T) {
+	a := makeUnit("a", "Blue", "def-a", 0, 0)
+	b := makeUnit("b", "Red", "def-b", 0, 0.01) // ~1.1 km
+	addWeapons(a, "gun", 5)
 	defs := map[string]DefStats{
-		"short_range": makeDef(10_000, 0, 1),
-		"long_range":  makeDef(100_000, 0, 1),
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
 	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	kills := AdjudicateTick([]*enginev1.Unit{a, b}, defs)
-	if len(kills) != 1 {
-		t.Fatalf("expected 1 kill, got %d", len(kills))
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected 1 shot, got %d", len(adj.Shots))
 	}
-	if kills[0].Victim.Id != "a" {
-		t.Errorf("expected a to be killed, got %s", kills[0].Victim.Id)
+	if adj.Shots[0].Shooter.Id != "a" || adj.Shots[0].Target.Id != "b" {
+		t.Errorf("unexpected shot: %+v", adj.Shots[0])
 	}
 }
 
-func TestAdjudicate_EqualRange_HigherStrengthWins(t *testing.T) {
-	a := makeUnit("a", "Blue", "strong", 0, 0)
-	b := makeUnit("b", "Red", "weak", 0, 0.01) // close range
+func TestAdjudicateTick_ShotHasHitProbability(t *testing.T) {
+	a := makeUnit("a", "Blue", "def-a", 0, 0)
+	b := makeUnit("b", "Red", "def-b", 0, 0.01)
+	addWeapons(a, "gun", 5)
 	defs := map[string]DefStats{
-		"strong": makeDef(50_000, 0, 10),
-		"weak":   makeDef(50_000, 0, 1),
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
 	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	kills := AdjudicateTick([]*enginev1.Unit{a, b}, defs)
-	if len(kills) != 1 {
-		t.Fatalf("expected 1 kill, got %d", len(kills))
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected 1 shot, got %d", len(adj.Shots))
 	}
-	if kills[0].Victim.Id != "b" {
-		t.Errorf("expected b (weak) to be killed, got %s", kills[0].Victim.Id)
+	if adj.Shots[0].HitProbability <= 0 || adj.Shots[0].HitProbability > 1.0 {
+		t.Errorf("HitProbability should be in (0,1], got %f", adj.Shots[0].HitProbability)
 	}
 }
 
-func TestAdjudicate_EqualRange_EqualStrength_MutualAnnihilation(t *testing.T) {
+func TestAdjudicateTick_AmmoDecremented(t *testing.T) {
+	a := makeUnit("a", "Blue", "def-a", 0, 0)
+	b := makeUnit("b", "Red", "def-b", 0, 0.01)
+	addWeapons(a, "gun", 5)
+	defs := map[string]DefStats{
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+
+	AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	if a.Weapons[0].CurrentQty != 4 {
+		t.Errorf("expected ammo to decrement to 4, got %d", a.Weapons[0].CurrentQty)
+	}
+}
+
+func TestAdjudicateTick_OutOfAmmo_NoShots(t *testing.T) {
+	a := makeUnit("a", "Blue", "def-a", 0, 0)
+	b := makeUnit("b", "Red", "def-b", 0, 0.01)
+	addWeapons(a, "gun", 0) // depleted
+	addWeapons(b, "gun", 0) // depleted
+	defs := map[string]DefStats{
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	if len(adj.Shots) != 0 {
+		t.Errorf("depleted units should fire 0 shots, got %d", len(adj.Shots))
+	}
+}
+
+func TestAdjudicateTick_WrongDomain_NoShots(t *testing.T) {
+	a := makeUnit("a", "Blue", "def-a", 0, 0)
+	b := makeUnit("b", "Red", "def-b", 0, 0.01)
+	addWeapons(a, "land-gun", 10)
+	defs := map[string]DefStats{
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR}, // air — land gun can't reach
+	}
+	catalog := makeWeaponCatalog("land-gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	if len(adj.Shots) != 0 {
+		t.Errorf("wrong-domain weapon: expected 0 shots, got %d", len(adj.Shots))
+	}
+}
+
+func TestAdjudicateTick_BothInRange_BothShoot(t *testing.T) {
 	a := makeUnit("a", "Blue", "def", 0, 0)
 	b := makeUnit("b", "Red", "def", 0, 0.01)
-	defs := map[string]DefStats{"def": makeDef(50_000, 0, 5)}
+	addWeapons(a, "gun", 5)
+	addWeapons(b, "gun", 5)
+	defs := map[string]DefStats{
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	kills := AdjudicateTick([]*enginev1.Unit{a, b}, defs)
-	if len(kills) != 2 {
-		t.Fatalf("expected 2 kills (mutual annihilation), got %d", len(kills))
-	}
-	for _, k := range kills {
-		if k.Attacker != nil {
-			t.Error("mutual annihilation kills should have nil Attacker")
-		}
-	}
-	if unitIsActive(a) || unitIsActive(b) {
-		t.Error("both units should be inactive after mutual annihilation")
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	if len(adj.Shots) != 2 {
+		t.Errorf("expected 2 shots (both fire), got %d", len(adj.Shots))
 	}
 }
 
-func TestAdjudicate_ZeroCombatRange_NoEngagement(t *testing.T) {
-	a := makeUnit("a", "Blue", "def", 0, 0)
-	b := makeUnit("b", "Red", "def", 0, 0)
-	defs := map[string]DefStats{"def": makeDef(0, 0, 1)}
-
-	kills := AdjudicateTick([]*enginev1.Unit{a, b}, defs)
-	if len(kills) != 0 {
-		t.Errorf("zero combat range: expected no kills, got %d", len(kills))
-	}
-}
-
-func TestAdjudicate_DestroyedUnitSkipped(t *testing.T) {
-	// a is already destroyed; it should not engage b.
-	a := makeUnit("a", "Blue", "def", 0, 0)
-	killUnit(a)
-	b := makeUnit("b", "Red", "def", 0, 0)
-	defs := map[string]DefStats{"def": makeDef(50_000, 0, 1)}
-
-	kills := AdjudicateTick([]*enginev1.Unit{a, b}, defs)
-	if len(kills) != 0 {
-		t.Errorf("destroyed unit should not engage; got %d kills", len(kills))
-	}
-}
-
-func TestAdjudicate_MultipleEnemies_ChainKills(t *testing.T) {
-	// Blue has massive range; three Red units all close — all three should die.
+func TestAdjudicateTick_EachUnitFiresOnce(t *testing.T) {
+	// Blue has massive range; three Red units all close. Blue should fire only once.
 	blue := makeUnit("blue", "Blue", "long", 0, 0)
 	r1 := makeUnit("r1", "Red", "short", 0, 0.01)
 	r2 := makeUnit("r2", "Red", "short", 0, 0.02)
 	r3 := makeUnit("r3", "Red", "short", 0, 0.03)
+	addWeapons(blue, "missile", 10)
 	defs := map[string]DefStats{
-		"long":  makeDef(500_000, 0, 1),
-		"short": makeDef(1_000, 0, 1),
+		"long":  {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"short": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+	}
+	catalog := makeWeaponCatalog("missile", 500_000, 0.9, enginev1.UnitDomain_DOMAIN_AIR)
+
+	adj := AdjudicateTick([]*enginev1.Unit{blue, r1, r2, r3}, defs, catalog)
+	blueShots := 0
+	for _, s := range adj.Shots {
+		if s.Shooter.Id == "blue" {
+			blueShots++
+		}
+	}
+	if blueShots != 1 {
+		t.Errorf("each unit should fire at most once per tick; blue fired %d times", blueShots)
+	}
+}
+
+func TestAdjudicateTick_DestroyedUnit_NoShots(t *testing.T) {
+	a := makeUnit("a", "Blue", "def", 0, 0)
+	killUnit(a)
+	b := makeUnit("b", "Red", "def", 0, 0)
+	addWeapons(b, "gun", 5)
+	defs := map[string]DefStats{
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	for _, s := range adj.Shots {
+		if s.Shooter.Id == "a" {
+			t.Error("destroyed unit should not fire")
+		}
+	}
+}
+
+// ─── ResolveArrivals ──────────────────────────────────────────────────────────
+
+func TestResolveArrivals_EmptyArrived_NoKills(t *testing.T) {
+	kills := ResolveArrivals(nil, nil, alwaysHit)
+	if len(kills) != 0 {
+		t.Errorf("expected 0 kills with no arrived munitions, got %d", len(kills))
+	}
+}
+
+func TestResolveArrivals_AlwaysHit_Kill(t *testing.T) {
+	a := makeUnit("a", "Blue", "def", 0, 0)
+	b := makeUnit("b", "Red", "def", 0, 0.01)
+	addWeapons(a, "gun", 5)
+	defs := map[string]DefStats{
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("setup: expected 1 shot, got %d", len(adj.Shots))
 	}
 
-	kills := AdjudicateTick([]*enginev1.Unit{blue, r1, r2, r3}, defs)
-	if len(kills) != 3 {
-		t.Errorf("expected 3 kills, got %d", len(kills))
+	arrived := []*InFlightMunition{munitionFromShot(adj.Shots[0])}
+	kills := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, alwaysHit)
+	if len(kills) != 1 {
+		t.Fatalf("expected 1 kill on arrival with alwaysHit, got %d", len(kills))
 	}
-	for _, k := range kills {
-		if k.Victim.Side != "Red" {
-			t.Errorf("expected Red victims, got Side=%s", k.Victim.Side)
-		}
+	if kills[0].Victim.Id != "b" {
+		t.Errorf("expected victim b, got %s", kills[0].Victim.Id)
+	}
+	if !unitIsActive(a) {
+		t.Error("attacker a should still be active")
+	}
+	if unitIsActive(b) {
+		t.Error("victim b should be inactive after kill")
+	}
+}
+
+func TestResolveArrivals_AlwaysMiss_NoKill(t *testing.T) {
+	a := makeUnit("a", "Blue", "def", 0, 0)
+	b := makeUnit("b", "Red", "def", 0, 0.01)
+	addWeapons(a, "gun", 5)
+	defs := map[string]DefStats{
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	arrived := []*InFlightMunition{munitionFromShot(adj.Shots[0])}
+	kills := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, alwaysMiss)
+	if len(kills) != 0 {
+		t.Errorf("expected 0 kills on miss, got %d", len(kills))
+	}
+	if !unitIsActive(b) {
+		t.Error("b should still be active after miss")
+	}
+}
+
+func TestResolveArrivals_DeadTarget_Skipped(t *testing.T) {
+	a := makeUnit("a", "Blue", "def", 0, 0)
+	b := makeUnit("b", "Red", "def", 0, 0.01)
+	killUnit(b) // already destroyed before munition arrives
+
+	mun := &InFlightMunition{
+		ID: NextMunitionID(), ShooterID: a.Id, TargetID: b.Id, HitProbability: 1.0,
+	}
+	kills := ResolveArrivals([]*InFlightMunition{mun}, []*enginev1.Unit{a, b}, alwaysHit)
+	if len(kills) != 0 {
+		t.Errorf("already-dead target should not generate a kill, got %d", len(kills))
+	}
+}
+
+func TestResolveArrivals_AttackerLookup(t *testing.T) {
+	a := makeUnit("a", "Blue", "def", 0, 0)
+	b := makeUnit("b", "Red", "def", 0, 0.01)
+	addWeapons(a, "gun", 5)
+	defs := map[string]DefStats{
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	arrived := []*InFlightMunition{munitionFromShot(adj.Shots[0])}
+	kills := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, alwaysHit)
+	if len(kills) != 1 {
+		t.Fatalf("expected 1 kill, got %d", len(kills))
+	}
+	if kills[0].Attacker == nil || kills[0].Attacker.Id != "a" {
+		t.Errorf("expected attacker a, got %v", kills[0].Attacker)
+	}
+}
+
+func TestResolveArrivals_MultipleMunitions(t *testing.T) {
+	// Both sides fire; both munitions arrive; alwaysHit → both die.
+	a := makeUnit("a", "Blue", "def", 0, 0)
+	b := makeUnit("b", "Red", "def", 0, 0.01)
+	addWeapons(a, "gun", 5)
+	addWeapons(b, "gun", 5)
+	defs := map[string]DefStats{
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	var arrived []*InFlightMunition
+	for _, s := range adj.Shots {
+		arrived = append(arrived, munitionFromShot(s))
+	}
+	kills := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, alwaysHit)
+	if len(kills) != 2 {
+		t.Errorf("expected 2 kills (both die), got %d", len(kills))
 	}
 }
 
@@ -247,8 +468,8 @@ func TestSensorTick_InRange_Detected(t *testing.T) {
 	blue := makeUnit("blue", "Blue", "sensor", 0, 0)
 	red := makeUnit("red", "Red", "no_sensor", 0, 0.05) // ~5.5 km
 	defs := map[string]DefStats{
-		"sensor":    makeDef(0, 10_000, 0),
-		"no_sensor": makeDef(0, 0, 0),
+		"sensor":    makeDef(10_000, 0),
+		"no_sensor": makeDef(0, 0),
 	}
 
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
@@ -271,8 +492,8 @@ func TestSensorTick_OutOfRange_NotDetected(t *testing.T) {
 	blue := makeUnit("blue", "Blue", "sensor", 0, 0)
 	red := makeUnit("red", "Red", "no_sensor", 0, 1.0) // ~111 km
 	defs := map[string]DefStats{
-		"sensor":    makeDef(0, 10_000, 0),
-		"no_sensor": makeDef(0, 0, 0),
+		"sensor":    makeDef(10_000, 0),
+		"no_sensor": makeDef(0, 0),
 	}
 
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
@@ -285,10 +506,9 @@ func TestSensorTick_OutOfRange_NotDetected(t *testing.T) {
 }
 
 func TestSensorTick_FriendlyNotDetected(t *testing.T) {
-	// Two Blue units next to each other — sensor should not report friendlies.
 	b1 := makeUnit("b1", "Blue", "sensor", 0, 0)
 	b2 := makeUnit("b2", "Blue", "sensor", 0, 0)
-	defs := map[string]DefStats{"sensor": makeDef(0, 100_000, 0)}
+	defs := map[string]DefStats{"sensor": makeDef(100_000, 0)}
 
 	result := SensorTick([]*enginev1.Unit{b1, b2}, defs)
 	for _, id := range result["Blue"] {
@@ -303,8 +523,8 @@ func TestSensorTick_DestroyedUnitSkipped(t *testing.T) {
 	red := makeUnit("red", "Red", "no_sensor", 0, 0.01)
 	killUnit(red)
 	defs := map[string]DefStats{
-		"sensor":    makeDef(0, 100_000, 0),
-		"no_sensor": makeDef(0, 0, 0),
+		"sensor":    makeDef(100_000, 0),
+		"no_sensor": makeDef(0, 0),
 	}
 
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
@@ -321,8 +541,8 @@ func TestSensorTick_EmptySliceForSideWithNoContacts(t *testing.T) {
 	blue := makeUnit("blue", "Blue", "sensor", 0, 0)
 	red := makeUnit("red", "Red", "no_sensor", 0, 10.0) // very far
 	defs := map[string]DefStats{
-		"sensor":    makeDef(0, 1_000, 0),
-		"no_sensor": makeDef(0, 0, 0),
+		"sensor":    makeDef(1_000, 0),
+		"no_sensor": makeDef(0, 0),
 	}
 
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
@@ -335,24 +555,20 @@ func TestSensorTick_EmptySliceForSideWithNoContacts(t *testing.T) {
 }
 
 func TestSensorTick_BothSidesDetectEachOther(t *testing.T) {
-	// Both units have sensor ranges that cover each other.
 	blue := makeUnit("blue", "Blue", "sensor", 0, 0)
 	red := makeUnit("red", "Red", "sensor", 0, 0.05) // ~5.5 km
-	defs := map[string]DefStats{"sensor": makeDef(0, 10_000, 0)}
+	defs := map[string]DefStats{"sensor": makeDef(10_000, 0)}
 
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
 
-	blueDetects := result["Blue"]
-	redDetects := result["Red"]
-
 	foundRed := false
-	for _, id := range blueDetects {
+	for _, id := range result["Blue"] {
 		if id == "red" {
 			foundRed = true
 		}
 	}
 	foundBlue := false
-	for _, id := range redDetects {
+	for _, id := range result["Red"] {
 		if id == "blue" {
 			foundBlue = true
 		}

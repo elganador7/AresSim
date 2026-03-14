@@ -266,7 +266,7 @@ func TestMockLoop_ExitsOnContextCancel(t *testing.T) {
 
 	done := make(chan struct{})
 	go func() {
-		MockLoop(ctx, []*enginev1.Unit{u}, defs, 0, func() float64 { return 1.0 },
+		MockLoop(ctx, []*enginev1.Unit{u}, defs, nil, 0, func() float64 { return 1.0 },
 			func(_ float64) {}, func(_ string, _ proto.Message) {})
 		close(done)
 	}()
@@ -296,7 +296,7 @@ func TestMockLoop_EmitsBatchUpdate(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1500*time.Millisecond)
 	defer cancel()
 
-	go MockLoop(ctx, []*enginev1.Unit{u}, defs, 0, func() float64 { return 1.0 }, func(_ float64) {}, emitFn)
+	go MockLoop(ctx, []*enginev1.Unit{u}, defs, nil, 0, func() float64 { return 1.0 }, func(_ float64) {}, emitFn)
 
 	<-ctx.Done()
 

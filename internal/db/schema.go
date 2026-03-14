@@ -12,7 +12,7 @@ import (
 // this constant, the database is wiped and rebuilt from scratch. This is
 // acceptable for a single-player desktop application where the database is
 // purely derived state (the authoritative record lives in scenario files).
-const schemaVersion = 7
+const schemaVersion = 9
 
 // SchemaVersion returns the current schema version for logging.
 func SchemaVersion() int { return schemaVersion }
@@ -43,7 +43,7 @@ func EnsureSchema(ctx context.Context, db *surrealdb.DB) error {
 
 	if stored != schemaVersion {
 		// Wipe all user tables and rebuild.
-		for _, tbl := range []string{"unit", "scenario", "checkpoint", "unit_definition", "schema_meta"} {
+		for _, tbl := range []string{"unit", "scenario", "checkpoint", "unit_definition", "weapon_definition", "schema_meta"} {
 			if _, err := surrealdb.Query[any](ctx, db,
 				fmt.Sprintf("REMOVE TABLE IF EXISTS %s", tbl), nil); err != nil {
 				return fmt.Errorf("wipe table %s: %w", tbl, err)
@@ -152,7 +152,6 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS nation_of_origin   ON unit_definition TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS service_entry_year ON unit_definition TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS base_strength      ON unit_definition TYPE float`,
-	`DEFINE FIELD IF NOT EXISTS combat_range_m     ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS accuracy           ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS max_speed_mps      ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS cruise_speed_mps   ON unit_definition TYPE float`,
@@ -198,4 +197,19 @@ var schemaStatements = []string{
 
 	`DEFINE INDEX IF NOT EXISTS idx_ckpt_scenario ON checkpoint FIELDS scenario_id`,
 	`DEFINE INDEX IF NOT EXISTS idx_ckpt_tick      ON checkpoint FIELDS tick_number`,
+
+	// ── weapon_definition ─────────────────────────────────────────────────────
+	// Global munition catalog seeded from DefaultWeaponDefinitions() on startup.
+	// domain_targets stored as a JSON array of int (UnitDomain enum values).
+
+	`DEFINE TABLE IF NOT EXISTS weapon_definition SCHEMAFULL`,
+
+	`DEFINE FIELD IF NOT EXISTS name               ON weapon_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS description        ON weapon_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS domain_targets     ON weapon_definition TYPE array<int>`,
+	`DEFINE FIELD IF NOT EXISTS speed_mps          ON weapon_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS range_m            ON weapon_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS probability_of_hit ON weapon_definition TYPE float`,
+
+	`DEFINE INDEX IF NOT EXISTS idx_weapondef_name ON weapon_definition FIELDS name`,
 }

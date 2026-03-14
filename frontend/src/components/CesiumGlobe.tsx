@@ -40,7 +40,7 @@ import {
   Cartographic,
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import { useSimStore, Unit } from "../store/simStore";
+import { useSimStore, Unit, Munition, WeaponDef } from "../store/simStore";
 import { ListUnitDefinitions, MoveUnit } from "../../wailsjs/go/main/App";
 import { getUnitBillboardUrl } from "../utils/unitBillboard";
 
@@ -50,7 +50,7 @@ type ActiveView = "debug" | "blue" | "red";
 
 interface DefInfo {
   generalType: number;
-  combatRangeM: number;
+  detectionRangeM: number;
 }
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -68,6 +68,38 @@ const ROUTE_COLOR: Record<string, Color> = {
 };
 
 type Detections = Map<string, Set<string>>;
+type MunitionDetections = Map<string, Set<string>>;
+
+const MUNITION_ENTITY_PREFIX = "mun_";
+const SENSOR_COLOR = Color.fromCssColorString("#22d3ee"); // cyan-400
+
+/**
+ * Returns the longest weapon range (metres) among weapons with ammo remaining.
+ * Returns 0 if the unit has no weapons or all are depleted.
+ */
+function maxWeaponRangeM(unit: Unit, weaponDefs: Map<string, WeaponDef>): number {
+  let best = 0;
+  for (const ws of unit.weapons) {
+    if (ws.currentQty <= 0) continue;
+    const def = weaponDefs.get(ws.weaponId);
+    if (def && def.rangeM > best) best = def.rangeM;
+  }
+  return best;
+}
+
+/**
+ * Returns true if the munition should be shown in the given view.
+ * In debug mode all munitions are visible. In blue/red mode only munitions
+ * detected by that side's sensors are shown.
+ */
+function isMunitionVisible(
+  munition: Munition,
+  view: ActiveView,
+  munitionDetections: MunitionDetections,
+): boolean {
+  if (view === "debug") return true;
+  return munitionDetections.get(view === "blue" ? "Blue" : "Red")?.has(munition.id) ?? false;
+}
 
 /**
  * Returns true if the unit should be shown in the given view.
@@ -133,6 +165,9 @@ function makeEntity(unit: Unit, generalType: number): Entity {
     },
   });
 }
+
+// Munitions are rendered as small bright orange points.
+const MUNITION_COLOR = Color.fromCssColorString("#f97316"); // tailwind orange-500
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 
@@ -220,15 +255,17 @@ export default function CesiumGlobe() {
       selectedId: string | null,
       detections: Detections,
     ) => {
-      const routeId = `${unit.id}_route`;
-      const destId  = `${unit.id}_dest`;
-      const rangeId = `${unit.id}_range`;
+      const routeId  = `${unit.id}_route`;
+      const destId   = `${unit.id}_dest`;
+      const rangeId  = `${unit.id}_range`;
+      const sensorId = `${unit.id}_sensor`;
 
       if (!unit.status.isActive) {
         viewer.entities.removeById(unit.id);
         viewer.entities.removeById(routeId);
         viewer.entities.removeById(destId);
         viewer.entities.removeById(rangeId);
+        viewer.entities.removeById(sensorId);
         return;
       }
 
@@ -314,21 +351,26 @@ export default function CesiumGlobe() {
         viewer.entities.removeById(destId);
       }
 
-      // Range ring — shown only when this unit is selected and visible.
-      const combatRangeM = defInfoRef.current[unit.definitionId]?.combatRangeM ?? 0;
-      if (isSelected && visible && combatRangeM > 0) {
+      // Range rings — shown only when this unit is selected and visible.
+      // Always remove and recreate so radius stays correct as ammo depletes.
+      viewer.entities.removeById(rangeId);
+      viewer.entities.removeById(sensorId);
+
+      if (isSelected && visible) {
         const ringColor = ROUTE_COLOR[unit.side] ?? Color.WHITE;
-        const existingRing = viewer.entities.getById(rangeId);
-        if (existingRing) {
-          (existingRing.position as unknown as { setValue: (p: Cartesian3) => void }).setValue(pos);
-        } else {
+
+        // Weapon range ring — longest range among weapons with ammo remaining.
+        const { weaponDefs } = useSimStore.getState();
+        const weaponRangeM = maxWeaponRangeM(unit, weaponDefs);
+
+        if (weaponRangeM > 0) {
           viewer.entities.add(new Entity({
             id: rangeId,
             show: true,
             position: pos,
             ellipse: new EllipseGraphics({
-              semiMajorAxis: new ConstantProperty(combatRangeM),
-              semiMinorAxis: new ConstantProperty(combatRangeM),
+              semiMajorAxis: new ConstantProperty(weaponRangeM),
+              semiMinorAxis: new ConstantProperty(weaponRangeM),
               material: ringColor.withAlpha(0.06),
               outline: true,
               outlineColor: ringColor.withAlpha(0.85),
@@ -337,8 +379,25 @@ export default function CesiumGlobe() {
             }),
           }));
         }
-      } else {
-        viewer.entities.removeById(rangeId);
+
+        // Sensor range ring — detection radius from unit definition.
+        const sensorRangeM = defInfoRef.current[unit.definitionId]?.detectionRangeM ?? 0;
+        if (sensorRangeM > 0) {
+          viewer.entities.add(new Entity({
+            id: sensorId,
+            show: true,
+            position: pos,
+            ellipse: new EllipseGraphics({
+              semiMajorAxis: new ConstantProperty(sensorRangeM),
+              semiMinorAxis: new ConstantProperty(sensorRangeM),
+              material: SENSOR_COLOR.withAlpha(0.03),
+              outline: true,
+              outlineColor: SENSOR_COLOR.withAlpha(0.55),
+              outlineWidth: new ConstantProperty(1),
+              heightReference: new ConstantProperty(HeightReference.CLAMP_TO_GROUND),
+            }),
+          }));
+        }
       }
     };
 
@@ -358,8 +417,57 @@ export default function CesiumGlobe() {
           !id.endsWith("_route") &&
           !id.endsWith("_dest") &&
           !id.endsWith("_range") &&
+          !id.endsWith("_sensor") &&
+          !id.startsWith(MUNITION_ENTITY_PREFIX) && // managed by syncMunitions
           !storeIds.has(id),
         )
+        .forEach((id) => viewer.entities.removeById(id));
+    };
+
+    // ── Sync a single in-flight munition entity ────────────────────────────
+    const syncMunition = (
+      munition: Munition,
+      view: ActiveView,
+      munitionDetections: MunitionDetections,
+    ) => {
+      const entityId = `${MUNITION_ENTITY_PREFIX}${munition.id}`;
+      const visible = isMunitionVisible(munition, view, munitionDetections);
+      const pos = Cartesian3.fromDegrees(munition.lon, munition.lat, 100);
+
+      const existing = viewer.entities.getById(entityId);
+      if (existing) {
+        (existing.position as unknown as { setValue: (p: Cartesian3) => void }).setValue(pos);
+        existing.show = visible;
+      } else {
+        viewer.entities.add(new Entity({
+          id: entityId,
+          show: visible,
+          position: pos,
+          point: {
+            pixelSize: 6,
+            color: MUNITION_COLOR,
+            outlineColor: Color.WHITE,
+            outlineWidth: 1,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+        }));
+      }
+    };
+
+    const syncMunitions = (
+      munitions: Map<string, Munition>,
+      view: ActiveView,
+      munitionDetections: MunitionDetections,
+    ) => {
+      munitions.forEach((m) => syncMunition(m, view, munitionDetections));
+
+      // Remove entities for munitions no longer in-flight.
+      const liveIds = new Set(
+        Array.from(munitions.keys()).map((id) => `${MUNITION_ENTITY_PREFIX}${id}`),
+      );
+      Array.from(viewer.entities.values)
+        .map((e) => e.id as string)
+        .filter((id) => id.startsWith(MUNITION_ENTITY_PREFIX) && !liveIds.has(id))
         .forEach((id) => viewer.entities.removeById(id));
     };
 
@@ -375,6 +483,8 @@ export default function CesiumGlobe() {
         if (d) d.show = visible;
         const rng = viewer.entities.getById(`${unit.id}_range`);
         if (rng) rng.show = visible;
+        const sen = viewer.entities.getById(`${unit.id}_sensor`);
+        if (sen) sen.show = visible;
       });
     };
 
@@ -396,8 +506,8 @@ export default function CesiumGlobe() {
         const map: Record<string, DefInfo> = {};
         rows.forEach((r) => {
           map[String(r["id"])] = {
-            generalType:  Number(r["general_type"]),
-            combatRangeM: Number(r["combat_range_m"]) || 0,
+            generalType:    Number(r["general_type"]),
+            detectionRangeM: Number(r["detection_range_m"]) || 0,
           };
         });
         defInfoRef.current = map;
@@ -408,23 +518,28 @@ export default function CesiumGlobe() {
 
     // Initial render with whatever is already in the store.
     const { units: initUnits, activeView: initView, selectedUnitId: initSel,
-            detections: initDet } = useSimStore.getState();
+            detections: initDet, munitions: initMun,
+            munitionDetections: initMunDet } = useSimStore.getState();
     syncUnits(initUnits, initView, initSel, initDet);
+    syncMunitions(initMun, initView, initMunDet);
 
     // ── Store subscriptions (imperatively driven, no React re-renders) ─────
     const unsub = useSimStore.subscribe((state, prev) => {
-      const unitsChanged      = state.units          !== prev.units;
-      const viewChanged       = state.activeView     !== prev.activeView;
-      const selectionChanged  = state.selectedUnitId !== prev.selectedUnitId;
-      const detectionsChanged = state.detections     !== prev.detections;
+      const unitsChanged           = state.units              !== prev.units;
+      const viewChanged            = state.activeView         !== prev.activeView;
+      const selectionChanged       = state.selectedUnitId     !== prev.selectedUnitId;
+      const detectionsChanged      = state.detections         !== prev.detections;
+      const munitionsChanged       = state.munitions          !== prev.munitions;
+      const munitionDetectChanged  = state.munitionDetections !== prev.munitionDetections;
 
       if (unitsChanged) {
         syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
         return; // syncUnits covers everything
       }
       if (viewChanged) {
-        // View change affects all units — full pass required.
+        // View change affects all units and munitions — full passes required.
         syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
+        syncMunitions(state.munitions, state.activeView, state.munitionDetections);
         return;
       }
       if (detectionsChanged) {
@@ -439,6 +554,19 @@ export default function CesiumGlobe() {
           if (wasVisible !== nowVisible || wasTrack !== nowTrack) {
             syncUnit(unit, state.activeView, state.selectedUnitId, state.detections);
           }
+        });
+        return;
+      }
+      if (munitionsChanged) {
+        syncMunitions(state.munitions, state.activeView, state.munitionDetections);
+        return;
+      }
+      if (munitionDetectChanged) {
+        // Re-evaluate visibility of every in-flight munition.
+        state.munitions.forEach((m) => {
+          const entityId = `${MUNITION_ENTITY_PREFIX}${m.id}`;
+          const e = viewer.entities.getById(entityId);
+          if (e) e.show = isMunitionVisible(m, state.activeView, state.munitionDetections);
         });
         return;
       }

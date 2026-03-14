@@ -32,6 +32,7 @@ function makeUnit(id: string, side: "Blue" | "Red" | "Neutral" = "Blue"): Unit {
       disrupted: false,
       routing: false,
     },
+    weapons: [],
   };
 }
 
@@ -43,6 +44,7 @@ function resetStore() {
     simSeconds: 0,
     tickNumber: 0,
     units: new Map(),
+    weaponDefs: new Map(),
     activeView: "debug",
     detections: new Map(),
     selectedUnitId: null,

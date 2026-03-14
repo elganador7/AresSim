@@ -242,6 +242,7 @@ function formatETA(secs: number): string {
 function UnitPanel() {
   const selectedUnitId = useSimStore((s) => s.selectedUnitId);
   const units          = useSimStore((s) => s.units);
+  const weaponDefs     = useSimStore((s) => s.weaponDefs);
   const activeView     = useSimStore((s) => s.activeView);
   const selectUnit     = useSimStore((s) => s.selectUnit);
 
@@ -372,6 +373,31 @@ function UnitPanel() {
             {Math.round(unit.position.altMsl)}m MSL
           </span>
         </div>
+
+        {unit.weapons.length > 0 && (
+          <div className="weapon-list">
+            <div className="weapon-list-header">Loadout</div>
+            {unit.weapons.map((w) => {
+              const def = weaponDefs.get(w.weaponId);
+              const pct = w.maxQty > 0 ? w.currentQty / w.maxQty : 0;
+              return (
+                <div key={w.weaponId} className="weapon-row">
+                  <span className="weapon-name">{def?.name ?? w.weaponId}</span>
+                  <span className="weapon-qty">
+                    {w.currentQty}
+                    <span className="weapon-qty-max">/{w.maxQty}</span>
+                  </span>
+                  <div className="weapon-bar-track">
+                    <div
+                      className="weapon-bar-fill"
+                      style={{ width: `${Math.round(pct * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

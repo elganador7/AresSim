@@ -5,6 +5,7 @@ option go_package = "github.com/aressim/internal/gen/engine/v1";
 import "engine/v1/common.proto";
 import "engine/v1/unit.proto";
 import "engine/v1/status.proto";
+import "engine/v1/weapon.proto";
 
 // ── Scenario play state ───────────────────────────────────────────────────────
 
@@ -20,10 +21,13 @@ enum ScenarioPlayState {
 // and rebuilds from this message.
 
 message FullStateSnapshot {
-  repeated Unit units        = 1;
-  SimTime       sim_time     = 3;
-  WeatherConditions weather  = 4;
-  string        scenario_name = 5;
+  repeated Unit             units              = 1;
+  SimTime                   sim_time           = 3;
+  WeatherConditions         weather            = 4;
+  string                    scenario_name      = 5;
+  // Weapon catalog — sent once per snapshot so the frontend can display
+  // weapon names without a separate RPC call.
+  repeated WeaponDefinition weapon_definitions = 6;
 }
 
 // ── Scenario state ────────────────────────────────────────────────────────────
@@ -47,7 +51,9 @@ message UnitDelta {
   OperationalStatus status     = 3; // present if status changed
   FormationPosture  posture    = 4; // present if posture changed
   // move_order present when order changes; empty MoveOrder clears the order.
-  MoveOrder         move_order = 5;
+  MoveOrder            move_order = 5;
+  // weapons present when one or more weapon states changed (e.g. ammo decremented).
+  repeated WeaponState weapons    = 6;
 }
 
 // ── Unit lifecycle ────────────────────────────────────────────────────────────
@@ -65,14 +71,32 @@ message UnitDestroyedEvent {
 }
 
 // ── Sensor / detection update ─────────────────────────────────────────────────
-// Emitted every tick with the *full current set* of unit IDs detected by each
-// side. The frontend replaces its per-side detection set on receipt.
-// A message with an empty detected_unit_ids list means the side currently has
-// no contacts.
+// Emitted every tick with the *full current set* of unit and munition IDs
+// detected by each side. The frontend replaces its per-side detection set on
+// receipt. Empty lists mean the side currently has no contacts of that type.
 
 message DetectionUpdate {
-  string          detecting_side    = 1; // "Blue" | "Red" | "Neutral"
-  repeated string detected_unit_ids = 2;
+  string          detecting_side        = 1; // "Blue" | "Red" | "Neutral"
+  repeated string detected_unit_ids    = 2;
+  repeated string detected_munition_ids = 3; // in-flight munition IDs visible to this side
+}
+
+// ── In-flight munition tracking ───────────────────────────────────────────────
+// Created when a weapon fires; moves each tick; removed on arrival.
+// Sensors on platforms in the munition's target domain can detect it.
+
+message InFlightMunition {
+  string   id         = 1; // stable ID for the lifetime of the munition
+  string   weapon_id  = 2; // → WeaponDefinition
+  string   shooter_id = 3; // unit that fired
+  Position position   = 4; // current position (updated each tick)
+}
+
+// Emitted every tick with the complete set of in-flight munitions.
+// An empty munitions list means nothing is currently in the air.
+message MunitionUpdate {
+  repeated InFlightMunition munitions = 1;
+  SimTime                   sim_time  = 2;
 }
 
 // ── Narrative log ─────────────────────────────────────────────────────────────

@@ -2,7 +2,7 @@ syntax = "proto3";
 package engine.v1;
 option go_package = "github.com/aressim/internal/gen/engine/v1";
 
-import "engine/v1/unit.proto";   // UnitDomain
+import "engine/v1/common.proto";  // UnitDomain, FormationPosture
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Unit Definition hierarchy
@@ -149,9 +149,6 @@ message UnitDefinition {
   // base_strength: normalised 0–1 combat power; adjudicator base value for
   // engagement resolution. 1.0 = full-strength front-line platform.
   float base_strength   = 10;
-
-  // combat_range_m: maximum engagement range in metres.
-  float combat_range_m  = 11;
 
   // accuracy: direct-fire / weapon accuracy coefficient 0–1.
   float accuracy        = 12;

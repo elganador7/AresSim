@@ -2,27 +2,9 @@ syntax = "proto3";
 package engine.v1;
 option go_package = "github.com/aressim/internal/gen/engine/v1";
 
-import "engine/v1/common.proto";
+import "engine/v1/common.proto";  // Position, MoveOrder, UnitDomain, FormationPosture
 import "engine/v1/status.proto";
-
-enum UnitDomain {
-  DOMAIN_UNSPECIFIED = 0;
-  DOMAIN_LAND        = 1;
-  DOMAIN_AIR         = 2;
-  DOMAIN_SEA         = 3;
-  DOMAIN_SUBSURFACE  = 4;
-}
-
-enum FormationPosture {
-  POSTURE_UNSPECIFIED  = 0;
-  POSTURE_TRAVELING    = 1;
-  POSTURE_BOUNDING     = 2;
-  POSTURE_DELIBERATE   = 3;
-  POSTURE_HASTY_DEFENSE = 4;
-  POSTURE_DUG_IN       = 5;
-  POSTURE_DISPERSED    = 6;
-  POSTURE_ASSAULT      = 7;
-}
+import "engine/v1/weapon.proto";
 
 message Unit {
   // Identity
@@ -49,4 +31,8 @@ message Unit {
 
   // Current movement order. Cleared when all waypoints are reached.
   MoveOrder move_order = 20;
+
+  // Live ammunition state. Initialized from the unit definition's default
+  // loadout on scenario load. Updated by the adjudicator each time a weapon fires.
+  repeated WeaponState weapons = 21;
 }

@@ -32,7 +32,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 2005
     base_strength: 0.97
-    combat_range_m: 180000
     accuracy: 0.95
     max_speed_mps: 686
     cruise_speed_mps: 625
@@ -41,6 +40,10 @@ definitions:
     detection_range_m: 370000
     fuel_capacity_liters: 8200
     fuel_burn_rate_lph: 3500
+    default_loadout:
+      - { weapon_id: aam-aim120c,   max_qty: 6,   initial_qty: 6   }
+      - { weapon_id: aam-aim9x,     max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 480, initial_qty: 480 }
 
   - id: f15c-eagle
     name: "F-15C Eagle"
@@ -52,7 +55,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 1979
     base_strength: 0.82
-    combat_range_m: 120000
     accuracy: 0.87
     max_speed_mps: 807
     cruise_speed_mps: 272
@@ -61,6 +63,10 @@ definitions:
     detection_range_m: 185000
     fuel_capacity_liters: 6103
     fuel_burn_rate_lph: 4200
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-aim9x,      max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 940, initial_qty: 940 }
 
   - id: f15ex-eagle-ii
     name: "F-15EX Eagle II"
@@ -72,7 +78,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 2021
     base_strength: 0.88
-    combat_range_m: 165000
     accuracy: 0.91
     max_speed_mps: 807
     cruise_speed_mps: 272
@@ -81,6 +86,10 @@ definitions:
     detection_range_m: 300000
     fuel_capacity_liters: 6103
     fuel_burn_rate_lph: 4000
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 8,   initial_qty: 8   }
+      - { weapon_id: aam-aim9x,      max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 940, initial_qty: 940 }
 
   - id: f16c-fighting-falcon
     name: "F-16C Fighting Falcon"
@@ -92,7 +101,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 1978
     base_strength: 0.73
-    combat_range_m: 100000
     accuracy: 0.82
     max_speed_mps: 686
     cruise_speed_mps: 272
@@ -101,6 +109,10 @@ definitions:
     detection_range_m: 130000
     fuel_capacity_liters: 3985
     fuel_burn_rate_lph: 2800
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: aam-aim9x,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 511, initial_qty: 511 }
 
   - id: f16v-viper
     name: "F-16V Viper"
@@ -112,7 +124,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 2017
     base_strength: 0.80
-    combat_range_m: 120000
     accuracy: 0.88
     max_speed_mps: 686
     cruise_speed_mps: 272
@@ -121,6 +132,10 @@ definitions:
     detection_range_m: 250000
     fuel_capacity_liters: 3985
     fuel_burn_rate_lph: 2700
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-aim9x,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 511, initial_qty: 511 }
 
   - id: fa18e-super-hornet
     name: "F/A-18E Super Hornet"
@@ -132,7 +147,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 1999
     base_strength: 0.79
-    combat_range_m: 120000
     accuracy: 0.86
     max_speed_mps: 617
     cruise_speed_mps: 260
@@ -141,6 +155,10 @@ definitions:
     detection_range_m: 200000
     fuel_capacity_liters: 6531
     fuel_burn_rate_lph: 3200
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-aim9x,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 578, initial_qty: 578 }
 
   - id: fa18f-super-hornet
     name: "F/A-18F Super Hornet"
@@ -152,7 +170,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 2002
     base_strength: 0.78
-    combat_range_m: 120000
     accuracy: 0.85
     max_speed_mps: 617
     cruise_speed_mps: 260
@@ -161,6 +178,10 @@ definitions:
     detection_range_m: 200000
     fuel_capacity_liters: 6531
     fuel_burn_rate_lph: 3200
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-aim9x,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 578, initial_qty: 578 }
 
   - id: f35a-lightning
     name: "F-35A Lightning II (CTOL)"
@@ -172,7 +193,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 2016
     base_strength: 0.93
-    combat_range_m: 165000
     accuracy: 0.93
     max_speed_mps: 549
     cruise_speed_mps: 292
@@ -181,6 +201,10 @@ definitions:
     detection_range_m: 350000
     fuel_capacity_liters: 8278
     fuel_burn_rate_lph: 3000
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-aim9x,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 182, initial_qty: 182 }
 
   - id: f35b-lightning
     name: "F-35B Lightning II (STOVL)"
@@ -192,7 +216,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 2015
     base_strength: 0.90
-    combat_range_m: 160000
     accuracy: 0.92
     max_speed_mps: 549
     cruise_speed_mps: 292
@@ -201,6 +224,9 @@ definitions:
     detection_range_m: 340000
     fuel_capacity_liters: 6125
     fuel_burn_rate_lph: 3200
+    default_loadout:
+      - { weapon_id: aam-aim120c, max_qty: 4, initial_qty: 4 }
+      - { weapon_id: aam-aim9x,   max_qty: 2, initial_qty: 2 }
 
   - id: f35c-lightning
     name: "F-35C Lightning II (CV)"
@@ -212,7 +238,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 2019
     base_strength: 0.91
-    combat_range_m: 165000
     accuracy: 0.92
     max_speed_mps: 549
     cruise_speed_mps: 292
@@ -221,6 +246,10 @@ definitions:
     detection_range_m: 345000
     fuel_capacity_liters: 9070
     fuel_burn_rate_lph: 2900
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-aim9x,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 182, initial_qty: 182 }
 
   - id: fa18c-hornet
     name: "F/A-18C Hornet"
@@ -232,7 +261,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 1987
     base_strength: 0.68
-    combat_range_m: 80000
     accuracy: 0.80
     max_speed_mps: 617
     cruise_speed_mps: 257
@@ -241,6 +269,10 @@ definitions:
     detection_range_m: 120000
     fuel_capacity_liters: 4926
     fuel_burn_rate_lph: 2900
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: aam-aim9x,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 578, initial_qty: 578 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # RUSSIA
@@ -256,7 +288,6 @@ definitions:
     nation_of_origin: "RUS"
     service_entry_year: 1985
     base_strength: 0.77
-    combat_range_m: 100000
     accuracy: 0.80
     max_speed_mps: 807
     cruise_speed_mps: 295
@@ -265,6 +296,10 @@ definitions:
     detection_range_m: 150000
     fuel_capacity_liters: 9400
     fuel_burn_rate_lph: 5200
+    default_loadout:
+      - { weapon_id: aam-r77-1,      max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-r74m,       max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   - id: su30sm-flanker-h
     name: "Su-30SM Flanker-H"
@@ -276,7 +311,6 @@ definitions:
     nation_of_origin: "RUS"
     service_entry_year: 2012
     base_strength: 0.83
-    combat_range_m: 110000
     accuracy: 0.84
     max_speed_mps: 772
     cruise_speed_mps: 295
@@ -285,6 +319,10 @@ definitions:
     detection_range_m: 180000
     fuel_capacity_liters: 9640
     fuel_burn_rate_lph: 5000
+    default_loadout:
+      - { weapon_id: aam-r77-1,      max_qty: 8,   initial_qty: 8   }
+      - { weapon_id: aam-r74m,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   - id: su35s-flanker-e
     name: "Su-35S Flanker-E"
@@ -296,7 +334,6 @@ definitions:
     nation_of_origin: "RUS"
     service_entry_year: 2014
     base_strength: 0.88
-    combat_range_m: 200000
     accuracy: 0.87
     max_speed_mps: 772
     cruise_speed_mps: 295
@@ -305,6 +342,10 @@ definitions:
     detection_range_m: 400000
     fuel_capacity_liters: 11500
     fuel_burn_rate_lph: 5500
+    default_loadout:
+      - { weapon_id: aam-r77-1,      max_qty: 8,   initial_qty: 8   }
+      - { weapon_id: aam-r74m,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   - id: su57-felon
     name: "Su-57 Felon"
@@ -316,7 +357,6 @@ definitions:
     nation_of_origin: "RUS"
     service_entry_year: 2020
     base_strength: 0.92
-    combat_range_m: 300000
     accuracy: 0.90
     max_speed_mps: 686
     cruise_speed_mps: 617
@@ -325,6 +365,10 @@ definitions:
     detection_range_m: 400000
     fuel_capacity_liters: 11000
     fuel_burn_rate_lph: 4500
+    default_loadout:
+      - { weapon_id: aam-r77-1,      max_qty: 6,   initial_qty: 6   }
+      - { weapon_id: aam-r74m,       max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   - id: mig29s-fulcrum-c
     name: "MiG-29S Fulcrum-C"
@@ -336,7 +380,6 @@ definitions:
     nation_of_origin: "RUS"
     service_entry_year: 1983
     base_strength: 0.67
-    combat_range_m: 80000
     accuracy: 0.76
     max_speed_mps: 772
     cruise_speed_mps: 280
@@ -345,6 +388,10 @@ definitions:
     detection_range_m: 100000
     fuel_capacity_liters: 4360
     fuel_burn_rate_lph: 3000
+    default_loadout:
+      - { weapon_id: aam-r77-1,      max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-r74m,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   - id: mig29m-fulcrum-e
     name: "MiG-29M/M2 Fulcrum-E"
@@ -356,7 +403,6 @@ definitions:
     nation_of_origin: "RUS"
     service_entry_year: 2013
     base_strength: 0.73
-    combat_range_m: 100000
     accuracy: 0.80
     max_speed_mps: 772
     cruise_speed_mps: 280
@@ -365,6 +411,10 @@ definitions:
     detection_range_m: 140000
     fuel_capacity_liters: 5300
     fuel_burn_rate_lph: 2900
+    default_loadout:
+      - { weapon_id: aam-r77-1,      max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-r74m,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   - id: mig31bm-foxhound
     name: "MiG-31BM Foxhound"
@@ -376,7 +426,6 @@ definitions:
     nation_of_origin: "RUS"
     service_entry_year: 1981
     base_strength: 0.82
-    combat_range_m: 300000
     accuracy: 0.84
     max_speed_mps: 972
     cruise_speed_mps: 807
@@ -385,6 +434,10 @@ definitions:
     detection_range_m: 400000
     fuel_capacity_liters: 15500
     fuel_burn_rate_lph: 7000
+    default_loadout:
+      - { weapon_id: aam-r37m,       max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-r74m,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 260, initial_qty: 260 }
 
   - id: mig35s-fulcrum-f
     name: "MiG-35S Fulcrum-F"
@@ -396,7 +449,6 @@ definitions:
     nation_of_origin: "RUS"
     service_entry_year: 2019
     base_strength: 0.75
-    combat_range_m: 110000
     accuracy: 0.82
     max_speed_mps: 772
     cruise_speed_mps: 280
@@ -405,6 +457,10 @@ definitions:
     detection_range_m: 200000
     fuel_capacity_liters: 5200
     fuel_burn_rate_lph: 2800
+    default_loadout:
+      - { weapon_id: aam-r77-1,      max_qty: 6,   initial_qty: 6   }
+      - { weapon_id: aam-r74m,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # CHINA
@@ -420,7 +476,6 @@ definitions:
     nation_of_origin: "CHN"
     service_entry_year: 2017
     base_strength: 0.91
-    combat_range_m: 200000
     accuracy: 0.90
     max_speed_mps: 686
     cruise_speed_mps: 292
@@ -429,6 +484,10 @@ definitions:
     detection_range_m: 300000
     fuel_capacity_liters: 11000
     fuel_burn_rate_lph: 4200
+    default_loadout:
+      - { weapon_id: aam-pl15,       max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-pl10,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 300, initial_qty: 300 }
 
   - id: j20b-mighty-dragon
     name: "J-20B Mighty Dragon"
@@ -440,7 +499,6 @@ definitions:
     nation_of_origin: "CHN"
     service_entry_year: 2023
     base_strength: 0.94
-    combat_range_m: 200000
     accuracy: 0.92
     max_speed_mps: 686
     cruise_speed_mps: 617
@@ -449,6 +507,10 @@ definitions:
     detection_range_m: 350000
     fuel_capacity_liters: 11000
     fuel_burn_rate_lph: 4000
+    default_loadout:
+      - { weapon_id: aam-pl15,       max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-pl10,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 300, initial_qty: 300 }
 
   - id: j11b-flanker
     name: "J-11B"
@@ -460,7 +522,6 @@ definitions:
     nation_of_origin: "CHN"
     service_entry_year: 2003
     base_strength: 0.76
-    combat_range_m: 100000
     accuracy: 0.79
     max_speed_mps: 807
     cruise_speed_mps: 295
@@ -469,6 +530,10 @@ definitions:
     detection_range_m: 160000
     fuel_capacity_liters: 9400
     fuel_burn_rate_lph: 5100
+    default_loadout:
+      - { weapon_id: aam-pl12,       max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-pl10,       max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   - id: j16-flanker
     name: "J-16"
@@ -480,7 +545,6 @@ definitions:
     nation_of_origin: "CHN"
     service_entry_year: 2013
     base_strength: 0.83
-    combat_range_m: 130000
     accuracy: 0.85
     max_speed_mps: 772
     cruise_speed_mps: 295
@@ -489,6 +553,10 @@ definitions:
     detection_range_m: 220000
     fuel_capacity_liters: 9640
     fuel_burn_rate_lph: 5000
+    default_loadout:
+      - { weapon_id: aam-pl15,       max_qty: 6,   initial_qty: 6   }
+      - { weapon_id: aam-pl10,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   - id: j10c-vigorous-dragon
     name: "J-10C Vigorous Dragon"
@@ -500,7 +568,6 @@ definitions:
     nation_of_origin: "CHN"
     service_entry_year: 2018
     base_strength: 0.78
-    combat_range_m: 150000
     accuracy: 0.85
     max_speed_mps: 686
     cruise_speed_mps: 275
@@ -509,6 +576,10 @@ definitions:
     detection_range_m: 200000
     fuel_capacity_liters: 4500
     fuel_burn_rate_lph: 2800
+    default_loadout:
+      - { weapon_id: aam-pl15,       max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-pl10,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 200, initial_qty: 200 }
 
   - id: j15-flying-shark
     name: "J-15 Flying Shark"
@@ -520,7 +591,6 @@ definitions:
     nation_of_origin: "CHN"
     service_entry_year: 2013
     base_strength: 0.78
-    combat_range_m: 110000
     accuracy: 0.82
     max_speed_mps: 772
     cruise_speed_mps: 280
@@ -529,6 +599,10 @@ definitions:
     detection_range_m: 180000
     fuel_capacity_liters: 9400
     fuel_burn_rate_lph: 5000
+    default_loadout:
+      - { weapon_id: aam-pl12,       max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-pl10,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   - id: jf17-thunder-blk3
     name: "JF-17 Thunder Block III"
@@ -540,7 +614,6 @@ definitions:
     nation_of_origin: "CHN"
     service_entry_year: 2021
     base_strength: 0.68
-    combat_range_m: 100000
     accuracy: 0.80
     max_speed_mps: 549
     cruise_speed_mps: 265
@@ -549,6 +622,10 @@ definitions:
     detection_range_m: 150000
     fuel_capacity_liters: 2300
     fuel_burn_rate_lph: 2200
+    default_loadout:
+      - { weapon_id: aam-pl15,       max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-pl10,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # EUROPE
@@ -564,7 +641,6 @@ definitions:
     nation_of_origin: "GBR"
     service_entry_year: 2003
     base_strength: 0.87
-    combat_range_m: 200000
     accuracy: 0.89
     max_speed_mps: 686
     cruise_speed_mps: 515
@@ -573,6 +649,10 @@ definitions:
     detection_range_m: 250000
     fuel_capacity_liters: 4996
     fuel_burn_rate_lph: 3400
+    default_loadout:
+      - { weapon_id: aam-meteor,     max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-iris-t,     max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-mauser-bk27, max_qty: 150, initial_qty: 150 }
 
   - id: eurofighter-typhoon-t1t2
     name: "Eurofighter Typhoon Tranche 1/2"
@@ -584,7 +664,6 @@ definitions:
     nation_of_origin: "GBR"
     service_entry_year: 2003
     base_strength: 0.82
-    combat_range_m: 120000
     accuracy: 0.85
     max_speed_mps: 686
     cruise_speed_mps: 515
@@ -593,6 +672,10 @@ definitions:
     detection_range_m: 180000
     fuel_capacity_liters: 4996
     fuel_burn_rate_lph: 3500
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-iris-t,     max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-mauser-bk27, max_qty: 150, initial_qty: 150 }
 
   - id: rafale-f3r
     name: "Dassault Rafale F3-R"
@@ -604,7 +687,6 @@ definitions:
     nation_of_origin: "FRA"
     service_entry_year: 2001
     base_strength: 0.86
-    combat_range_m: 200000
     accuracy: 0.90
     max_speed_mps: 617
     cruise_speed_mps: 290
@@ -613,6 +695,10 @@ definitions:
     detection_range_m: 200000
     fuel_capacity_liters: 4700
     fuel_burn_rate_lph: 3200
+    default_loadout:
+      - { weapon_id: aam-meteor,     max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-mica-ir,    max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-defa554-30mm, max_qty: 125, initial_qty: 125 }
 
   - id: jas39c-gripen
     name: "Saab JAS 39C Gripen"
@@ -624,7 +710,6 @@ definitions:
     nation_of_origin: "SWE"
     service_entry_year: 1997
     base_strength: 0.73
-    combat_range_m: 100000
     accuracy: 0.83
     max_speed_mps: 686
     cruise_speed_mps: 280
@@ -633,6 +718,10 @@ definitions:
     detection_range_m: 150000
     fuel_capacity_liters: 2268
     fuel_burn_rate_lph: 2000
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: aam-iris-t,     max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-mauser-bk27, max_qty: 150, initial_qty: 150 }
 
   - id: jas39e-gripen
     name: "Saab JAS 39E Gripen"
@@ -644,7 +733,6 @@ definitions:
     nation_of_origin: "SWE"
     service_entry_year: 2020
     base_strength: 0.81
-    combat_range_m: 200000
     accuracy: 0.88
     max_speed_mps: 686
     cruise_speed_mps: 285
@@ -653,6 +741,10 @@ definitions:
     detection_range_m: 250000
     fuel_capacity_liters: 3400
     fuel_burn_rate_lph: 2200
+    default_loadout:
+      - { weapon_id: aam-meteor,     max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-iris-t,     max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-mauser-bk27, max_qty: 150, initial_qty: 150 }
 
   - id: mirage2000-5
     name: "Dassault Mirage 2000-5"
@@ -664,7 +756,6 @@ definitions:
     nation_of_origin: "FRA"
     service_entry_year: 1997
     base_strength: 0.73
-    combat_range_m: 100000
     accuracy: 0.82
     max_speed_mps: 748
     cruise_speed_mps: 275
@@ -673,6 +764,10 @@ definitions:
     detection_range_m: 130000
     fuel_capacity_liters: 3160
     fuel_burn_rate_lph: 2500
+    default_loadout:
+      - { weapon_id: aam-mica-em,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-mica-ir,    max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-defa554-30mm, max_qty: 125, initial_qty: 125 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # ISRAEL
@@ -688,7 +783,6 @@ definitions:
     nation_of_origin: "ISR"
     service_entry_year: 1998
     base_strength: 0.87
-    combat_range_m: 130000
     accuracy: 0.90
     max_speed_mps: 807
     cruise_speed_mps: 272
@@ -697,6 +791,10 @@ definitions:
     detection_range_m: 200000
     fuel_capacity_liters: 6103
     fuel_burn_rate_lph: 4100
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-python5,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 940, initial_qty: 940 }
 
   - id: f16i-sufa
     name: "F-16I Sufa"
@@ -708,7 +806,6 @@ definitions:
     nation_of_origin: "ISR"
     service_entry_year: 2004
     base_strength: 0.81
-    combat_range_m: 100000
     accuracy: 0.88
     max_speed_mps: 686
     cruise_speed_mps: 272
@@ -717,6 +814,10 @@ definitions:
     detection_range_m: 170000
     fuel_capacity_liters: 5580
     fuel_burn_rate_lph: 2700
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: aam-python5,    max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 511, initial_qty: 511 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # INDIA
@@ -732,7 +833,6 @@ definitions:
     nation_of_origin: "IND"
     service_entry_year: 2002
     base_strength: 0.84
-    combat_range_m: 120000
     accuracy: 0.84
     max_speed_mps: 772
     cruise_speed_mps: 295
@@ -741,6 +841,10 @@ definitions:
     detection_range_m: 200000
     fuel_capacity_liters: 9640
     fuel_burn_rate_lph: 5000
+    default_loadout:
+      - { weapon_id: aam-r77-1,      max_qty: 6,   initial_qty: 6   }
+      - { weapon_id: aam-r74m,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   - id: mig29k-fulcrum-d
     name: "MiG-29K Fulcrum-D"
@@ -752,7 +856,6 @@ definitions:
     nation_of_origin: "RUS"
     service_entry_year: 2010
     base_strength: 0.72
-    combat_range_m: 100000
     accuracy: 0.79
     max_speed_mps: 686
     cruise_speed_mps: 275
@@ -761,6 +864,10 @@ definitions:
     detection_range_m: 130000
     fuel_capacity_liters: 5800
     fuel_burn_rate_lph: 3100
+    default_loadout:
+      - { weapon_id: aam-r77-1,      max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-r74m,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   - id: tejas-mk1a
     name: "HAL Tejas Mk1A"
@@ -772,7 +879,6 @@ definitions:
     nation_of_origin: "IND"
     service_entry_year: 2025
     base_strength: 0.70
-    combat_range_m: 80000
     accuracy: 0.80
     max_speed_mps: 549
     cruise_speed_mps: 265
@@ -781,6 +887,10 @@ definitions:
     detection_range_m: 150000
     fuel_capacity_liters: 2458
     fuel_burn_rate_lph: 2200
+    default_loadout:
+      - { weapon_id: aam-astra-mk1,  max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: aam-r74m,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 220, initial_qty: 220 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # JAPAN
@@ -796,7 +906,6 @@ definitions:
     nation_of_origin: "JPN"
     service_entry_year: 1981
     base_strength: 0.80
-    combat_range_m: 120000
     accuracy: 0.86
     max_speed_mps: 807
     cruise_speed_mps: 272
@@ -805,6 +914,10 @@ definitions:
     detection_range_m: 185000
     fuel_capacity_liters: 6103
     fuel_burn_rate_lph: 4200
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-aim9x,      max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 940, initial_qty: 940 }
 
   - id: f2-viper-zero
     name: "Mitsubishi F-2"
@@ -816,7 +929,6 @@ definitions:
     nation_of_origin: "JPN"
     service_entry_year: 2000
     base_strength: 0.78
-    combat_range_m: 100000
     accuracy: 0.84
     max_speed_mps: 600
     cruise_speed_mps: 270
@@ -825,6 +937,10 @@ definitions:
     detection_range_m: 180000
     fuel_capacity_liters: 4750
     fuel_burn_rate_lph: 2900
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: aam-aim9x,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 511, initial_qty: 511 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # SOUTH KOREA
@@ -840,7 +956,6 @@ definitions:
     nation_of_origin: "KOR"
     service_entry_year: 2005
     base_strength: 0.86
-    combat_range_m: 130000
     accuracy: 0.89
     max_speed_mps: 807
     cruise_speed_mps: 272
@@ -849,6 +964,10 @@ definitions:
     detection_range_m: 200000
     fuel_capacity_liters: 6103
     fuel_burn_rate_lph: 4000
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-aim9x,      max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 940, initial_qty: 940 }
 
   - id: kf21-boramae
     name: "KAI KF-21 Boramae"
@@ -860,7 +979,6 @@ definitions:
     nation_of_origin: "KOR"
     service_entry_year: 2026
     base_strength: 0.82
-    combat_range_m: 150000
     accuracy: 0.87
     max_speed_mps: 617
     cruise_speed_mps: 280
@@ -869,6 +987,10 @@ definitions:
     detection_range_m: 250000
     fuel_capacity_liters: 4800
     fuel_burn_rate_lph: 3000
+    default_loadout:
+      - { weapon_id: aam-meteor,     max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-aim9x,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-mauser-bk27, max_qty: 150, initial_qty: 150 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # TAIWAN
@@ -884,7 +1006,6 @@ definitions:
     nation_of_origin: "TWN"
     service_entry_year: 1994
     base_strength: 0.62
-    combat_range_m: 60000
     accuracy: 0.76
     max_speed_mps: 617
     cruise_speed_mps: 260
@@ -893,6 +1014,10 @@ definitions:
     detection_range_m: 90000
     fuel_capacity_liters: 2000
     fuel_burn_rate_lph: 2000
+    default_loadout:
+      - { weapon_id: aam-derby,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: aam-python5,    max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 511, initial_qty: 511 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # UNITED ARAB EMIRATES
@@ -908,7 +1033,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 2004
     base_strength: 0.83
-    combat_range_m: 130000
     accuracy: 0.89
     max_speed_mps: 686
     cruise_speed_mps: 272
@@ -917,6 +1041,10 @@ definitions:
     detection_range_m: 260000
     fuel_capacity_liters: 5985
     fuel_burn_rate_lph: 2700
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: aam-aim9x,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 511, initial_qty: 511 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # IRAN
@@ -932,7 +1060,6 @@ definitions:
     nation_of_origin: "IRN"
     service_entry_year: 1976
     base_strength: 0.50
-    combat_range_m: 100000
     accuracy: 0.58
     max_speed_mps: 807
     cruise_speed_mps: 265
@@ -941,6 +1068,11 @@ definitions:
     detection_range_m: 185000
     fuel_capacity_liters: 9344
     fuel_burn_rate_lph: 4800
+    # Degraded loadout reflecting decades of sanctions and limited spares
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: aam-aim9x,      max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 675, initial_qty: 675 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # SAUDI ARABIA
@@ -956,7 +1088,6 @@ definitions:
     nation_of_origin: "USA"
     service_entry_year: 2016
     base_strength: 0.88
-    combat_range_m: 140000
     accuracy: 0.90
     max_speed_mps: 807
     cruise_speed_mps: 272
@@ -965,6 +1096,10 @@ definitions:
     detection_range_m: 280000
     fuel_capacity_liters: 6103
     fuel_burn_rate_lph: 4000
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 8,   initial_qty: 8   }
+      - { weapon_id: aam-aim9x,      max_qty: 4,   initial_qty: 4   }
+      - { weapon_id: gun-m61a2-20mm, max_qty: 940, initial_qty: 940 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # ALGERIA
@@ -980,7 +1115,6 @@ definitions:
     nation_of_origin: "DZA"
     service_entry_year: 2007
     base_strength: 0.82
-    combat_range_m: 110000
     accuracy: 0.83
     max_speed_mps: 772
     cruise_speed_mps: 295
@@ -989,6 +1123,10 @@ definitions:
     detection_range_m: 180000
     fuel_capacity_liters: 9640
     fuel_burn_rate_lph: 5000
+    default_loadout:
+      - { weapon_id: aam-r77-1,      max_qty: 6,   initial_qty: 6   }
+      - { weapon_id: aam-r74m,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }
 
   # ════════════════════════════════════════════════════════════════════════════
   # UKRAINE / OTHER CIS OPERATORS
@@ -1004,7 +1142,6 @@ definitions:
     nation_of_origin: "UKR"
     service_entry_year: 1985
     base_strength: 0.66
-    combat_range_m: 100000
     accuracy: 0.78
     max_speed_mps: 772
     cruise_speed_mps: 280
@@ -1013,3 +1150,7 @@ definitions:
     detection_range_m: 130000
     fuel_capacity_liters: 4360
     fuel_burn_rate_lph: 3000
+    default_loadout:
+      - { weapon_id: aam-aim120c,    max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: aam-r74m,       max_qty: 2,   initial_qty: 2   }
+      - { weapon_id: gun-gsh301-30mm, max_qty: 150, initial_qty: 150 }

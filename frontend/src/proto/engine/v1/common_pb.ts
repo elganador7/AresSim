@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/common.proto.
  */
 export const file_engine_v1_common: GenFile = /*@__PURE__*/
-  fileDesc("ChZlbmdpbmUvdjEvY29tbW9uLnByb3RvEgllbmdpbmUudjEiVQoIUG9zaXRpb24SCwoDbGF0GAEgASgBEgsKA2xvbhgCIAEoARIPCgdhbHRfbXNsGAMgASgBEg8KB2hlYWRpbmcYBCABKAESDQoFc3BlZWQYBSABKAEiNwoHU2ltVGltZRIXCg9zZWNvbmRzX2VsYXBzZWQYASABKAESEwoLdGlja19udW1iZXIYAiABKAMisQEKEVdlYXRoZXJDb25kaXRpb25zEiYKBXN0YXRlGAEgASgOMhcuZW5naW5lLnYxLldlYXRoZXJTdGF0ZRIVCg12aXNpYmlsaXR5X2ttGAIgASgCEhYKDndpbmRfc3BlZWRfbXBzGAMgASgCEhUKDXByZWNpcGl0YXRpb24YBCABKAgSFQoNdGVtcGVyYXR1cmVfYxgFIAEoAhIXCg9jbG91ZF9jZWlsaW5nX20YBiABKAIiMQoPT3BlcmF0aW9uUmVzdWx0Eg8KB3N1Y2Nlc3MYASABKAgSDQoFZXJyb3IYAiABKAkiNQoIV2F5cG9pbnQSCwoDbGF0GAEgASgBEgsKA2xvbhgCIAEoARIPCgdhbHRfbXNsGAMgASgBIjMKCU1vdmVPcmRlchImCgl3YXlwb2ludHMYASADKAsyEy5lbmdpbmUudjEuV2F5cG9pbnQqswEKDFdlYXRoZXJTdGF0ZRIXChNXRUFUSEVSX1VOU1BFQ0lGSUVEEAASEQoNV0VBVEhFUl9DTEVBUhABEhQKEFdFQVRIRVJfT1ZFUkNBU1QQAhIPCgtXRUFUSEVSX0ZPRxADEhAKDFdFQVRIRVJfUkFJThAEEhYKEldFQVRIRVJfSEVBVllfUkFJThAFEhAKDFdFQVRIRVJfU05PVxAGEhQKEFdFQVRIRVJfQkxJWlpBUkQQB0IrWilnaXRodWIuY29tL2FyZXNzaW0vaW50ZXJuYWwvZ2VuL2VuZ2luZS92MWIGcHJvdG8z");
+  fileDesc("ChZlbmdpbmUvdjEvY29tbW9uLnByb3RvEgllbmdpbmUudjEiVQoIUG9zaXRpb24SCwoDbGF0GAEgASgBEgsKA2xvbhgCIAEoARIPCgdhbHRfbXNsGAMgASgBEg8KB2hlYWRpbmcYBCABKAESDQoFc3BlZWQYBSABKAEiNwoHU2ltVGltZRIXCg9zZWNvbmRzX2VsYXBzZWQYASABKAESEwoLdGlja19udW1iZXIYAiABKAMisQEKEVdlYXRoZXJDb25kaXRpb25zEiYKBXN0YXRlGAEgASgOMhcuZW5naW5lLnYxLldlYXRoZXJTdGF0ZRIVCg12aXNpYmlsaXR5X2ttGAIgASgCEhYKDndpbmRfc3BlZWRfbXBzGAMgASgCEhUKDXByZWNpcGl0YXRpb24YBCABKAgSFQoNdGVtcGVyYXR1cmVfYxgFIAEoAhIXCg9jbG91ZF9jZWlsaW5nX20YBiABKAIiMQoPT3BlcmF0aW9uUmVzdWx0Eg8KB3N1Y2Nlc3MYASABKAgSDQoFZXJyb3IYAiABKAkiNQoIV2F5cG9pbnQSCwoDbGF0GAEgASgBEgsKA2xvbhgCIAEoARIPCgdhbHRfbXNsGAMgASgBIjMKCU1vdmVPcmRlchImCgl3YXlwb2ludHMYASADKAsyEy5lbmdpbmUudjEuV2F5cG9pbnQqswEKDFdlYXRoZXJTdGF0ZRIXChNXRUFUSEVSX1VOU1BFQ0lGSUVEEAASEQoNV0VBVEhFUl9DTEVBUhABEhQKEFdFQVRIRVJfT1ZFUkNBU1QQAhIPCgtXRUFUSEVSX0ZPRxADEhAKDFdFQVRIRVJfUkFJThAEEhYKEldFQVRIRVJfSEVBVllfUkFJThAFEhAKDFdFQVRIRVJfU05PVxAGEhQKEFdFQVRIRVJfQkxJWlpBUkQQBypsCgpVbml0RG9tYWluEhYKEkRPTUFJTl9VTlNQRUNJRklFRBAAEg8KC0RPTUFJTl9MQU5EEAESDgoKRE9NQUlOX0FJUhACEg4KCkRPTUFJTl9TRUEQAxIVChFET01BSU5fU1VCU1VSRkFDRRAEKssBChBGb3JtYXRpb25Qb3N0dXJlEhcKE1BPU1RVUkVfVU5TUEVDSUZJRUQQABIVChFQT1NUVVJFX1RSQVZFTElORxABEhQKEFBPU1RVUkVfQk9VTkRJTkcQAhIWChJQT1NUVVJFX0RFTElCRVJBVEUQAxIZChVQT1NUVVJFX0hBU1RZX0RFRkVOU0UQBBISCg5QT1NUVVJFX0RVR19JThAFEhUKEVBPU1RVUkVfRElTUEVSU0VEEAYSEwoPUE9TVFVSRV9BU1NBVUxUEAdCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw");
 
 /**
  * @generated from message engine.v1.Position
@@ -146,6 +146,7 @@ export const OperationResultSchema: GenMessage<OperationResult> = /*@__PURE__*/
   messageDesc(file_engine_v1_common, 3);
 
 /**
+ * ── Movement ──────────────────────────────────────────────────────────────────
  * A single geographic point in a movement route.
  *
  * @generated from message engine.v1.Waypoint
@@ -245,4 +246,91 @@ export enum WeatherState {
  */
 export const WeatherStateSchema: GenEnum<WeatherState> = /*@__PURE__*/
   enumDesc(file_engine_v1_common, 0);
+
+/**
+ * @generated from enum engine.v1.UnitDomain
+ */
+export enum UnitDomain {
+  /**
+   * @generated from enum value: DOMAIN_UNSPECIFIED = 0;
+   */
+  DOMAIN_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: DOMAIN_LAND = 1;
+   */
+  DOMAIN_LAND = 1,
+
+  /**
+   * @generated from enum value: DOMAIN_AIR = 2;
+   */
+  DOMAIN_AIR = 2,
+
+  /**
+   * @generated from enum value: DOMAIN_SEA = 3;
+   */
+  DOMAIN_SEA = 3,
+
+  /**
+   * @generated from enum value: DOMAIN_SUBSURFACE = 4;
+   */
+  DOMAIN_SUBSURFACE = 4,
+}
+
+/**
+ * Describes the enum engine.v1.UnitDomain.
+ */
+export const UnitDomainSchema: GenEnum<UnitDomain> = /*@__PURE__*/
+  enumDesc(file_engine_v1_common, 1);
+
+/**
+ * @generated from enum engine.v1.FormationPosture
+ */
+export enum FormationPosture {
+  /**
+   * @generated from enum value: POSTURE_UNSPECIFIED = 0;
+   */
+  POSTURE_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: POSTURE_TRAVELING = 1;
+   */
+  POSTURE_TRAVELING = 1,
+
+  /**
+   * @generated from enum value: POSTURE_BOUNDING = 2;
+   */
+  POSTURE_BOUNDING = 2,
+
+  /**
+   * @generated from enum value: POSTURE_DELIBERATE = 3;
+   */
+  POSTURE_DELIBERATE = 3,
+
+  /**
+   * @generated from enum value: POSTURE_HASTY_DEFENSE = 4;
+   */
+  POSTURE_HASTY_DEFENSE = 4,
+
+  /**
+   * @generated from enum value: POSTURE_DUG_IN = 5;
+   */
+  POSTURE_DUG_IN = 5,
+
+  /**
+   * @generated from enum value: POSTURE_DISPERSED = 6;
+   */
+  POSTURE_DISPERSED = 6,
+
+  /**
+   * @generated from enum value: POSTURE_ASSAULT = 7;
+   */
+  POSTURE_ASSAULT = 7,
+}
+
+/**
+ * Describes the enum engine.v1.FormationPosture.
+ */
+export const FormationPostureSchema: GenEnum<FormationPosture> = /*@__PURE__*/
+  enumDesc(file_engine_v1_common, 2);
 

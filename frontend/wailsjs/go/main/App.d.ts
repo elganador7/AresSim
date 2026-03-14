@@ -16,6 +16,8 @@ export function ListScenarios():Promise<Array<Record<string, any>>>;
 
 export function ListUnitDefinitions():Promise<Array<Record<string, any>>>;
 
+export function ListWeaponDefinitions():Promise<Array<Record<string, any>>>;
+
 export function LoadScenarioFromProto(arg1:string):Promise<main.BridgeResult>;
 
 export function MoveUnit(arg1:string,arg2:number,arg3:number):Promise<main.BridgeResult>;

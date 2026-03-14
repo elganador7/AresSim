@@ -7,46 +7,72 @@ import (
 // DefStats holds the per-definition values the sim loop needs each tick.
 type DefStats struct {
 	CruiseSpeedMps  float64
-	CombatRangeM    float64
 	BaseStrength    float64
 	DetectionRangeM float64
+	Domain          enginev1.UnitDomain // physical domain of this platform
 }
 
-// Kill represents a single combat outcome from one engagement check.
-// Attacker is nil for mutual annihilation (both units destroy each other).
+// WeaponStats holds the per-weapon catalog data needed for engagement resolution
+// and in-flight munition tracking.
+type WeaponStats struct {
+	RangeM           float64
+	SpeedMps         float64 // projectile/missile speed; used for munition travel time
+	ProbabilityOfHit float64
+	DomainTargets    []enginev1.UnitDomain
+}
+
+// Rng is the minimal interface for probability rolls.
+// *rand.Rand satisfies this interface; a deterministic stub is used in tests.
+type Rng interface {
+	Float64() float64
+}
+
+// Kill represents a single combat outcome resolved when a munition arrives.
+// Attacker may be nil if the shooter was destroyed before the munition landed.
 type Kill struct {
-	Attacker *enginev1.Unit // unit that won; nil = mutual
-	Victim   *enginev1.Unit // unit destroyed
+	Attacker *enginev1.Unit
+	Victim   *enginev1.Unit
 }
 
-// AdjudicateTick checks all pairs of enemy active units. When a pair falls
-// within the longer unit's combat range, the unit with the superior range
-// destroys the other. If ranges are equal, higher base_strength wins; a tie
-// annihilates both. Killed units are mutated in-place (IsActive = false,
-// MoveOrder cleared) so subsequent ticks skip them automatically.
+// FiredShot records a single weapon discharge during adjudication.
+type FiredShot struct {
+	Shooter        *enginev1.Unit
+	Target         *enginev1.Unit
+	WeaponID       string
+	HitProbability float64 // range-degraded probability at fire time
+}
+
+// AdjudicateResult holds all shots fired in one tick of adjudication.
+// Kills are NOT resolved here — they are deferred to when the in-flight
+// munition arrives at its destination (see ResolveArrivals).
+type AdjudicateResult struct {
+	Shots []FiredShot
+}
+
+// AdjudicateTick checks all pairs of enemy active units and fires weapons for
+// any unit within its best weapon's range. Each unit fires at most once per
+// tick. Probability of hit is range-degraded at fire time and stored on the
+// returned FiredShot for later resolution via ResolveArrivals.
 //
-// Each unit can participate in at most one engagement per tick: once a unit is
-// marked killed it is skipped in all subsequent pair checks within the same
-// tick. This means cascading kills (A kills B, B would have killed C) are
-// resolved in iteration order. Future work: track per-pair engagement time so
-// combat resolution is proportional to sim-seconds elapsed.
-func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats) []Kill {
-	killed := make(map[string]bool)
-	var results []Kill
+// Units with no loadout, or with a loadout where no weapon can reach the
+// target's domain, simply cannot engage — there is no fallback.
+func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats) AdjudicateResult {
+	firedThisTick := make(map[string]bool)
+	var result AdjudicateResult
 
 	for i := 0; i < len(units); i++ {
 		a := units[i]
-		if !unitIsActive(a) || killed[a.Id] {
+		if !unitIsActive(a) {
 			continue
 		}
 
 		for j := i + 1; j < len(units); j++ {
 			b := units[j]
-			if !unitIsActive(b) || killed[b.Id] {
+			if !unitIsActive(b) {
 				continue
 			}
 			if a.Side == b.Side {
-				continue // no friendly fire
+				continue
 			}
 
 			dist := haversineM(
@@ -57,53 +83,138 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats) []Kill {
 			defA := defs[a.DefinitionId]
 			defB := defs[b.DefinitionId]
 
-			rangeA := defA.CombatRangeM
-			rangeB := defB.CombatRangeM
-			maxRange := max(rangeA, rangeB)
+			wIDA, wA, hasWeapA := selectBestWeapon(a, defB.Domain, weapons)
+			wIDB, wB, hasWeapB := selectBestWeapon(b, defA.Domain, weapons)
 
-			if maxRange <= 0 || dist > maxRange {
-				continue // out of engagement range
+			aCanFire := hasWeapA && dist <= wA.RangeM && !firedThisTick[a.Id]
+			bCanFire := hasWeapB && dist <= wB.RangeM && !firedThisTick[b.Id]
+
+			if !aCanFire && !bCanFire {
+				continue
 			}
 
-			switch {
-			case rangeA > rangeB:
-				// A can engage; B is out of range — A wins.
-				killUnit(b)
-				killed[b.Id] = true
-				results = append(results, Kill{Attacker: a, Victim: b})
+			if aCanFire {
+				prob := rangeDegradedPoh(wA.ProbabilityOfHit, dist, wA.RangeM)
+				decrementAmmo(a, wIDA)
+				result.Shots = append(result.Shots, FiredShot{
+					Shooter:        a,
+					Target:         b,
+					WeaponID:       wIDA,
+					HitProbability: prob,
+				})
+				firedThisTick[a.Id] = true
+			}
 
-			case rangeB > rangeA:
-				// B can engage; A is out of range — B wins.
-				killUnit(a)
-				killed[a.Id] = true
-				results = append(results, Kill{Attacker: b, Victim: a})
+			if bCanFire {
+				prob := rangeDegradedPoh(wB.ProbabilityOfHit, dist, wB.RangeM)
+				decrementAmmo(b, wIDB)
+				result.Shots = append(result.Shots, FiredShot{
+					Shooter:        b,
+					Target:         a,
+					WeaponID:       wIDB,
+					HitProbability: prob,
+				})
+				firedThisTick[b.Id] = true
+			}
 
-			default:
-				// Equal range — resolve by base_strength; tie = mutual.
-				switch {
-				case defA.BaseStrength > defB.BaseStrength:
-					killUnit(b)
-					killed[b.Id] = true
-					results = append(results, Kill{Attacker: a, Victim: b})
-				case defB.BaseStrength > defA.BaseStrength:
-					killUnit(a)
-					killed[a.Id] = true
-					results = append(results, Kill{Attacker: b, Victim: a})
-				default:
-					// Mutual annihilation.
-					killUnit(a)
-					killUnit(b)
-					killed[a.Id] = true
-					killed[b.Id] = true
-					results = append(results,
-						Kill{Attacker: nil, Victim: a},
-						Kill{Attacker: nil, Victim: b},
-					)
-				}
+			if firedThisTick[a.Id] {
+				break // A has fired; advance to the next outer unit
 			}
 		}
 	}
-	return results
+	return result
+}
+
+// ResolveArrivals resolves kill outcomes for munitions that have reached their
+// destinations. For each arrived munition, rng is rolled against its
+// pre-computed HitProbability. Already-destroyed targets are safely skipped.
+func ResolveArrivals(arrived []*InFlightMunition, units []*enginev1.Unit, rng Rng) []Kill {
+	if len(arrived) == 0 {
+		return nil
+	}
+	unitByID := make(map[string]*enginev1.Unit, len(units))
+	for _, u := range units {
+		unitByID[u.Id] = u
+	}
+
+	var kills []Kill
+	for _, m := range arrived {
+		if m.TargetID == "" {
+			continue
+		}
+		target := unitByID[m.TargetID]
+		if target == nil || !unitIsActive(target) {
+			continue // already destroyed before munition arrived
+		}
+		if rng.Float64() < m.HitProbability {
+			killUnit(target)
+			kills = append(kills, Kill{
+				Attacker: unitByID[m.ShooterID],
+				Victim:   target,
+			})
+		}
+	}
+	return kills
+}
+
+// rangeDegradedPoh returns the base probability of hit scaled by a linear
+// range factor. At dist=0 the full basePoh applies; at dist=rangeM the
+// probability is reduced to 30% of basePoh, reflecting the difficulty of
+// engaging a target at maximum effective range.
+func rangeDegradedPoh(basePoh, dist, rangeM float64) float64 {
+	if rangeM <= 0 {
+		return basePoh
+	}
+	factor := 1.0 - 0.7*(dist/rangeM)
+	if factor < 0.3 {
+		factor = 0.3
+	}
+	return basePoh * factor
+}
+
+// selectBestWeapon finds the highest-range weapon on unit that can target
+// targetDomain and has ammo remaining.
+func selectBestWeapon(unit *enginev1.Unit, targetDomain enginev1.UnitDomain, catalog map[string]WeaponStats) (weaponID string, stats WeaponStats, found bool) {
+	bestRange := -1.0
+	for _, ws := range unit.Weapons {
+		if ws.CurrentQty <= 0 {
+			continue
+		}
+		wdef, ok := catalog[ws.WeaponId]
+		if !ok {
+			continue
+		}
+		if !canTargetDomain(wdef.DomainTargets, targetDomain) {
+			continue
+		}
+		if wdef.RangeM > bestRange {
+			bestRange = wdef.RangeM
+			weaponID = ws.WeaponId
+			stats = wdef
+			found = true
+		}
+	}
+	return
+}
+
+// canTargetDomain returns true if the given domain is in the targets slice.
+func canTargetDomain(targets []enginev1.UnitDomain, d enginev1.UnitDomain) bool {
+	for _, t := range targets {
+		if t == d {
+			return true
+		}
+	}
+	return false
+}
+
+// decrementAmmo reduces the current quantity of weaponID on shooter by 1.
+func decrementAmmo(shooter *enginev1.Unit, weaponID string) {
+	for _, ws := range shooter.Weapons {
+		if ws.WeaponId == weaponID && ws.CurrentQty > 0 {
+			ws.CurrentQty--
+			return
+		}
+	}
 }
 
 // ─── SENSOR DETECTION ─────────────────────────────────────────────────────────
@@ -113,15 +224,9 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats) []Kill {
 type DetectionSet map[string][]string
 
 // SensorTick scans all active units and builds the current detection picture.
-// For each detector unit, any enemy unit within its DetectionRangeM is added
-// to the detector's side's contact set. Returns the full set for every side
-// that has at least one active unit (empty slice = no contacts this tick).
 func SensorTick(units []*enginev1.Unit, defs map[string]DefStats) DetectionSet {
-	// Use intermediate sets to avoid duplicate entries.
 	bySet := make(map[string]map[string]bool)
 
-	// Collect all active sides so we can emit an empty update when a side
-	// has no contacts (clearing stale frontend state).
 	for _, u := range units {
 		if unitIsActive(u) {
 			if bySet[u.Side] == nil {
@@ -164,11 +269,6 @@ func SensorTick(units []*enginev1.Unit, defs map[string]DefStats) DetectionSet {
 }
 
 // unitIsActive returns true if u is not yet destroyed.
-// Treats nil Status as active because proto3 defaults bool fields to false,
-// meaning a freshly constructed Unit with no Status set would incorrectly
-// appear destroyed if we relied solely on GetStatus().GetIsActive().
-// FUTURE: change OperationalStatus.is_active to an enum or optional bool so
-// the "not yet set" vs "explicitly false" distinction is encoded in the schema.
 func unitIsActive(u *enginev1.Unit) bool {
 	if u.Status == nil {
 		return true

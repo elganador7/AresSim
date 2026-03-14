@@ -39,28 +39,35 @@ type Meta struct {
 	Author      string `yaml:"author"`
 }
 
+// LoadoutSlot describes one weapon type in a definition's default loadout.
+type LoadoutSlot struct {
+	WeaponID   string `yaml:"weapon_id"`
+	MaxQty     int32  `yaml:"max_qty"`
+	InitialQty int32  `yaml:"initial_qty"`
+}
+
 // Definition is one unit definition record inside a library file.
 // Field names use snake_case to match the DB schema and YAML convention.
 type Definition struct {
-	ID                 string  `yaml:"id"`
-	Name               string  `yaml:"name"`
-	Description        string  `yaml:"description"`
-	Domain             int     `yaml:"domain"`
-	Form               int     `yaml:"form"`
-	GeneralType        int     `yaml:"general_type"`
-	SpecificType       string  `yaml:"specific_type"`
-	NationOfOrigin     string  `yaml:"nation_of_origin"`
-	ServiceEntryYear   int     `yaml:"service_entry_year"`
-	BaseStrength       float32 `yaml:"base_strength"`
-	CombatRangeM       float32 `yaml:"combat_range_m"`
-	Accuracy           float32 `yaml:"accuracy"`
-	MaxSpeedMps        float32 `yaml:"max_speed_mps"`
-	CruiseSpeedMps     float32 `yaml:"cruise_speed_mps"`
-	MaxRangeKm         float32 `yaml:"max_range_km"`
-	Survivability      float32 `yaml:"survivability"`
-	DetectionRangeM    float32 `yaml:"detection_range_m"`
-	FuelCapacityLiters float32 `yaml:"fuel_capacity_liters"`
-	FuelBurnRateLph    float32 `yaml:"fuel_burn_rate_lph"`
+	ID                 string        `yaml:"id"`
+	Name               string        `yaml:"name"`
+	Description        string        `yaml:"description"`
+	Domain             int           `yaml:"domain"`
+	Form               int           `yaml:"form"`
+	GeneralType        int           `yaml:"general_type"`
+	SpecificType       string        `yaml:"specific_type"`
+	NationOfOrigin     string        `yaml:"nation_of_origin"`
+	ServiceEntryYear   int           `yaml:"service_entry_year"`
+	BaseStrength       float32       `yaml:"base_strength"`
+	Accuracy           float32       `yaml:"accuracy"`
+	MaxSpeedMps        float32       `yaml:"max_speed_mps"`
+	CruiseSpeedMps     float32       `yaml:"cruise_speed_mps"`
+	MaxRangeKm         float32       `yaml:"max_range_km"`
+	Survivability      float32       `yaml:"survivability"`
+	DetectionRangeM    float32       `yaml:"detection_range_m"`
+	FuelCapacityLiters float32       `yaml:"fuel_capacity_liters"`
+	FuelBurnRateLph    float32       `yaml:"fuel_burn_rate_lph"`
+	DefaultLoadout     []LoadoutSlot `yaml:"default_loadout"`
 }
 
 // File is the top-level structure of a library YAML file.
@@ -83,7 +90,6 @@ func (d Definition) ToRecord() map[string]any {
 		"nation_of_origin":     d.NationOfOrigin,
 		"service_entry_year":   d.ServiceEntryYear,
 		"base_strength":        float64(d.BaseStrength),
-		"combat_range_m":       float64(d.CombatRangeM),
 		"accuracy":             float64(d.Accuracy),
 		"max_speed_mps":        float64(d.MaxSpeedMps),
 		"cruise_speed_mps":     float64(d.CruiseSpeedMps),

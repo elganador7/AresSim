@@ -52,6 +52,30 @@ export interface UnitStatus {
   routing: boolean;
 }
 
+export interface WeaponState {
+  weaponId: string;
+  currentQty: number;
+  maxQty: number;
+}
+
+export interface Munition {
+  id: string;
+  weaponId: string;
+  shooterId: string;
+  lat: number;
+  lon: number;
+}
+
+export interface WeaponDef {
+  id: string;
+  name: string;
+  description: string;
+  domainTargets: number[];  // UnitDomain enum values
+  speedMps: number;
+  rangeM: number;
+  probabilityOfHit: number;
+}
+
 export interface Unit {
   id: string;
   displayName: string;
@@ -63,6 +87,7 @@ export interface Unit {
   status: UnitStatus;
   parentUnitId?: string;
   moveOrder?: MoveOrder;
+  weapons: WeaponState[];
 }
 
 export type ScenarioState = "idle" | "paused" | "running" | "ended";
@@ -78,6 +103,18 @@ export interface SimStore {
   // ── Units ────────────────────────────────────────────────────────────────
   // Map keyed by unit ID for O(1) lookup and incremental delta merges.
   units: Map<string, Unit>;
+
+  // ── Weapon definitions ────────────────────────────────────────────────────
+  // Global munition catalog keyed by weapon ID. Populated from full_state_snapshot.
+  weaponDefs: Map<string, WeaponDef>;
+
+  // ── In-flight munitions ───────────────────────────────────────────────────
+  // Keyed by munition ID. Replaced in full each tick via munition_update.
+  munitions: Map<string, Munition>;
+
+  // ── Munition detections ───────────────────────────────────────────────────
+  // Maps detecting side → set of munition IDs currently visible to that side.
+  munitionDetections: Map<string, Set<string>>;
 
   // ── View ─────────────────────────────────────────────────────────────────
   // Controls fog of war: "debug" shows all units; "blue"/"red" shows own
@@ -99,7 +136,9 @@ export interface SimStore {
 
   // ── Actions ──────────────────────────────────────────────────────────────
   // Called by bridge.ts on incoming sim events.
-  loadSnapshot: (units: Unit[], scenarioName: string) => void;
+  loadSnapshot: (units: Unit[], scenarioName: string, weaponDefs?: WeaponDef[]) => void;
+  setMunitions: (munitions: Munition[]) => void;
+  setMunitionDetections: (side: string, ids: string[]) => void;
   applyUnitDelta: (id: string, delta: Partial<Unit>) => void;
   spawnUnit: (unit: Unit) => void;
   destroyUnit: (id: string) => void;
@@ -129,30 +168,46 @@ export const useSimStore = create<SimStore>((set) => ({
   simSeconds: 0,
   tickNumber: 0,
   units: new Map(),
+  weaponDefs: new Map(),
+  munitions: new Map(),
+  munitionDetections: new Map(),
   activeView: "debug",
   detections: new Map(),
   selectedUnitId: null,
   eventLog: [],
 
-  loadSnapshot: (units, scenarioName) =>
+  loadSnapshot: (units, scenarioName, weaponDefs) =>
     // Replaces the entire units Map reference. Zustand notifies all subscribers
     // because the reference changed, so CesiumGlobe's subscription fires and
     // does a full syncUnits pass. This is correct: a snapshot is a full rebuild.
-    set({
+    set((state) => ({
       scenarioName,
       scenarioState: "paused",
       simSeconds: 0,
       tickNumber: 0,
       units: new Map(units.map((u) => [u.id, u])),
       eventLog: [],
-    }),
+      weaponDefs: weaponDefs
+        ? new Map(weaponDefs.map((d) => [d.id, d]))
+        : state.weaponDefs,
+    })),
 
   applyUnitDelta: (id, delta) =>
     set((state) => {
       const existing = state.units.get(id);
       if (!existing) return {};
       const updated = new Map(state.units);
-      updated.set(id, { ...existing, ...delta });
+      const merged = { ...existing, ...delta };
+      // When a weapons delta arrives, merge by weaponId rather than replacing
+      // the entire array, so un-fired weapons retain their previous quantities.
+      if (delta.weapons && delta.weapons.length > 0) {
+        const weaponMap = new Map(existing.weapons.map((w) => [w.weaponId, w]));
+        for (const w of delta.weapons) {
+          weaponMap.set(w.weaponId, w);
+        }
+        merged.weapons = Array.from(weaponMap.values());
+      }
+      updated.set(id, merged);
       return { units: updated };
     }),
 
@@ -193,5 +248,15 @@ export const useSimStore = create<SimStore>((set) => ({
       const updated = new Map(state.detections);
       updated.set(side, new Set(ids));
       return { detections: updated };
+    }),
+
+  setMunitions: (munitions) =>
+    set({ munitions: new Map(munitions.map((m) => [m.id, m])) }),
+
+  setMunitionDetections: (side, ids) =>
+    set((state) => {
+      const updated = new Map(state.munitionDetections);
+      updated.set(side, new Set(ids));
+      return { munitionDetections: updated };
     }),
 }));

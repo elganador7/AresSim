@@ -4,19 +4,21 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { MoveOrder, Position, SimTime, WeatherConditions } from "./common_pb";
+import type { FormationPosture, MoveOrder, Position, SimTime, WeatherConditions } from "./common_pb";
 import { file_engine_v1_common } from "./common_pb";
-import type { FormationPosture, Unit } from "./unit_pb";
+import type { Unit } from "./unit_pb";
 import { file_engine_v1_unit } from "./unit_pb";
 import type { OperationalStatus } from "./status_pb";
 import { file_engine_v1_status } from "./status_pb";
+import type { WeaponDefinition, WeaponState } from "./weapon_pb";
+import { file_engine_v1_weapon } from "./weapon_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file engine/v1/events.proto.
  */
 export const file_engine_v1_events: GenFile = /*@__PURE__*/
-  fileDesc("ChZlbmdpbmUvdjEvZXZlbnRzLnByb3RvEgllbmdpbmUudjEinwEKEUZ1bGxTdGF0ZVNuYXBzaG90Eh4KBXVuaXRzGAEgAygLMg8uZW5naW5lLnYxLlVuaXQSJAoIc2ltX3RpbWUYAyABKAsyEi5lbmdpbmUudjEuU2ltVGltZRItCgd3ZWF0aGVyGAQgASgLMhwuZW5naW5lLnYxLldlYXRoZXJDb25kaXRpb25zEhUKDXNjZW5hcmlvX25hbWUYBSABKAkiVQoSU2NlbmFyaW9TdGF0ZUV2ZW50EisKBXN0YXRlGAEgASgOMhwuZW5naW5lLnYxLlNjZW5hcmlvUGxheVN0YXRlEhIKCnRpbWVfc2NhbGUYAiABKAIiXQoPQmF0Y2hVbml0VXBkYXRlEiQKBmRlbHRhcxgBIAMoCzIULmVuZ2luZS52MS5Vbml0RGVsdGESJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSLJAQoJVW5pdERlbHRhEg8KB3VuaXRfaWQYASABKAkSJQoIcG9zaXRpb24YAiABKAsyEy5lbmdpbmUudjEuUG9zaXRpb24SLAoGc3RhdHVzGAMgASgLMhwuZW5naW5lLnYxLk9wZXJhdGlvbmFsU3RhdHVzEiwKB3Bvc3R1cmUYBCABKA4yGy5lbmdpbmUudjEuRm9ybWF0aW9uUG9zdHVyZRIoCgptb3ZlX29yZGVyGAUgASgLMhQuZW5naW5lLnYxLk1vdmVPcmRlciJXChBVbml0U3Bhd25lZEV2ZW50Eh0KBHVuaXQYASABKAsyDy5lbmdpbmUudjEuVW5pdBIkCghzaW1fdGltZRgCIAEoCzISLmVuZ2luZS52MS5TaW1UaW1lIm8KElVuaXREZXN0cm95ZWRFdmVudBIPCgd1bml0X2lkGAEgASgJEg0KBWNhdXNlGAIgASgJEiQKCHNpbV90aW1lGAMgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUSEwoLYXR0YWNrZXJfaWQYBCABKAkiRAoPRGV0ZWN0aW9uVXBkYXRlEhYKDmRldGVjdGluZ19zaWRlGAEgASgJEhkKEWRldGVjdGVkX3VuaXRfaWRzGAIgAygJIk8KDk5hcnJhdGl2ZUV2ZW50EgwKBHRleHQYASABKAkSEAoIY2F0ZWdvcnkYAiABKAkSDwoHdW5pdF9pZBgDIAEoCRIMCgRzaWRlGAQgASgJKmwKEVNjZW5hcmlvUGxheVN0YXRlEhgKFFNDRU5BUklPX1VOU1BFQ0lGSUVEEAASEwoPU0NFTkFSSU9fUEFVU0VEEAESFAoQU0NFTkFSSU9fUlVOTklORxACEhIKDlNDRU5BUklPX0VOREVEEANCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common, file_engine_v1_unit, file_engine_v1_status]);
+  fileDesc("ChZlbmdpbmUvdjEvZXZlbnRzLnByb3RvEgllbmdpbmUudjEi2AEKEUZ1bGxTdGF0ZVNuYXBzaG90Eh4KBXVuaXRzGAEgAygLMg8uZW5naW5lLnYxLlVuaXQSJAoIc2ltX3RpbWUYAyABKAsyEi5lbmdpbmUudjEuU2ltVGltZRItCgd3ZWF0aGVyGAQgASgLMhwuZW5naW5lLnYxLldlYXRoZXJDb25kaXRpb25zEhUKDXNjZW5hcmlvX25hbWUYBSABKAkSNwoSd2VhcG9uX2RlZmluaXRpb25zGAYgAygLMhsuZW5naW5lLnYxLldlYXBvbkRlZmluaXRpb24iVQoSU2NlbmFyaW9TdGF0ZUV2ZW50EisKBXN0YXRlGAEgASgOMhwuZW5naW5lLnYxLlNjZW5hcmlvUGxheVN0YXRlEhIKCnRpbWVfc2NhbGUYAiABKAIiXQoPQmF0Y2hVbml0VXBkYXRlEiQKBmRlbHRhcxgBIAMoCzIULmVuZ2luZS52MS5Vbml0RGVsdGESJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSLyAQoJVW5pdERlbHRhEg8KB3VuaXRfaWQYASABKAkSJQoIcG9zaXRpb24YAiABKAsyEy5lbmdpbmUudjEuUG9zaXRpb24SLAoGc3RhdHVzGAMgASgLMhwuZW5naW5lLnYxLk9wZXJhdGlvbmFsU3RhdHVzEiwKB3Bvc3R1cmUYBCABKA4yGy5lbmdpbmUudjEuRm9ybWF0aW9uUG9zdHVyZRIoCgptb3ZlX29yZGVyGAUgASgLMhQuZW5naW5lLnYxLk1vdmVPcmRlchInCgd3ZWFwb25zGAYgAygLMhYuZW5naW5lLnYxLldlYXBvblN0YXRlIlcKEFVuaXRTcGF3bmVkRXZlbnQSHQoEdW5pdBgBIAEoCzIPLmVuZ2luZS52MS5Vbml0EiQKCHNpbV90aW1lGAIgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUibwoSVW5pdERlc3Ryb3llZEV2ZW50Eg8KB3VuaXRfaWQYASABKAkSDQoFY2F1c2UYAiABKAkSJAoIc2ltX3RpbWUYAyABKAsyEi5lbmdpbmUudjEuU2ltVGltZRITCgthdHRhY2tlcl9pZBgEIAEoCSJjCg9EZXRlY3Rpb25VcGRhdGUSFgoOZGV0ZWN0aW5nX3NpZGUYASABKAkSGQoRZGV0ZWN0ZWRfdW5pdF9pZHMYAiADKAkSHQoVZGV0ZWN0ZWRfbXVuaXRpb25faWRzGAMgAygJImwKEEluRmxpZ2h0TXVuaXRpb24SCgoCaWQYASABKAkSEQoJd2VhcG9uX2lkGAIgASgJEhIKCnNob290ZXJfaWQYAyABKAkSJQoIcG9zaXRpb24YBCABKAsyEy5lbmdpbmUudjEuUG9zaXRpb24iZgoOTXVuaXRpb25VcGRhdGUSLgoJbXVuaXRpb25zGAEgAygLMhsuZW5naW5lLnYxLkluRmxpZ2h0TXVuaXRpb24SJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSJPCg5OYXJyYXRpdmVFdmVudBIMCgR0ZXh0GAEgASgJEhAKCGNhdGVnb3J5GAIgASgJEg8KB3VuaXRfaWQYAyABKAkSDAoEc2lkZRgEIAEoCSpsChFTY2VuYXJpb1BsYXlTdGF0ZRIYChRTQ0VOQVJJT19VTlNQRUNJRklFRBAAEhMKD1NDRU5BUklPX1BBVVNFRBABEhQKEFNDRU5BUklPX1JVTk5JTkcQAhISCg5TQ0VOQVJJT19FTkRFRBADQitaKWdpdGh1Yi5jb20vYXJlc3NpbS9pbnRlcm5hbC9nZW4vZW5naW5lL3YxYgZwcm90bzM", [file_engine_v1_common, file_engine_v1_unit, file_engine_v1_status, file_engine_v1_weapon]);
 
 /**
  * @generated from message engine.v1.FullStateSnapshot
@@ -41,6 +43,14 @@ export type FullStateSnapshot = Message<"engine.v1.FullStateSnapshot"> & {
    * @generated from field: string scenario_name = 5;
    */
   scenarioName: string;
+
+  /**
+   * Weapon catalog — sent once per snapshot so the frontend can display
+   * weapon names without a separate RPC call.
+   *
+   * @generated from field: repeated engine.v1.WeaponDefinition weapon_definitions = 6;
+   */
+  weaponDefinitions: WeaponDefinition[];
 };
 
 /**
@@ -130,6 +140,13 @@ export type UnitDelta = Message<"engine.v1.UnitDelta"> & {
    * @generated from field: engine.v1.MoveOrder move_order = 5;
    */
   moveOrder?: MoveOrder;
+
+  /**
+   * weapons present when one or more weapon states changed (e.g. ammo decremented).
+   *
+   * @generated from field: repeated engine.v1.WeaponState weapons = 6;
+   */
+  weapons: WeaponState[];
 };
 
 /**
@@ -212,6 +229,13 @@ export type DetectionUpdate = Message<"engine.v1.DetectionUpdate"> & {
    * @generated from field: repeated string detected_unit_ids = 2;
    */
   detectedUnitIds: string[];
+
+  /**
+   * in-flight munition IDs visible to this side
+   *
+   * @generated from field: repeated string detected_munition_ids = 3;
+   */
+  detectedMunitionIds: string[];
 };
 
 /**
@@ -220,6 +244,71 @@ export type DetectionUpdate = Message<"engine.v1.DetectionUpdate"> & {
  */
 export const DetectionUpdateSchema: GenMessage<DetectionUpdate> = /*@__PURE__*/
   messageDesc(file_engine_v1_events, 6);
+
+/**
+ * @generated from message engine.v1.InFlightMunition
+ */
+export type InFlightMunition = Message<"engine.v1.InFlightMunition"> & {
+  /**
+   * stable ID for the lifetime of the munition
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * → WeaponDefinition
+   *
+   * @generated from field: string weapon_id = 2;
+   */
+  weaponId: string;
+
+  /**
+   * unit that fired
+   *
+   * @generated from field: string shooter_id = 3;
+   */
+  shooterId: string;
+
+  /**
+   * current position (updated each tick)
+   *
+   * @generated from field: engine.v1.Position position = 4;
+   */
+  position?: Position;
+};
+
+/**
+ * Describes the message engine.v1.InFlightMunition.
+ * Use `create(InFlightMunitionSchema)` to create a new message.
+ */
+export const InFlightMunitionSchema: GenMessage<InFlightMunition> = /*@__PURE__*/
+  messageDesc(file_engine_v1_events, 7);
+
+/**
+ * Emitted every tick with the complete set of in-flight munitions.
+ * An empty munitions list means nothing is currently in the air.
+ *
+ * @generated from message engine.v1.MunitionUpdate
+ */
+export type MunitionUpdate = Message<"engine.v1.MunitionUpdate"> & {
+  /**
+   * @generated from field: repeated engine.v1.InFlightMunition munitions = 1;
+   */
+  munitions: InFlightMunition[];
+
+  /**
+   * @generated from field: engine.v1.SimTime sim_time = 2;
+   */
+  simTime?: SimTime;
+};
+
+/**
+ * Describes the message engine.v1.MunitionUpdate.
+ * Use `create(MunitionUpdateSchema)` to create a new message.
+ */
+export const MunitionUpdateSchema: GenMessage<MunitionUpdate> = /*@__PURE__*/
+  messageDesc(file_engine_v1_events, 8);
 
 /**
  * @generated from message engine.v1.NarrativeEvent
@@ -253,7 +342,7 @@ export type NarrativeEvent = Message<"engine.v1.NarrativeEvent"> & {
  * Use `create(NarrativeEventSchema)` to create a new message.
  */
 export const NarrativeEventSchema: GenMessage<NarrativeEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 7);
+  messageDesc(file_engine_v1_events, 9);
 
 /**
  * @generated from enum engine.v1.ScenarioPlayState

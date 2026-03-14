@@ -6,7 +6,7 @@
  */
 
 import { EventsOn } from "../../wailsjs/runtime/runtime";
-import { useSimStore, Unit, MoveOrder, EventLogEntry } from "../store/simStore";
+import { useSimStore, Unit, MoveOrder, EventLogEntry, WeaponState, WeaponDef, Munition } from "../store/simStore";
 import { fromBinary } from "@bufbuild/protobuf";
 
 import {
@@ -17,6 +17,7 @@ import {
   UnitDestroyedEventSchema,
   NarrativeEventSchema,
   DetectionUpdateSchema,
+  MunitionUpdateSchema,
 } from "@proto/engine/v1/events_pb";
 import type {
   FullStateSnapshot,
@@ -26,6 +27,7 @@ import type {
   UnitDelta,
 } from "@proto/engine/v1/events_pb";
 import type { Unit as ProtoUnit } from "@proto/engine/v1/unit_pb";
+import type { WeaponDefinition as ProtoWeaponDef } from "@proto/engine/v1/weapon_pb";
 import type { MoveOrder as ProtoMoveOrder } from "@proto/engine/v1/common_pb";
 import type { OperationalStatus } from "@proto/engine/v1/status_pb";
 import { ScenarioPlayState } from "@proto/engine/v1/events_pb";
@@ -87,6 +89,23 @@ export function protoUnitToStore(u: ProtoUnit): Unit {
     status: protoStatusToStore(u.status),
     parentUnitId: u.parentUnitId || undefined,
     moveOrder: protoMoveOrderToStore(u.moveOrder),
+    weapons: (u.weapons ?? []).map((w): WeaponState => ({
+      weaponId: w.weaponId,
+      currentQty: w.currentQty,
+      maxQty: w.maxQty,
+    })),
+  };
+}
+
+function protoWeaponDefToStore(w: ProtoWeaponDef): WeaponDef {
+  return {
+    id: w.id,
+    name: w.name,
+    description: w.description,
+    domainTargets: w.domainTargets,
+    speedMps: w.speedMps,
+    rangeM: w.rangeM,
+    probabilityOfHit: w.probabilityOfHit,
   };
 }
 
@@ -111,6 +130,14 @@ function applyDelta(delta: UnitDelta): void {
     patch.moveOrder = delta.moveOrder.waypoints.length > 0
       ? protoMoveOrderToStore(delta.moveOrder)
       : undefined;
+  }
+  // weapon states present = ammo changed (adjudicator fired a weapon)
+  if (delta.weapons && delta.weapons.length > 0) {
+    patch.weapons = delta.weapons.map((w): WeaponState => ({
+      weaponId: w.weaponId,
+      currentQty: w.currentQty,
+      maxQty: w.maxQty,
+    }));
   }
 
   store.applyUnitDelta(delta.unitId, patch);
@@ -142,11 +169,12 @@ export function initBridge(): void {
       return;
     }
     const units = snap.units.map(protoUnitToStore);
-    store.loadSnapshot(units, snap.scenarioName);
+    const weaponDefs = snap.weaponDefinitions.map(protoWeaponDefToStore);
+    store.loadSnapshot(units, snap.scenarioName, weaponDefs);
     if (snap.simTime) {
       store.setSimTime(snap.simTime.secondsElapsed, Number(snap.simTime.tickNumber));
     }
-    console.log(`[bridge] snapshot loaded: ${units.length} units, scenario="${snap.scenarioName}"`);
+    console.log(`[bridge] snapshot loaded: ${units.length} units, ${weaponDefs.length} weapon defs, scenario="${snap.scenarioName}"`);
   });
 
   // ── Per-tick batch update ──────────────────────────────────────────────────
@@ -230,6 +258,26 @@ export function initBridge(): void {
       return;
     }
     store.setDetections(ev.detectingSide, ev.detectedUnitIds);
+    store.setMunitionDetections(ev.detectingSide, ev.detectedMunitionIds);
+  });
+
+  // ── In-flight munition update ──────────────────────────────────────────
+  EventsOn("sim:munition_update", (b64: string) => {
+    let ev;
+    try {
+      ev = fromBinary(MunitionUpdateSchema, b64ToBytes(b64));
+    } catch (e) {
+      console.error("[bridge] munition_update decode failed", e);
+      return;
+    }
+    const munitions: Munition[] = ev.munitions.map((m) => ({
+      id: m.id,
+      weaponId: m.weaponId,
+      shooterId: m.shooterId,
+      lat: m.position?.lat ?? 0,
+      lon: m.position?.lon ?? 0,
+    }));
+    store.setMunitions(munitions);
   });
 
   console.log("[bridge] event listeners registered");

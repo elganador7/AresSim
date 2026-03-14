@@ -30,6 +30,10 @@ export function ListUnitDefinitions() {
   return window['go']['main']['App']['ListUnitDefinitions']();
 }
 
+export function ListWeaponDefinitions() {
+  return window['go']['main']['App']['ListWeaponDefinitions']();
+}
+
 export function LoadScenarioFromProto(arg1) {
   return window['go']['main']['App']['LoadScenarioFromProto'](arg1);
 }

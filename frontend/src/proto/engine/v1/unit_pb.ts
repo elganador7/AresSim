@@ -2,19 +2,21 @@
 // @generated from file engine/v1/unit.proto (package engine.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
-import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { MoveOrder, Position } from "./common_pb";
+import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { FormationPosture, MoveOrder, Position } from "./common_pb";
 import { file_engine_v1_common } from "./common_pb";
 import type { OperationalStatus } from "./status_pb";
 import { file_engine_v1_status } from "./status_pb";
+import type { WeaponState } from "./weapon_pb";
+import { file_engine_v1_weapon } from "./weapon_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file engine/v1/unit.proto.
  */
 export const file_engine_v1_unit: GenFile = /*@__PURE__*/
-  fileDesc("ChRlbmdpbmUvdjEvdW5pdC5wcm90bxIJZW5naW5lLnYxIr8CCgRVbml0EgoKAmlkGAEgASgJEhQKDGRpc3BsYXlfbmFtZRgCIAEoCRIRCglmdWxsX25hbWUYAyABKAkSDAoEc2lkZRgEIAEoCRIVCg1kZWZpbml0aW9uX2lkGAUgASgJEiUKCHBvc2l0aW9uGAogASgLMhMuZW5naW5lLnYxLlBvc2l0aW9uEiwKBnN0YXR1cxgMIAEoCzIcLmVuZ2luZS52MS5PcGVyYXRpb25hbFN0YXR1cxIWCg5wYXJlbnRfdW5pdF9pZBgOIAEoCRIsCgdwb3N0dXJlGBEgASgOMhsuZW5naW5lLnYxLkZvcm1hdGlvblBvc3R1cmUSGAoQbmF0b19zeW1ib2xfc2lkYxgSIAEoCRIoCgptb3ZlX29yZGVyGBQgASgLMhQuZW5naW5lLnYxLk1vdmVPcmRlcipsCgpVbml0RG9tYWluEhYKEkRPTUFJTl9VTlNQRUNJRklFRBAAEg8KC0RPTUFJTl9MQU5EEAESDgoKRE9NQUlOX0FJUhACEg4KCkRPTUFJTl9TRUEQAxIVChFET01BSU5fU1VCU1VSRkFDRRAEKssBChBGb3JtYXRpb25Qb3N0dXJlEhcKE1BPU1RVUkVfVU5TUEVDSUZJRUQQABIVChFQT1NUVVJFX1RSQVZFTElORxABEhQKEFBPU1RVUkVfQk9VTkRJTkcQAhIWChJQT1NUVVJFX0RFTElCRVJBVEUQAxIZChVQT1NUVVJFX0hBU1RZX0RFRkVOU0UQBBISCg5QT1NUVVJFX0RVR19JThAFEhUKEVBPU1RVUkVfRElTUEVSU0VEEAYSEwoPUE9TVFVSRV9BU1NBVUxUEAdCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common, file_engine_v1_status]);
+  fileDesc("ChRlbmdpbmUvdjEvdW5pdC5wcm90bxIJZW5naW5lLnYxIugCCgRVbml0EgoKAmlkGAEgASgJEhQKDGRpc3BsYXlfbmFtZRgCIAEoCRIRCglmdWxsX25hbWUYAyABKAkSDAoEc2lkZRgEIAEoCRIVCg1kZWZpbml0aW9uX2lkGAUgASgJEiUKCHBvc2l0aW9uGAogASgLMhMuZW5naW5lLnYxLlBvc2l0aW9uEiwKBnN0YXR1cxgMIAEoCzIcLmVuZ2luZS52MS5PcGVyYXRpb25hbFN0YXR1cxIWCg5wYXJlbnRfdW5pdF9pZBgOIAEoCRIsCgdwb3N0dXJlGBEgASgOMhsuZW5naW5lLnYxLkZvcm1hdGlvblBvc3R1cmUSGAoQbmF0b19zeW1ib2xfc2lkYxgSIAEoCRIoCgptb3ZlX29yZGVyGBQgASgLMhQuZW5naW5lLnYxLk1vdmVPcmRlchInCgd3ZWFwb25zGBUgAygLMhYuZW5naW5lLnYxLldlYXBvblN0YXRlQitaKWdpdGh1Yi5jb20vYXJlc3NpbS9pbnRlcm5hbC9nZW4vZW5naW5lL3YxYgZwcm90bzM", [file_engine_v1_common, file_engine_v1_status, file_engine_v1_weapon]);
 
 /**
  * @generated from message engine.v1.Unit
@@ -98,6 +100,14 @@ export type Unit = Message<"engine.v1.Unit"> & {
    * @generated from field: engine.v1.MoveOrder move_order = 20;
    */
   moveOrder?: MoveOrder;
+
+  /**
+   * Live ammunition state. Initialized from the unit definition's default
+   * loadout on scenario load. Updated by the adjudicator each time a weapon fires.
+   *
+   * @generated from field: repeated engine.v1.WeaponState weapons = 21;
+   */
+  weapons: WeaponState[];
 };
 
 /**
@@ -106,91 +116,4 @@ export type Unit = Message<"engine.v1.Unit"> & {
  */
 export const UnitSchema: GenMessage<Unit> = /*@__PURE__*/
   messageDesc(file_engine_v1_unit, 0);
-
-/**
- * @generated from enum engine.v1.UnitDomain
- */
-export enum UnitDomain {
-  /**
-   * @generated from enum value: DOMAIN_UNSPECIFIED = 0;
-   */
-  DOMAIN_UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: DOMAIN_LAND = 1;
-   */
-  DOMAIN_LAND = 1,
-
-  /**
-   * @generated from enum value: DOMAIN_AIR = 2;
-   */
-  DOMAIN_AIR = 2,
-
-  /**
-   * @generated from enum value: DOMAIN_SEA = 3;
-   */
-  DOMAIN_SEA = 3,
-
-  /**
-   * @generated from enum value: DOMAIN_SUBSURFACE = 4;
-   */
-  DOMAIN_SUBSURFACE = 4,
-}
-
-/**
- * Describes the enum engine.v1.UnitDomain.
- */
-export const UnitDomainSchema: GenEnum<UnitDomain> = /*@__PURE__*/
-  enumDesc(file_engine_v1_unit, 0);
-
-/**
- * @generated from enum engine.v1.FormationPosture
- */
-export enum FormationPosture {
-  /**
-   * @generated from enum value: POSTURE_UNSPECIFIED = 0;
-   */
-  POSTURE_UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: POSTURE_TRAVELING = 1;
-   */
-  POSTURE_TRAVELING = 1,
-
-  /**
-   * @generated from enum value: POSTURE_BOUNDING = 2;
-   */
-  POSTURE_BOUNDING = 2,
-
-  /**
-   * @generated from enum value: POSTURE_DELIBERATE = 3;
-   */
-  POSTURE_DELIBERATE = 3,
-
-  /**
-   * @generated from enum value: POSTURE_HASTY_DEFENSE = 4;
-   */
-  POSTURE_HASTY_DEFENSE = 4,
-
-  /**
-   * @generated from enum value: POSTURE_DUG_IN = 5;
-   */
-  POSTURE_DUG_IN = 5,
-
-  /**
-   * @generated from enum value: POSTURE_DISPERSED = 6;
-   */
-  POSTURE_DISPERSED = 6,
-
-  /**
-   * @generated from enum value: POSTURE_ASSAULT = 7;
-   */
-  POSTURE_ASSAULT = 7,
-}
-
-/**
- * Describes the enum engine.v1.FormationPosture.
- */
-export const FormationPostureSchema: GenEnum<FormationPosture> = /*@__PURE__*/
-  enumDesc(file_engine_v1_unit, 1);
 

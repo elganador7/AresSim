@@ -40,6 +40,30 @@ message OperationResult {
   string error   = 2;
 }
 
+// ── Domain / Posture enums ────────────────────────────────────────────────────
+// Kept in common.proto so weapon.proto and unit.proto can both import them
+// without introducing a circular dependency.
+
+enum UnitDomain {
+  DOMAIN_UNSPECIFIED = 0;
+  DOMAIN_LAND        = 1;
+  DOMAIN_AIR         = 2;
+  DOMAIN_SEA         = 3;
+  DOMAIN_SUBSURFACE  = 4;
+}
+
+enum FormationPosture {
+  POSTURE_UNSPECIFIED   = 0;
+  POSTURE_TRAVELING     = 1;
+  POSTURE_BOUNDING      = 2;
+  POSTURE_DELIBERATE    = 3;
+  POSTURE_HASTY_DEFENSE = 4;
+  POSTURE_DUG_IN        = 5;
+  POSTURE_DISPERSED     = 6;
+  POSTURE_ASSAULT       = 7;
+}
+
+// ── Movement ──────────────────────────────────────────────────────────────────
 // A single geographic point in a movement route.
 message Waypoint {
   double lat     = 1;

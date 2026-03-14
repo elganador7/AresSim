@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"math/rand"
 	"time"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
@@ -25,7 +26,8 @@ const (
 )
 
 // MockLoop runs the movement and adjudication engine.
-// defs maps definitionId → DefStats (speed, range, strength).
+// defs maps definitionId → DefStats (speed, range, strength, domain).
+// weapons maps weaponId → WeaponStats (range, probability, domain targets).
 // startSeconds is the accumulated sim time to resume from (pass 0 for a fresh
 // scenario; pass the value from the previous run when resuming after pause).
 // getScale is called each tick to read the current time-scale multiplier;
@@ -33,12 +35,14 @@ const (
 // reportSeconds is called after each tick with the new accumulated sim time so
 // the caller can persist it across pause/resume cycles.
 // Returns when ctx is cancelled.
-func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefStats, startSeconds float64, getScale func() float64, reportSeconds func(float64), emit EmitFn) {
+func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, startSeconds float64, getScale func() float64, reportSeconds func(float64), emit EmitFn) {
 	ticker := time.NewTicker(tickInterval)
 	defer ticker.Stop()
 
+	rng        := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
 	tick       := int64(0)
 	simSeconds := startSeconds
+	var inFlight []*InFlightMunition
 
 	for {
 		select {
@@ -57,17 +61,91 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 				SimTime: &enginev1.SimTime{SecondsElapsed: simSeconds, TickNumber: tick},
 			})
 
+			// ── Adjudication ──────────────────────────────────────────────
+			adj := AdjudicateTick(units, defs, weapons)
+
+			// Emit a weapon-state delta for every unit that fired this tick
+			// so the frontend can update ammo counters in real time.
+			fired := make(map[string]bool)
+			for _, shot := range adj.Shots {
+				if !fired[shot.Shooter.Id] {
+					fired[shot.Shooter.Id] = true
+					states := make([]*enginev1.WeaponState, len(shot.Shooter.Weapons))
+					for i, ws := range shot.Shooter.Weapons {
+						states[i] = &enginev1.WeaponState{
+							WeaponId:   ws.WeaponId,
+							CurrentQty: ws.CurrentQty,
+							MaxQty:     ws.MaxQty,
+						}
+					}
+					emit("batch_update", &enginev1.BatchUnitUpdate{
+						Deltas: []*enginev1.UnitDelta{{
+							UnitId:  shot.Shooter.Id,
+							Weapons: states,
+						}},
+					})
+				}
+
+				// Create an in-flight munition for every weapon with a speed.
+				// Carry the target ID and pre-computed PoH so kill resolution
+				// can be deferred until the munition arrives.
+				ws, hasStats := weapons[shot.WeaponID]
+				if hasStats && ws.SpeedMps > 0 {
+					inFlight = append(inFlight, &InFlightMunition{
+						ID:             NextMunitionID(),
+						WeaponID:       shot.WeaponID,
+						ShooterID:      shot.Shooter.Id,
+						TargetID:       shot.Target.Id,
+						HitProbability: shot.HitProbability,
+						CurLat:         shot.Shooter.GetPosition().GetLat(),
+						CurLon:         shot.Shooter.GetPosition().GetLon(),
+						DestLat:        shot.Target.GetPosition().GetLat(),
+						DestLon:        shot.Target.GetPosition().GetLon(),
+						SpeedMps:       ws.SpeedMps,
+						TargetDomains:  ws.DomainTargets,
+					})
+				}
+			}
+
+			// ── Move in-flight munitions ───────────────────────────────────
+			var arrived []*InFlightMunition
+			inFlight, arrived = AdvanceMunitions(inFlight, timeScale)
+
+			// ── Resolve kills for munitions that arrived this tick ─────────
+			kills := ResolveArrivals(arrived, units, rng)
+
 			// ── Sensor detection ──────────────────────────────────────────
-			detections := SensorTick(units, defs)
-			for side, ids := range detections {
+			detections   := SensorTick(units, defs)
+			munitionDets := DetectMunitions(units, defs, inFlight)
+
+			// Emit per-side detection updates, merging unit and munition contacts.
+			activeSides := make(map[string]bool, len(detections)+len(munitionDets))
+			for side := range detections  { activeSides[side] = true }
+			for side := range munitionDets { activeSides[side] = true }
+			for side := range activeSides {
 				emit("detection_update", &enginev1.DetectionUpdate{
-					DetectingSide:   side,
-					DetectedUnitIds: ids,
+					DetectingSide:       side,
+					DetectedUnitIds:     detections[side],
+					DetectedMunitionIds: munitionDets[side],
 				})
 			}
 
-			// ── Adjudication ──────────────────────────────────────────────
-			kills := AdjudicateTick(units, defs)
+			// ── Emit full in-flight munition state ─────────────────────────
+			munProtos := make([]*enginev1.InFlightMunition, len(inFlight))
+			for i, m := range inFlight {
+				munProtos[i] = &enginev1.InFlightMunition{
+					Id:        m.ID,
+					WeaponId:  m.WeaponID,
+					ShooterId: m.ShooterID,
+					Position:  &enginev1.Position{Lat: m.CurLat, Lon: m.CurLon},
+				}
+			}
+			emit("munition_update", &enginev1.MunitionUpdate{
+				Munitions: munProtos,
+				SimTime:   &enginev1.SimTime{SecondsElapsed: simSeconds, TickNumber: tick},
+			})
+
+			// ── Emit kill events for arrived munitions ─────────────────────
 			for _, k := range kills {
 				attackerID := ""
 				if k.Attacker != nil {

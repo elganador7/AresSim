@@ -66,12 +66,17 @@ type App struct {
 	lastDetMu      sync.RWMutex
 	lastDetections map[string][]string
 
-	dbMgr       *db.Manager
-	dbClient    *db.Client
-	unitRepo    *repository.UnitRepo
-	scenRepo    *repository.ScenarioRepo
-	unitDefRepo *repository.UnitDefRepo
-	checkpoint  *db.CheckpointWriter
+	dbMgr         *db.Manager
+	dbClient      *db.Client
+	unitRepo      *repository.UnitRepo
+	scenRepo      *repository.ScenarioRepo
+	unitDefRepo   *repository.UnitDefRepo
+	weaponDefRepo *repository.WeaponDefRepo
+	checkpoint    *db.CheckpointWriter
+
+	// libDefsCache caches all library.Definition records keyed by ID so
+	// loadScenario can apply per-definition weapon loadouts without re-parsing YAML.
+	libDefsCache map[string]library.Definition
 
 	// shutdownOnce ensures the shutdown path runs at most once, whether
 	// triggered by Wails OnShutdown or by our OS signal handler.
@@ -127,6 +132,7 @@ func (a *App) startup(ctx context.Context) {
 	a.unitRepo = repository.NewUnitRepo(rawDB)
 	a.scenRepo = repository.NewScenarioRepo(rawDB)
 	a.unitDefRepo = repository.NewUnitDefRepo(rawDB)
+	a.weaponDefRepo = repository.NewWeaponDefRepo(rawDB)
 	a.checkpoint = db.NewCheckpointWriter(a.unitRepo, a.scenRepo)
 
 	// Seed default data synchronously so it is present before the frontend loads.
@@ -171,7 +177,6 @@ func (a *App) seedDefaults(ctx context.Context, cfg db.Config) {
 			"nation_of_origin":     unitDef.NationOfOrigin,
 			"service_entry_year":   int(unitDef.ServiceEntryYear),
 			"base_strength":        float64(unitDef.BaseStrength),
-			"combat_range_m":       float64(unitDef.CombatRangeM),
 			"accuracy":             float64(unitDef.Accuracy),
 			"max_speed_mps":        float64(unitDef.MaxSpeedMps),
 			"cruise_speed_mps":     float64(unitDef.CruiseSpeedMps),
@@ -191,14 +196,35 @@ func (a *App) seedDefaults(ctx context.Context, cfg db.Config) {
 	if err != nil {
 		slog.Warn("load libraries", "err", err)
 	}
+	a.libDefsCache = make(map[string]library.Definition, len(libDefs))
 	for _, d := range libDefs {
+		a.libDefsCache[d.ID] = d
 		if err := a.unitDefRepo.Save(ctx, d.ID, d.ToRecord()); err != nil {
 			slog.Warn("seed library definition", "id", d.ID, "err", err)
 		}
 	}
+	// ── Weapon definitions ────────────────────────────────────────────────
+	for _, wd := range scenario.DefaultWeaponDefinitions() {
+		targets := make([]int, len(wd.DomainTargets))
+		for i, d := range wd.DomainTargets {
+			targets[i] = int(d)
+		}
+		if err := a.weaponDefRepo.Save(ctx, wd.Id, map[string]any{
+			"name":               wd.Name,
+			"description":        wd.Description,
+			"domain_targets":     targets,
+			"speed_mps":          float64(wd.SpeedMps),
+			"range_m":            float64(wd.RangeM),
+			"probability_of_hit": float64(wd.ProbabilityOfHit),
+		}); err != nil {
+			slog.Warn("seed weapon definition", "id", wd.Id, "err", err)
+		}
+	}
+
 	slog.Info("seeding complete",
 		"scaffold", len(scenario.DefaultUnitDefinitions()),
 		"library", len(libDefs),
+		"weapons", len(scenario.DefaultWeaponDefinitions()),
 	)
 }
 
@@ -430,12 +456,41 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 
 	a.currentScenario = scen
 
+	// Initialize weapon loadouts for units that have none yet.
+	unitDefs, _ := a.unitDefRepo.List(a.ctx)
+	generalTypeByDefID := make(map[string]int32, len(unitDefs))
+	for _, row := range unitDefs {
+		id := extractRecordID(row["id"])
+		if gt, ok := row["general_type"]; ok {
+			generalTypeByDefID[id] = int32(toFloat64(gt))
+		}
+	}
+	for _, u := range scen.Units {
+		if len(u.Weapons) == 0 {
+			// Normalize the definition ID — strip any residual table prefix that
+			// may have been stored when extractRecordID used the old fmt path.
+			defID := extractRecordID(u.DefinitionId)
+			if def, ok := a.libDefsCache[defID]; ok && len(def.DefaultLoadout) > 0 {
+				u.Weapons = loadoutToWeaponStates(def.DefaultLoadout)
+				slog.Info("weapon loadout from library", "unit", u.DisplayName, "def", defID, "weapons", len(u.Weapons))
+			} else {
+				gt := generalTypeByDefID[defID]
+				u.Weapons = scenario.InitUnitWeapons(u, gt)
+				slog.Info("weapon loadout from defaults", "unit", u.DisplayName, "def", defID, "general_type", gt, "weapons", len(u.Weapons))
+			}
+		}
+	}
+
+	// Fetch weapon definitions for the snapshot.
+	weaponDefs := a.listWeaponDefsProto()
+
 	// Tell the frontend to rebuild from scratch.
 	a.emitProtoEvent("full_state_snapshot", &enginev1.FullStateSnapshot{
-		Units:        scen.Units,
-		SimTime:      &enginev1.SimTime{},
-		Weather:      scen.GetMap().GetInitialWeather(),
-		ScenarioName: scen.Name,
+		Units:             scen.Units,
+		SimTime:           &enginev1.SimTime{},
+		Weather:           scen.GetMap().GetInitialWeather(),
+		ScenarioName:      scen.Name,
+		WeaponDefinitions: weaponDefs,
 	})
 	a.emitProtoEvent("scenario_state", &enginev1.ScenarioStateEvent{
 		State:     enginev1.ScenarioPlayState_SCENARIO_RUNNING,
@@ -456,7 +511,7 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 	}
 	simCtx, simCancel := context.WithCancel(a.ctx)
 	a.simCancel = simCancel
-	go sim.MockLoop(simCtx, scen.Units, a.getCachedDefs(), 0, a.getSimTimeScale, a.setSimSeconds, a.makeEmitFn())
+	go sim.MockLoop(simCtx, scen.Units, a.getCachedDefs(), a.buildWeaponCatalog(), 0, a.getSimTimeScale, a.setSimSeconds, a.makeEmitFn())
 	slog.Info("scenario loaded", "name", scen.Name, "units", len(scen.Units))
 }
 
@@ -470,10 +525,11 @@ func (a *App) RequestSync() BridgeResult {
 		return failMsg("no scenario loaded")
 	}
 	a.emitProtoEvent("full_state_snapshot", &enginev1.FullStateSnapshot{
-		Units:        a.currentScenario.Units,
-		SimTime:      &enginev1.SimTime{SecondsElapsed: a.getSimSeconds()},
-		Weather:      a.currentScenario.GetMap().GetInitialWeather(),
-		ScenarioName: a.currentScenario.Name,
+		Units:             a.currentScenario.Units,
+		SimTime:           &enginev1.SimTime{SecondsElapsed: a.getSimSeconds()},
+		Weather:           a.currentScenario.GetMap().GetInitialWeather(),
+		ScenarioName:      a.currentScenario.Name,
+		WeaponDefinitions: a.listWeaponDefsProto(),
 	})
 	a.emitProtoEvent("scenario_state", &enginev1.ScenarioStateEvent{
 		State:     enginev1.ScenarioPlayState_SCENARIO_RUNNING,
@@ -505,7 +561,7 @@ func (a *App) PauseSim(paused bool) BridgeResult {
 			simCtx, simCancel := context.WithCancel(a.ctx)
 			a.simCancel = simCancel
 			// Resume from the accumulated sim time so the clock doesn't reset.
-			go sim.MockLoop(simCtx, a.currentScenario.Units, a.getCachedDefs(), a.getSimSeconds(), a.getSimTimeScale, a.setSimSeconds, a.makeEmitFn())
+			go sim.MockLoop(simCtx, a.currentScenario.Units, a.getCachedDefs(), a.buildWeaponCatalog(), a.getSimSeconds(), a.getSimTimeScale, a.setSimSeconds, a.makeEmitFn())
 		}
 	}
 	state := enginev1.ScenarioPlayState_SCENARIO_PAUSED
@@ -625,12 +681,42 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 		id := extractRecordID(row["id"])
 		defs[id] = sim.DefStats{
 			CruiseSpeedMps:  toFloat64(row["cruise_speed_mps"]),
-			CombatRangeM:    toFloat64(row["combat_range_m"]),
 			BaseStrength:    toFloat64(row["base_strength"]),
 			DetectionRangeM: toFloat64(row["detection_range_m"]),
+			Domain:          enginev1.UnitDomain(int32(toFloat64(row["domain"]))),
 		}
 	}
 	return defs
+}
+
+// loadoutToWeaponStates converts library.LoadoutSlot entries (from YAML) into
+// the proto WeaponState slice expected by the adjudicator and frontend.
+func loadoutToWeaponStates(slots []library.LoadoutSlot) []*enginev1.WeaponState {
+	states := make([]*enginev1.WeaponState, 0, len(slots))
+	for _, s := range slots {
+		states = append(states, &enginev1.WeaponState{
+			WeaponId:   s.WeaponID,
+			CurrentQty: s.InitialQty,
+			MaxQty:     s.MaxQty,
+		})
+	}
+	return states
+}
+
+// buildWeaponCatalog converts the stored weapon definitions into a
+// weaponId → WeaponStats map for the adjudication engine.
+func (a *App) buildWeaponCatalog() map[string]sim.WeaponStats {
+	catalog := make(map[string]sim.WeaponStats)
+	protoWeapons := a.listWeaponDefsProto()
+	for _, wd := range protoWeapons {
+		catalog[wd.Id] = sim.WeaponStats{
+			RangeM:           float64(wd.RangeM),
+			SpeedMps:         float64(wd.SpeedMps),
+			ProbabilityOfHit: float64(wd.ProbabilityOfHit),
+			DomainTargets:    wd.DomainTargets,
+		}
+	}
+	return catalog
 }
 
 // SetSimSpeed sets the simulation time scale multiplier.
@@ -709,6 +795,57 @@ func (a *App) DeleteScenario(id string) BridgeResult {
 	return ok()
 }
 
+// ─── WEAPON DEFINITION BRIDGE ─────────────────────────────────────────────────
+
+// ListWeaponDefinitions returns all weapon definitions for the frontend.
+func (a *App) ListWeaponDefinitions() ([]map[string]any, error) {
+	if a.weaponDefRepo == nil {
+		return nil, fmt.Errorf("database not ready")
+	}
+	rows, err := a.weaponDefRepo.List(a.ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range rows {
+		row["id"] = extractRecordID(row["id"])
+	}
+	return rows, nil
+}
+
+// listWeaponDefsProto converts DB weapon definition rows into proto messages.
+// Used internally to populate FullStateSnapshot.
+func (a *App) listWeaponDefsProto() []*enginev1.WeaponDefinition {
+	if a.weaponDefRepo == nil {
+		return scenario.DefaultWeaponDefinitions()
+	}
+	rows, err := a.weaponDefRepo.List(a.ctx)
+	if err != nil {
+		slog.Warn("listWeaponDefsProto: list", "err", err)
+		return scenario.DefaultWeaponDefinitions()
+	}
+	out := make([]*enginev1.WeaponDefinition, 0, len(rows))
+	for _, row := range rows {
+		wd := &enginev1.WeaponDefinition{
+			Id:              extractRecordID(row["id"]),
+			Name:            toString(row["name"]),
+			Description:     toString(row["description"]),
+			SpeedMps:        float32(toFloat64(row["speed_mps"])),
+			RangeM:          float32(toFloat64(row["range_m"])),
+			ProbabilityOfHit: float32(toFloat64(row["probability_of_hit"])),
+		}
+		if targets, ok := row["domain_targets"]; ok {
+			switch v := targets.(type) {
+			case []any:
+				for _, item := range v {
+					wd.DomainTargets = append(wd.DomainTargets, enginev1.UnitDomain(int32(toFloat64(item))))
+				}
+			}
+		}
+		out = append(out, wd)
+	}
+	return out
+}
+
 // ─── UNIT DEFINITION BRIDGE ───────────────────────────────────────────────────
 
 // ListUnitDefinitions returns all unit definitions for the palette/editor.
@@ -785,7 +922,24 @@ func toFloat64(v any) float64 {
 	return 0
 }
 
+func toString(v any) string {
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return ""
+}
+
 func extractRecordID(v any) string {
+	// Fast path: SurrealDB CBOR decoder puts RecordID values (not pointers) into
+	// map[string]any, so String() (pointer receiver) is never called by fmt.Sprintf.
+	// Access .ID directly to get the plain string identifier.
+	switch rid := v.(type) {
+	case models.RecordID:
+		return fmt.Sprintf("%v", rid.ID)
+	case *models.RecordID:
+		return fmt.Sprintf("%v", rid.ID)
+	}
+	// Fallback for plain strings like "unit_definition:f22a-raptor".
 	s := fmt.Sprintf("%v", v)
 	if idx := strings.LastIndex(s, ":"); idx >= 0 {
 		return s[idx+1:]
