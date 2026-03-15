@@ -18,7 +18,7 @@ import (
 type EmitFn func(eventName string, msg proto.Message)
 
 const (
-	tickInterval = time.Second  // one tick per second
+	tickInterval = time.Second // one tick per second
 	earthRadiusM = 6_371_000.0
 	// Snap-to-waypoint is handled by canMoveM >= distM (unit covers the
 	// remaining distance in one tick). arrivalRadius was removed because the
@@ -39,8 +39,8 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 	ticker := time.NewTicker(tickInterval)
 	defer ticker.Stop()
 
-	rng        := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
-	tick       := int64(0)
+	rng := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
+	tick := int64(0)
 	simSeconds := startSeconds
 	var inFlight []*InFlightMunition
 
@@ -62,7 +62,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 			})
 
 			// ── Adjudication ──────────────────────────────────────────────
-			adj := AdjudicateTick(units, defs, weapons)
+			adj := AdjudicateTick(units, defs, weapons, inFlight)
 
 			// Emit a weapon-state delta for every unit that fired this tick
 			// so the frontend can update ammo counters in real time.
@@ -86,42 +86,54 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 					})
 				}
 
-				// Create an in-flight munition for every weapon with a speed.
+				// Create one in-flight munition per round in the salvo.
 				// Carry the target ID and pre-computed PoH so kill resolution
 				// can be deferred until the munition arrives.
 				ws, hasStats := weapons[shot.WeaponID]
 				if hasStats && ws.SpeedMps > 0 {
-					inFlight = append(inFlight, &InFlightMunition{
-						ID:             NextMunitionID(),
-						WeaponID:       shot.WeaponID,
-						ShooterID:      shot.Shooter.Id,
-						TargetID:       shot.Target.Id,
-						HitProbability: shot.HitProbability,
-						CurLat:         shot.Shooter.GetPosition().GetLat(),
-						CurLon:         shot.Shooter.GetPosition().GetLon(),
-						DestLat:        shot.Target.GetPosition().GetLat(),
-						DestLon:        shot.Target.GetPosition().GetLon(),
-						SpeedMps:       ws.SpeedMps,
-						TargetDomains:  ws.DomainTargets,
-					})
+					for range shot.SalvoSize {
+						inFlight = append(inFlight, &InFlightMunition{
+							ID:             NextMunitionID(),
+							WeaponID:       shot.WeaponID,
+							ShooterID:      shot.Shooter.Id,
+							ShooterSide:    shot.Shooter.Side,
+							TargetID:       shot.Target.Id,
+							HitProbability: shot.HitProbability,
+							CurLat:         shot.Shooter.GetPosition().GetLat(),
+							CurLon:         shot.Shooter.GetPosition().GetLon(),
+							DestLat:        shot.Target.GetPosition().GetLat(),
+							DestLon:        shot.Target.GetPosition().GetLon(),
+							SpeedMps:       ws.SpeedMps,
+							TargetDomains:  ws.DomainTargets,
+							Guidance:       ws.Guidance,
+						})
+					}
 				}
 			}
 
+			// ── Sensor detection (unit-to-unit) ───────────────────────────
+			// Run before AdvanceMunitions so radar-guided munitions can check
+			// whether the shooter still holds a detection on their target.
+			detections := SensorTick(units, defs)
+
 			// ── Move in-flight munitions ───────────────────────────────────
 			var arrived []*InFlightMunition
-			inFlight, arrived = AdvanceMunitions(inFlight, timeScale)
+			inFlight, arrived = AdvanceMunitions(inFlight, timeScale, units, detections)
 
 			// ── Resolve kills for munitions that arrived this tick ─────────
 			kills := ResolveArrivals(arrived, units, rng)
 
-			// ── Sensor detection ──────────────────────────────────────────
-			detections   := SensorTick(units, defs)
+			// ── Munition detection (post-advance positions) ────────────────
 			munitionDets := DetectMunitions(units, defs, inFlight)
 
 			// Emit per-side detection updates, merging unit and munition contacts.
 			activeSides := make(map[string]bool, len(detections)+len(munitionDets))
-			for side := range detections  { activeSides[side] = true }
-			for side := range munitionDets { activeSides[side] = true }
+			for side := range detections {
+				activeSides[side] = true
+			}
+			for side := range munitionDets {
+				activeSides[side] = true
+			}
 			for side := range activeSides {
 				emit("detection_update", &enginev1.DetectionUpdate{
 					DetectingSide:       side,

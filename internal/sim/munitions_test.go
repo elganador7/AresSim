@@ -27,7 +27,7 @@ func TestAdvanceMunitions_MovesCloser(t *testing.T) {
 	// Munition at origin, destination ~111 km north, speed 1000 m/s.
 	// One tick (timeScale=1) it should move 1000 m north and remain in-flight.
 	m := makeMunition("m1", 0, 0, 1.0, 0, 1000, enginev1.UnitDomain_DOMAIN_LAND)
-	remaining, arrived := AdvanceMunitions([]*InFlightMunition{m}, 1.0)
+	remaining, arrived := AdvanceMunitions([]*InFlightMunition{m}, 1.0, nil, nil)
 	if len(arrived) != 0 {
 		t.Errorf("expected no arrivals, got %d", len(arrived))
 	}
@@ -43,7 +43,7 @@ func TestAdvanceMunitions_ArrivesWhenCanCoverDistance(t *testing.T) {
 	// Destination is 100 m away, speed is 1000 m/s — should arrive in one tick.
 	m := makeMunition("m1", 0, 0, 0.0009, 0, 1000, enginev1.UnitDomain_DOMAIN_LAND)
 	// Distance ~100 m; 1000 m/s covers it in one tick.
-	remaining, arrived := AdvanceMunitions([]*InFlightMunition{m}, 1.0)
+	remaining, arrived := AdvanceMunitions([]*InFlightMunition{m}, 1.0, nil, nil)
 	if len(arrived) != 1 {
 		t.Errorf("expected 1 arrival, got %d", len(arrived))
 	}
@@ -57,8 +57,8 @@ func TestAdvanceMunitions_TimeScaleAffectsSpeed(t *testing.T) {
 	slow := makeMunition("s", 0, 0, 1.0, 0, 100, enginev1.UnitDomain_DOMAIN_LAND)
 	fast := makeMunition("f", 0, 0, 1.0, 0, 100, enginev1.UnitDomain_DOMAIN_LAND)
 
-	remSlow, _ := AdvanceMunitions([]*InFlightMunition{slow}, 1.0)
-	remFast, _ := AdvanceMunitions([]*InFlightMunition{fast}, 10.0)
+	remSlow, _ := AdvanceMunitions([]*InFlightMunition{slow}, 1.0, nil, nil)
+	remFast, _ := AdvanceMunitions([]*InFlightMunition{fast}, 10.0, nil, nil)
 
 	if len(remSlow) == 0 {
 		t.Fatal("slow munition should not have arrived at 1x")
@@ -76,7 +76,7 @@ func TestAdvanceMunitions_TimeScaleAffectsSpeed(t *testing.T) {
 }
 
 func TestAdvanceMunitions_EmptyInput(t *testing.T) {
-	rem, arr := AdvanceMunitions(nil, 1.0)
+	rem, arr := AdvanceMunitions(nil, 1.0, nil, nil)
 	if len(rem) != 0 || len(arr) != 0 {
 		t.Error("expected nil/empty slices for empty input")
 	}
@@ -85,12 +85,96 @@ func TestAdvanceMunitions_EmptyInput(t *testing.T) {
 func TestAdvanceMunitions_MultipleOneMayArrive(t *testing.T) {
 	near := makeMunition("near", 0, 0, 0.0009, 0, 1000, enginev1.UnitDomain_DOMAIN_LAND) // arrives
 	far  := makeMunition("far",  0, 0, 5.0,    0, 100,  enginev1.UnitDomain_DOMAIN_LAND)  // remains
-	rem, arr := AdvanceMunitions([]*InFlightMunition{near, far}, 1.0)
+	rem, arr := AdvanceMunitions([]*InFlightMunition{near, far}, 1.0, nil, nil)
 	if len(arr) != 1 || arr[0].ID != "near" {
 		t.Errorf("expected 'near' to arrive, got %v", arr)
 	}
 	if len(rem) != 1 || rem[0].ID != "far" {
 		t.Errorf("expected 'far' to remain, got %v", rem)
+	}
+}
+
+// ─── Guidance tracking ────────────────────────────────────────────────────────
+
+// makeTrackingMunition builds a munition with the given guidance type aimed at
+// a target that starts 1° north and moves to 1° north + 0.1° east each tick.
+func makeTrackingMunition(guidance enginev1.GuidanceType) (*InFlightMunition, *enginev1.Unit) {
+	target := makeUnit("tgt", "Red", "def", 1.0, 0.0)
+	m := &InFlightMunition{
+		ID:          "m1",
+		WeaponID:    "test",
+		ShooterID:   "shooter",
+		ShooterSide: "Blue",
+		TargetID:    "tgt",
+		CurLat:      0, CurLon: 0,
+		DestLat:     1.0, DestLon: 0.0,
+		SpeedMps:    100,
+		Guidance:    guidance,
+	}
+	return m, target
+}
+
+func TestAdvanceMunitions_IR_TracksMovingTarget(t *testing.T) {
+	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_IR)
+	// Move target to a new position not in the original bearing.
+	target.Position.Lon = 1.0
+	units := []*enginev1.Unit{target}
+
+	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, nil)
+	if len(rem) == 0 {
+		t.Fatal("munition should still be in flight")
+	}
+	// Destination should have been updated to the target's new longitude.
+	if rem[0].DestLon != 1.0 {
+		t.Errorf("IR munition should track target: expected DestLon=1.0, got %.4f", rem[0].DestLon)
+	}
+}
+
+func TestAdvanceMunitions_GPS_DoesNotTrack(t *testing.T) {
+	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_GPS)
+	originalDestLon := m.DestLon
+	target.Position.Lon = 1.0 // target moves
+	units := []*enginev1.Unit{target}
+
+	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, nil)
+	if len(rem) == 0 {
+		t.Fatal("munition should still be in flight")
+	}
+	if rem[0].DestLon != originalDestLon {
+		t.Errorf("GPS munition should not track: expected DestLon=%.4f, got %.4f", originalDestLon, rem[0].DestLon)
+	}
+}
+
+func TestAdvanceMunitions_Radar_TracksWhenLockHeld(t *testing.T) {
+	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_RADAR)
+	target.Position.Lon = 1.0
+	units := []*enginev1.Unit{target}
+	// Blue side has detection on the target.
+	detections := DetectionSet{"Blue": []string{"tgt"}}
+
+	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, detections)
+	if len(rem) == 0 {
+		t.Fatal("munition should still be in flight")
+	}
+	if rem[0].DestLon != 1.0 {
+		t.Errorf("radar munition should track when lock held: expected DestLon=1.0, got %.4f", rem[0].DestLon)
+	}
+}
+
+func TestAdvanceMunitions_Radar_FixedPointWhenLockLost(t *testing.T) {
+	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_RADAR)
+	originalDestLon := m.DestLon
+	target.Position.Lon = 1.0
+	units := []*enginev1.Unit{target}
+	// Blue side has NO detection on the target.
+	detections := DetectionSet{"Blue": {}}
+
+	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, detections)
+	if len(rem) == 0 {
+		t.Fatal("munition should still be in flight")
+	}
+	if rem[0].DestLon != originalDestLon {
+		t.Errorf("radar munition should hold last known pos when lock lost: expected DestLon=%.4f, got %.4f", originalDestLon, rem[0].DestLon)
 	}
 }
 

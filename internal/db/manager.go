@@ -28,6 +28,7 @@ const (
 	defaultPassword = "aressim"
 	defaultNS       = "aressim"
 	defaultDB       = "engine"
+	defaultStorage  = StorageSurrealKV
 
 	// healthCheckInterval is how often we poll the TCP port while waiting for ready.
 	healthCheckInterval = 100 * time.Millisecond
@@ -35,12 +36,11 @@ const (
 	healthCheckTimeout = 15 * time.Second
 	// shutdownGracePeriod is how long we wait for a clean shutdown before SIGKILL.
 	shutdownGracePeriod = 5 * time.Second
+)
 
-	// UseInMemoryDB controls whether SurrealDB runs with the in-memory backend
-	// instead of the file-based surrealkv store. Set to true during development
-	// to avoid LOCK file conflicts and schema migration friction. All repository
-	// and schema code remains active — only the storage layer changes.
-	UseInMemoryDB = true
+const (
+	StorageMemory    = "memory"
+	StorageSurrealKV = "surrealkv"
 )
 
 // Config holds all tunable parameters for the SurrealDB subprocess.
@@ -65,6 +65,9 @@ type Config struct {
 	// Namespace and Database select the SurrealDB logical context.
 	Namespace string
 	Database  string
+
+	// Storage selects the SurrealDB backend: "surrealkv" or "memory".
+	Storage string
 }
 
 // DefaultConfig returns a Config with sensible defaults for a desktop deployment.
@@ -80,6 +83,7 @@ func DefaultConfig() (Config, error) {
 		Password:  defaultPassword,
 		Namespace: defaultNS,
 		Database:  defaultDB,
+		Storage:   defaultStorageMode(),
 	}, nil
 }
 
@@ -109,7 +113,7 @@ func (m *Manager) Start(ctx context.Context) error {
 	// exhaustion is the only symptom of leaked processes.
 	killOrphanedSurrealProcesses(m.cfg.Port)
 
-	if !UseInMemoryDB {
+	if !m.usesMemoryStorage() {
 		if err := os.MkdirAll(m.cfg.DataDir, 0o700); err != nil {
 			return fmt.Errorf("create data dir %q: %w", m.cfg.DataDir, err)
 		}
@@ -213,7 +217,7 @@ func (m *Manager) DBName() string { return m.cfg.Database }
 // Compatible with SurrealDB 2.x and 3.x.
 func (m *Manager) buildArgs() []string {
 	var datastore string
-	if UseInMemoryDB {
+	if m.usesMemoryStorage() {
 		datastore = "memory"
 	} else {
 		dbPath := filepath.Join(m.cfg.DataDir, "surreal.db")
@@ -230,6 +234,25 @@ func (m *Manager) buildArgs() []string {
 		"--log", "warn",
 		"--no-banner",
 		datastore,
+	}
+}
+
+func (m *Manager) usesMemoryStorage() bool {
+	return strings.EqualFold(m.cfg.Storage, StorageMemory)
+}
+
+func defaultStorageMode() string {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv("ARESSIM_DB_MODE"))) {
+	case "", StorageSurrealKV:
+		return StorageSurrealKV
+	case StorageMemory:
+		return StorageMemory
+	default:
+		slog.Warn("unknown ARESSIM_DB_MODE; falling back to persisted storage",
+			"value", os.Getenv("ARESSIM_DB_MODE"),
+			"supported", []string{StorageSurrealKV, StorageMemory},
+		)
+		return StorageSurrealKV
 	}
 }
 
@@ -269,9 +292,9 @@ func (m *Manager) resolveBinary() (string, error) {
 	path, err := exec.LookPath("surreal")
 	if err != nil {
 		return "", fmt.Errorf(
-			"surreal binary not found in bundle or PATH\n"+
-				"  macOS:   brew install surrealdb/tap/surreal\n"+
-				"  Linux:   curl -sSf https://install.surrealdb.com | sh\n"+
+			"surreal binary not found in bundle or PATH\n" +
+				"  macOS:   brew install surrealdb/tap/surreal\n" +
+				"  Linux:   curl -sSf https://install.surrealdb.com | sh\n" +
 				"  Windows: https://surrealdb.com/install",
 		)
 	}

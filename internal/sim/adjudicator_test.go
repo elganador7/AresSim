@@ -51,6 +51,18 @@ func addWeapons(u *enginev1.Unit, weaponID string, qty int32) {
 	})
 }
 
+func repeatInFlight(targetID string, hitProbability float64, count int) []*InFlightMunition {
+	inFlight := make([]*InFlightMunition, 0, count)
+	for range count {
+		inFlight = append(inFlight, &InFlightMunition{
+			ID:             NextMunitionID(),
+			TargetID:       targetID,
+			HitProbability: hitProbability,
+		})
+	}
+	return inFlight
+}
+
 // munitionFromShot builds an InFlightMunition from a FiredShot for use in
 // ResolveArrivals tests. SpeedMps=0 means the munition has already arrived.
 func munitionFromShot(shot FiredShot) *InFlightMunition {
@@ -157,7 +169,7 @@ func TestRangeDegradedPoh_ZeroMaxRange(t *testing.T) {
 // ─── AdjudicateTick ───────────────────────────────────────────────────────────
 
 func TestAdjudicateTick_NoUnits_NoShots(t *testing.T) {
-	adj := AdjudicateTick(nil, nil, nil)
+	adj := AdjudicateTick(nil, nil, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Errorf("expected 0 shots with no units, got %d", len(adj.Shots))
 	}
@@ -173,7 +185,7 @@ func TestAdjudicateTick_FriendlyFire_NoShots(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	if len(adj.Shots) != 0 {
 		t.Errorf("friendly fire: expected 0 shots, got %d", len(adj.Shots))
 	}
@@ -188,7 +200,7 @@ func TestAdjudicateTick_OutOfRange_NoShots(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	if len(adj.Shots) != 0 {
 		t.Errorf("out-of-range: expected 0 shots, got %d", len(adj.Shots))
 	}
@@ -204,12 +216,15 @@ func TestAdjudicateTick_InRange_ShotFired(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected 1 shot, got %d", len(adj.Shots))
 	}
 	if adj.Shots[0].Shooter.Id != "a" || adj.Shots[0].Target.Id != "b" {
 		t.Errorf("unexpected shot: %+v", adj.Shots[0])
+	}
+	if adj.Shots[0].SalvoSize != 1 {
+		t.Errorf("expected single-round salvo, got %d", adj.Shots[0].SalvoSize)
 	}
 }
 
@@ -223,7 +238,7 @@ func TestAdjudicateTick_ShotHasHitProbability(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected 1 shot, got %d", len(adj.Shots))
 	}
@@ -242,7 +257,7 @@ func TestAdjudicateTick_AmmoDecremented(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	if a.Weapons[0].CurrentQty != 4 {
 		t.Errorf("expected ammo to decrement to 4, got %d", a.Weapons[0].CurrentQty)
 	}
@@ -259,7 +274,7 @@ func TestAdjudicateTick_OutOfAmmo_NoShots(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	if len(adj.Shots) != 0 {
 		t.Errorf("depleted units should fire 0 shots, got %d", len(adj.Shots))
 	}
@@ -275,7 +290,7 @@ func TestAdjudicateTick_WrongDomain_NoShots(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("land-gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	if len(adj.Shots) != 0 {
 		t.Errorf("wrong-domain weapon: expected 0 shots, got %d", len(adj.Shots))
 	}
@@ -291,7 +306,7 @@ func TestAdjudicateTick_BothInRange_BothShoot(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	if len(adj.Shots) != 2 {
 		t.Errorf("expected 2 shots (both fire), got %d", len(adj.Shots))
 	}
@@ -310,7 +325,7 @@ func TestAdjudicateTick_EachUnitFiresOnce(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("missile", 500_000, 0.9, enginev1.UnitDomain_DOMAIN_AIR)
 
-	adj := AdjudicateTick([]*enginev1.Unit{blue, r1, r2, r3}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{blue, r1, r2, r3}, defs, catalog, nil)
 	blueShots := 0
 	for _, s := range adj.Shots {
 		if s.Shooter.Id == "blue" {
@@ -332,11 +347,114 @@ func TestAdjudicateTick_DestroyedUnit_NoShots(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	for _, s := range adj.Shots {
 		if s.Shooter.Id == "a" {
 			t.Error("destroyed unit should not fire")
 		}
+	}
+}
+
+func TestAdjudicateTick_LowPkillOutsideSensors_HoldsFire(t *testing.T) {
+	a := makeUnit("a", "Blue", "def-a", 0, 0)
+	b := makeUnit("b", "Red", "def-b", 0, 0.01)
+	addWeapons(a, "missile", 5)
+	defs := map[string]DefStats{
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 0},
+		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 0},
+	}
+	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	if len(adj.Shots) != 0 {
+		t.Fatalf("expected no shots when pkill <= 50%% outside sensors, got %d", len(adj.Shots))
+	}
+	if a.Weapons[0].CurrentQty != 5 {
+		t.Errorf("ammo should be conserved, got %d remaining", a.Weapons[0].CurrentQty)
+	}
+}
+
+func TestAdjudicateTick_LowPkillInsideEnemySensors_Fires(t *testing.T) {
+	a := makeUnit("a", "Blue", "def-a", 0, 0)
+	b := makeUnit("b", "Red", "def-b", 0, 0.01)
+	addWeapons(a, "missile", 5)
+	defs := map[string]DefStats{
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 0},
+		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 5_000},
+	}
+	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected one firing decision when already detected, got %d", len(adj.Shots))
+	}
+	if adj.Shots[0].SalvoSize != 3 {
+		t.Errorf("expected 3-round salvo to exceed 70%% cumulative pkill, got %d", adj.Shots[0].SalvoSize)
+	}
+	if a.Weapons[0].CurrentQty != 2 {
+		t.Errorf("expected ammo to drop from 5 to 2, got %d", a.Weapons[0].CurrentQty)
+	}
+}
+
+func TestAdjudicateTick_SalvoSizedToThreshold(t *testing.T) {
+	a := makeUnit("a", "Blue", "def-a", 0, 0)
+	b := makeUnit("b", "Red", "def-b", 0, 0.01)
+	addWeapons(a, "missile", 10)
+	defs := map[string]DefStats{
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+	}
+	catalog := makeWeaponCatalog("missile", 50_000, 0.6, enginev1.UnitDomain_DOMAIN_AIR)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected one shot record, got %d", len(adj.Shots))
+	}
+	if adj.Shots[0].SalvoSize != 2 {
+		t.Errorf("expected 2-round salvo for 60%% single-shot pkill, got %d", adj.Shots[0].SalvoSize)
+	}
+	if a.Weapons[0].CurrentQty != 8 {
+		t.Errorf("expected ammo to drop from 10 to 8, got %d", a.Weapons[0].CurrentQty)
+	}
+}
+
+func TestAdjudicateTick_InFlightRoundsReduceNewSalvo(t *testing.T) {
+	a := makeUnit("a", "Blue", "def-a", 0, 0)
+	b := makeUnit("b", "Red", "def-b", 0, 0.01)
+	addWeapons(a, "missile", 10)
+	defs := map[string]DefStats{
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 5_000},
+	}
+	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
+	inFlight := repeatInFlight("b", 0.4, 2)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, inFlight)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected one shot record, got %d", len(adj.Shots))
+	}
+	if adj.Shots[0].SalvoSize != 1 {
+		t.Errorf("expected one additional round after two are already inbound, got %d", adj.Shots[0].SalvoSize)
+	}
+}
+
+func TestAdjudicateTick_EnoughInFlight_NoAdditionalShot(t *testing.T) {
+	a := makeUnit("a", "Blue", "def-a", 0, 0)
+	b := makeUnit("b", "Red", "def-b", 0, 0.01)
+	addWeapons(a, "missile", 10)
+	defs := map[string]DefStats{
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 5_000},
+	}
+	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
+	inFlight := repeatInFlight("b", 0.4, 3)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, inFlight)
+	if len(adj.Shots) != 0 {
+		t.Fatalf("expected no new shot once in-flight salvo already exceeds 70%% pkill, got %d", len(adj.Shots))
+	}
+	if a.Weapons[0].CurrentQty != 10 {
+		t.Errorf("ammo should be unchanged when existing salvo is sufficient, got %d", a.Weapons[0].CurrentQty)
 	}
 }
 
@@ -358,7 +476,7 @@ func TestResolveArrivals_AlwaysHit_Kill(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("setup: expected 1 shot, got %d", len(adj.Shots))
 	}
@@ -388,7 +506,7 @@ func TestResolveArrivals_AlwaysMiss_NoKill(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	arrived := []*InFlightMunition{munitionFromShot(adj.Shots[0])}
 	kills := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, alwaysMiss)
 	if len(kills) != 0 {
@@ -422,7 +540,7 @@ func TestResolveArrivals_AttackerLookup(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	arrived := []*InFlightMunition{munitionFromShot(adj.Shots[0])}
 	kills := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, alwaysHit)
 	if len(kills) != 1 {
@@ -444,7 +562,7 @@ func TestResolveArrivals_MultipleMunitions(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	var arrived []*InFlightMunition
 	for _, s := range adj.Shots {
 		arrived = append(arrived, munitionFromShot(s))

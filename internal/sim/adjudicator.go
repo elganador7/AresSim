@@ -1,6 +1,8 @@
 package sim
 
 import (
+	"math"
+
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
 )
 
@@ -19,6 +21,7 @@ type WeaponStats struct {
 	SpeedMps         float64 // projectile/missile speed; used for munition travel time
 	ProbabilityOfHit float64
 	DomainTargets    []enginev1.UnitDomain
+	Guidance         enginev1.GuidanceType // homing behaviour for in-flight munitions
 }
 
 // Rng is the minimal interface for probability rolls.
@@ -34,12 +37,15 @@ type Kill struct {
 	Victim   *enginev1.Unit
 }
 
-// FiredShot records a single weapon discharge during adjudication.
+// FiredShot records a salvo discharge during adjudication.
+// SalvoSize is the number of rounds fired in this salvo; mock.go uses it to
+// create that many in-flight munitions, each with the same HitProbability.
 type FiredShot struct {
 	Shooter        *enginev1.Unit
 	Target         *enginev1.Unit
 	WeaponID       string
-	HitProbability float64 // range-degraded probability at fire time
+	HitProbability float64 // range-degraded probability per round at fire time
+	SalvoSize      int32   // rounds fired in this salvo (≥1)
 }
 
 // AdjudicateResult holds all shots fired in one tick of adjudication.
@@ -49,14 +55,20 @@ type AdjudicateResult struct {
 	Shots []FiredShot
 }
 
-// AdjudicateTick checks all pairs of enemy active units and fires weapons for
-// any unit within its best weapon's range. Each unit fires at most once per
-// tick. Probability of hit is range-degraded at fire time and stored on the
-// returned FiredShot for later resolution via ResolveArrivals.
+// AdjudicateTick checks all pairs of enemy active units and fires a salvo for
+// each unit that meets the engagement criteria. Each unit fires at most one
+// salvo per tick (at its highest-priority target).
 //
-// Units with no loadout, or with a loadout where no weapon can reach the
-// target's domain, simply cannot engage — there is no fallback.
-func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats) AdjudicateResult {
+// Fire conditions — a unit fires only when EITHER:
+//   - The range-degraded probability of hit exceeds 50 %, OR
+//   - The shooter is already within the target's detection range (stealth is
+//     already compromised, so there is nothing to gain by holding fire).
+//
+// Salvo sizing — the minimum number of rounds N such that the cumulative
+// kill probability of all munitions (in-flight + new salvo) exceeds 70 %.
+// Already in-flight munitions targeting the same unit are counted, so platforms
+// do not keep firing after enough rounds are already on the way.
+func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, inFlight []*InFlightMunition) AdjudicateResult {
 	firedThisTick := make(map[string]bool)
 	var result AdjudicateResult
 
@@ -86,35 +98,53 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons ma
 			wIDA, wA, hasWeapA := selectBestWeapon(a, defB.Domain, weapons)
 			wIDB, wB, hasWeapB := selectBestWeapon(b, defA.Domain, weapons)
 
-			aCanFire := hasWeapA && dist <= wA.RangeM && !firedThisTick[a.Id]
-			bCanFire := hasWeapB && dist <= wB.RangeM && !firedThisTick[b.Id]
+			aInRange := hasWeapA && dist <= wA.RangeM && !firedThisTick[a.Id]
+			bInRange := hasWeapB && dist <= wB.RangeM && !firedThisTick[b.Id]
 
-			if !aCanFire && !bCanFire {
+			if !aInRange && !bInRange {
 				continue
 			}
 
-			if aCanFire {
+			if aInRange {
 				prob := rangeDegradedPoh(wA.ProbabilityOfHit, dist, wA.RangeM)
-				decrementAmmo(a, wIDA)
-				result.Shots = append(result.Shots, FiredShot{
-					Shooter:        a,
-					Target:         b,
-					WeaponID:       wIDA,
-					HitProbability: prob,
-				})
-				firedThisTick[a.Id] = true
+				aDetectedByB := dist <= defB.DetectionRangeM
+				if prob > 0.50 || aDetectedByB {
+					miss := inFlightMissProb(inFlight, b.Id)
+					salvo := salvoToAchieveKillProb(miss, prob, 0.30)
+					salvo = capAtAmmo(a, wIDA, salvo)
+					if salvo > 0 {
+						decrementAmmo(a, wIDA, salvo)
+						result.Shots = append(result.Shots, FiredShot{
+							Shooter:        a,
+							Target:         b,
+							WeaponID:       wIDA,
+							HitProbability: prob,
+							SalvoSize:      salvo,
+						})
+						firedThisTick[a.Id] = true
+					}
+				}
 			}
 
-			if bCanFire {
+			if bInRange {
 				prob := rangeDegradedPoh(wB.ProbabilityOfHit, dist, wB.RangeM)
-				decrementAmmo(b, wIDB)
-				result.Shots = append(result.Shots, FiredShot{
-					Shooter:        b,
-					Target:         a,
-					WeaponID:       wIDB,
-					HitProbability: prob,
-				})
-				firedThisTick[b.Id] = true
+				bDetectedByA := dist <= defA.DetectionRangeM
+				if prob > 0.50 || bDetectedByA {
+					miss := inFlightMissProb(inFlight, a.Id)
+					salvo := salvoToAchieveKillProb(miss, prob, 0.30)
+					salvo = capAtAmmo(b, wIDB, salvo)
+					if salvo > 0 {
+						decrementAmmo(b, wIDB, salvo)
+						result.Shots = append(result.Shots, FiredShot{
+							Shooter:        b,
+							Target:         a,
+							WeaponID:       wIDB,
+							HitProbability: prob,
+							SalvoSize:      salvo,
+						})
+						firedThisTick[b.Id] = true
+					}
+				}
 			}
 
 			if firedThisTick[a.Id] {
@@ -123,6 +153,64 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons ma
 		}
 	}
 	return result
+}
+
+// inFlightMissProb returns the combined probability that ALL currently
+// in-flight munitions targeting targetID miss. The complement is the
+// cumulative kill probability of the existing salvo:
+//
+//	cumKillProb = 1 − inFlightMissProb(...)
+func inFlightMissProb(inFlight []*InFlightMunition, targetID string) float64 {
+	p := 1.0
+	for _, m := range inFlight {
+		if m.TargetID == targetID {
+			p *= 1.0 - m.HitProbability
+		}
+	}
+	return p
+}
+
+// salvoToAchieveKillProb returns the minimum number of additional rounds at
+// singleShotPoh needed so that the combined miss probability drops to or below
+// targetMissProb (default 0.30 → cumulative kill ≥ 70 %).
+//
+//	existingMissProb × (1−p)^N ≤ targetMissProb
+//	N ≥ log(targetMissProb / existingMissProb) / log(1−p)
+//
+// Returns 0 if the threshold is already met by existing in-flight munitions.
+func salvoToAchieveKillProb(existingMissProb, singleShotPoh, targetMissProb float64) int32 {
+	if existingMissProb <= targetMissProb {
+		return 0 // enough in flight already
+	}
+	if singleShotPoh <= 0 {
+		return 0
+	}
+	if singleShotPoh >= 1.0 {
+		return 1
+	}
+	n := math.Log(targetMissProb/existingMissProb) / math.Log(1.0-singleShotPoh)
+	result := int32(math.Ceil(n))
+	if result < 1 {
+		result = 1
+	}
+	return result
+}
+
+// capAtAmmo returns the minimum of requested and available rounds for weaponID
+// on the unit. Returns 0 if the weapon is not found or has no ammo.
+func capAtAmmo(unit *enginev1.Unit, weaponID string, requested int32) int32 {
+	for _, ws := range unit.Weapons {
+		if ws.WeaponId == weaponID {
+			if ws.CurrentQty <= 0 {
+				return 0
+			}
+			if requested > ws.CurrentQty {
+				return ws.CurrentQty
+			}
+			return requested
+		}
+	}
+	return 0
 }
 
 // ResolveArrivals resolves kill outcomes for munitions that have reached their
@@ -207,11 +295,18 @@ func canTargetDomain(targets []enginev1.UnitDomain, d enginev1.UnitDomain) bool 
 	return false
 }
 
-// decrementAmmo reduces the current quantity of weaponID on shooter by 1.
-func decrementAmmo(shooter *enginev1.Unit, weaponID string) {
+// decrementAmmo reduces the current quantity of weaponID on shooter by amount.
+func decrementAmmo(shooter *enginev1.Unit, weaponID string, amount int32) {
+	if amount <= 0 {
+		return
+	}
 	for _, ws := range shooter.Weapons {
 		if ws.WeaponId == weaponID && ws.CurrentQty > 0 {
-			ws.CurrentQty--
+			if amount >= ws.CurrentQty {
+				ws.CurrentQty = 0
+				return
+			}
+			ws.CurrentQty -= amount
 			return
 		}
 	}

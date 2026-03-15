@@ -7,7 +7,7 @@
 
 import { EventsOn } from "../../wailsjs/runtime/runtime";
 import { useSimStore, Unit, MoveOrder, EventLogEntry, WeaponState, WeaponDef, Munition } from "../store/simStore";
-import { fromBinary } from "@bufbuild/protobuf";
+import { fromBinary, type DescMessage } from "@bufbuild/protobuf";
 
 import {
   FullStateSnapshotSchema,
@@ -21,9 +21,13 @@ import {
 } from "@proto/engine/v1/events_pb";
 import type {
   FullStateSnapshot,
+  BatchUnitUpdate,
+  ScenarioStateEvent,
   UnitSpawnedEvent,
   UnitDestroyedEvent,
   NarrativeEvent,
+  DetectionUpdate,
+  MunitionUpdate,
   UnitDelta,
 } from "@proto/engine/v1/events_pb";
 import type { Unit as ProtoUnit } from "@proto/engine/v1/unit_pb";
@@ -41,6 +45,29 @@ function b64ToBytes(b64: string): Uint8Array {
     bytes[i] = binary.charCodeAt(i);
   }
   return bytes;
+}
+
+function decodeProtoEvent<T>(schema: DescMessage, eventName: string, b64: string): T | null {
+  try {
+    return fromBinary(schema, b64ToBytes(b64)) as T;
+  } catch (error) {
+    console.error(`[bridge] ${eventName} decode failed`, error);
+    return null;
+  }
+}
+
+function registerProtoEvent<T>(
+  eventName: string,
+  schema: DescMessage,
+  handler: (message: T) => void,
+): void {
+  EventsOn(eventName, (b64: string) => {
+    const message = decodeProtoEvent<T>(schema, eventName.replace("sim:", ""), b64);
+    if (!message) {
+      return;
+    }
+    handler(message);
+  });
 }
 
 // ─── PROTO → STORE CONVERTERS ─────────────────────────────────────────────────
@@ -160,14 +187,7 @@ export function initBridge(): void {
   const store = useSimStore.getState();
 
   // ── Full state snapshot ────────────────────────────────────────────────────
-  EventsOn("sim:full_state_snapshot", (b64: string) => {
-    let snap: FullStateSnapshot;
-    try {
-      snap = fromBinary(FullStateSnapshotSchema, b64ToBytes(b64));
-    } catch (e) {
-      console.error("[bridge] full_state_snapshot decode failed", e);
-      return;
-    }
+  registerProtoEvent<FullStateSnapshot>("sim:full_state_snapshot", FullStateSnapshotSchema, (snap) => {
     const units = snap.units.map(protoUnitToStore);
     const weaponDefs = snap.weaponDefinitions.map(protoWeaponDefToStore);
     store.loadSnapshot(units, snap.scenarioName, weaponDefs);
@@ -178,14 +198,7 @@ export function initBridge(): void {
   });
 
   // ── Per-tick batch update ──────────────────────────────────────────────────
-  EventsOn("sim:batch_update", (b64: string) => {
-    let msg;
-    try {
-      msg = fromBinary(BatchUnitUpdateSchema, b64ToBytes(b64));
-    } catch (e) {
-      console.error("[bridge] batch_update decode failed", e);
-      return;
-    }
+  registerProtoEvent<BatchUnitUpdate>("sim:batch_update", BatchUnitUpdateSchema, (msg) => {
     for (const delta of msg.deltas) {
       applyDelta(delta);
     }
@@ -195,37 +208,16 @@ export function initBridge(): void {
   });
 
   // ── Unit lifecycle ─────────────────────────────────────────────────────────
-  EventsOn("sim:unit_spawned", (b64: string) => {
-    let ev: UnitSpawnedEvent;
-    try {
-      ev = fromBinary(UnitSpawnedEventSchema, b64ToBytes(b64));
-    } catch (e) {
-      console.error("[bridge] unit_spawned decode failed", e);
-      return;
-    }
+  registerProtoEvent<UnitSpawnedEvent>("sim:unit_spawned", UnitSpawnedEventSchema, (ev) => {
     if (ev.unit) store.spawnUnit(protoUnitToStore(ev.unit));
   });
 
-  EventsOn("sim:unit_destroyed", (b64: string) => {
-    let ev: UnitDestroyedEvent;
-    try {
-      ev = fromBinary(UnitDestroyedEventSchema, b64ToBytes(b64));
-    } catch (e) {
-      console.error("[bridge] unit_destroyed decode failed", e);
-      return;
-    }
+  registerProtoEvent<UnitDestroyedEvent>("sim:unit_destroyed", UnitDestroyedEventSchema, (ev) => {
     store.destroyUnit(ev.unitId);
   });
 
   // ── Scenario state ─────────────────────────────────────────────────────────
-  EventsOn("sim:scenario_state", (b64: string) => {
-    let ev;
-    try {
-      ev = fromBinary(ScenarioStateEventSchema, b64ToBytes(b64));
-    } catch (e) {
-      console.error("[bridge] scenario_state decode failed", e);
-      return;
-    }
+  registerProtoEvent<ScenarioStateEvent>("sim:scenario_state", ScenarioStateEventSchema, (ev) => {
     const stateMap = {
       [ScenarioPlayState.SCENARIO_UNSPECIFIED]: "idle",
       [ScenarioPlayState.SCENARIO_PAUSED]: "paused",
@@ -236,40 +228,19 @@ export function initBridge(): void {
   });
 
   // ── Narrative event log ────────────────────────────────────────────────────
-  EventsOn("sim:narrative", (b64: string) => {
-    let ev: NarrativeEvent;
-    try {
-      ev = fromBinary(NarrativeEventSchema, b64ToBytes(b64));
-    } catch (e) {
-      console.error("[bridge] narrative decode failed", e);
-      return;
-    }
+  registerProtoEvent<NarrativeEvent>("sim:narrative", NarrativeEventSchema, (ev) => {
     const { simSeconds } = useSimStore.getState();
     store.appendEventLog(protoEventToLogEntry(ev, simSeconds));
   });
 
   // ── Sensor detection updates ───────────────────────────────────────────
-  EventsOn("sim:detection_update", (b64: string) => {
-    let ev;
-    try {
-      ev = fromBinary(DetectionUpdateSchema, b64ToBytes(b64));
-    } catch (e) {
-      console.error("[bridge] detection_update decode failed", e);
-      return;
-    }
+  registerProtoEvent<DetectionUpdate>("sim:detection_update", DetectionUpdateSchema, (ev) => {
     store.setDetections(ev.detectingSide, ev.detectedUnitIds);
     store.setMunitionDetections(ev.detectingSide, ev.detectedMunitionIds);
   });
 
   // ── In-flight munition update ──────────────────────────────────────────
-  EventsOn("sim:munition_update", (b64: string) => {
-    let ev;
-    try {
-      ev = fromBinary(MunitionUpdateSchema, b64ToBytes(b64));
-    } catch (e) {
-      console.error("[bridge] munition_update decode failed", e);
-      return;
-    }
+  registerProtoEvent<MunitionUpdate>("sim:munition_update", MunitionUpdateSchema, (ev) => {
     const munitions: Munition[] = ev.munitions.map((m) => ({
       id: m.id,
       weaponId: m.weaponId,

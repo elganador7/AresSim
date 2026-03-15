@@ -14,7 +14,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { create, toBinary } from "@bufbuild/protobuf";
+import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import { ScenarioSchema } from "@proto/engine/v1/scenario_pb";
 import { UnitSchema } from "@proto/engine/v1/unit_pb";
 import { PositionSchema } from "@proto/engine/v1/common_pb";
@@ -604,9 +604,7 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
     setShowLoadModal(false);
     try {
       const b64 = await GetScenario(id);
-      const { fromBinary } = await import("@bufbuild/protobuf");
-      const { ScenarioSchema: SS } = await import("@proto/engine/v1/scenario_pb");
-      const scen = fromBinary(SS, base64ToBytes(b64));
+      const scen = fromBinary(ScenarioSchema, base64ToBytes(b64));
       loadDraft({
         id: scen.id,
         name: scen.name,

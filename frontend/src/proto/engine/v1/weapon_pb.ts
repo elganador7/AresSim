@@ -2,8 +2,8 @@
 // @generated from file engine/v1/weapon.proto (package engine.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { UnitDomain } from "./common_pb";
 import { file_engine_v1_common } from "./common_pb";
 import type { Message } from "@bufbuild/protobuf";
@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/weapon.proto.
  */
 export const file_engine_v1_weapon: GenFile = /*@__PURE__*/
-  fileDesc("ChZlbmdpbmUvdjEvd2VhcG9uLnByb3RvEgllbmdpbmUudjEisAEKEFdlYXBvbkRlZmluaXRpb24SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRItCg5kb21haW5fdGFyZ2V0cxgEIAMoDjIVLmVuZ2luZS52MS5Vbml0RG9tYWluEhEKCXNwZWVkX21wcxgFIAEoAhIPCgdyYW5nZV9tGAYgASgCEhoKEnByb2JhYmlsaXR5X29mX2hpdBgHIAEoAiJGCgtXZWFwb25TdGF0ZRIRCgl3ZWFwb25faWQYASABKAkSEwoLY3VycmVudF9xdHkYAiABKAUSDwoHbWF4X3F0eRgDIAEoBUIrWilnaXRodWIuY29tL2FyZXNzaW0vaW50ZXJuYWwvZ2VuL2VuZ2luZS92MWIGcHJvdG8z", [file_engine_v1_common]);
+  fileDesc("ChZlbmdpbmUvdjEvd2VhcG9uLnByb3RvEgllbmdpbmUudjEi2wEKEFdlYXBvbkRlZmluaXRpb24SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRItCg5kb21haW5fdGFyZ2V0cxgEIAMoDjIVLmVuZ2luZS52MS5Vbml0RG9tYWluEhEKCXNwZWVkX21wcxgFIAEoAhIPCgdyYW5nZV9tGAYgASgCEhoKEnByb2JhYmlsaXR5X29mX2hpdBgHIAEoAhIpCghndWlkYW5jZRgIIAEoDjIXLmVuZ2luZS52MS5HdWlkYW5jZVR5cGUiRgoLV2VhcG9uU3RhdGUSEQoJd2VhcG9uX2lkGAEgASgJEhMKC2N1cnJlbnRfcXR5GAIgASgFEg8KB21heF9xdHkYAyABKAUqsQEKDEd1aWRhbmNlVHlwZRIYChRHVUlEQU5DRV9VTlNQRUNJRklFRBAAEhUKEUdVSURBTkNFX1VOR1VJREVEEAESEAoMR1VJREFOQ0VfR1BTEAISEgoOR1VJREFOQ0VfUkFEQVIQAxIPCgtHVUlEQU5DRV9JUhAEEhIKDkdVSURBTkNFX0xBU0VSEAUSEQoNR1VJREFOQ0VfV0lSRRAGEhIKDkdVSURBTkNFX1NPTkFSEAdCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common]);
 
 /**
  * @generated from message engine.v1.WeaponDefinition
@@ -62,11 +62,18 @@ export type WeaponDefinition = Message<"engine.v1.WeaponDefinition"> & {
   rangeM: number;
 
   /**
-   * 0–1; uniform across all target types for now
+   * 0–1; base probability, range-degraded at fire time
    *
    * @generated from field: float probability_of_hit = 7;
    */
   probabilityOfHit: number;
+
+  /**
+   * Guidance mechanism; determines tracking behaviour in AdvanceMunitions.
+   *
+   * @generated from field: engine.v1.GuidanceType guidance = 8;
+   */
+  guidance: GuidanceType;
 };
 
 /**
@@ -108,4 +115,69 @@ export type WeaponState = Message<"engine.v1.WeaponState"> & {
  */
 export const WeaponStateSchema: GenMessage<WeaponState> = /*@__PURE__*/
   messageDesc(file_engine_v1_weapon, 1);
+
+/**
+ * @generated from enum engine.v1.GuidanceType
+ */
+export enum GuidanceType {
+  /**
+   * @generated from enum value: GUIDANCE_UNSPECIFIED = 0;
+   */
+  GUIDANCE_UNSPECIFIED = 0,
+
+  /**
+   * Ballistic / dumb-fire — fixed point at launch
+   *
+   * @generated from enum value: GUIDANCE_UNGUIDED = 1;
+   */
+  GUIDANCE_UNGUIDED = 1,
+
+  /**
+   * GPS/INS precision — fixed point, high accuracy
+   *
+   * @generated from enum value: GUIDANCE_GPS = 2;
+   */
+  GUIDANCE_GPS = 2,
+
+  /**
+   * Active radar homing — tracks while shooter holds lock
+   *
+   * @generated from enum value: GUIDANCE_RADAR = 3;
+   */
+  GUIDANCE_RADAR = 3,
+
+  /**
+   * Infrared seeker — fire-and-forget, always tracks
+   *
+   * @generated from enum value: GUIDANCE_IR = 4;
+   */
+  GUIDANCE_IR = 4,
+
+  /**
+   * Laser-guided — tracks illuminated spot (fixed point)
+   *
+   * @generated from enum value: GUIDANCE_LASER = 5;
+   */
+  GUIDANCE_LASER = 5,
+
+  /**
+   * Wire / datalink-guided — operator tracks continuously
+   *
+   * @generated from enum value: GUIDANCE_WIRE = 6;
+   */
+  GUIDANCE_WIRE = 6,
+
+  /**
+   * Acoustic sonar — torpedo self-homing, always tracks
+   *
+   * @generated from enum value: GUIDANCE_SONAR = 7;
+   */
+  GUIDANCE_SONAR = 7,
+}
+
+/**
+ * Describes the enum engine.v1.GuidanceType.
+ */
+export const GuidanceTypeSchema: GenEnum<GuidanceType> = /*@__PURE__*/
+  enumDesc(file_engine_v1_weapon, 0);
 

@@ -4,6 +4,22 @@ option go_package = "github.com/aressim/internal/gen/engine/v1";
 
 import "engine/v1/common.proto"; // UnitDomain
 
+// ── GuidanceType ──────────────────────────────────────────────────────────────
+// How a munition homes on or navigates to its target.
+// The adjudicator uses this to determine whether a munition updates its
+// destination each tick (tracking) or flies to a fixed point (ballistic/GPS).
+
+enum GuidanceType {
+  GUIDANCE_UNSPECIFIED = 0;
+  GUIDANCE_UNGUIDED    = 1;  // Ballistic / dumb-fire — fixed point at launch
+  GUIDANCE_GPS         = 2;  // GPS/INS precision — fixed point, high accuracy
+  GUIDANCE_RADAR       = 3;  // Active radar homing — tracks while shooter holds lock
+  GUIDANCE_IR          = 4;  // Infrared seeker — fire-and-forget, always tracks
+  GUIDANCE_LASER       = 5;  // Laser-guided — tracks illuminated spot (fixed point)
+  GUIDANCE_WIRE        = 6;  // Wire / datalink-guided — operator tracks continuously
+  GUIDANCE_SONAR       = 7;  // Acoustic sonar — torpedo self-homing, always tracks
+}
+
 // ── WeaponDefinition ──────────────────────────────────────────────────────────
 // Global catalog entry describing a munition type.
 // Authored once (seeded from Go defaults); referenced by WeaponState.weapon_id.
@@ -20,7 +36,10 @@ message WeaponDefinition {
   // Ballistic / kinematic parameters.
   float speed_mps           = 5;  // Projectile/missile speed in m/s
   float range_m             = 6;  // Maximum effective range in metres
-  float probability_of_hit  = 7;  // 0–1; uniform across all target types for now
+  float probability_of_hit  = 7;  // 0–1; base probability, range-degraded at fire time
+
+  // Guidance mechanism; determines tracking behaviour in AdvanceMunitions.
+  GuidanceType guidance = 8;
 }
 
 // ── WeaponState ───────────────────────────────────────────────────────────────

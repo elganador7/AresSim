@@ -10,6 +10,14 @@ func DefaultWeaponDefinitions() []*enginev1.WeaponDefinition {
 	S := enginev1.UnitDomain_DOMAIN_SEA
 	U := enginev1.UnitDomain_DOMAIN_SUBSURFACE
 
+	unguided := enginev1.GuidanceType_GUIDANCE_UNGUIDED
+	gps      := enginev1.GuidanceType_GUIDANCE_GPS
+	radar    := enginev1.GuidanceType_GUIDANCE_RADAR
+	ir       := enginev1.GuidanceType_GUIDANCE_IR
+	laser    := enginev1.GuidanceType_GUIDANCE_LASER
+	wire     := enginev1.GuidanceType_GUIDANCE_WIRE
+	sonar    := enginev1.GuidanceType_GUIDANCE_SONAR
+
 	return []*enginev1.WeaponDefinition{
 		// ── Land-domain guns ─────────────────────────────────────────────────────
 		{
@@ -17,48 +25,56 @@ func DefaultWeaponDefinitions() []*enginev1.WeaponDefinition {
 			Description:       "M829A3 kinetic-energy penetrator for MBTs",
 			DomainTargets:     []enginev1.UnitDomain{L},
 			SpeedMps:          1700, RangeM: 3500, ProbabilityOfHit: 0.85,
+			Guidance:          unguided,
 		},
 		{
 			Id: "gnd-25mm-hei", Name: "25mm HEI",
 			Description:       "M919 25mm high-explosive incendiary for IFV autocannons",
 			DomainTargets:     []enginev1.UnitDomain{L, A},
 			SpeedMps:          1100, RangeM: 2500, ProbabilityOfHit: 0.70,
+			Guidance:          unguided,
 		},
 		{
 			Id: "gnd-155mm-he", Name: "155mm HE Shell",
 			Description:       "M795 HE projectile for 155mm howitzers",
 			DomainTargets:     []enginev1.UnitDomain{L},
 			SpeedMps:          550, RangeM: 30000, ProbabilityOfHit: 0.75,
+			Guidance:          unguided,
 		},
 		{
 			Id: "gnd-gmlrs", Name: "GMLRS 227mm",
 			Description:       "Guided MLRS rocket with GPS/INS precision guidance",
 			DomainTargets:     []enginev1.UnitDomain{L},
 			SpeedMps:          1075, RangeM: 84000, ProbabilityOfHit: 0.72,
+			Guidance:          gps,
 		},
 		{
 			Id: "gnd-tow", Name: "BGM-71 TOW",
 			Description:       "Wire-guided anti-tank missile",
 			DomainTargets:     []enginev1.UnitDomain{L},
 			SpeedMps:          318, RangeM: 4200, ProbabilityOfHit: 0.88,
+			Guidance:          wire,
 		},
 		{
 			Id: "gnd-javelin", Name: "FGM-148 Javelin",
-			Description:       "Fire-and-forget man-portable ATGM",
+			Description:       "Fire-and-forget man-portable ATGM with IR seeker",
 			DomainTargets:     []enginev1.UnitDomain{L},
 			SpeedMps:          300, RangeM: 4000, ProbabilityOfHit: 0.90,
+			Guidance:          ir,
 		},
 		{
 			Id: "gnd-556mm-rifle", Name: "5.56mm Rifle",
 			Description:       "Standard infantry rifle ammunition",
 			DomainTargets:     []enginev1.UnitDomain{L},
 			SpeedMps:          940, RangeM: 500, ProbabilityOfHit: 0.60,
+			Guidance:          unguided,
 		},
 		{
 			Id: "gnd-at4", Name: "AT4 Rocket",
 			Description:       "Single-shot 84mm unguided rocket launcher",
 			DomainTargets:     []enginev1.UnitDomain{L},
 			SpeedMps:          290, RangeM: 300, ProbabilityOfHit: 0.65,
+			Guidance:          unguided,
 		},
 		// ── Air-to-air missiles (Western / US) ───────────────────────────────────
 		{
@@ -66,12 +82,14 @@ func DefaultWeaponDefinitions() []*enginev1.WeaponDefinition {
 			Description:       "Beyond-visual-range active-radar AAM",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1450, RangeM: 105000, ProbabilityOfHit: 0.80,
+			Guidance:          radar,
 		},
 		{
 			Id: "aam-aim9x", Name: "AIM-9X Sidewinder",
 			Description:       "Short-range infrared-guided AAM",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1000, RangeM: 35000, ProbabilityOfHit: 0.78,
+			Guidance:          ir,
 		},
 		// ── Air-to-air missiles (Russian) ─────────────────────────────────────
 		{
@@ -79,18 +97,21 @@ func DefaultWeaponDefinitions() []*enginev1.WeaponDefinition {
 			Description:       "Russian active-radar BVR AAM; primary armament of Flanker/Felon family",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1480, RangeM: 110000, ProbabilityOfHit: 0.78,
+			Guidance:          radar,
 		},
 		{
 			Id: "aam-r74m", Name: "R-74M (AA-11 Archer)",
 			Description:       "Russian high-off-boresight short-range IR-guided AAM",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          900, RangeM: 40000, ProbabilityOfHit: 0.76,
+			Guidance:          ir,
 		},
 		{
 			Id: "aam-r37m", Name: "R-37M (AA-13 Axehead)",
 			Description:       "Russian very-long-range interceptor missile; primary armament of MiG-31BM",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1500, RangeM: 300000, ProbabilityOfHit: 0.72,
+			Guidance:          radar,
 		},
 		// ── Air-to-air missiles (Chinese) ─────────────────────────────────────
 		{
@@ -98,18 +119,21 @@ func DefaultWeaponDefinitions() []*enginev1.WeaponDefinition {
 			Description:       "Chinese long-range active-radar BVR AAM for J-20/J-16/J-10C",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1500, RangeM: 200000, ProbabilityOfHit: 0.78,
+			Guidance:          radar,
 		},
 		{
 			Id: "aam-pl10", Name: "PL-10 WVR Missile",
 			Description:       "Chinese high-off-boresight short-range IR-guided AAM",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1000, RangeM: 20000, ProbabilityOfHit: 0.80,
+			Guidance:          ir,
 		},
 		{
 			Id: "aam-pl12", Name: "PL-12 BVR Missile",
 			Description:       "Chinese active-radar BVR AAM; primary on J-11B/J-15",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1400, RangeM: 100000, ProbabilityOfHit: 0.76,
+			Guidance:          radar,
 		},
 		// ── Air-to-air missiles (European) ────────────────────────────────────
 		{
@@ -117,24 +141,28 @@ func DefaultWeaponDefinitions() []*enginev1.WeaponDefinition {
 			Description:       "European ramjet-powered BVR AAM with very large no-escape zone; Typhoon/Rafale/Gripen E",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1500, RangeM: 200000, ProbabilityOfHit: 0.85,
+			Guidance:          radar,
 		},
 		{
 			Id: "aam-mica-em", Name: "MICA-EM BVR Missile",
 			Description:       "French active-radar BVR/WVR AAM; primary armament of Rafale and Mirage 2000-5",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1200, RangeM: 80000, ProbabilityOfHit: 0.80,
+			Guidance:          radar,
 		},
 		{
 			Id: "aam-mica-ir", Name: "MICA-IR WVR Missile",
 			Description:       "French IR-guided short-range AAM for Rafale and Mirage 2000-5",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1000, RangeM: 25000, ProbabilityOfHit: 0.82,
+			Guidance:          ir,
 		},
 		{
 			Id: "aam-iris-t", Name: "IRIS-T WVR Missile",
 			Description:       "German high-off-boresight short-range IR-guided AAM; Eurofighter/Gripen standard",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1000, RangeM: 25000, ProbabilityOfHit: 0.82,
+			Guidance:          ir,
 		},
 		// ── Air-to-air missiles (Israeli) ─────────────────────────────────────
 		{
@@ -142,12 +170,14 @@ func DefaultWeaponDefinitions() []*enginev1.WeaponDefinition {
 			Description:       "Israeli imaging-IR short-range AAM; exceptional off-boresight capability",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          900, RangeM: 20000, ProbabilityOfHit: 0.85,
+			Guidance:          ir,
 		},
 		{
 			Id: "aam-derby", Name: "Derby / I-Derby ER BVR",
 			Description:       "Israeli active-radar BVR AAM; I-Derby ER variant extends range to 100 km",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1300, RangeM: 100000, ProbabilityOfHit: 0.78,
+			Guidance:          radar,
 		},
 		// ── Air-to-air missiles (Indian) ──────────────────────────────────────
 		{
@@ -155,37 +185,43 @@ func DefaultWeaponDefinitions() []*enginev1.WeaponDefinition {
 			Description:       "Indian domestically developed active-radar BVR AAM for Su-30MKI and Tejas",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1400, RangeM: 80000, ProbabilityOfHit: 0.74,
+			Guidance:          radar,
 		},
 		// ── Air-to-ground / air-to-surface ───────────────────────────────────────
 		{
 			Id: "agm-114-hellfire", Name: "AGM-114 Hellfire",
-			Description:       "Laser/RF-guided anti-armor missile for helicopters",
+			Description:       "Semi-active laser or radar-guided anti-armor missile for helicopters",
 			DomainTargets:     []enginev1.UnitDomain{L, S},
 			SpeedMps:          475, RangeM: 8000, ProbabilityOfHit: 0.90,
+			Guidance:          laser,
 		},
 		{
 			Id: "agm-65-maverick", Name: "AGM-65 Maverick",
 			Description:       "EO/IR-guided air-to-ground missile",
 			DomainTargets:     []enginev1.UnitDomain{L, S},
 			SpeedMps:          340, RangeM: 27000, ProbabilityOfHit: 0.82,
+			Guidance:          ir,
 		},
 		{
 			Id: "agm-84-harpoon", Name: "AGM-84 Harpoon",
-			Description:       "Air-launched anti-ship cruise missile",
+			Description:       "Air-launched anti-ship cruise missile with active radar seeker",
 			DomainTargets:     []enginev1.UnitDomain{S},
 			SpeedMps:          310, RangeM: 290000, ProbabilityOfHit: 0.85,
+			Guidance:          radar,
 		},
 		{
 			Id: "agm-88-harm", Name: "AGM-88 HARM",
-			Description:       "High-speed anti-radiation missile",
+			Description:       "High-speed anti-radiation missile; homes on radar emissions",
 			DomainTargets:     []enginev1.UnitDomain{L},
 			SpeedMps:          1480, RangeM: 150000, ProbabilityOfHit: 0.80,
+			Guidance:          radar,
 		},
 		{
 			Id: "gbu-32-jdam", Name: "GBU-32 JDAM",
 			Description:       "GPS/INS-guided 1,000-lb precision bomb",
 			DomainTargets:     []enginev1.UnitDomain{L, S},
 			SpeedMps:          280, RangeM: 28000, ProbabilityOfHit: 0.88,
+			Guidance:          gps,
 		},
 		// ── Air-domain guns ───────────────────────────────────────────────────────
 		{
@@ -193,81 +229,94 @@ func DefaultWeaponDefinitions() []*enginev1.WeaponDefinition {
 			Description:       "20mm rotary cannon for fighter aircraft",
 			DomainTargets:     []enginev1.UnitDomain{A, L},
 			SpeedMps:          1050, RangeM: 1800, ProbabilityOfHit: 0.75,
+			Guidance:          unguided,
 		},
 		{
 			Id: "gun-m230-30mm", Name: "M230 30mm Chain Gun",
 			Description:       "30mm cannon for AH-64 Apache",
 			DomainTargets:     []enginev1.UnitDomain{L},
 			SpeedMps:          805, RangeM: 4000, ProbabilityOfHit: 0.78,
+			Guidance:          unguided,
 		},
 		{
 			Id: "gun-gsh301-30mm", Name: "GSh-30-1 30mm Cannon",
 			Description:       "Single-barrel 30mm cannon on Russian Flanker/Felon family fighters",
 			DomainTargets:     []enginev1.UnitDomain{A, L},
 			SpeedMps:          900, RangeM: 2000, ProbabilityOfHit: 0.72,
+			Guidance:          unguided,
 		},
 		{
 			Id: "gun-mauser-bk27", Name: "Mauser BK-27 27mm Cannon",
 			Description:       "27mm revolver cannon on Eurofighter Typhoon and Gripen",
 			DomainTargets:     []enginev1.UnitDomain{A, L},
 			SpeedMps:          1025, RangeM: 2000, ProbabilityOfHit: 0.74,
+			Guidance:          unguided,
 		},
 		{
 			Id: "gun-defa554-30mm", Name: "DEFA 554 30mm Cannon",
 			Description:       "30mm revolver cannon on Rafale and Mirage 2000",
 			DomainTargets:     []enginev1.UnitDomain{A, L},
 			SpeedMps:          820, RangeM: 2000, ProbabilityOfHit: 0.70,
+			Guidance:          unguided,
 		},
 		// ── Ship-launched surface-to-surface ─────────────────────────────────────
 		{
 			Id: "ssm-rgm84-harpoon", Name: "RGM-84 Harpoon",
-			Description:       "Ship/sub-launched anti-ship cruise missile",
+			Description:       "Ship/sub-launched anti-ship cruise missile with active radar seeker",
 			DomainTargets:     []enginev1.UnitDomain{S},
 			SpeedMps:          310, RangeM: 315000, ProbabilityOfHit: 0.82,
+			Guidance:          radar,
 		},
 		// ── Ship-launched surface-to-air ─────────────────────────────────────────
 		{
 			Id: "sam-sm2-block3", Name: "SM-2 Block III",
-			Description:       "Long-range area air defense missile",
+			Description:       "Long-range area air defense missile with semi-active/active radar",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          900, RangeM: 167000, ProbabilityOfHit: 0.80,
+			Guidance:          radar,
 		},
 		{
 			Id: "sam-sm6", Name: "SM-6",
-			Description:       "Extended-range air defense / ballistic missile defense",
+			Description:       "Extended-range air defense / ballistic missile defense; active radar seeker",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1200, RangeM: 370000, ProbabilityOfHit: 0.78,
+			Guidance:          radar,
 		},
 		{
 			Id: "gun-phalanx-20mm", Name: "Phalanx CIWS 20mm",
 			Description:       "Close-in weapon system; last-ditch anti-missile defense",
 			DomainTargets:     []enginev1.UnitDomain{A},
 			SpeedMps:          1100, RangeM: 3500, ProbabilityOfHit: 0.65,
+			Guidance:          unguided,
 		},
 		{
 			Id: "gun-mk45-5in", Name: "Mk 45 5\"/62 Naval Gun",
 			Description:       "127mm naval gun for surface and shore fire",
 			DomainTargets:     []enginev1.UnitDomain{L, S},
 			SpeedMps:          920, RangeM: 24000, ProbabilityOfHit: 0.72,
+			Guidance:          unguided,
 		},
 		// ── Anti-submarine warfare ────────────────────────────────────────────────
 		{
 			Id: "asw-vlasroc", Name: "VL-ASROC",
-			Description:       "Vertically-launched rocket-propelled Mk 54 torpedo",
+			Description:       "Vertically-launched rocket-propelled Mk 54 torpedo; GPS midcourse, sonar terminal",
 			DomainTargets:     []enginev1.UnitDomain{U},
 			SpeedMps:          350, RangeM: 22000, ProbabilityOfHit: 0.75,
+			Guidance:          sonar,
 		},
 		{
 			Id: "torp-mk48", Name: "Mk 48 ADCAP Torpedo",
 			Description:       "Heavy-weight wire-guided torpedo for submarines",
 			DomainTargets:     []enginev1.UnitDomain{S, U},
 			SpeedMps:          28, RangeM: 55000, ProbabilityOfHit: 0.80,
+			Guidance:          sonar,
 		},
 		{
 			Id: "torp-mk54", Name: "Mk 54 LHT Torpedo",
 			Description:       "Lightweight hybrid torpedo for surface ships and aircraft",
 			DomainTargets:     []enginev1.UnitDomain{U, S},
 			SpeedMps:          28, RangeM: 18000, ProbabilityOfHit: 0.75,
+			Guidance:          sonar,
 		},
 	}
 }
