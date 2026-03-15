@@ -23,6 +23,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -49,25 +50,27 @@ type LoadoutSlot struct {
 // Definition is one unit definition record inside a library file.
 // Field names use snake_case to match the DB schema and YAML convention.
 type Definition struct {
-	ID                 string        `yaml:"id"`
-	Name               string        `yaml:"name"`
-	Description        string        `yaml:"description"`
-	Domain             int           `yaml:"domain"`
-	Form               int           `yaml:"form"`
-	GeneralType        int           `yaml:"general_type"`
-	SpecificType       string        `yaml:"specific_type"`
-	NationOfOrigin     string        `yaml:"nation_of_origin"`
-	ServiceEntryYear   int           `yaml:"service_entry_year"`
-	BaseStrength       float32       `yaml:"base_strength"`
-	Accuracy           float32       `yaml:"accuracy"`
-	MaxSpeedMps        float32       `yaml:"max_speed_mps"`
-	CruiseSpeedMps     float32       `yaml:"cruise_speed_mps"`
-	MaxRangeKm         float32       `yaml:"max_range_km"`
-	Survivability      float32       `yaml:"survivability"`
-	DetectionRangeM    float32       `yaml:"detection_range_m"`
-	FuelCapacityLiters float32       `yaml:"fuel_capacity_liters"`
-	FuelBurnRateLph    float32       `yaml:"fuel_burn_rate_lph"`
-	DefaultLoadout     []LoadoutSlot `yaml:"default_loadout"`
+	ID                  string        `yaml:"id"`
+	Name                string        `yaml:"name"`
+	Description         string        `yaml:"description"`
+	Domain              int           `yaml:"domain"`
+	Form                int           `yaml:"form"`
+	GeneralType         int           `yaml:"general_type"`
+	SpecificType        string        `yaml:"specific_type"`
+	ShortName           string        `yaml:"short_name"`
+	NationOfOrigin      string        `yaml:"nation_of_origin"`
+	ServiceEntryYear    int           `yaml:"service_entry_year"`
+	BaseStrength        float32       `yaml:"base_strength"`
+	Accuracy            float32       `yaml:"accuracy"`
+	MaxSpeedMps         float32       `yaml:"max_speed_mps"`
+	CruiseSpeedMps      float32       `yaml:"cruise_speed_mps"`
+	MaxRangeKm          float32       `yaml:"max_range_km"`
+	Survivability       float32       `yaml:"survivability"`
+	DetectionRangeM     float32       `yaml:"detection_range_m"`
+	RadarCrossSectionM2 float32       `yaml:"radar_cross_section_m2"`
+	FuelCapacityLiters  float32       `yaml:"fuel_capacity_liters"`
+	FuelBurnRateLph     float32       `yaml:"fuel_burn_rate_lph"`
+	DefaultLoadout      []LoadoutSlot `yaml:"default_loadout"`
 }
 
 // File is the top-level structure of a library YAML file.
@@ -80,25 +83,44 @@ type File struct {
 // Numeric types are widened to int / float64 to satisfy SurrealDB's SCHEMAFULL
 // TYPE int and TYPE float field definitions.
 func (d Definition) ToRecord() map[string]any {
-	return map[string]any{
-		"name":                 d.Name,
-		"description":          d.Description,
-		"domain":               d.Domain,
-		"form":                 d.Form,
-		"general_type":         d.GeneralType,
-		"specific_type":        d.SpecificType,
-		"nation_of_origin":     d.NationOfOrigin,
-		"service_entry_year":   d.ServiceEntryYear,
-		"base_strength":        float64(d.BaseStrength),
-		"accuracy":             float64(d.Accuracy),
-		"max_speed_mps":        float64(d.MaxSpeedMps),
-		"cruise_speed_mps":     float64(d.CruiseSpeedMps),
-		"max_range_km":         float64(d.MaxRangeKm),
-		"survivability":        float64(d.Survivability),
-		"detection_range_m":    float64(d.DetectionRangeM),
-		"fuel_capacity_liters": float64(d.FuelCapacityLiters),
-		"fuel_burn_rate_lph":   float64(d.FuelBurnRateLph),
+	shortName := d.ShortName
+	if shortName == "" {
+		shortName = inferShortName(d.Name, d.SpecificType)
 	}
+	return map[string]any{
+		"name":                   d.Name,
+		"description":            d.Description,
+		"domain":                 d.Domain,
+		"form":                   d.Form,
+		"general_type":           d.GeneralType,
+		"specific_type":          d.SpecificType,
+		"short_name":             shortName,
+		"nation_of_origin":       d.NationOfOrigin,
+		"service_entry_year":     d.ServiceEntryYear,
+		"base_strength":          float64(d.BaseStrength),
+		"accuracy":               float64(d.Accuracy),
+		"max_speed_mps":          float64(d.MaxSpeedMps),
+		"cruise_speed_mps":       float64(d.CruiseSpeedMps),
+		"max_range_km":           float64(d.MaxRangeKm),
+		"survivability":          float64(d.Survivability),
+		"detection_range_m":      float64(d.DetectionRangeM),
+		"radar_cross_section_m2": float64(d.RadarCrossSectionM2),
+		"fuel_capacity_liters":   float64(d.FuelCapacityLiters),
+		"fuel_burn_rate_lph":     float64(d.FuelBurnRateLph),
+	}
+}
+
+func inferShortName(name, specificType string) string {
+	for _, candidate := range []string{specificType, name} {
+		candidate = strings.TrimSpace(candidate)
+		if candidate == "" {
+			continue
+		}
+		if parts := strings.Fields(candidate); len(parts) > 0 {
+			return strings.ToUpper(parts[0])
+		}
+	}
+	return "UNIT"
 }
 
 // LoadAll returns every Definition from:

@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log/slog"
+	"regexp"
 	"strings"
 
 	"github.com/surrealdb/surrealdb.go/pkg/models"
@@ -50,6 +51,25 @@ func extractRecordID(v any) string {
 		return s[idx+1:]
 	}
 	return s
+}
+
+var shortNamePattern = regexp.MustCompile(`(?i)([a-z]+[-/]?\d+[a-z0-9/-]*)`)
+
+func inferUnitShortName(name, specificType string) string {
+	for _, candidate := range []string{specificType, name} {
+		candidate = strings.TrimSpace(candidate)
+		if candidate == "" {
+			continue
+		}
+		if match := shortNamePattern.FindStringSubmatch(candidate); len(match) > 1 {
+			return strings.ToUpper(match[1])
+		}
+		fields := strings.Fields(candidate)
+		if len(fields) > 0 {
+			return strings.ToUpper(fields[0])
+		}
+	}
+	return "UNIT"
 }
 
 // stripTablePrefix removes the "table:" prefix that may arrive on IDs.

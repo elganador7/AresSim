@@ -337,14 +337,63 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 	}
 	for _, row := range rows {
 		id := extractRecordID(row["id"])
+		domain := enginev1.UnitDomain(int32(toFloat64(row["domain"])))
+		generalType := int32(toFloat64(row["general_type"]))
+		rcs := toFloat64(row["radar_cross_section_m2"])
+		if rcs <= 0 {
+			rcs = defaultRadarCrossSectionM2(domain, generalType)
+		}
 		defs[id] = sim.DefStats{
-			CruiseSpeedMps:  toFloat64(row["cruise_speed_mps"]),
-			BaseStrength:    toFloat64(row["base_strength"]),
-			DetectionRangeM: toFloat64(row["detection_range_m"]),
-			Domain:          enginev1.UnitDomain(int32(toFloat64(row["domain"]))),
+			CruiseSpeedMps:      toFloat64(row["cruise_speed_mps"]),
+			BaseStrength:        toFloat64(row["base_strength"]),
+			DetectionRangeM:     toFloat64(row["detection_range_m"]),
+			RadarCrossSectionM2: rcs,
+			Domain:              domain,
 		}
 	}
 	return defs
+}
+
+func defaultRadarCrossSectionM2(domain enginev1.UnitDomain, generalType int32) float64 {
+	switch domain {
+	case enginev1.UnitDomain_DOMAIN_AIR:
+		switch generalType {
+		case int32(enginev1.UnitGeneralType_GENERAL_TYPE_BOMBER):
+			return 20
+		case int32(enginev1.UnitGeneralType_GENERAL_TYPE_TRANSPORT_AIRCRAFT),
+			int32(enginev1.UnitGeneralType_GENERAL_TYPE_MARITIME_PATROL),
+			int32(enginev1.UnitGeneralType_GENERAL_TYPE_AEW),
+			int32(enginev1.UnitGeneralType_GENERAL_TYPE_TANKER):
+			return 25
+		case int32(enginev1.UnitGeneralType_GENERAL_TYPE_ISR_UAV),
+			int32(enginev1.UnitGeneralType_GENERAL_TYPE_UCAV),
+			int32(enginev1.UnitGeneralType_GENERAL_TYPE_LOITERING_MUNITION):
+			return 0.5
+		default:
+			return 5
+		}
+	case enginev1.UnitDomain_DOMAIN_SEA:
+		return 1_000
+	case enginev1.UnitDomain_DOMAIN_SUBSURFACE:
+		return 0.2
+	case enginev1.UnitDomain_DOMAIN_LAND:
+		switch generalType {
+		case int32(enginev1.UnitGeneralType_GENERAL_TYPE_LIGHT_INFANTRY),
+			int32(enginev1.UnitGeneralType_GENERAL_TYPE_AIRBORNE_INFANTRY),
+			int32(enginev1.UnitGeneralType_GENERAL_TYPE_MARINE_INFANTRY),
+			int32(enginev1.UnitGeneralType_GENERAL_TYPE_SPECIAL_FORCES):
+			return 0.5
+		case int32(enginev1.UnitGeneralType_GENERAL_TYPE_MAIN_BATTLE_TANK),
+			int32(enginev1.UnitGeneralType_GENERAL_TYPE_INFANTRY_FIGHTING_VEHICLE),
+			int32(enginev1.UnitGeneralType_GENERAL_TYPE_ARMORED_PERSONNEL_CARRIER),
+			int32(enginev1.UnitGeneralType_GENERAL_TYPE_RECONNAISSANCE_VEHICLE):
+			return 10
+		default:
+			return 5
+		}
+	default:
+		return 1
+	}
 }
 
 // loadoutToWeaponStates converts library.LoadoutSlot entries into proto weapon state.

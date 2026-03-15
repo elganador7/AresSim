@@ -63,11 +63,11 @@ const DOMAIN_COLORS: Record<number, string> = {
 function blankDef(): UnitDefinitionDraft {
   return {
     id: "", name: "", description: "",
-    domain: 1, form: 30, generalType: 60, specificType: "",
+    domain: 1, form: 30, generalType: 60, specificType: "", shortName: "",
     nationOfOrigin: "", serviceEntryYear: 2000,
     baseStrength: 0.8, combatRangeM: 1000, accuracy: 0.75,
     maxSpeedMps: 10, cruiseSpeedMps: 7, maxRangeKm: 500,
-    survivability: 0.6, detectionRangeM: 5000,
+    survivability: 0.6, detectionRangeM: 5000, radarCrossSectionM2: 5,
     fuelCapacityLiters: 500, fuelBurnRateLph: 100,
   };
 }
@@ -75,14 +75,15 @@ function blankDef(): UnitDefinitionDraft {
 function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
   const num = (k: string) => Number(r[k] ?? 0);
   const str = (k: string) => String(r[k] ?? "");
+  const firstNonEmpty = (...values: string[]) => values.find((v) => v.trim().length > 0) ?? "";
   return {
     id: str("id"), name: str("name"), description: str("description"),
     domain: num("domain"), form: num("form"), generalType: num("general_type"),
-    specificType: str("specific_type"), nationOfOrigin: str("nation_of_origin"),
+    specificType: str("specific_type"), shortName: firstNonEmpty(str("short_name"), str("specific_type"), str("name")), nationOfOrigin: str("nation_of_origin"),
     serviceEntryYear: num("service_entry_year"),
     baseStrength: num("base_strength"), combatRangeM: num("combat_range_m"), accuracy: num("accuracy"),
     maxSpeedMps: num("max_speed_mps"), cruiseSpeedMps: num("cruise_speed_mps"), maxRangeKm: num("max_range_km"),
-    survivability: num("survivability"), detectionRangeM: num("detection_range_m"),
+    survivability: num("survivability"), detectionRangeM: num("detection_range_m"), radarCrossSectionM2: num("radar_cross_section_m2"),
     fuelCapacityLiters: num("fuel_capacity_liters"), fuelBurnRateLph: num("fuel_burn_rate_lph"),
   };
 }
@@ -209,6 +210,12 @@ function DefinitionForm({
               onChange={(e) => patch({ specificType: e.target.value })}
               placeholder="e.g. F-35A Lightning II" />
           </div>
+          <div className="field">
+            <label className="field-label">Short Name</label>
+            <input className="field-input" value={def.shortName}
+              onChange={(e) => patch({ shortName: e.target.value })}
+              placeholder="e.g. F-22A or MiG-35" />
+          </div>
         </div>
 
         <div className="panel-section">
@@ -253,6 +260,7 @@ function DefinitionForm({
             {numField("Survivability (0–1)", "survivability", 0.01, 0)}
             {numField("Detection Range (m)", "detectionRangeM", 1000, 0)}
           </div>
+          {numField("Radar Cross Section (m²)", "radarCrossSectionM2", 0.01, 0)}
         </div>
 
         <div className="panel-section">
@@ -319,12 +327,12 @@ export default function UnitDefinitionManager({ onClose }: Props) {
     const payload = {
       id: def.id, name: def.name, description: def.description,
       domain: def.domain, form: def.form, general_type: def.generalType,
-      specific_type: def.specificType, nation_of_origin: def.nationOfOrigin,
+      specific_type: def.specificType, short_name: def.shortName, nation_of_origin: def.nationOfOrigin,
       service_entry_year: def.serviceEntryYear,
       base_strength: def.baseStrength, combat_range_m: def.combatRangeM,
       accuracy: def.accuracy, max_speed_mps: def.maxSpeedMps,
       cruise_speed_mps: def.cruiseSpeedMps, max_range_km: def.maxRangeKm,
-      survivability: def.survivability, detection_range_m: def.detectionRangeM,
+      survivability: def.survivability, detection_range_m: def.detectionRangeM, radar_cross_section_m2: def.radarCrossSectionM2,
       fuel_capacity_liters: def.fuelCapacityLiters, fuel_burn_rate_lph: def.fuelBurnRateLph,
     };
     const res = await SaveUnitDefinition(JSON.stringify(payload));

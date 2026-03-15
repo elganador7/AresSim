@@ -26,7 +26,6 @@ import {
   Cartesian3,
   Cartesian2,
   Color,
-  LabelStyle,
   VerticalOrigin,
   HorizontalOrigin,
   NearFarScalar,
@@ -34,6 +33,7 @@ import {
   Entity,
   EllipseGraphics,
   ConstantProperty,
+  ColorMaterialProperty,
   PolylineDashMaterialProperty,
   ScreenSpaceEventType,
   Math as CesiumMath,
@@ -51,15 +51,10 @@ type ActiveView = "debug" | "blue" | "red";
 interface DefInfo {
   generalType: number;
   detectionRangeM: number;
+  shortName: string;
 }
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-
-const LABEL_COLOR: Record<string, Color> = {
-  Blue:    Color.fromCssColorString("#dbeafe"),
-  Red:     Color.fromCssColorString("#fee2e2"),
-  Neutral: Color.fromCssColorString("#fef3c7"),
-};
 
 const ROUTE_COLOR: Record<string, Color> = {
   Blue:    Color.fromCssColorString("#60a5fa"),
@@ -71,7 +66,7 @@ type Detections = Map<string, Set<string>>;
 type MunitionDetections = Map<string, Set<string>>;
 
 const MUNITION_ENTITY_PREFIX = "mun_";
-const SENSOR_COLOR = Color.fromCssColorString("#22d3ee"); // cyan-400
+const SENSOR_COLOR = Color.fromCssColorString("#0f9fb8");
 
 /**
  * Returns the longest weapon range (metres) among weapons with ammo remaining.
@@ -134,34 +129,20 @@ function canMove(unit: Unit, view: ActiveView): boolean {
   return false;
 }
 
-function makeEntity(unit: Unit, generalType: number): Entity {
-  const labelColor = LABEL_COLOR[unit.side] ?? Color.WHITE;
+function makeEntity(unit: Unit, generalType: number, shortName: string): Entity {
   return new Entity({
     id: unit.id,
     position: Cartesian3.fromDegrees(unit.position.lon, unit.position.lat, unit.position.altMsl),
     show: true,
     billboard: {
-      image: getUnitBillboardUrl(generalType, unit.side),
-      width: 36,
-      height: 36,
+      image: getUnitBillboardUrl(generalType, unit.side, shortName),
+      width: 62,
+      height: 62,
       verticalOrigin: VerticalOrigin.CENTER,
       horizontalOrigin: HorizontalOrigin.CENTER,
       scaleByDistance: new NearFarScalar(1.5e5, 1.2, 8e6, 0.4),
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
       heightReference: HeightReference.CLAMP_TO_GROUND,
-    },
-    label: {
-      text: unit.displayName,
-      font: "12px 'Courier New', monospace",
-      style: LabelStyle.FILL_AND_OUTLINE,
-      fillColor: labelColor,
-      outlineColor: Color.fromCssColorString("#0f1115"),
-      outlineWidth: 3,
-      verticalOrigin: VerticalOrigin.BOTTOM,
-      horizontalOrigin: HorizontalOrigin.CENTER,
-      pixelOffset: new Cartesian2(0, -22),
-      scaleByDistance: new NearFarScalar(1.5e5, 1.2, 8e6, 0.5),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
     },
   });
 }
@@ -284,12 +265,16 @@ export default function CesiumGlobe() {
         (existing.position as unknown as { setValue: (p: Cartesian3) => void }).setValue(pos);
         existing.show = visible;
         if (existing.billboard) {
+          const def = defInfoRef.current[unit.definitionId];
+          existing.billboard.image = new ConstantProperty(
+            getUnitBillboardUrl(def?.generalType ?? 0, unit.side, def?.shortName ?? unit.displayName),
+          );
           existing.billboard.scale = new ConstantProperty(isSelected ? 1.4 : 1.0);
           existing.billboard.color = new ConstantProperty(Color.WHITE.withAlpha(trackAlpha));
         }
       } else {
         const def = defInfoRef.current[unit.definitionId];
-        const entity = makeEntity(unit, def?.generalType ?? 0);
+        const entity = makeEntity(unit, def?.generalType ?? 0, def?.shortName ?? unit.displayName);
         entity.show = visible;
         viewer.entities.add(entity);
         // Apply initial track alpha after adding.
@@ -351,10 +336,9 @@ export default function CesiumGlobe() {
         viewer.entities.removeById(destId);
       }
 
-      // Range rings — shown only when this unit is selected and visible.
+      // Weapon range ring — shown only when this unit is selected and visible.
       // Always remove and recreate so radius stays correct as ammo depletes.
       viewer.entities.removeById(rangeId);
-      viewer.entities.removeById(sensorId);
 
       if (isSelected && visible) {
         const ringColor = ROUTE_COLOR[unit.side] ?? Color.WHITE;
@@ -371,18 +355,36 @@ export default function CesiumGlobe() {
             ellipse: new EllipseGraphics({
               semiMajorAxis: new ConstantProperty(weaponRangeM),
               semiMinorAxis: new ConstantProperty(weaponRangeM),
-              material: ringColor.withAlpha(0.06),
+              material: new ColorMaterialProperty(ringColor.withAlpha(0.12)),
               outline: true,
-              outlineColor: ringColor.withAlpha(0.85),
-              outlineWidth: new ConstantProperty(1),
+              outlineColor: ringColor.withAlpha(0.95),
+              outlineWidth: new ConstantProperty(2),
               heightReference: new ConstantProperty(HeightReference.CLAMP_TO_GROUND),
             }),
           }));
         }
 
-        // Sensor range ring — detection radius from unit definition.
-        const sensorRangeM = defInfoRef.current[unit.definitionId]?.detectionRangeM ?? 0;
-        if (sensorRangeM > 0) {
+      }
+
+      // Sensor range ring — shown only for the selected visible platform.
+      const sensorRangeM = defInfoRef.current[unit.definitionId]?.detectionRangeM ?? 0;
+      if (!visible || !isSelected || sensorRangeM <= 0) {
+        viewer.entities.removeById(sensorId)
+      } else {
+        const sensorEntity = viewer.entities.getById(sensorId)
+        const outlineAlpha = 0.75
+        const fillAlpha = 0.1
+        if (sensorEntity) {
+          (sensorEntity.position as unknown as { setValue: (p: Cartesian3) => void }).setValue(pos)
+          sensorEntity.show = true
+          if (sensorEntity.ellipse) {
+            sensorEntity.ellipse.semiMajorAxis = new ConstantProperty(sensorRangeM)
+            sensorEntity.ellipse.semiMinorAxis = new ConstantProperty(sensorRangeM)
+            sensorEntity.ellipse.material = new ColorMaterialProperty(SENSOR_COLOR.withAlpha(fillAlpha))
+            sensorEntity.ellipse.outlineColor = new ConstantProperty(SENSOR_COLOR.withAlpha(outlineAlpha))
+            sensorEntity.ellipse.outlineWidth = new ConstantProperty(2)
+          }
+        } else {
           viewer.entities.add(new Entity({
             id: sensorId,
             show: true,
@@ -390,13 +392,13 @@ export default function CesiumGlobe() {
             ellipse: new EllipseGraphics({
               semiMajorAxis: new ConstantProperty(sensorRangeM),
               semiMinorAxis: new ConstantProperty(sensorRangeM),
-              material: SENSOR_COLOR.withAlpha(0.03),
+              material: new ColorMaterialProperty(SENSOR_COLOR.withAlpha(fillAlpha)),
               outline: true,
-              outlineColor: SENSOR_COLOR.withAlpha(0.55),
-              outlineWidth: new ConstantProperty(1),
+              outlineColor: SENSOR_COLOR.withAlpha(outlineAlpha),
+              outlineWidth: new ConstantProperty(2),
               heightReference: new ConstantProperty(HeightReference.CLAMP_TO_GROUND),
             }),
-          }));
+          }))
         }
       }
     };
@@ -505,9 +507,13 @@ export default function CesiumGlobe() {
       .then((rows) => {
         const map: Record<string, DefInfo> = {};
         rows.forEach((r) => {
+          const shortName = String(r["short_name"] ?? "").trim()
+            || String(r["specific_type"] ?? "").trim()
+            || String(r["name"] ?? "").trim();
           map[String(r["id"])] = {
             generalType:    Number(r["general_type"]),
             detectionRangeM: Number(r["detection_range_m"]) || 0,
+            shortName,
           };
         });
         defInfoRef.current = map;

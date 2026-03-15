@@ -1,5 +1,19 @@
 /* app.css — AresSim COP shell styles */
 
+:root {
+  --font-ui: "Avenir Next", "Segoe UI Variable", "Segoe UI", sans-serif;
+  --font-display: "Avenir Next Condensed", "Arial Narrow", "Avenir Next", sans-serif;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-ui);
+}
+
 /* ─── LAYOUT ──────────────────────────────────────────────────────────────── */
 
 .app-shell {
@@ -43,7 +57,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-ui);
   font-size: 12px;
   color: #d1d5db;
   user-select: none;
@@ -131,7 +145,7 @@
 .speed-step-btn:disabled { color: #374151; cursor: default; }
 
 .speed-label {
-  font-family: "Courier New", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
   color: #22c55e;
   min-width: 32px;
@@ -144,7 +158,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 3px;
   color: #9ca3af;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -173,7 +187,7 @@
 
 .view-btn {
   padding: 5px 18px;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -206,7 +220,7 @@
   border-radius: 6px;
   display: flex;
   flex-direction: column;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
 }
 
@@ -262,7 +276,7 @@
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-ui);
   font-size: 12px;
   color: #d1d5db;
 }
@@ -360,7 +374,7 @@
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid rgba(239, 68, 68, 0.4);
   color: #f87171;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-display);
   font-size: 10px;
   padding: 3px 8px;
   border-radius: 3px;

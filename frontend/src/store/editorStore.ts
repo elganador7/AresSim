@@ -55,6 +55,7 @@ export interface PendingDrop {
   domain: number;      // kept for display color
   definitionId: string;
   label: string;
+  shortName: string;
   domainColor: string;
 }
 
@@ -66,6 +67,7 @@ export interface UnitDefinitionDraft {
   form: number;
   generalType: number;
   specificType: string;
+  shortName: string;
   nationOfOrigin: string;
   serviceEntryYear: number;
   baseStrength: number;
@@ -76,6 +78,7 @@ export interface UnitDefinitionDraft {
   maxRangeKm: number;
   survivability: number;
   detectionRangeM: number;
+  radarCrossSectionM2: number;
   fuelCapacityLiters: number;
   fuelBurnRateLph: number;
 }

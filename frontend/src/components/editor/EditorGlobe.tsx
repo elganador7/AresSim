@@ -21,10 +21,10 @@ import {
   ImageryLayer,
   Color,
   Cartesian3,
+  Cartesian2,
   Cartographic,
   ScreenSpaceEventType,
   Math as CesiumMath,
-  Cartesian2,
   ConstantProperty,
   VerticalOrigin,
   HorizontalOrigin,
@@ -56,12 +56,6 @@ function getDropLatLon(
     lon: CesiumMath.toDegrees(carto.longitude),
   };
 }
-
-const LABEL_COLORS: Record<string, Color> = {
-  Blue:    Color.fromCssColorString("#dbeafe"),
-  Red:     Color.fromCssColorString("#fee2e2"),
-  Neutral: Color.fromCssColorString("#fef3c7"),
-};
 
 // ─── PROPS ────────────────────────────────────────────────────────────────────
 
@@ -199,8 +193,10 @@ export default function EditorGlobe({
 
       // Build definitionId → generalType lookup from current editor definitions.
       const defs = useEditorStore.getState().unitDefinitions;
-      const defMap: Record<string, number> = {};
-      defs.forEach((d) => { defMap[d.id] = d.generalType; });
+      const defMap: Record<string, { generalType: number; shortName: string }> = {};
+      defs.forEach((d) => {
+        defMap[d.id] = { generalType: d.generalType, shortName: d.shortName };
+      });
 
       const currentIds = new Set(units.map((u) => `editor-${u.id}`));
 
@@ -212,8 +208,9 @@ export default function EditorGlobe({
       }
 
       for (const unit of units) {
-        const generalType = defMap[unit.definitionId] ?? 0;
-        const labelColor  = LABEL_COLORS[unit.side] ?? Color.WHITE;
+        const def = defMap[unit.definitionId];
+        const generalType = def?.generalType ?? 0;
+        const shortName = def?.shortName || unit.displayName;
         const pos         = Cartesian3.fromDegrees(unit.lon, unit.lat, unit.altMsl);
         const entityId    = `editor-${unit.id}`;
         const existing    = viewer.entities.getById(entityId);
@@ -222,37 +219,26 @@ export default function EditorGlobe({
           (existing.position as unknown as { setValue(p: Cartesian3): void }).setValue(pos);
           if (existing.billboard) {
             existing.billboard.image = new ConstantProperty(
-              getUnitBillboardUrl(generalType, unit.side),
+              getUnitBillboardUrl(generalType, unit.side, shortName),
             );
-          }
-          if (existing.label) {
-            existing.label.text = new ConstantProperty(unit.displayName);
           }
         } else {
           viewer.entities.add({
             id: entityId,
             position: pos,
             billboard: {
-              image: getUnitBillboardUrl(generalType, unit.side),
-              width: 36,
-              height: 36,
+              image: getUnitBillboardUrl(
+                generalType,
+                unit.side,
+                shortName,
+              ),
+              width: 62,
+              height: 62,
               verticalOrigin: VerticalOrigin.CENTER,
               horizontalOrigin: HorizontalOrigin.CENTER,
               scaleByDistance: new NearFarScalar(1.5e5, 1.2, 8e6, 0.4),
               disableDepthTestDistance: Number.POSITIVE_INFINITY,
               heightReference: HeightReference.CLAMP_TO_GROUND,
-            },
-            label: {
-              text: unit.displayName,
-              font: "bold 11px 'Courier New'",
-              fillColor: labelColor,
-              outlineColor: Color.BLACK,
-              outlineWidth: 2,
-              style: 2, // FILL_AND_OUTLINE
-              verticalOrigin: VerticalOrigin.BOTTOM,
-              horizontalOrigin: HorizontalOrigin.CENTER,
-              pixelOffset: new Cartesian2(0, -22),
-              disableDepthTestDistance: Number.POSITIVE_INFINITY,
             },
             properties: { unitId: unit.id },
           });

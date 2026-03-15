@@ -8,10 +8,11 @@ import (
 
 // DefStats holds the per-definition values the sim loop needs each tick.
 type DefStats struct {
-	CruiseSpeedMps  float64
-	BaseStrength    float64
-	DetectionRangeM float64
-	Domain          enginev1.UnitDomain // physical domain of this platform
+	CruiseSpeedMps      float64
+	BaseStrength        float64
+	DetectionRangeM     float64
+	RadarCrossSectionM2 float64
+	Domain              enginev1.UnitDomain // physical domain of this platform
 }
 
 // WeaponStats holds the per-weapon catalog data needed for engagement resolution
@@ -107,7 +108,7 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons ma
 
 			if aInRange {
 				prob := rangeDegradedPoh(wA.ProbabilityOfHit, dist, wA.RangeM)
-				aDetectedByB := dist <= defB.DetectionRangeM
+				aDetectedByB := dist <= effectiveDetectionRangeM(defB, defA)
 				if prob > 0.50 || aDetectedByB {
 					miss := inFlightMissProb(inFlight, b.Id)
 					salvo := salvoToAchieveKillProb(miss, prob, 0.30)
@@ -128,7 +129,7 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons ma
 
 			if bInRange {
 				prob := rangeDegradedPoh(wB.ProbabilityOfHit, dist, wB.RangeM)
-				bDetectedByA := dist <= defA.DetectionRangeM
+				bDetectedByA := dist <= effectiveDetectionRangeM(defA, defB)
 				if prob > 0.50 || bDetectedByA {
 					miss := inFlightMissProb(inFlight, a.Id)
 					salvo := salvoToAchieveKillProb(miss, prob, 0.30)
@@ -260,6 +261,33 @@ func rangeDegradedPoh(basePoh, dist, rangeM float64) float64 {
 	return basePoh * factor
 }
 
+// effectiveDetectionRangeM adjusts the detector's nominal range based on the
+// target's radar cross section. A 1 m^2 target uses the nominal range.
+// The fourth-root scaling is a simple approximation of the radar equation:
+//
+//	range ∝ sigma^(1/4)
+//
+// Very small RCS values are clamped so stealth remains meaningful without
+// making targets practically invisible; very large signatures are also capped
+// to avoid runaway detection bonuses.
+func effectiveDetectionRangeM(detector, target DefStats) float64 {
+	if detector.DetectionRangeM <= 0 {
+		return 0
+	}
+	rcs := target.RadarCrossSectionM2
+	if rcs <= 0 {
+		return detector.DetectionRangeM
+	}
+	factor := math.Pow(rcs, 0.25)
+	if factor < 0.25 {
+		factor = 0.25
+	}
+	if factor > 2.0 {
+		factor = 2.0
+	}
+	return detector.DetectionRangeM * factor
+}
+
 // selectBestWeapon finds the highest-range weapon on unit that can target
 // targetDomain and has ammo remaining.
 func selectBestWeapon(unit *enginev1.Unit, targetDomain enginev1.UnitDomain, catalog map[string]WeaponStats) (weaponID string, stats WeaponStats, found bool) {
@@ -334,8 +362,8 @@ func SensorTick(units []*enginev1.Unit, defs map[string]DefStats) DetectionSet {
 		if !unitIsActive(detector) {
 			continue
 		}
-		rangeM := defs[detector.DefinitionId].DetectionRangeM
-		if rangeM <= 0 {
+		detectorDef := defs[detector.DefinitionId]
+		if detectorDef.DetectionRangeM <= 0 {
 			continue
 		}
 		for _, target := range units {
@@ -346,7 +374,7 @@ func SensorTick(units []*enginev1.Unit, defs map[string]DefStats) DetectionSet {
 				detector.GetPosition().GetLat(), detector.GetPosition().GetLon(),
 				target.GetPosition().GetLat(), target.GetPosition().GetLon(),
 			)
-			if dist <= rangeM {
+			if dist <= effectiveDetectionRangeM(detectorDef, defs[target.DefinitionId]) {
 				bySet[detector.Side][target.Id] = true
 			}
 		}

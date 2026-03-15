@@ -80,22 +80,16 @@ func (a *App) startup(ctx context.Context) {
 	}()
 }
 
-// seedDefaults writes the default scenario and all built-in unit definitions
-// into the database. Uses UPSERT semantics so it is safe to call on every
-// startup — existing records are overwritten, ensuring library updates are
-// always applied.
+// seedDefaults writes the default scenario plus the YAML-backed unit and weapon
+// libraries into the database. Uses UPSERT semantics so it is safe to call on
+// every startup — existing records are overwritten, ensuring library updates
+// are always applied.
 func (a *App) seedDefaults(ctx context.Context, cfg db.Config) {
 	slog.Info("seeding defaults")
 
 	def := scenario.Default()
 	if err := a.scenRepo.Save(ctx, def.Id, scenarioRecord(def)); err != nil {
 		slog.Warn("seed default scenario", "err", err)
-	}
-
-	for _, unitDef := range scenario.DefaultUnitDefinitions() {
-		if err := a.unitDefRepo.Save(ctx, unitDef.Id, unitDefinitionRecord(unitDef)); err != nil {
-			slog.Warn("seed scaffold definition", "id", unitDef.Id, "err", err)
-		}
 	}
 
 	userLibDir := filepath.Join(cfg.DataDir, "libraries")
@@ -118,7 +112,6 @@ func (a *App) seedDefaults(ctx context.Context, cfg db.Config) {
 	}
 
 	slog.Info("seeding complete",
-		"scaffold", len(scenario.DefaultUnitDefinitions()),
 		"library", len(libDefs),
 		"weapons", len(scenario.DefaultWeaponDefinitions()),
 	)

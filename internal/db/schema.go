@@ -149,6 +149,7 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS form               ON unit_definition TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS general_type       ON unit_definition TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS specific_type      ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS short_name         ON unit_definition TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS nation_of_origin   ON unit_definition TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS service_entry_year ON unit_definition TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS base_strength      ON unit_definition TYPE float`,
@@ -158,6 +159,7 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS max_range_km       ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS survivability      ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS detection_range_m  ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS radar_cross_section_m2 ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS fuel_capacity_liters ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS fuel_burn_rate_lph ON unit_definition TYPE float`,
 

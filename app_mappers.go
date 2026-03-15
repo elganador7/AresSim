@@ -9,28 +9,6 @@ func normalizeRecordIDs(rows []map[string]any) []map[string]any {
 	return rows
 }
 
-func unitDefinitionRecord(unitDef *enginev1.UnitDefinition) map[string]any {
-	return map[string]any{
-		"name":                 unitDef.Name,
-		"description":          unitDef.Description,
-		"domain":               int(unitDef.Domain),
-		"form":                 int(unitDef.Form),
-		"general_type":         int(unitDef.GeneralType),
-		"specific_type":        unitDef.SpecificType,
-		"nation_of_origin":     unitDef.NationOfOrigin,
-		"service_entry_year":   int(unitDef.ServiceEntryYear),
-		"base_strength":        float64(unitDef.BaseStrength),
-		"accuracy":             float64(unitDef.Accuracy),
-		"max_speed_mps":        float64(unitDef.MaxSpeedMps),
-		"cruise_speed_mps":     float64(unitDef.CruiseSpeedMps),
-		"max_range_km":         float64(unitDef.MaxRangeKm),
-		"survivability":        float64(unitDef.Survivability),
-		"detection_range_m":    float64(unitDef.DetectionRangeM),
-		"fuel_capacity_liters": float64(unitDef.FuelCapacityLiters),
-		"fuel_burn_rate_lph":   float64(unitDef.FuelBurnRateLph),
-	}
-}
-
 func weaponDefinitionRecord(wd *enginev1.WeaponDefinition) map[string]any {
 	targets := make([]int, len(wd.DomainTargets))
 	for i, d := range wd.DomainTargets {

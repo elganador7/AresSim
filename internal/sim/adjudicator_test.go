@@ -166,6 +166,28 @@ func TestRangeDegradedPoh_ZeroMaxRange(t *testing.T) {
 	}
 }
 
+func TestEffectiveDetectionRangeM_StealthTargetShrinksRange(t *testing.T) {
+	detector := DefStats{DetectionRangeM: 100_000}
+	target := DefStats{RadarCrossSectionM2: 0.01}
+
+	got := effectiveDetectionRangeM(detector, target)
+	want := 100_000 * math.Pow(0.01, 0.25)
+	if !approxEqual(got, want) {
+		t.Fatalf("expected stealth-adjusted range %f, got %f", want, got)
+	}
+}
+
+func TestEffectiveDetectionRangeM_LargeTargetExtendsRange(t *testing.T) {
+	detector := DefStats{DetectionRangeM: 100_000}
+	target := DefStats{RadarCrossSectionM2: 16}
+
+	got := effectiveDetectionRangeM(detector, target)
+	want := 200_000.0 // clamped at 2x
+	if !approxEqual(got, want) {
+		t.Fatalf("expected large-RCS range %f, got %f", want, got)
+	}
+}
+
 // ─── AdjudicateTick ───────────────────────────────────────────────────────────
 
 func TestAdjudicateTick_NoUnits_NoShots(t *testing.T) {
@@ -393,6 +415,28 @@ func TestAdjudicateTick_LowPkillInsideEnemySensors_Fires(t *testing.T) {
 	}
 	if a.Weapons[0].CurrentQty != 2 {
 		t.Errorf("expected ammo to drop from 5 to 2, got %d", a.Weapons[0].CurrentQty)
+	}
+}
+
+func TestAdjudicateTick_EnemySensorRangeUsesTargetRCS(t *testing.T) {
+	a := makeUnit("a", "Blue", "def-a", 0, 0)
+	b := makeUnit("b", "Red", "def-b", 0, 0.036) // ~4 km
+	addWeapons(a, "gun", 5)
+	defs := map[string]DefStats{
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 0.01},
+		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 10_000},
+	}
+	catalog := makeWeaponCatalog("gun", 10_000, 0.2, enginev1.UnitDomain_DOMAIN_AIR)
+
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	if len(adj.Shots) != 0 {
+		t.Fatalf("expected no shot when stealth target stays outside adjusted sensor range, got %d", len(adj.Shots))
+	}
+
+	defs["def-a"] = DefStats{Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 16}
+	adj = AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected one shot when large-RCS target is inside adjusted sensor range, got %d", len(adj.Shots))
 	}
 }
 
@@ -697,5 +741,33 @@ func TestSensorTick_BothSidesDetectEachOther(t *testing.T) {
 	}
 	if !foundBlue {
 		t.Error("Red should detect Blue")
+	}
+}
+
+func TestSensorTick_StealthTargetCanAvoidDetection(t *testing.T) {
+	blue := makeUnit("blue", "Blue", "def-blue", 0, 0)
+	red := makeUnit("red", "Red", "def-red", 0, 0.036) // ~4 km
+	defs := map[string]DefStats{
+		"def-blue": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 10_000},
+		"def-red":  {Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 0.01},
+	}
+
+	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
+	if len(result["Blue"]) != 0 {
+		t.Fatalf("expected stealth target to remain undetected, got %v", result["Blue"])
+	}
+}
+
+func TestSensorTick_LargeTargetDetectedEarlier(t *testing.T) {
+	blue := makeUnit("blue", "Blue", "def-blue", 0, 0)
+	red := makeUnit("red", "Red", "def-red", 0, 0.036) // ~4 km
+	defs := map[string]DefStats{
+		"def-blue": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 10_000},
+		"def-red":  {Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 16},
+	}
+
+	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
+	if len(result["Blue"]) != 1 || result["Blue"][0] != "red" {
+		t.Fatalf("expected large-RCS target to be detected, got %v", result["Blue"])
 	}
 }

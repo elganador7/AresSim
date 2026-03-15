@@ -22,7 +22,7 @@ interface Props {
 
 export default function DropConfirmDialog({ drop, onConfirm, onCancel }: Props) {
   const [designator, setDesignator] = useState(() => {
-    const base = drop.label.toUpperCase().replace(/\s+/g, "-");
+    const base = (drop.shortName || drop.label).toUpperCase().replace(/\s+/g, "-");
     return `${base}-1`;
   });
   const [side, setSide] = useState<"Blue" | "Red" | "Neutral">("Blue");

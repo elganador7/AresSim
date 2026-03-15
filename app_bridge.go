@@ -162,6 +162,9 @@ func (a *App) SaveUnitDefinition(jsonStr string) BridgeResult {
 	if id == "" {
 		return failMsg("unit definition id is required")
 	}
+	if toString(rec["short_name"]) == "" {
+		rec["short_name"] = inferUnitShortName(toString(rec["name"]), toString(rec["specific_type"]))
+	}
 	if a.unitDefRepo == nil {
 		return failMsg("database not ready")
 	}

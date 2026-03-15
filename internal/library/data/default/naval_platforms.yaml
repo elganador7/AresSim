@@ -1,0 +1,196 @@
+library:
+  id: "default-naval-platforms-v1"
+  name: "Naval Surface and Subsurface Platforms"
+  description: "Starter library for carriers, escorts, amphibious ships, and submarines."
+  version: "1.0.0"
+  author: "AresSim Default Library"
+
+definitions:
+  - id: cvn68-nimitz
+    name: "USS Nimitz (CVN-68)"
+    short_name: "CVN-68"
+    description: "Nuclear-powered aircraft carrier and fleet flagship."
+    domain: 3
+    form: 20
+    general_type: 40
+    specific_type: "Nimitz-class Aircraft Carrier"
+    nation_of_origin: "USA"
+    service_entry_year: 1975
+    base_strength: 1.0
+    accuracy: 0.88
+    max_speed_mps: 15.4
+    cruise_speed_mps: 10.3
+    max_range_km: 999999
+    survivability: 0.9
+    detection_range_m: 370000
+    radar_cross_section_m2: 100000
+    fuel_capacity_liters: 3000000
+    fuel_burn_rate_lph: 0
+
+  - id: ddg51-flight-iia
+    name: "Arleigh Burke Flight IIA"
+    short_name: "DDG-51"
+    description: "Multi-mission guided missile destroyer with Aegis combat system."
+    domain: 3
+    form: 20
+    general_type: 42
+    specific_type: "Arleigh Burke-class Destroyer"
+    nation_of_origin: "USA"
+    service_entry_year: 1997
+    base_strength: 0.86
+    accuracy: 0.86
+    max_speed_mps: 16
+    cruise_speed_mps: 10.3
+    max_range_km: 8100
+    survivability: 0.7
+    detection_range_m: 370000
+    radar_cross_section_m2: 12000
+    fuel_capacity_liters: 1800000
+    fuel_burn_rate_lph: 2400
+
+  - id: cg47-ticonderoga
+    name: "Ticonderoga-class Cruiser"
+    short_name: "CG-47"
+    description: "Large AAW and strike surface combatant built around Aegis."
+    domain: 3
+    form: 20
+    general_type: 41
+    specific_type: "Ticonderoga-class Cruiser"
+    nation_of_origin: "USA"
+    service_entry_year: 1983
+    base_strength: 0.88
+    accuracy: 0.87
+    max_speed_mps: 16
+    cruise_speed_mps: 10.3
+    max_range_km: 11000
+    survivability: 0.72
+    detection_range_m: 370000
+    radar_cross_section_m2: 14000
+    fuel_capacity_liters: 1900000
+    fuel_burn_rate_lph: 2500
+
+  - id: ffg62-constellation
+    name: "Constellation-class Frigate"
+    short_name: "FFG-62"
+    description: "Modern guided missile frigate focused on escort and ASW."
+    domain: 3
+    form: 20
+    general_type: 43
+    specific_type: "Constellation-class Frigate"
+    nation_of_origin: "USA"
+    service_entry_year: 2026
+    base_strength: 0.76
+    accuracy: 0.83
+    max_speed_mps: 14.4
+    cruise_speed_mps: 9.3
+    max_range_km: 7400
+    survivability: 0.6
+    detection_range_m: 300000
+    radar_cross_section_m2: 9000
+    fuel_capacity_liters: 900000
+    fuel_burn_rate_lph: 1800
+
+  - id: lha6-america
+    name: "USS America (LHA-6)"
+    short_name: "LHA-6"
+    description: "Amphibious assault ship for expeditionary air and marine operations."
+    domain: 3
+    form: 20
+    general_type: 46
+    specific_type: "America-class Amphibious Assault Ship"
+    nation_of_origin: "USA"
+    service_entry_year: 2014
+    base_strength: 0.74
+    accuracy: 0.65
+    max_speed_mps: 12.9
+    cruise_speed_mps: 9
+    max_range_km: 17500
+    survivability: 0.66
+    detection_range_m: 220000
+    radar_cross_section_m2: 25000
+    fuel_capacity_liters: 1400000
+    fuel_burn_rate_lph: 1800
+
+  - id: type055-renhai
+    name: "Type 055 Renhai Cruiser"
+    short_name: "Type 055"
+    description: "Large Chinese surface combatant optimized for area air defense and strike."
+    domain: 3
+    form: 20
+    general_type: 41
+    specific_type: "Type 055 Renhai-class Cruiser"
+    nation_of_origin: "CHN"
+    service_entry_year: 2020
+    base_strength: 0.9
+    accuracy: 0.88
+    max_speed_mps: 16
+    cruise_speed_mps: 10
+    max_range_km: 10000
+    survivability: 0.75
+    detection_range_m: 380000
+    radar_cross_section_m2: 15000
+    fuel_capacity_liters: 1800000
+    fuel_burn_rate_lph: 2500
+
+  - id: type052d-luyang-iii
+    name: "Type 052D Luyang III"
+    short_name: "Type 052D"
+    description: "Chinese destroyer equipped for fleet air defense and missile warfare."
+    domain: 3
+    form: 20
+    general_type: 42
+    specific_type: "Type 052D Luyang III Destroyer"
+    nation_of_origin: "CHN"
+    service_entry_year: 2014
+    base_strength: 0.82
+    accuracy: 0.84
+    max_speed_mps: 15.5
+    cruise_speed_mps: 10
+    max_range_km: 8300
+    survivability: 0.68
+    detection_range_m: 320000
+    radar_cross_section_m2: 11000
+    fuel_capacity_liters: 1200000
+    fuel_burn_rate_lph: 2100
+
+  - id: virginia-block-v
+    name: "Virginia Block V"
+    short_name: "SSN-774"
+    description: "US fast attack submarine with VPM strike capacity."
+    domain: 4
+    form: 21
+    general_type: 50
+    specific_type: "Virginia-class Attack Submarine"
+    nation_of_origin: "USA"
+    service_entry_year: 2020
+    base_strength: 0.93
+    accuracy: 0.9
+    max_speed_mps: 13.4
+    cruise_speed_mps: 7.7
+    max_range_km: 999999
+    survivability: 0.85
+    detection_range_m: 200000
+    radar_cross_section_m2: 0.15
+    fuel_capacity_liters: 0
+    fuel_burn_rate_lph: 0
+
+  - id: kilo-636-3
+    name: "Kilo 636.3 Improved"
+    short_name: "Kilo"
+    description: "Quiet diesel-electric attack submarine used widely for coastal denial."
+    domain: 4
+    form: 21
+    general_type: 50
+    specific_type: "Project 636.3 Kilo-class Submarine"
+    nation_of_origin: "RUS"
+    service_entry_year: 2010
+    base_strength: 0.78
+    accuracy: 0.82
+    max_speed_mps: 10
+    cruise_speed_mps: 5.5
+    max_range_km: 7500
+    survivability: 0.74
+    detection_range_m: 120000
+    radar_cross_section_m2: 0.2
+    fuel_capacity_liters: 250000
+    fuel_burn_rate_lph: 220
