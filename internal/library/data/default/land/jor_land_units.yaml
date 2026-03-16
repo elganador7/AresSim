@@ -1,0 +1,115 @@
+library:
+    id: jor_land_units-v1
+    name: JOR Land Units
+    description: Land units originating from JOR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: jordanian-airbase
+      name: Jordanian Air Base
+      description: Regional air base supporting defensive fighter operations, coalition support, and rapid response missions.
+      domain: 1
+      form: 34
+      general_type: 93
+      specific_type: Air Base
+      short_name: Air Base
+      asset_class: airbase
+      target_class: runway
+      stationary: true
+      affiliation: military
+      nation_of_origin: JOR
+      operators: [JOR]
+      employed_by: [JOR]
+      service_entry_year: 1980
+      base_strength: 0.38
+      accuracy: 0.05
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.28
+      detection_range_m: 14000
+      radar_cross_section_m2: 34
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: jordanian-air-defense-operations-center
+      name: Jordanian Air Defense Operations Center
+      description: Fixed command node coordinating national air surveillance, air-defense response, and coalition deconfliction.
+      domain: 1
+      form: 34
+      general_type: 93
+      specific_type: Air Defense Operations Center
+      short_name: ADOC
+      asset_class: c2_site
+      target_class: hardened_infrastructure
+      stationary: true
+      affiliation: military
+      nation_of_origin: JOR
+      operators: [JOR]
+      employed_by: [JOR]
+      service_entry_year: 2005
+      base_strength: 0.28
+      accuracy: 0.12
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.38
+      detection_range_m: 24000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: jordanian-early-warning-radar-site
+      name: Jordanian Early Warning Radar Site
+      description: Fixed radar installation covering western and eastern air approaches to support rapid defensive warning.
+      domain: 1
+      form: 34
+      general_type: 94
+      specific_type: Early Warning Radar Site
+      short_name: Radar Site
+      asset_class: radar_site
+      target_class: sam_battery
+      stationary: true
+      affiliation: military
+      nation_of_origin: JOR
+      operators: [JOR]
+      employed_by: [JOR]
+      service_entry_year: 2010
+      base_strength: 0.24
+      accuracy: 0.18
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.24
+      detection_range_m: 220000
+      radar_cross_section_m2: 18
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

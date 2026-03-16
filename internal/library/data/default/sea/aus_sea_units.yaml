@@ -1,0 +1,47 @@
+library:
+    id: aus_sea_units-v1
+    name: AUS SEA Units
+    description: Sea units originating from AUS.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: hobart-class-destroyer
+      name: Hobart-class Destroyer
+      description: Australian Aegis destroyer derived from the Álvaro de Bazán design.
+      domain: 3
+      form: 20
+      general_type: 42
+      specific_type: Hobart-class Air Warfare Destroyer
+      short_name: Hobart
+      nation_of_origin: AUS
+      operators:
+        - AUS
+      employed_by:
+        - AUS
+      service_entry_year: 2017
+      base_strength: 0.8
+      accuracy: 0.84
+      max_speed_mps: 15.4
+      cruise_speed_mps: 10
+      max_range_km: 9300
+      survivability: 0.66
+      detection_range_m: 340000
+      radar_cross_section_m2: 12000
+      fuel_capacity_liters: 1.3e+06
+      fuel_burn_rate_lph: 2100
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-sm2-block3
+          max_qty: 48
+          initial_qty: 48
+        - weapon_id: asm-nsm
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []

@@ -1,0 +1,44 @@
+library:
+    id: nor_sea_units-v1
+    name: NOR SEA Units
+    description: Sea units originating from NOR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: skjold-corvette-norway
+      name: Skjold-class Corvette
+      description: Norwegian high-speed stealth corvette built for littoral anti-surface warfare in complex coastal waters.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Skjold-class Corvette
+      short_name: Skjold
+      nation_of_origin: NOR
+      operators:
+        - NOR
+      employed_by:
+        - NOR
+      service_entry_year: 2009
+      base_strength: 0.46
+      accuracy: 0.58
+      max_speed_mps: 30
+      cruise_speed_mps: 14
+      max_range_km: 1400
+      survivability: 0.24
+      detection_range_m: 85000
+      radar_cross_section_m2: 1200
+      fuel_capacity_liters: 110000
+      fuel_burn_rate_lph: 300
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-nsm
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []

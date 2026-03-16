@@ -1,0 +1,41 @@
+library:
+    id: kor_sea_units-v1
+    name: KOR SEA Units
+    description: Sea units originating from KOR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: dokdo-class-lph
+      name: Dokdo-class LPH
+      description: South Korean amphibious ship for marine landing operations and helicopter assault support.
+      domain: 3
+      form: 20
+      general_type: 46
+      specific_type: Dokdo-class Landing Platform Helicopter
+      short_name: Dokdo
+      nation_of_origin: KOR
+      operators:
+        - KOR
+      employed_by:
+        - KOR
+      service_entry_year: 2007
+      base_strength: 0.66
+      accuracy: 0.46
+      max_speed_mps: 12.9
+      cruise_speed_mps: 9
+      max_range_km: 10000
+      survivability: 0.5
+      detection_range_m: 130000
+      radar_cross_section_m2: 22000
+      fuel_capacity_liters: 900000
+      fuel_burn_rate_lph: 1300
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 10
+      embarked_uav_capacity: 2
+      embarked_surface_connector_capacity: 2
+      launch_capacity_per_interval: 3
+      recovery_capacity_per_interval: 3
+      sortie_interval_minutes: 25
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

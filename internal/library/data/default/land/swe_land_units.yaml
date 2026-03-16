@@ -1,0 +1,138 @@
+library:
+    id: swe_land_units-v1
+    name: SWE Land Units
+    description: Land units originating from SWE.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: archer-artillery
+      name: Archer SPH
+      description: Highly automated wheeled artillery system designed for rapid shoot-and-scoot operations.
+      domain: 1
+      form: 31
+      general_type: 70
+      specific_type: Archer Self-Propelled Howitzer
+      short_name: Archer
+      nation_of_origin: SWE
+      operators:
+        - SWE
+        - GBR
+      employed_by:
+        - SWE
+        - GBR
+      service_entry_year: 2016
+      base_strength: 0.7
+      accuracy: 0.81
+      max_speed_mps: 19
+      cruise_speed_mps: 14
+      max_range_km: 500
+      survivability: 0.34
+      detection_range_m: 900
+      radar_cross_section_m2: 7
+      fuel_capacity_liters: 400
+      fuel_burn_rate_lph: 85
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: cv90-ifv
+      name: CV90 IFV
+      description: Scandinavian tracked IFV family with high mobility and modular weapon configurations.
+      domain: 1
+      form: 32
+      general_type: 61
+      specific_type: CV90 Infantry Fighting Vehicle
+      short_name: CV90
+      nation_of_origin: SWE
+      operators:
+        - SWE
+        - DNK
+        - EST
+        - FIN
+        - NLD
+        - NOR
+        - CHE
+        - SVK
+        - UKR
+      employed_by:
+        - SWE
+        - DNK
+        - EST
+        - FIN
+        - NLD
+        - NOR
+        - CHE
+        - SVK
+        - UKR
+      service_entry_year: 1993
+      base_strength: 0.74
+      accuracy: 0.77
+      max_speed_mps: 19.4
+      cruise_speed_mps: 11
+      max_range_km: 320
+      survivability: 0.6
+      detection_range_m: 3000
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 670
+      fuel_burn_rate_lph: 150
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: rbs70ng-battery
+      name: RBS 70 NG Battery
+      description: Swedish short-range laser-guided air defense system used by multiple allied operators.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: RBS 70 NG Battery
+      short_name: RBS 70
+      nation_of_origin: SWE
+      operators:
+        - SWE
+        - CZE
+        - LVA
+        - LTU
+        - BRA
+      employed_by:
+        - SWE
+        - CZE
+        - LVA
+        - LTU
+        - BRA
+      service_entry_year: 2011
+      base_strength: 0.5
+      accuracy: 0.7
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.24
+      detection_range_m: 60000
+      radar_cross_section_m2: 5
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-irist-slm
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []

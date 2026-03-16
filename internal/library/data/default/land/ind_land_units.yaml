@@ -1,0 +1,41 @@
+library:
+    id: ind_land_units-v1
+    name: IND Land Units
+    description: Land units originating from IND.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: arjun-mk1a
+      name: Arjun Mk1A
+      description: Indian heavy MBT with improved fire control and domestic subsystem integration.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: Arjun Mk1A
+      short_name: Arjun
+      nation_of_origin: IND
+      operators:
+        - IND
+      employed_by:
+        - IND
+      service_entry_year: 2021
+      base_strength: 0.84
+      accuracy: 0.8
+      max_speed_mps: 16.7
+      cruise_speed_mps: 9.5
+      max_range_km: 450
+      survivability: 0.7
+      detection_range_m: 3600
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 1610
+      fuel_burn_rate_lph: 330
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

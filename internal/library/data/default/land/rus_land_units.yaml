@@ -1,0 +1,501 @@
+library:
+    id: rus_land_units-v1
+    name: RUS Land Units
+    description: Land units originating from RUS.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: bastion-p
+      name: Bastion-P Coastal Battery
+      description: Mobile coastal defense system for anti-ship denial and sea control.
+      domain: 1
+      form: 31
+      general_type: 73
+      specific_type: Bastion-P Coastal Defense System
+      short_name: Bastion
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - VNM
+        - SYR
+      employed_by:
+        - RUS
+        - VNM
+        - SYR
+      service_entry_year: 2010
+      base_strength: 0.62
+      accuracy: 0.74
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 850
+      survivability: 0.34
+      detection_range_m: 220000
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 400
+      fuel_burn_rate_lph: 90
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-brahmos
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: bmp3-ifv
+      name: BMP-3 IFV
+      description: Russian infantry fighting vehicle with amphibious mobility and heavy organic firepower.
+      domain: 1
+      form: 32
+      general_type: 61
+      specific_type: BMP-3 Infantry Fighting Vehicle
+      short_name: BMP-3
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - ARE
+        - KWT
+        - IRQ
+      employed_by:
+        - RUS
+        - ARE
+        - KWT
+        - IRQ
+      service_entry_year: 1987
+      base_strength: 0.68
+      accuracy: 0.72
+      max_speed_mps: 19.4
+      cruise_speed_mps: 10.5
+      max_range_km: 600
+      survivability: 0.5
+      detection_range_m: 2600
+      radar_cross_section_m2: 7
+      fuel_capacity_liters: 600
+      fuel_burn_rate_lph: 140
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: btr82a-apc
+      name: BTR-82A APC
+      description: Russian wheeled armored personnel carrier used by motor rifle and naval infantry units.
+      domain: 1
+      form: 31
+      general_type: 62
+      specific_type: BTR-82A Armored Personnel Carrier
+      short_name: BTR-82A
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - KAZ
+        - AZE
+        - SYR
+      employed_by:
+        - RUS
+        - KAZ
+        - AZE
+        - SYR
+      service_entry_year: 2013
+      base_strength: 0.56
+      accuracy: 0.58
+      max_speed_mps: 22
+      cruise_speed_mps: 16
+      max_range_km: 600
+      survivability: 0.42
+      detection_range_m: 1800
+      radar_cross_section_m2: 5
+      fuel_capacity_liters: 300
+      fuel_burn_rate_lph: 80
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: buk-m3-battery
+      name: Buk-M3 Battery
+      description: Mobile medium-range Russian air defense system for maneuver formations.
+      domain: 1
+      form: 31
+      general_type: 73
+      specific_type: Buk-M3 Battery
+      short_name: Buk-M3
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2016
+      base_strength: 0.66
+      accuracy: 0.74
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.42
+      detection_range_m: 180000
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 500
+      fuel_burn_rate_lph: 100
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-sm2-block3
+          max_qty: 24
+          initial_qty: 24
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: iskander-e-armenia
+      name: Iskander-E Battery (Armenia)
+      description: Armenian short-range ballistic missile unit for theater-level deterrence.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: Iskander-E Missile Battery
+      short_name: Iskander-E
+      nation_of_origin: RUS
+      operators:
+        - ARM
+      employed_by:
+        - ARM
+      service_entry_year: 2016
+      base_strength: 0.58
+      accuracy: 0.56
+      max_speed_mps: 14
+      cruise_speed_mps: 8
+      max_range_km: 300
+      survivability: 0.24
+      detection_range_m: 1200
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 380
+      fuel_burn_rate_lph: 70
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-kalibr
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: iskander-m-brigade
+      name: Iskander-M Brigade
+      description: Road-mobile short-range ballistic missile brigade for theater strike against fixed targets.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: 9K720 Iskander-M Brigade
+      short_name: Iskander
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2006
+      base_strength: 0.72
+      accuracy: 0.7
+      max_speed_mps: 15
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.34
+      detection_range_m: 1200
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 500
+      fuel_burn_rate_lph: 95
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-kalibr
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: pantsir-syria
+      name: Pantsir-S1 Battery (Syria)
+      description: Syrian point-defense air defense battery used to protect key bases and regime infrastructure.
+      domain: 1
+      form: 31
+      general_type: 73
+      specific_type: Pantsir-S1 Air Defense Battery
+      short_name: Pantsir
+      nation_of_origin: RUS
+      operators:
+        - SYR
+      employed_by:
+        - SYR
+      service_entry_year: 2008
+      base_strength: 0.46
+      accuracy: 0.54
+      max_speed_mps: 14
+      cruise_speed_mps: 9
+      max_range_km: 400
+      survivability: 0.24
+      detection_range_m: 80000
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 360
+      fuel_burn_rate_lph: 70
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-irist-slm
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: s300pmu2-battery-iran
+      name: S-300PMU-2 Battery (Iran)
+      description: Strategic long-range air-defense battery protecting high-value sites around Tehran, nuclear infrastructure, and key air bases.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: S-300PMU-2 Battery
+      short_name: S-300
+      nation_of_origin: RUS
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2016
+      base_strength: 0.72
+      accuracy: 0.78
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.36
+      detection_range_m: 280000
+      radar_cross_section_m2: 18
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-s300pmu2
+          max_qty: 24
+          initial_qty: 24
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: s400-triumf-battery
+      name: S-400 Triumf Battery
+      description: Russian strategic long-range surface-to-air missile battery for integrated air defense.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: S-400 Triumf Battery
+      short_name: S-400
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - CHN
+        - IND
+        - TUR
+      employed_by:
+        - RUS
+        - CHN
+        - IND
+        - TUR
+      service_entry_year: 2007
+      base_strength: 0.8
+      accuracy: 0.8
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.4
+      detection_range_m: 380000
+      radar_cross_section_m2: 20
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-s400-40n6
+          max_qty: 32
+          initial_qty: 32
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: t14-armata
+      name: T-14 Armata
+      description: Russian next-generation main battle tank with an unmanned turret and advanced protection suite.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: T-14 Armata
+      short_name: T-14
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2020
+      base_strength: 0.82
+      accuracy: 0.82
+      max_speed_mps: 22
+      cruise_speed_mps: 12
+      max_range_km: 500
+      survivability: 0.72
+      detection_range_m: 6500
+      radar_cross_section_m2: 9
+      fuel_capacity_liters: 1600
+      fuel_burn_rate_lph: 260
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-120mm-apfsds
+          max_qty: 32
+          initial_qty: 32
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: t90m-proryv
+      name: T-90M Proryv
+      description: Modernized Russian main battle tank with updated turret, armor package, and sensors.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: T-90M Proryv
+      short_name: T-90M
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2020
+      base_strength: 0.88
+      accuracy: 0.82
+      max_speed_mps: 16.5
+      cruise_speed_mps: 9.5
+      max_range_km: 550
+      survivability: 0.74
+      detection_range_m: 3500
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 1600
+      fuel_burn_rate_lph: 320
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: t90s-iraq
+      name: T-90S (Iraq)
+      description: Iraqi main battle tank used by elite armored units for conventional maneuver warfare.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: T-90S Main Battle Tank
+      short_name: T-90S
+      nation_of_origin: RUS
+      operators:
+        - IRQ
+      employed_by:
+        - IRQ
+      service_entry_year: 2018
+      base_strength: 0.64
+      accuracy: 0.64
+      max_speed_mps: 17
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.52
+      detection_range_m: 5000
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 1200
+      fuel_burn_rate_lph: 220
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-120mm-apfsds
+          max_qty: 30
+          initial_qty: 30
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: tor-m1-battery-iran
+      name: Tor-M1 Battery (Iran)
+      description: Short-range point-defense system used to shield key air-defense nodes and fixed facilities from standoff attack.
+      domain: 1
+      form: 31
+      general_type: 73
+      specific_type: Tor-M1 Air Defense Battery
+      short_name: Tor-M1
+      nation_of_origin: RUS
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2007
+      base_strength: 0.56
+      accuracy: 0.72
+      max_speed_mps: 18
+      cruise_speed_mps: 11
+      max_range_km: 450
+      survivability: 0.32
+      detection_range_m: 60000
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 380
+      fuel_burn_rate_lph: 80
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-tor-m1
+          max_qty: 16
+          initial_qty: 16
+      default_weapon_configuration: ""
+      weapon_configurations: []

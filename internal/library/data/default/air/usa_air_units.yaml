@@ -1,0 +1,2941 @@
+library:
+    id: usa_air_units-v1
+    name: USA AIR Units
+    description: Air units originating from USA.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: a10c-thunderbolt-ii
+      name: A-10C Thunderbolt II
+      description: Dedicated close air support aircraft optimized for armored target attack and battlefield persistence.
+      domain: 2
+      form: 10
+      general_type: 12
+      specific_type: A-10C Thunderbolt II
+      short_name: A-10C
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2007
+      base_strength: 0.72
+      accuracy: 0.82
+      max_speed_mps: 195
+      cruise_speed_mps: 155
+      max_range_km: 4150
+      survivability: 0.7
+      detection_range_m: 75000
+      radar_cross_section_m2: 6
+      fuel_capacity_liters: 5029
+      fuel_burn_rate_lph: 2400
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-65-maverick
+          max_qty: 6
+          initial_qty: 6
+        - weapon_id: gbu-32-jdam
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: ah1z-viper
+      name: AH-1Z Viper
+      description: Marine Corps attack helicopter optimized for expeditionary support and littoral strike.
+      domain: 2
+      form: 11
+      general_type: 20
+      specific_type: AH-1Z Viper
+      short_name: AH-1Z
+      nation_of_origin: USA
+      operators:
+        - USA
+        - BHR
+        - CZE
+      employed_by:
+        - USA
+        - BHR
+        - CZE
+      service_entry_year: 2010
+      base_strength: 0.7
+      accuracy: 0.84
+      max_speed_mps: 78
+      cruise_speed_mps: 69
+      max_range_km: 610
+      survivability: 0.54
+      detection_range_m: 26000
+      radar_cross_section_m2: 2.6
+      fuel_capacity_liters: 1220
+      fuel_burn_rate_lph: 430
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-114-hellfire
+          max_qty: 16
+          initial_qty: 16
+        - weapon_id: gun-m230-30mm
+          max_qty: 750
+          initial_qty: 750
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: ah64e-apache-guardian
+      name: AH-64E Apache Guardian
+      description: Attack helicopter optimized for anti-armor and close air support.
+      domain: 2
+      form: 11
+      general_type: 20
+      specific_type: AH-64E Apache Guardian
+      short_name: AH-64E
+      nation_of_origin: USA
+      operators:
+        - USA
+        - GBR
+        - NLD
+        - IND
+        - IDN
+        - KOR
+        - KWT
+        - QAT
+        - SAU
+        - TWN
+        - ARE
+      employed_by:
+        - USA
+        - GBR
+        - NLD
+        - IND
+        - IDN
+        - KOR
+        - KWT
+        - QAT
+        - SAU
+        - TWN
+        - ARE
+      service_entry_year: 2012
+      base_strength: 0.68
+      accuracy: 0.8
+      max_speed_mps: 83
+      cruise_speed_mps: 72
+      max_range_km: 476
+      survivability: 0.48
+      detection_range_m: 12000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 1421
+      fuel_burn_rate_lph: 700
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: ah64e-guardian
+      name: AH-64E Apache Guardian
+      description: Modernized Apache attack helicopter with improved sensors, networking, and maritime targeting options.
+      domain: 2
+      form: 11
+      general_type: 20
+      specific_type: AH-64E Apache Guardian
+      short_name: AH-64E
+      nation_of_origin: USA
+      operators:
+        - USA
+        - GBR
+        - NLD
+        - IND
+        - IDN
+        - KOR
+        - KWT
+        - QAT
+        - SAU
+        - TWN
+        - ARE
+      employed_by:
+        - USA
+        - GBR
+        - NLD
+        - IND
+        - IDN
+        - KOR
+        - KWT
+        - QAT
+        - SAU
+        - TWN
+        - ARE
+      service_entry_year: 2012
+      base_strength: 0.74
+      accuracy: 0.86
+      max_speed_mps: 82
+      cruise_speed_mps: 72
+      max_range_km: 480
+      survivability: 0.58
+      detection_range_m: 32000
+      radar_cross_section_m2: 3
+      fuel_capacity_liters: 1421
+      fuel_burn_rate_lph: 500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-114-hellfire
+          max_qty: 16
+          initial_qty: 16
+        - weapon_id: gun-m230-30mm
+          max_qty: 1200
+          initial_qty: 1200
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: b1b-lancer
+      name: B-1B Lancer
+      description: Supersonic long-range bomber optimized for conventional standoff strike.
+      domain: 2
+      form: 10
+      general_type: 13
+      specific_type: B-1B Lancer
+      short_name: B-1B
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 1986
+      base_strength: 0.88
+      accuracy: 0.82
+      max_speed_mps: 370
+      cruise_speed_mps: 255
+      max_range_km: 12000
+      survivability: 0.56
+      detection_range_m: 260000
+      radar_cross_section_m2: 24
+      fuel_capacity_liters: 120000
+      fuel_burn_rate_lph: 14000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-158-jassm-er
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: b21-raider
+      name: B-21 Raider
+      description: Next-generation stealth bomber for deep strike and stand-in attack missions.
+      domain: 2
+      form: 10
+      general_type: 13
+      specific_type: B-21 Raider
+      short_name: B-21
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2027
+      base_strength: 0.97
+      accuracy: 0.93
+      max_speed_mps: 290
+      cruise_speed_mps: 235
+      max_range_km: 12500
+      survivability: 0.9
+      detection_range_m: 300000
+      radar_cross_section_m2: 0.02
+      fuel_capacity_liters: 78000
+      fuel_burn_rate_lph: 8500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-158-jassm-er
+          max_qty: 20
+          initial_qty: 20
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: b2a-spirit
+      name: B-2A Spirit
+      description: Stealth penetrating bomber for strategic conventional and nuclear strike.
+      domain: 2
+      form: 10
+      general_type: 13
+      specific_type: B-2A Spirit
+      short_name: B-2A
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 1997
+      base_strength: 0.94
+      accuracy: 0.9
+      max_speed_mps: 280
+      cruise_speed_mps: 230
+      max_range_km: 11000
+      survivability: 0.86
+      detection_range_m: 240000
+      radar_cross_section_m2: 0.05
+      fuel_capacity_liters: 75000
+      fuel_burn_rate_lph: 9000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-158-jassm-er
+          max_qty: 16
+          initial_qty: 16
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: bell412-bahrain
+      name: Bell 412 Utility Helicopter (Bahrain)
+      description: Bahraini utility helicopter for internal lift, coastal security support, and rapid-response missions.
+      domain: 2
+      form: 11
+      general_type: 21
+      specific_type: Bell 412 Utility Helicopter
+      short_name: Bell 412
+      nation_of_origin: USA
+      operators:
+        - BHR
+      employed_by:
+        - BHR
+      service_entry_year: 2000
+      base_strength: 0.28
+      accuracy: 0.1
+      max_speed_mps: 72
+      cruise_speed_mps: 60
+      max_range_km: 680
+      survivability: 0.18
+      detection_range_m: 7000
+      radar_cross_section_m2: 3.2
+      fuel_capacity_liters: 1200
+      fuel_burn_rate_lph: 360
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: boeing707-tanker-iran
+      name: Boeing 707 Tanker (Iran)
+      description: Iranian tanker-transport aircraft for limited aerial refueling and long-range logistical support.
+      domain: 2
+      form: 10
+      general_type: 17
+      specific_type: Boeing 707 Tanker
+      short_name: 707 Tanker
+      nation_of_origin: USA
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 1990
+      base_strength: 0.24
+      accuracy: 0.08
+      max_speed_mps: 240
+      cruise_speed_mps: 220
+      max_range_km: 9000
+      survivability: 0.14
+      detection_range_m: 120000
+      radar_cross_section_m2: 40
+      fuel_capacity_liters: 90000
+      fuel_burn_rate_lph: 9500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: c130j-kuwait
+      name: C-130J-30 (Kuwait)
+      description: Kuwaiti tactical airlifter used for resupply, troop movement, and regional mobility.
+      domain: 2
+      form: 10
+      general_type: 14
+      specific_type: C-130J-30 Super Hercules
+      short_name: C-130J
+      nation_of_origin: USA
+      operators:
+        - KWT
+      employed_by:
+        - KWT
+      service_entry_year: 2014
+      base_strength: 0.36
+      accuracy: 0.1
+      max_speed_mps: 185
+      cruise_speed_mps: 170
+      max_range_km: 4000
+      survivability: 0.22
+      detection_range_m: 90000
+      radar_cross_section_m2: 28
+      fuel_capacity_liters: 27000
+      fuel_burn_rate_lph: 5000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: c130j-oman
+      name: C-130J (Oman)
+      description: Omani tactical airlifter supporting reinforcement, maritime-region sustainment, and special operations.
+      domain: 2
+      form: 10
+      general_type: 14
+      specific_type: C-130J Super Hercules
+      short_name: C-130J
+      nation_of_origin: USA
+      operators:
+        - OMN
+      employed_by:
+        - OMN
+      service_entry_year: 2013
+      base_strength: 0.36
+      accuracy: 0.1
+      max_speed_mps: 185
+      cruise_speed_mps: 170
+      max_range_km: 3800
+      survivability: 0.22
+      detection_range_m: 90000
+      radar_cross_section_m2: 28
+      fuel_capacity_liters: 27000
+      fuel_burn_rate_lph: 5000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: c130j-shimshon
+      name: C-130J Shimshon
+      description: Israeli tactical and strategic airlifter for special operations, troop movement, and logistics.
+      domain: 2
+      form: 10
+      general_type: 14
+      specific_type: C-130J Shimshon
+      short_name: C-130J
+      nation_of_origin: USA
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2014
+      base_strength: 0.38
+      accuracy: 0.12
+      max_speed_mps: 185
+      cruise_speed_mps: 170
+      max_range_km: 3800
+      survivability: 0.24
+      detection_range_m: 90000
+      radar_cross_section_m2: 28
+      fuel_capacity_liters: 27000
+      fuel_burn_rate_lph: 5000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: c17a-globemaster-iii
+      name: C-17A Globemaster III
+      description: Strategic airlifter used for global troop, cargo, and humanitarian transport.
+      domain: 2
+      form: 10
+      general_type: 14
+      specific_type: C-17A Globemaster III
+      short_name: C-17
+      nation_of_origin: USA
+      operators:
+        - USA
+        - AUS
+        - CAN
+        - IND
+        - KWT
+        - QAT
+        - ARE
+        - GBR
+      employed_by:
+        - USA
+        - AUS
+        - CAN
+        - IND
+        - KWT
+        - QAT
+        - ARE
+        - GBR
+      service_entry_year: 1993
+      base_strength: 0.38
+      accuracy: 0.1
+      max_speed_mps: 265
+      cruise_speed_mps: 232
+      max_range_km: 10390
+      survivability: 0.28
+      detection_range_m: 5000
+      radar_cross_section_m2: 28
+      fuel_capacity_liters: 102000
+      fuel_burn_rate_lph: 9800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: c17a-qatar
+      name: C-17A Globemaster III (Qatar)
+      description: Qatari strategic airlifter for expeditionary mobility, heavy logistics, and rapid reinforcement.
+      domain: 2
+      form: 10
+      general_type: 14
+      specific_type: C-17A Globemaster III
+      short_name: C-17A
+      nation_of_origin: USA
+      operators:
+        - QAT
+      employed_by:
+        - QAT
+      service_entry_year: 2009
+      base_strength: 0.44
+      accuracy: 0.1
+      max_speed_mps: 250
+      cruise_speed_mps: 230
+      max_range_km: 10400
+      survivability: 0.18
+      detection_range_m: 110000
+      radar_cross_section_m2: 38
+      fuel_capacity_liters: 134000
+      fuel_burn_rate_lph: 9800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: cf18-hornet-canada
+      name: CF-18 Hornet
+      description: Canadian multirole fighter used for NORAD, NATO, and expeditionary strike missions.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: CF-18A/B Hornet
+      short_name: CF-18
+      nation_of_origin: USA
+      operators:
+        - CAN
+      employed_by:
+        - CAN
+      service_entry_year: 1982
+      base_strength: 0.68
+      accuracy: 0.74
+      max_speed_mps: 530
+      cruise_speed_mps: 240
+      max_range_km: 3330
+      survivability: 0.5
+      detection_range_m: 180000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 6200
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 578
+          initial_qty: 578
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: ch47f-chinook
+      name: CH-47F Chinook
+      description: Heavy-lift tandem-rotor transport helicopter for troops, artillery, and logistics.
+      domain: 2
+      form: 11
+      general_type: 21
+      specific_type: CH-47F Chinook
+      short_name: CH-47F
+      nation_of_origin: USA
+      operators:
+        - USA
+        - ARE
+        - AUS
+        - CAN
+        - DEU
+        - ESP
+        - GBR
+        - GRC
+        - ITA
+        - NLD
+        - KOR
+        - SAU
+      employed_by:
+        - USA
+        - ARE
+        - AUS
+        - CAN
+        - DEU
+        - ESP
+        - GBR
+        - GRC
+        - ITA
+        - NLD
+        - KOR
+        - SAU
+      service_entry_year: 2007
+      base_strength: 0.38
+      accuracy: 0.12
+      max_speed_mps: 83
+      cruise_speed_mps: 68
+      max_range_km: 740
+      survivability: 0.28
+      detection_range_m: 8000
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 3900
+      fuel_burn_rate_lph: 900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: ch47f-chinook
+      name: CH-47F Chinook
+      description: Heavy-lift helicopter for logistics, artillery movement, and personnel transport.
+      domain: 2
+      form: 11
+      general_type: 21
+      specific_type: CH-47F Chinook
+      short_name: CH-47F
+      nation_of_origin: USA
+      operators:
+        - USA
+        - AUS
+        - CAN
+        - DEU
+        - ESP
+        - GBR
+        - GRC
+        - ITA
+        - NLD
+        - KOR
+      employed_by:
+        - USA
+        - AUS
+        - CAN
+        - DEU
+        - ESP
+        - GBR
+        - GRC
+        - ITA
+        - NLD
+        - KOR
+      service_entry_year: 2007
+      base_strength: 0.35
+      accuracy: 0.1
+      max_speed_mps: 82
+      cruise_speed_mps: 70
+      max_range_km: 740
+      survivability: 0.3
+      detection_range_m: 7000
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 3900
+      fuel_burn_rate_lph: 950
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: cobra-jordan
+      name: AH-1 Cobra (Jordan)
+      description: Jordanian attack helicopter used for close support and border security operations.
+      domain: 2
+      form: 11
+      general_type: 20
+      specific_type: AH-1 Cobra
+      short_name: AH-1
+      nation_of_origin: USA
+      operators:
+        - JOR
+      employed_by:
+        - JOR
+      service_entry_year: 1985
+      base_strength: 0.48
+      accuracy: 0.58
+      max_speed_mps: 77
+      cruise_speed_mps: 62
+      max_range_km: 480
+      survivability: 0.26
+      detection_range_m: 60000
+      radar_cross_section_m2: 1.8
+      fuel_capacity_liters: 1100
+      fuel_burn_rate_lph: 420
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-114-hellfire
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: e3a-sentry-saudi
+      name: E-3A Sentry (Saudi)
+      description: Saudi airborne early warning aircraft for theater surveillance, command, and air-defense coordination.
+      domain: 2
+      form: 10
+      general_type: 16
+      specific_type: E-3A Sentry AEW&C
+      short_name: E-3A
+      nation_of_origin: USA
+      operators:
+        - SAU
+      employed_by:
+        - SAU
+      service_entry_year: 1987
+      base_strength: 0.58
+      accuracy: 0.2
+      max_speed_mps: 240
+      cruise_speed_mps: 220
+      max_range_km: 7400
+      survivability: 0.24
+      detection_range_m: 420000
+      radar_cross_section_m2: 35
+      fuel_capacity_liters: 90000
+      fuel_burn_rate_lph: 7800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f15c-eagle
+      name: F-15C Eagle
+      description: 4th-generation dedicated air-superiority fighter with unmatched kill ratio. Still operated by USAF, Japan, and Saudi Arabia.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: F-15C Eagle
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - USA
+        - JPN
+        - SAU
+      employed_by:
+        - USA
+        - JPN
+        - SAU
+      service_entry_year: 1979
+      base_strength: 0.82
+      accuracy: 0.87
+      max_speed_mps: 807
+      cruise_speed_mps: 272
+      max_range_km: 3765
+      survivability: 0.68
+      detection_range_m: 185000
+      radar_cross_section_m2: 25
+      fuel_capacity_liters: 6103
+      fuel_burn_rate_lph: 4200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 940
+          initial_qty: 940
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f15e-strike-eagle
+      name: F-15E Strike Eagle
+      description: Dual-role all-weather strike fighter with heavy payload and deep strike range.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-15E Strike Eagle
+      short_name: F-15E
+      nation_of_origin: USA
+      operators:
+        - USA
+        - ISR
+        - KOR
+        - SAU
+        - SGP
+        - QAT
+      employed_by:
+        - USA
+        - ISR
+        - KOR
+        - SAU
+        - SGP
+        - QAT
+      service_entry_year: 1989
+      base_strength: 0.86
+      accuracy: 0.88
+      max_speed_mps: 730
+      cruise_speed_mps: 285
+      max_range_km: 3900
+      survivability: 0.68
+      detection_range_m: 210000
+      radar_cross_section_m2: 7
+      fuel_capacity_liters: 13455
+      fuel_burn_rate_lph: 4600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: deep_strike
+      weapon_configurations:
+        - id: deep_strike
+          name: Deep Strike
+          description: Standoff land-attack loadout with self-escort missiles.
+          loadout:
+            - weapon_id: agm-158-jassm-er
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-aim120c
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 510
+              initial_qty: 510
+        - id: sead
+          name: SEAD
+          description: HARM-based suppression package.
+          loadout:
+            - weapon_id: agm-88-harm
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 510
+              initial_qty: 510
+        - id: maritime_strike
+          name: Maritime Strike
+          description: Anti-ship loadout for blue-water strike.
+          loadout:
+            - weapon_id: agm-158c-lrasm
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 510
+              initial_qty: 510
+    - id: f15ex-eagle-ii
+      name: F-15EX Eagle II
+      description: Advanced 4th-generation air superiority fighter with EPAWSS electronic warfare suite and APG-82 AESA radar. USAF's newest Eagle variant.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: F-15EX Eagle II
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2021
+      base_strength: 0.88
+      accuracy: 0.91
+      max_speed_mps: 807
+      cruise_speed_mps: 272
+      max_range_km: 4400
+      survivability: 0.72
+      detection_range_m: 300000
+      radar_cross_section_m2: 25
+      fuel_capacity_liters: 6103
+      fuel_burn_rate_lph: 4000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: aam-aim9x
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 940
+          initial_qty: 940
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f15sa-strike-eagle
+      name: F-15SA
+      description: Saudi Arabia's advanced F-15S/SA upgrade with APG-63(V)3 AESA radar, digital flight controls, 3D TVC nozzles, and expanded weapons suite. Among the most capable F-15 variants.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: F-15SA
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - SAU
+      employed_by:
+        - SAU
+      service_entry_year: 2016
+      base_strength: 0.88
+      accuracy: 0.9
+      max_speed_mps: 807
+      cruise_speed_mps: 272
+      max_range_km: 4400
+      survivability: 0.71
+      detection_range_m: 280000
+      radar_cross_section_m2: 25
+      fuel_capacity_liters: 6103
+      fuel_burn_rate_lph: 4000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: aam-aim9x
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 940
+          initial_qty: 940
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f15sg-singapore
+      name: F-15SG
+      description: Singaporean long-range multirole fighter optimized for precision strike and air superiority.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-15SG Strike Eagle
+      short_name: F-15SG
+      nation_of_origin: USA
+      operators:
+        - SGP
+      employed_by:
+        - SGP
+      service_entry_year: 2010
+      base_strength: 0.84
+      accuracy: 0.86
+      max_speed_mps: 690
+      cruise_speed_mps: 270
+      max_range_km: 3900
+      survivability: 0.62
+      detection_range_m: 260000
+      radar_cross_section_m2: 6
+      fuel_capacity_liters: 13300
+      fuel_burn_rate_lph: 4200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 6
+          initial_qty: 6
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gbu-32-jdam
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f16-jordan
+      name: F-16AM/BM (Jordan)
+      description: Jordanian fighter fleet used for regional air defense and coalition strike support.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-16AM/BM Fighting Falcon
+      short_name: F-16
+      nation_of_origin: USA
+      operators:
+        - JOR
+      employed_by:
+        - JOR
+      service_entry_year: 1997
+      base_strength: 0.62
+      accuracy: 0.66
+      max_speed_mps: 590
+      cruise_speed_mps: 235
+      max_range_km: 3000
+      survivability: 0.42
+      detection_range_m: 160000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 7000
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f16am-portugal
+      name: F-16AM (Portugal)
+      description: Portuguese F-16 fleet used for NATO air policing and expeditionary support.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-16AM Fighting Falcon
+      short_name: F-16AM
+      nation_of_origin: USA
+      operators:
+        - PRT
+      employed_by:
+        - PRT
+      service_entry_year: 1994
+      base_strength: 0.68
+      accuracy: 0.72
+      max_speed_mps: 590
+      cruise_speed_mps: 240
+      max_range_km: 3200
+      survivability: 0.48
+      detection_range_m: 170000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 7000
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gbu-32-jdam
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f16c-chile
+      name: F-16C/D Block 50 (Chile)
+      description: Chilean frontline fighter used for air defense and regional conventional deterrence.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-16C/D Block 50
+      short_name: F-16C
+      nation_of_origin: USA
+      operators:
+        - CHL
+      employed_by:
+        - CHL
+      service_entry_year: 2006
+      base_strength: 0.74
+      accuracy: 0.76
+      max_speed_mps: 590
+      cruise_speed_mps: 240
+      max_range_km: 3200
+      survivability: 0.5
+      detection_range_m: 180000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 7000
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f16c-fighting-falcon
+      name: F-16C Fighting Falcon
+      description: 4th-generation lightweight multirole fighter; most widely exported Western fighter jet. Block 40/50/52 variants in widespread service.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-16C Fighting Falcon
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - USA
+        - BEL
+        - DNK
+        - EGY
+        - GRC
+        - IDN
+        - IRQ
+        - JOR
+        - KOR
+        - NLD
+        - NOR
+        - PAK
+        - POL
+        - PRT
+        - SGP
+        - THA
+        - TUR
+        - UKR
+      employed_by:
+        - USA
+        - BEL
+        - DNK
+        - EGY
+        - GRC
+        - IDN
+        - IRQ
+        - JOR
+        - KOR
+        - NLD
+        - NOR
+        - PAK
+        - POL
+        - PRT
+        - SGP
+        - THA
+        - TUR
+        - UKR
+      service_entry_year: 1978
+      base_strength: 0.73
+      accuracy: 0.82
+      max_speed_mps: 686
+      cruise_speed_mps: 272
+      max_range_km: 4220
+      survivability: 0.58
+      detection_range_m: 130000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 3985
+      fuel_burn_rate_lph: 2800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 511
+          initial_qty: 511
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f16e-desert-falcon
+      name: F-16E/F Block 60 Desert Falcon
+      description: The most capable F-16 variant; UAE-specific Block 60 with AESA radar, CFTs, internal FLIR/laser, and the APG-80 AESA radar. Only operated by UAE.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-16E Block 60 Desert Falcon
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - ARE
+      employed_by:
+        - ARE
+      service_entry_year: 2004
+      base_strength: 0.83
+      accuracy: 0.89
+      max_speed_mps: 686
+      cruise_speed_mps: 272
+      max_range_km: 4220
+      survivability: 0.65
+      detection_range_m: 260000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 5985
+      fuel_burn_rate_lph: 2700
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 511
+          initial_qty: 511
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f16iq-iraq
+      name: F-16IQ
+      description: Iraqi multirole fighter used for counterinsurgency strike and limited air defense.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-16IQ Fighting Falcon
+      short_name: F-16IQ
+      nation_of_origin: USA
+      operators:
+        - IRQ
+      employed_by:
+        - IRQ
+      service_entry_year: 2015
+      base_strength: 0.52
+      accuracy: 0.56
+      max_speed_mps: 590
+      cruise_speed_mps: 235
+      max_range_km: 3200
+      survivability: 0.38
+      detection_range_m: 160000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 7000
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gbu-32-jdam
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f16v-taiwan
+      name: F-16V (Taiwan)
+      description: Taiwanese upgraded F-16 fleet used for island air defense and maritime strike support.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-16V Fighting Falcon
+      short_name: F-16V
+      nation_of_origin: USA
+      operators:
+        - TWN
+      employed_by:
+        - TWN
+      service_entry_year: 2021
+      base_strength: 0.8
+      accuracy: 0.82
+      max_speed_mps: 590
+      cruise_speed_mps: 240
+      max_range_km: 3200
+      survivability: 0.54
+      detection_range_m: 210000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 7000
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: asm-nsm
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f16v-viper
+      name: F-16V Viper
+      description: Upgraded F-16 Block 70/72 with APG-83 AESA radar, modernized avionics and Link 16. In service with Taiwan, Greece, Slovakia, Bahrain.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-16V Viper (Block 70/72)
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - TWN
+        - GRC
+        - BHR
+        - SVK
+        - BGR
+      employed_by:
+        - TWN
+        - GRC
+        - BHR
+        - SVK
+        - BGR
+      service_entry_year: 2017
+      base_strength: 0.8
+      accuracy: 0.88
+      max_speed_mps: 686
+      cruise_speed_mps: 272
+      max_range_km: 4220
+      survivability: 0.61
+      detection_range_m: 250000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 3985
+      fuel_burn_rate_lph: 2700
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 511
+          initial_qty: 511
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f18c-switzerland
+      name: F/A-18C Hornet (Swiss)
+      description: Swiss air-defense fighter for homeland interception and sovereignty patrol.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: F/A-18C Hornet
+      short_name: F/A-18C
+      nation_of_origin: USA
+      operators:
+        - CHE
+      employed_by:
+        - CHE
+      service_entry_year: 1997
+      base_strength: 0.7
+      accuracy: 0.74
+      max_speed_mps: 530
+      cruise_speed_mps: 240
+      max_range_km: 3000
+      survivability: 0.5
+      detection_range_m: 180000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 6200
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 578
+          initial_qty: 578
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f22a-raptor
+      name: F-22A Raptor
+      description: 5th-generation air-superiority stealth fighter; the most capable air-to-air platform in US inventory. Supercruises at Mach 1.82 without afterburner.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: F-22A Raptor
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2005
+      base_strength: 0.97
+      accuracy: 0.95
+      max_speed_mps: 686
+      cruise_speed_mps: 625
+      max_range_km: 2960
+      survivability: 0.86
+      detection_range_m: 370000
+      radar_cross_section_m2: 0.0001
+      fuel_capacity_liters: 8200
+      fuel_burn_rate_lph: 3500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 6
+          initial_qty: 6
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 480
+          initial_qty: 480
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f35a-denmark
+      name: F-35A (Danish)
+      description: Danish fifth-generation fighter for NATO air policing and strike missions.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-35A Lightning II
+      short_name: F-35A
+      nation_of_origin: USA
+      operators:
+        - DNK
+      employed_by:
+        - DNK
+      service_entry_year: 2023
+      base_strength: 0.9
+      accuracy: 0.9
+      max_speed_mps: 530
+      cruise_speed_mps: 250
+      max_range_km: 2200
+      survivability: 0.82
+      detection_range_m: 300000
+      radar_cross_section_m2: 0.005
+      fuel_capacity_liters: 8280
+      fuel_burn_rate_lph: 3200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gbu-32-jdam
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f35a-lightning
+      name: F-35A Lightning II (CTOL)
+      description: 5th-generation conventional take-off and landing multirole stealth fighter. Operated by USAF, NATO allies, Japan, South Korea, Australia, Israel and others.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-35A Lightning II
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - USA
+        - AUS
+        - BEL
+        - DNK
+        - FIN
+        - ISR
+        - ITA
+        - JPN
+        - KOR
+        - NLD
+        - NOR
+        - POL
+        - SGP
+      employed_by:
+        - USA
+        - AUS
+        - BEL
+        - DNK
+        - FIN
+        - ISR
+        - ITA
+        - JPN
+        - KOR
+        - NLD
+        - NOR
+        - POL
+        - SGP
+      service_entry_year: 2016
+      base_strength: 0.93
+      accuracy: 0.93
+      max_speed_mps: 549
+      cruise_speed_mps: 292
+      max_range_km: 2220
+      survivability: 0.82
+      detection_range_m: 350000
+      radar_cross_section_m2: 0.0015
+      fuel_capacity_liters: 8278
+      fuel_burn_rate_lph: 3000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 182
+          initial_qty: 182
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f35a-norway
+      name: F-35A (Norwegian)
+      description: Norwegian stealth fighter used for Arctic air defense and maritime strike support.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-35A Lightning II
+      short_name: F-35A
+      nation_of_origin: USA
+      operators:
+        - NOR
+      employed_by:
+        - NOR
+      service_entry_year: 2017
+      base_strength: 0.9
+      accuracy: 0.9
+      max_speed_mps: 530
+      cruise_speed_mps: 250
+      max_range_km: 2200
+      survivability: 0.82
+      detection_range_m: 300000
+      radar_cross_section_m2: 0.005
+      fuel_capacity_liters: 8280
+      fuel_burn_rate_lph: 3200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: asm-nsm
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f35b-lightning
+      name: F-35B Lightning II (STOVL)
+      description: 5th-generation short take-off / vertical landing variant. Operated by USMC, UK Royal Navy/RAF, Italian Navy and Japan (MSDF).
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-35B Lightning II
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - USA
+        - GBR
+        - ITA
+        - JPN
+      employed_by:
+        - USA
+        - GBR
+        - ITA
+        - JPN
+      service_entry_year: 2015
+      base_strength: 0.9
+      accuracy: 0.92
+      max_speed_mps: 549
+      cruise_speed_mps: 292
+      max_range_km: 1670
+      survivability: 0.8
+      detection_range_m: 340000
+      radar_cross_section_m2: 0.0015
+      fuel_capacity_liters: 6125
+      fuel_burn_rate_lph: 3200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f35c-lightning
+      name: F-35C Lightning II (CV)
+      description: 5th-generation carrier variant with larger wing and strengthened undercarriage. Primary future USN carrier-based fighter.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-35C Lightning II
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2019
+      base_strength: 0.91
+      accuracy: 0.92
+      max_speed_mps: 549
+      cruise_speed_mps: 292
+      max_range_km: 2520
+      survivability: 0.81
+      detection_range_m: 345000
+      radar_cross_section_m2: 0.0015
+      fuel_capacity_liters: 9070
+      fuel_burn_rate_lph: 2900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 182
+          initial_qty: 182
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f4e-phantom-iriaf
+      name: F-4E Phantom II (IRIAF)
+      description: Legacy Iranian strike and maritime-attack aircraft still relevant for mass and regional strike tasks despite obsolescence.
+      domain: 2
+      form: 10
+      general_type: 12
+      specific_type: F-4E Phantom II (IRIAF)
+      short_name: F-4E
+      nation_of_origin: USA
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 1971
+      base_strength: 0.4
+      accuracy: 0.5
+      max_speed_mps: 660
+      cruise_speed_mps: 240
+      max_range_km: 2600
+      survivability: 0.24
+      detection_range_m: 80000
+      radar_cross_section_m2: 18
+      fuel_capacity_liters: 6500
+      fuel_burn_rate_lph: 4300
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-noor
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 640
+          initial_qty: 640
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: fa18-finland
+      name: F/A-18C Hornet (Finnish)
+      description: Finnish multirole fighter used for dispersed homeland defense and precision strike.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F/A-18C Hornet
+      short_name: F/A-18C
+      nation_of_origin: USA
+      operators:
+        - FIN
+      employed_by:
+        - FIN
+      service_entry_year: 1995
+      base_strength: 0.72
+      accuracy: 0.76
+      max_speed_mps: 530
+      cruise_speed_mps: 240
+      max_range_km: 3000
+      survivability: 0.52
+      detection_range_m: 180000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 6200
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gbu-32-jdam
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: fa18-super-hornet-kuwait
+      name: F/A-18E/F Super Hornet (Kuwait)
+      description: Kuwaiti frontline strike fighter used for regional air defense and precision attack.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F/A-18E/F Super Hornet
+      short_name: F/A-18E
+      nation_of_origin: USA
+      operators:
+        - KWT
+      employed_by:
+        - KWT
+      service_entry_year: 2021
+      base_strength: 0.82
+      accuracy: 0.82
+      max_speed_mps: 530
+      cruise_speed_mps: 245
+      max_range_km: 3300
+      survivability: 0.58
+      detection_range_m: 220000
+      radar_cross_section_m2: 3.5
+      fuel_capacity_liters: 6600
+      fuel_burn_rate_lph: 2700
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gbu-32-jdam
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: fa18c-hornet
+      name: F/A-18C Hornet
+      description: 4th-generation carrier-based multirole fighter. Legacy Hornet still operated by Finland (transitioning), Canada (CF-18A), and Kuwait.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F/A-18C Hornet
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - CAN
+        - FIN
+        - KWT
+        - MYS
+        - ESP
+        - CHE
+      employed_by:
+        - CAN
+        - FIN
+        - KWT
+        - MYS
+        - ESP
+        - CHE
+      service_entry_year: 1987
+      base_strength: 0.68
+      accuracy: 0.8
+      max_speed_mps: 617
+      cruise_speed_mps: 257
+      max_range_km: 1990
+      survivability: 0.55
+      detection_range_m: 120000
+      radar_cross_section_m2: 5
+      fuel_capacity_liters: 4926
+      fuel_burn_rate_lph: 2900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 578
+          initial_qty: 578
+      default_weapon_configuration: close_air_support
+      weapon_configurations:
+        - id: close_air_support
+          name: Close Air Support
+          description: Legacy Hornet strike fit optimized for battlefield support.
+          loadout:
+            - weapon_id: agm-65-maverick
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: gbu-32-jdam
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 578
+              initial_qty: 578
+        - id: air_superiority
+          name: Air Superiority
+          description: Self-escort CAP configuration.
+          loadout:
+            - weapon_id: aam-aim120c
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 578
+              initial_qty: 578
+        - id: anti_ship
+          name: Anti-Ship
+          description: Harpoon maritime strike fit.
+          loadout:
+            - weapon_id: agm-84-harpoon
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 578
+              initial_qty: 578
+    - id: fa18e-super-hornet
+      name: F/A-18E Super Hornet
+      description: 4.5th-generation carrier-based multirole fighter. Single-seat variant; primary USN strike fighter.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F/A-18E Super Hornet
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 1999
+      base_strength: 0.79
+      accuracy: 0.86
+      max_speed_mps: 617
+      cruise_speed_mps: 260
+      max_range_km: 2346
+      survivability: 0.62
+      detection_range_m: 200000
+      radar_cross_section_m2: 6
+      fuel_capacity_liters: 6531
+      fuel_burn_rate_lph: 3200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 578
+          initial_qty: 578
+      default_weapon_configuration: air_superiority
+      weapon_configurations:
+        - id: air_superiority
+          name: Air Superiority
+          description: AMRAAM-heavy fleet defense loadout.
+          loadout:
+            - weapon_id: aam-aim120c
+              max_qty: 6
+              initial_qty: 6
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 578
+              initial_qty: 578
+        - id: anti_ship
+          name: Anti-Ship
+          description: Maritime strike loadout with Harpoon and self-escort missiles.
+          loadout:
+            - weapon_id: agm-84-harpoon
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 578
+              initial_qty: 578
+        - id: close_air_support
+          name: Close Air Support
+          description: Mixed CAS loadout for armored targets and precision strike.
+          loadout:
+            - weapon_id: agm-65-maverick
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: gbu-32-jdam
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 578
+              initial_qty: 578
+    - id: fa18f-super-hornet
+      name: F/A-18F Super Hornet
+      description: Two-seat tandem carrier-based multirole fighter. Also operated by Royal Australian Air Force.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F/A-18F Super Hornet
+      short_name: ""
+      nation_of_origin: USA
+      operators:
+        - USA
+        - AUS
+        - KWT
+      employed_by:
+        - USA
+        - AUS
+        - KWT
+      service_entry_year: 2002
+      base_strength: 0.78
+      accuracy: 0.85
+      max_speed_mps: 617
+      cruise_speed_mps: 260
+      max_range_km: 2346
+      survivability: 0.62
+      detection_range_m: 200000
+      radar_cross_section_m2: 6
+      fuel_capacity_liters: 6531
+      fuel_burn_rate_lph: 3200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 578
+          initial_qty: 578
+      default_weapon_configuration: air_superiority
+      weapon_configurations:
+        - id: air_superiority
+          name: Air Superiority
+          description: Escort and CAP fit with a full BVR/WVR missile set.
+          loadout:
+            - weapon_id: aam-aim120c
+              max_qty: 6
+              initial_qty: 6
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 578
+              initial_qty: 578
+        - id: anti_ship
+          name: Anti-Ship
+          description: Carrier strike loadout with Harpoon and self-defense AAMs.
+          loadout:
+            - weapon_id: agm-84-harpoon
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 578
+              initial_qty: 578
+        - id: suppression_of_air_defenses
+          name: SEAD
+          description: Anti-radiation fit for escort jamming and radar suppression.
+          loadout:
+            - weapon_id: agm-88-harm
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 578
+              initial_qty: 578
+    - id: kc130j-kuwait
+      name: KC-130J (Kuwait)
+      description: Kuwaiti tanker-transport aircraft for regional refueling support, lift, and sustainment missions.
+      domain: 2
+      form: 10
+      general_type: 17
+      specific_type: KC-130J Super Hercules
+      short_name: KC-130J
+      nation_of_origin: USA
+      operators:
+        - KWT
+      employed_by:
+        - KWT
+      service_entry_year: 2014
+      base_strength: 0.34
+      accuracy: 0.1
+      max_speed_mps: 175
+      cruise_speed_mps: 165
+      max_range_km: 3800
+      survivability: 0.2
+      detection_range_m: 90000
+      radar_cross_section_m2: 30
+      fuel_capacity_liters: 30000
+      fuel_burn_rate_lph: 5200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: kc46a-pegasus
+      name: KC-46A Pegasus
+      description: Modern tanker aircraft for aerial refueling and strategic transport.
+      domain: 2
+      form: 10
+      general_type: 17
+      specific_type: KC-46A Pegasus
+      short_name: KC-46
+      nation_of_origin: USA
+      operators:
+        - USA
+        - JPN
+        - ISR
+        - QAT
+      employed_by:
+        - USA
+        - JPN
+        - ISR
+        - QAT
+      service_entry_year: 2019
+      base_strength: 0.35
+      accuracy: 0.1
+      max_speed_mps: 240
+      cruise_speed_mps: 230
+      max_range_km: 11830
+      survivability: 0.26
+      detection_range_m: 180000
+      radar_cross_section_m2: 32
+      fuel_capacity_liters: 96000
+      fuel_burn_rate_lph: 9000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mh60r-seahawk
+      name: MH-60R Seahawk
+      description: Naval helicopter for anti-submarine, anti-surface, and over-the-horizon targeting missions.
+      domain: 2
+      form: 11
+      general_type: 22
+      specific_type: MH-60R Seahawk
+      short_name: MH-60R
+      nation_of_origin: USA
+      operators:
+        - USA
+        - AUS
+        - DNK
+        - GRC
+        - IND
+        - KOR
+        - SAU
+        - ESP
+      employed_by:
+        - USA
+        - AUS
+        - DNK
+        - GRC
+        - IND
+        - KOR
+        - SAU
+        - ESP
+      service_entry_year: 2006
+      base_strength: 0.55
+      accuracy: 0.56
+      max_speed_mps: 82
+      cruise_speed_mps: 71
+      max_range_km: 830
+      survivability: 0.4
+      detection_range_m: 180000
+      radar_cross_section_m2: 4.5
+      fuel_capacity_liters: 2230
+      fuel_burn_rate_lph: 500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: torp-mk54
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mh60r-seahawk
+      name: MH-60R Seahawk
+      description: Naval helicopter for ASW, ASuW, and shipborne screening missions.
+      domain: 2
+      form: 11
+      general_type: 22
+      specific_type: MH-60R Seahawk
+      short_name: MH-60R
+      nation_of_origin: USA
+      operators:
+        - USA
+        - AUS
+        - DNK
+        - GRC
+        - IND
+        - KOR
+        - SAU
+        - ESP
+      employed_by:
+        - USA
+        - AUS
+        - DNK
+        - GRC
+        - IND
+        - KOR
+        - SAU
+        - ESP
+      service_entry_year: 2006
+      base_strength: 0.5
+      accuracy: 0.35
+      max_speed_mps: 78
+      cruise_speed_mps: 68
+      max_range_km: 830
+      survivability: 0.36
+      detection_range_m: 60000
+      radar_cross_section_m2: 5
+      fuel_capacity_liters: 2230
+      fuel_burn_rate_lph: 700
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mq1c-gray-eagle
+      name: MQ-1C Gray Eagle
+      description: Army tactical UAV for armed reconnaissance and overwatch.
+      domain: 2
+      form: 12
+      general_type: 31
+      specific_type: MQ-1C Gray Eagle
+      short_name: MQ-1C
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2009
+      base_strength: 0.3
+      accuracy: 0.46
+      max_speed_mps: 78
+      cruise_speed_mps: 56
+      max_range_km: 400
+      survivability: 0.2
+      detection_range_m: 80000
+      radar_cross_section_m2: 0.35
+      fuel_capacity_liters: 260
+      fuel_burn_rate_lph: 40
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-114-hellfire
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mq9a-reaper
+      name: MQ-9A Reaper
+      description: MALE UAV capable of persistent ISR and strike missions.
+      domain: 2
+      form: 12
+      general_type: 31
+      specific_type: MQ-9A Reaper
+      short_name: MQ-9
+      nation_of_origin: USA
+      operators:
+        - USA
+        - GBR
+        - ITA
+        - FRA
+        - ESP
+        - NLD
+        - POL
+      employed_by:
+        - USA
+        - GBR
+        - ITA
+        - FRA
+        - ESP
+        - NLD
+        - POL
+      service_entry_year: 2007
+      base_strength: 0.34
+      accuracy: 0.72
+      max_speed_mps: 135
+      cruise_speed_mps: 120
+      max_range_km: 1850
+      survivability: 0.22
+      detection_range_m: 40000
+      radar_cross_section_m2: 0.6
+      fuel_capacity_liters: 1800
+      fuel_burn_rate_lph: 300
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: p3f-orion-mpa-iran
+      name: P-3F Orion MPA (Iran)
+      description: Iranian maritime patrol aircraft for Gulf and Gulf of Oman surveillance, shipping watch, and sea-denial cueing.
+      domain: 2
+      form: 10
+      general_type: 15
+      specific_type: P-3F Orion Maritime Patrol Aircraft
+      short_name: P-3F
+      nation_of_origin: USA
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 1975
+      base_strength: 0.34
+      accuracy: 0.14
+      max_speed_mps: 205
+      cruise_speed_mps: 180
+      max_range_km: 6400
+      survivability: 0.2
+      detection_range_m: 220000
+      radar_cross_section_m2: 24
+      fuel_capacity_liters: 35000
+      fuel_burn_rate_lph: 5600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: p8a-poseidon
+      name: P-8A Poseidon
+      description: Maritime patrol and ISR aircraft optimized for anti-submarine and over-water surveillance.
+      domain: 2
+      form: 10
+      general_type: 15
+      specific_type: P-8A Poseidon
+      short_name: P-8A
+      nation_of_origin: USA
+      operators:
+        - USA
+        - AUS
+        - DEU
+        - GBR
+        - IND
+        - KOR
+        - NOR
+        - NZL
+      employed_by:
+        - USA
+        - AUS
+        - DEU
+        - GBR
+        - IND
+        - KOR
+        - NOR
+        - NZL
+      service_entry_year: 2013
+      base_strength: 0.5
+      accuracy: 0.2
+      max_speed_mps: 250
+      cruise_speed_mps: 222
+      max_range_km: 7500
+      survivability: 0.32
+      detection_range_m: 300000
+      radar_cross_section_m2: 22
+      fuel_capacity_liters: 34000
+      fuel_burn_rate_lph: 6200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: re3a-sigint-saudi
+      name: RE-3A SIGINT (Saudi)
+      description: Saudi signals-intelligence and stand-off surveillance aircraft for theater monitoring and strategic cueing.
+      domain: 2
+      form: 10
+      general_type: 18
+      specific_type: RE-3A SIGINT Aircraft
+      short_name: RE-3A
+      nation_of_origin: USA
+      operators:
+        - SAU
+      employed_by:
+        - SAU
+      service_entry_year: 1987
+      base_strength: 0.5
+      accuracy: 0.18
+      max_speed_mps: 240
+      cruise_speed_mps: 220
+      max_range_km: 7400
+      survivability: 0.22
+      detection_range_m: 320000
+      radar_cross_section_m2: 35
+      fuel_capacity_liters: 90000
+      fuel_burn_rate_lph: 7800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: rq4b-global-hawk
+      name: RQ-4B Global Hawk
+      description: High-altitude long-endurance ISR UAV for broad-area surveillance.
+      domain: 2
+      form: 12
+      general_type: 30
+      specific_type: RQ-4B Global Hawk
+      short_name: RQ-4
+      nation_of_origin: USA
+      operators:
+        - USA
+        - JPN
+        - KOR
+      employed_by:
+        - USA
+        - JPN
+        - KOR
+      service_entry_year: 2001
+      base_strength: 0.2
+      accuracy: 0.1
+      max_speed_mps: 175
+      cruise_speed_mps: 165
+      max_range_km: 22780
+      survivability: 0.18
+      detection_range_m: 100000
+      radar_cross_section_m2: 0.5
+      fuel_capacity_liters: 7847
+      fuel_burn_rate_lph: 500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: switchblade-600
+      name: Switchblade 600
+      description: Man-portable loitering munition optimized for anti-armor precision attack.
+      domain: 2
+      form: 12
+      general_type: 32
+      specific_type: Switchblade 600
+      short_name: SB-600
+      nation_of_origin: USA
+      operators:
+        - USA
+        - UKR
+      employed_by:
+        - USA
+        - UKR
+      service_entry_year: 2021
+      base_strength: 0.18
+      accuracy: 0.7
+      max_speed_mps: 45
+      cruise_speed_mps: 30
+      max_range_km: 40
+      survivability: 0.05
+      detection_range_m: 15000
+      radar_cross_section_m2: 0.05
+      fuel_capacity_liters: 5
+      fuel_burn_rate_lph: 2
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-65-maverick
+          max_qty: 1
+          initial_qty: 1
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: uh60m-black-hawk
+      name: UH-60M Black Hawk
+      description: Utility helicopter for troop lift, logistics, and medical evacuation.
+      domain: 2
+      form: 11
+      general_type: 21
+      specific_type: UH-60M Black Hawk
+      short_name: UH-60M
+      nation_of_origin: USA
+      operators:
+        - USA
+        - AUS
+        - BRA
+        - COL
+        - JOR
+        - MEX
+        - SAU
+        - SWE
+        - TUR
+        - TWN
+      employed_by:
+        - USA
+        - AUS
+        - BRA
+        - COL
+        - JOR
+        - MEX
+        - SAU
+        - SWE
+        - TUR
+        - TWN
+      service_entry_year: 2006
+      base_strength: 0.42
+      accuracy: 0.15
+      max_speed_mps: 82
+      cruise_speed_mps: 70
+      max_range_km: 590
+      survivability: 0.34
+      detection_range_m: 8000
+      radar_cross_section_m2: 6
+      fuel_capacity_liters: 1362
+      fuel_burn_rate_lph: 650
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: uh60m-black-hawk
+      name: UH-60M Black Hawk
+      description: General-purpose tactical utility helicopter for lift, medevac, and assault support.
+      domain: 2
+      form: 11
+      general_type: 21
+      specific_type: UH-60M Black Hawk
+      short_name: UH-60M
+      nation_of_origin: USA
+      operators:
+        - USA
+        - AUS
+        - ARE
+        - BRA
+        - COL
+        - JOR
+        - KWT
+        - MEX
+        - SAU
+        - SWE
+        - TUR
+        - TWN
+      employed_by:
+        - USA
+        - AUS
+        - ARE
+        - BRA
+        - COL
+        - JOR
+        - KWT
+        - MEX
+        - SAU
+        - SWE
+        - TUR
+        - TWN
+      service_entry_year: 2007
+      base_strength: 0.42
+      accuracy: 0.18
+      max_speed_mps: 82
+      cruise_speed_mps: 70
+      max_range_km: 590
+      survivability: 0.36
+      detection_range_m: 12000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 1360
+      fuel_burn_rate_lph: 430
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: v22-osprey
+      name: MV-22B Osprey
+      description: Tiltrotor assault support aircraft combining helicopter access with turboprop speed.
+      domain: 2
+      form: 11
+      general_type: 21
+      specific_type: MV-22B Osprey
+      short_name: MV-22B
+      nation_of_origin: USA
+      operators:
+        - USA
+        - JPN
+      employed_by:
+        - USA
+        - JPN
+      service_entry_year: 2007
+      base_strength: 0.4
+      accuracy: 0.15
+      max_speed_mps: 155
+      cruise_speed_mps: 125
+      max_range_km: 1600
+      survivability: 0.3
+      detection_range_m: 10000
+      radar_cross_section_m2: 7
+      fuel_capacity_liters: 6510
+      fuel_burn_rate_lph: 1300
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: c130j-30-iraq
+      name: C-130J-30 (Iraq)
+      description: Iraqi tactical airlift aircraft used for theater sustainment, redeployment, and special operations support.
+      domain: 2
+      form: 10
+      general_type: 17
+      specific_type: C-130J-30 Super Hercules
+      short_name: C-130J
+      nation_of_origin: USA
+      operators:
+        - IRQ
+      employed_by:
+        - IRQ
+      service_entry_year: 2013
+      base_strength: 0.36
+      accuracy: 0.1
+      max_speed_mps: 175
+      cruise_speed_mps: 165
+      max_range_km: 3800
+      survivability: 0.22
+      detection_range_m: 90000
+      radar_cross_section_m2: 30
+      fuel_capacity_liters: 30000
+      fuel_burn_rate_lph: 5200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f15qa-ababil
+      name: F-15QA Ababil
+      description: Qatar's advanced Strike Eagle derivative for long-range air superiority, escort, and deep precision strike.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-15QA Ababil
+      short_name: F-15QA
+      nation_of_origin: USA
+      operators:
+        - QAT
+      employed_by:
+        - QAT
+      service_entry_year: 2022
+      base_strength: 0.9
+      accuracy: 0.9
+      max_speed_mps: 780
+      cruise_speed_mps: 275
+      max_range_km: 3900
+      survivability: 0.72
+      detection_range_m: 220000
+      radar_cross_section_m2: 14
+      fuel_capacity_liters: 6400
+      fuel_burn_rate_lph: 3900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 6
+          initial_qty: 6
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gbu-32-jdam
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 510
+          initial_qty: 510
+      default_weapon_configuration: deep_strike
+      weapon_configurations:
+        - id: air_superiority
+          name: Air Superiority
+          description: Long-range CAP and escort fit for Gulf and Levant air operations.
+          loadout:
+            - weapon_id: aam-aim120c
+              max_qty: 8
+              initial_qty: 8
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 510
+              initial_qty: 510
+        - id: deep_strike
+          name: Deep Strike
+          description: Precision strike fit for long-range coalition sorties.
+          loadout:
+            - weapon_id: aam-aim120c
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gbu-32-jdam
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 510
+              initial_qty: 510
+    - id: f16c-oman
+      name: F-16C/D Block 50 (Oman)
+      description: Omani multirole fighter used for air defense, base protection, and coalition support sorties over the Gulf approaches.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-16C/D Block 50 Fighting Falcon
+      short_name: F-16C
+      nation_of_origin: USA
+      operators:
+        - OMN
+      employed_by:
+        - OMN
+      service_entry_year: 2005
+      base_strength: 0.74
+      accuracy: 0.78
+      max_speed_mps: 686
+      cruise_speed_mps: 272
+      max_range_km: 3200
+      survivability: 0.56
+      detection_range_m: 150000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 3185
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gbu-32-jdam
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 511
+          initial_qty: 511
+      default_weapon_configuration: air_defense
+      weapon_configurations:
+        - id: air_defense
+          name: Air Defense
+          description: Standard alert fit for homeland defense and escort.
+          loadout:
+            - weapon_id: aam-aim120c
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 511
+              initial_qty: 511
+        - id: strike
+          name: Strike
+          description: Mixed precision attack fit for coalition strike support.
+          loadout:
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gbu-32-jdam
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 511
+              initial_qty: 511

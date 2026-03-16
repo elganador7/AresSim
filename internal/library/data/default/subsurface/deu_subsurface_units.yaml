@@ -1,0 +1,46 @@
+library:
+    id: deu_subsurface_units-v1
+    name: DEU Subsurface Units
+    description: Subsurface units originating from DEU.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: type212a
+      name: Type 212A
+      description: Air-independent propulsion attack submarine for littoral sea denial and covert patrol.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Type 212A Attack Submarine
+      short_name: Type 212A
+      nation_of_origin: DEU
+      operators:
+        - DEU
+        - ITA
+      employed_by:
+        - DEU
+        - ITA
+      service_entry_year: 2005
+      base_strength: 0.72
+      accuracy: 0.76
+      max_speed_mps: 10
+      cruise_speed_mps: 5.5
+      max_range_km: 8000
+      survivability: 0.78
+      detection_range_m: 160000
+      radar_cross_section_m2: 0.08
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: torp-mk48
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []

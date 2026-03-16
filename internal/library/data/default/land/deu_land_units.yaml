@@ -1,0 +1,178 @@
+library:
+    id: deu_land_units-v1
+    name: DEU Land Units
+    description: Land units originating from DEU.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: boxer-ifv
+      name: Boxer IFV
+      description: Wheeled infantry fighting vehicle family with modular armor and high road mobility.
+      domain: 1
+      form: 31
+      general_type: 61
+      specific_type: Boxer Infantry Fighting Vehicle
+      short_name: Boxer
+      nation_of_origin: DEU
+      operators:
+        - DEU
+        - AUS
+        - GBR
+        - LTU
+        - NLD
+      employed_by:
+        - DEU
+        - AUS
+        - GBR
+        - LTU
+        - NLD
+      service_entry_year: 2011
+      base_strength: 0.7
+      accuracy: 0.75
+      max_speed_mps: 28
+      cruise_speed_mps: 18
+      max_range_km: 1050
+      survivability: 0.58
+      detection_range_m: 2800
+      radar_cross_section_m2: 6
+      fuel_capacity_liters: 560
+      fuel_burn_rate_lph: 120
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: iris-t-slm-battery
+      name: IRIS-T SLM Battery
+      description: Modern medium-range air defense battery for maneuver and fixed-site protection.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: IRIS-T SLM Battery
+      short_name: IRIS-T
+      nation_of_origin: DEU
+      operators:
+        - DEU
+        - UKR
+      employed_by:
+        - DEU
+        - UKR
+      service_entry_year: 2022
+      base_strength: 0.64
+      accuracy: 0.78
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.36
+      detection_range_m: 140000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-irist-slm
+          max_qty: 24
+          initial_qty: 24
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: leopard2a7v
+      name: Leopard 2A7V
+      description: Latest German Leopard 2 modernization with improved protection and fire control.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: Leopard 2A7V
+      short_name: Leo 2A7
+      nation_of_origin: DEU
+      operators:
+        - DEU
+        - DNK
+        - HUN
+        - NOR
+      employed_by:
+        - DEU
+        - DNK
+        - HUN
+        - NOR
+      service_entry_year: 2021
+      base_strength: 0.93
+      accuracy: 0.86
+      max_speed_mps: 19
+      cruise_speed_mps: 11
+      max_range_km: 450
+      survivability: 0.78
+      detection_range_m: 4200
+      radar_cross_section_m2: 11
+      fuel_capacity_liters: 1160
+      fuel_burn_rate_lph: 300
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: pzh2000
+      name: PzH 2000
+      description: German long-range self-propelled howitzer with high automation and rate of fire.
+      domain: 1
+      form: 32
+      general_type: 70
+      specific_type: Panzerhaubitze 2000
+      short_name: PzH 2000
+      nation_of_origin: DEU
+      operators:
+        - DEU
+        - NLD
+        - ITA
+        - GRC
+        - HRV
+        - LTU
+        - HUN
+        - QAT
+        - UKR
+      employed_by:
+        - DEU
+        - NLD
+        - ITA
+        - GRC
+        - HRV
+        - LTU
+        - HUN
+        - QAT
+        - UKR
+      service_entry_year: 1998
+      base_strength: 0.78
+      accuracy: 0.82
+      max_speed_mps: 16.7
+      cruise_speed_mps: 10
+      max_range_km: 420
+      survivability: 0.44
+      detection_range_m: 1000
+      radar_cross_section_m2: 9
+      fuel_capacity_liters: 1000
+      fuel_burn_rate_lph: 170
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

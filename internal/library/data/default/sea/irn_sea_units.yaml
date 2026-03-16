@@ -1,0 +1,195 @@
+library:
+    id: irn_sea_units-v1
+    name: IRN SEA Units
+    description: Sea units originating from IRN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: ghadir-fast-attack-craft
+      name: Ghadir Fast Attack Craft
+      description: Small Iranian missile boat representative of the swarm and coastal harassment threat in the Gulf.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: Ghadir-class Fast Attack Craft
+      short_name: Ghadir FAC
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2007
+      base_strength: 0.24
+      accuracy: 0.42
+      max_speed_mps: 22
+      cruise_speed_mps: 12
+      max_range_km: 1500
+      survivability: 0.14
+      detection_range_m: 50000
+      radar_cross_section_m2: 900
+      fuel_capacity_liters: 50000
+      fuel_burn_rate_lph: 180
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-noor
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: irgcn-swarm-group
+      name: IRGCN Swarm Attack Group
+      description: Composite fast inshore attack craft formation representing the concentrated swarm threat in the Strait of Hormuz and central Gulf.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: IRGCN Fast Attack Swarm Group
+      short_name: IRGCN Swarm
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2015
+      base_strength: 0.3
+      accuracy: 0.46
+      max_speed_mps: 22
+      cruise_speed_mps: 13
+      max_range_km: 1200
+      survivability: 0.14
+      detection_range_m: 50000
+      radar_cross_section_m2: 1200
+      fuel_capacity_liters: 70000
+      fuel_burn_rate_lph: 220
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-noor
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: jamaran-frigate
+      name: Jamaran Frigate
+      description: Iranian light frigate used for patrol, escort, and symbolic blue-water presence missions.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: Jamaran-class Frigate
+      short_name: Jamaran
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2010
+      base_strength: 0.44
+      accuracy: 0.46
+      max_speed_mps: 15
+      cruise_speed_mps: 9
+      max_range_km: 5500
+      survivability: 0.32
+      detection_range_m: 120000
+      radar_cross_section_m2: 8000
+      fuel_capacity_liters: 450000
+      fuel_burn_rate_lph: 900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 35
+      default_loadout:
+        - weapon_id: asm-noor
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: shahid-soleimani-corvette
+      name: Shahid Soleimani Corvette
+      description: IRGC Navy catamaran combatant intended for distributed strike, air-defense escort, and command of swarming littoral actions.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Shahid Soleimani-class Corvette
+      short_name: Soleimani
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2022
+      base_strength: 0.42
+      accuracy: 0.56
+      max_speed_mps: 18
+      cruise_speed_mps: 11
+      max_range_km: 2500
+      survivability: 0.24
+      detection_range_m: 110000
+      radar_cross_section_m2: 1600
+      fuel_capacity_liters: 160000
+      fuel_burn_rate_lph: 380
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 45
+      default_loadout:
+        - weapon_id: asm-noor
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: sam-tor-m1
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: zulfiqar-missile-boat
+      name: Zulfiqar Missile Boat
+      description: Iranian small missile craft used for dispersed littoral attack and harassment in confined waters.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: Zulfiqar-class Missile Boat
+      short_name: Zulfiqar
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2011
+      base_strength: 0.22
+      accuracy: 0.4
+      max_speed_mps: 19
+      cruise_speed_mps: 11
+      max_range_km: 1200
+      survivability: 0.12
+      detection_range_m: 45000
+      radar_cross_section_m2: 700
+      fuel_capacity_liters: 40000
+      fuel_burn_rate_lph: 150
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-noor
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []

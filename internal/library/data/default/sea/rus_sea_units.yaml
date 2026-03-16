@@ -1,0 +1,163 @@
+library:
+    id: rus_sea_units-v1
+    name: RUS SEA Units
+    description: Sea units originating from RUS.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: admiral-gorshkov
+      name: Admiral Gorshkov-class Frigate
+      description: Modern Russian frigate with long-range strike and layered air defense capability.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: Admiral Gorshkov-class Frigate
+      short_name: Gorshkov
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - IND
+      employed_by:
+        - RUS
+        - IND
+      service_entry_year: 2018
+      base_strength: 0.78
+      accuracy: 0.82
+      max_speed_mps: 15.4
+      cruise_speed_mps: 10
+      max_range_km: 8300
+      survivability: 0.62
+      detection_range_m: 260000
+      radar_cross_section_m2: 9000
+      fuel_capacity_liters: 900000
+      fuel_burn_rate_lph: 1700
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: ssm-kalibr
+          max_qty: 16
+          initial_qty: 16
+        - weapon_id: sam-sm2-block3
+          max_qty: 32
+          initial_qty: 32
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: buyan-m-corvette
+      name: Buyan-M Corvette
+      description: Russian missile corvette for coastal strike missions with a compact but dangerous cruise missile battery.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Buyan-M Corvette
+      short_name: Buyan-M
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2014
+      base_strength: 0.52
+      accuracy: 0.7
+      max_speed_mps: 13.4
+      cruise_speed_mps: 8.2
+      max_range_km: 4000
+      survivability: 0.4
+      detection_range_m: 165000
+      radar_cross_section_m2: 5500
+      fuel_capacity_liters: 350000
+      fuel_burn_rate_lph: 800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-kalibr
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: kirov-battlecruiser
+      name: Kirov-class Battlecruiser
+      description: Nuclear-powered heavy missile cruiser with large anti-ship and area-defense magazines.
+      domain: 3
+      form: 20
+      general_type: 41
+      specific_type: Kirov-class Battlecruiser
+      short_name: Kirov
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 1980
+      base_strength: 0.92
+      accuracy: 0.86
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 999999
+      survivability: 0.78
+      detection_range_m: 320000
+      radar_cross_section_m2: 22000
+      fuel_capacity_liters: 2.5e+06
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 3
+      embarked_uav_capacity: 2
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: asm-brahmos
+          max_qty: 20
+          initial_qty: 20
+        - weapon_id: sam-sm6
+          max_qty: 64
+          initial_qty: 64
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: slava-cruiser
+      name: Slava-class Cruiser
+      description: Large Soviet-designed missile cruiser focused on anti-ship strike and fleet air defense.
+      domain: 3
+      form: 20
+      general_type: 41
+      specific_type: Slava-class Guided Missile Cruiser
+      short_name: Slava
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 1983
+      base_strength: 0.82
+      accuracy: 0.8
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 10000
+      survivability: 0.64
+      detection_range_m: 280000
+      radar_cross_section_m2: 18000
+      fuel_capacity_liters: 1.8e+06
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: asm-brahmos
+          max_qty: 16
+          initial_qty: 16
+      default_weapon_configuration: ""
+      weapon_configurations: []

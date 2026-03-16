@@ -1,0 +1,237 @@
+library:
+    id: ita_sea_units-v1
+    name: ITA SEA Units
+    description: Sea units originating from ITA.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: al-zour-corvette-kuwait
+      name: Al Zour-class Corvette
+      description: Kuwaiti corvette for escort, air defense, and coastal maritime security in the northern Gulf.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Al Zour-class Corvette
+      short_name: Al Zour
+      nation_of_origin: ITA
+      operators:
+        - KWT
+      employed_by:
+        - KWT
+      service_entry_year: 2023
+      base_strength: 0.6
+      accuracy: 0.72
+      max_speed_mps: 15
+      cruise_speed_mps: 9.2
+      max_range_km: 6500
+      survivability: 0.48
+      detection_range_m: 210000
+      radar_cross_section_m2: 6200
+      fuel_capacity_liters: 520000
+      fuel_burn_rate_lph: 1050
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-vl-mica
+          max_qty: 16
+          initial_qty: 16
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: barzan-opv-qatar
+      name: Barzan-class OPV
+      description: Qatari offshore patrol combatant for local sea control, escort, and critical infrastructure defense.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: Barzan-class Offshore Patrol Vessel
+      short_name: Barzan
+      nation_of_origin: ITA
+      operators:
+        - QAT
+      employed_by:
+        - QAT
+      service_entry_year: 2022
+      base_strength: 0.48
+      accuracy: 0.62
+      max_speed_mps: 14
+      cruise_speed_mps: 8.9
+      max_range_km: 5000
+      survivability: 0.36
+      detection_range_m: 150000
+      radar_cross_section_m2: 4200
+      fuel_capacity_liters: 340000
+      fuel_burn_rate_lph: 760
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-vl-mica
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: asm-am39-exocet
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: cavour-carrier
+      name: Cavour (550)
+      description: Italian STOVL carrier combining fleet air operations with limited amphibious lift.
+      domain: 3
+      form: 20
+      general_type: 40
+      specific_type: Cavour-class Aircraft Carrier
+      short_name: Cavour
+      nation_of_origin: ITA
+      operators:
+        - ITA
+      employed_by:
+        - ITA
+      service_entry_year: 2009
+      base_strength: 0.78
+      accuracy: 0.7
+      max_speed_mps: 14.4
+      cruise_speed_mps: 9.5
+      max_range_km: 7000
+      survivability: 0.64
+      detection_range_m: 180000
+      radar_cross_section_m2: 28000
+      fuel_capacity_liters: 1e+06
+      fuel_burn_rate_lph: 1500
+      embarked_fixed_wing_capacity: 12
+      embarked_rotary_wing_capacity: 12
+      embarked_uav_capacity: 4
+      embarked_surface_connector_capacity: 2
+      launch_capacity_per_interval: 4
+      recovery_capacity_per_interval: 4
+      sortie_interval_minutes: 25
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: doha-corvette-qatar
+      name: Doha-class Corvette
+      description: Qatari multirole corvette for escort, local air defense, and maritime strike missions.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Doha-class Corvette
+      short_name: Doha
+      nation_of_origin: ITA
+      operators:
+        - QAT
+      employed_by:
+        - QAT
+      service_entry_year: 2021
+      base_strength: 0.62
+      accuracy: 0.72
+      max_speed_mps: 15.4
+      cruise_speed_mps: 9.5
+      max_range_km: 6500
+      survivability: 0.48
+      detection_range_m: 210000
+      radar_cross_section_m2: 6500
+      fuel_capacity_liters: 540000
+      fuel_burn_rate_lph: 1100
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-vl-mica
+          max_qty: 16
+          initial_qty: 16
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: horizon-destroyer
+      name: Horizon-class Destroyer
+      description: Franco-Italian area air defense destroyer with advanced phased-array radar.
+      domain: 3
+      form: 20
+      general_type: 42
+      specific_type: Horizon-class Destroyer
+      short_name: Horizon
+      nation_of_origin: ITA
+      operators:
+        - ITA
+        - FRA
+      employed_by:
+        - ITA
+        - FRA
+      service_entry_year: 2009
+      base_strength: 0.8
+      accuracy: 0.85
+      max_speed_mps: 15.9
+      cruise_speed_mps: 10.3
+      max_range_km: 13000
+      survivability: 0.66
+      detection_range_m: 340000
+      radar_cross_section_m2: 11000
+      fuel_capacity_liters: 1e+06
+      fuel_burn_rate_lph: 1900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-sm2-block3
+          max_qty: 48
+          initial_qty: 48
+        - weapon_id: gun-mk45-5in
+          max_qty: 650
+          initial_qty: 650
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: trieste-lhd
+      name: Trieste (L9890)
+      description: Italian LHD able to support amphibious assault, helicopter operations, and STOVL fast jets.
+      domain: 3
+      form: 20
+      general_type: 46
+      specific_type: Trieste-class Landing Helicopter Dock
+      short_name: Trieste
+      nation_of_origin: ITA
+      operators:
+        - ITA
+      employed_by:
+        - ITA
+      service_entry_year: 2024
+      base_strength: 0.74
+      accuracy: 0.56
+      max_speed_mps: 13.9
+      cruise_speed_mps: 9.3
+      max_range_km: 7000
+      survivability: 0.58
+      detection_range_m: 150000
+      radar_cross_section_m2: 26000
+      fuel_capacity_liters: 1.1e+06
+      fuel_burn_rate_lph: 1400
+      embarked_fixed_wing_capacity: 8
+      embarked_rotary_wing_capacity: 18
+      embarked_uav_capacity: 4
+      embarked_surface_connector_capacity: 4
+      launch_capacity_per_interval: 5
+      recovery_capacity_per_interval: 5
+      sortie_interval_minutes: 25
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

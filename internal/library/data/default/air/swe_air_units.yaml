@@ -1,0 +1,219 @@
+library:
+    id: swe_air_units-v1
+    name: SWE AIR Units
+    description: Air units originating from SWE.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: globaleye-uae
+      name: GlobalEye (UAE)
+      description: UAE long-range AEW and ISR aircraft for wide-area air and maritime surveillance.
+      domain: 2
+      form: 10
+      general_type: 16
+      specific_type: GlobalEye AEW&C
+      short_name: GlobalEye
+      nation_of_origin: SWE
+      operators:
+        - ARE
+      employed_by:
+        - ARE
+      service_entry_year: 2020
+      base_strength: 0.62
+      accuracy: 0.24
+      max_speed_mps: 250
+      cruise_speed_mps: 230
+      max_range_km: 11000
+      survivability: 0.26
+      detection_range_m: 470000
+      radar_cross_section_m2: 24
+      fuel_capacity_liters: 26000
+      fuel_burn_rate_lph: 4500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: gripen-czech
+      name: JAS 39C Gripen (Czech)
+      description: Czech leased multirole fighter used for NATO air policing and home air defense.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: JAS 39C Gripen
+      short_name: Gripen C
+      nation_of_origin: SWE
+      operators:
+        - CZE
+      employed_by:
+        - CZE
+      service_entry_year: 2005
+      base_strength: 0.72
+      accuracy: 0.76
+      max_speed_mps: 560
+      cruise_speed_mps: 230
+      max_range_km: 3200
+      survivability: 0.54
+      detection_range_m: 180000
+      radar_cross_section_m2: 2
+      fuel_capacity_liters: 3400
+      fuel_burn_rate_lph: 1800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-iris-t
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-meteor
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: jas39c-gripen
+      name: Saab JAS 39C Gripen
+      description: 4th-generation lightweight single-engine canard-delta multirole fighter. Operated by Sweden, Czech Republic, Hungary, South Africa, and Thailand.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: JAS 39C Gripen
+      short_name: ""
+      nation_of_origin: SWE
+      operators:
+        - SWE
+        - CZE
+        - HUN
+        - ZAF
+        - THA
+      employed_by:
+        - SWE
+        - CZE
+        - HUN
+        - ZAF
+        - THA
+      service_entry_year: 1997
+      base_strength: 0.73
+      accuracy: 0.83
+      max_speed_mps: 686
+      cruise_speed_mps: 280
+      max_range_km: 3200
+      survivability: 0.59
+      detection_range_m: 150000
+      radar_cross_section_m2: 1.2
+      fuel_capacity_liters: 2268
+      fuel_burn_rate_lph: 2000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-iris-t
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-mauser-bk27
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: swing_role
+      weapon_configurations:
+        - id: swing_role
+          name: Swing Role
+          description: Mixed Gripen package for self-escort precision strike.
+          loadout:
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-iris-t
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gbu-32-jdam
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-mauser-bk27
+              max_qty: 150
+              initial_qty: 150
+        - id: air_superiority
+          name: Air Superiority
+          description: Counter-air fit emphasizing beyond-visual-range missiles.
+          loadout:
+            - weapon_id: aam-meteor
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-iris-t
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-mauser-bk27
+              max_qty: 150
+              initial_qty: 150
+        - id: anti_ship
+          name: Anti-Ship
+          description: Maritime strike loadout with Harpoon and IRIS-T self-defense.
+          loadout:
+            - weapon_id: agm-84-harpoon
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-iris-t
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-mauser-bk27
+              max_qty: 150
+              initial_qty: 150
+    - id: jas39e-gripen
+      name: Saab JAS 39E Gripen
+      description: 4.5th-generation advanced Gripen with AESA radar, expanded fuel capacity, and Meteor BVR integration. Operated by Sweden and Brazil.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: JAS 39E Gripen
+      short_name: ""
+      nation_of_origin: SWE
+      operators:
+        - SWE
+        - BRA
+      employed_by:
+        - SWE
+        - BRA
+      service_entry_year: 2020
+      base_strength: 0.81
+      accuracy: 0.88
+      max_speed_mps: 686
+      cruise_speed_mps: 285
+      max_range_km: 4000
+      survivability: 0.64
+      detection_range_m: 250000
+      radar_cross_section_m2: 0.8
+      fuel_capacity_liters: 3400
+      fuel_burn_rate_lph: 2200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-meteor
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-iris-t
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-mauser-bk27
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []

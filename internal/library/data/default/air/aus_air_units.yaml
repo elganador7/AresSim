@@ -1,0 +1,47 @@
+library:
+    id: aus_air_units-v1
+    name: AUS AIR Units
+    description: Air units originating from AUS.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: e7a-wedgetail
+      name: E-7A Wedgetail
+      description: Airborne early warning and battle management aircraft with MESA radar.
+      domain: 2
+      form: 10
+      general_type: 16
+      specific_type: E-7A Wedgetail
+      short_name: E-7A
+      nation_of_origin: AUS
+      operators:
+        - AUS
+        - KOR
+        - TUR
+        - GBR
+      employed_by:
+        - AUS
+        - KOR
+        - TUR
+        - GBR
+      service_entry_year: 2009
+      base_strength: 0.45
+      accuracy: 0.15
+      max_speed_mps: 240
+      cruise_speed_mps: 230
+      max_range_km: 7040
+      survivability: 0.3
+      detection_range_m: 450000
+      radar_cross_section_m2: 30
+      fuel_capacity_liters: 26000
+      fuel_burn_rate_lph: 6500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

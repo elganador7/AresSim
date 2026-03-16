@@ -1,0 +1,570 @@
+library:
+    id: irn_land_units-v1
+    name: IRN Land Units
+    description: Land units originating from IRN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: bavar373-battery
+      name: Bavar-373 Battery
+      description: Iranian long-range air defense system intended to provide strategic SAM coverage against aircraft and missiles.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: Bavar-373 Air Defense Battery
+      short_name: Bavar-373
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2019
+      base_strength: 0.66
+      accuracy: 0.72
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.34
+      detection_range_m: 260000
+      radar_cross_section_m2: 18
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-sayyad4b
+          max_qty: 24
+          initial_qty: 24
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: fateh110-brigade
+      name: Fateh-110 Missile Brigade
+      description: Iranian road-mobile short-range ballistic missile formation for regional strike missions.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: Fateh-110 Missile Brigade
+      short_name: Fateh-110
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2012
+      base_strength: 0.6
+      accuracy: 0.62
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 300
+      survivability: 0.28
+      detection_range_m: 1500
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 400
+      fuel_burn_rate_lph: 85
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-fateh110
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: karrar-mbt
+      name: Karrar
+      description: Iranian main battle tank modernization program fielded for domestic armored formations.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: Karrar Main Battle Tank
+      short_name: Karrar
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2017
+      base_strength: 0.64
+      accuracy: 0.68
+      max_speed_mps: 17
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.52
+      detection_range_m: 5000
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 1200
+      fuel_burn_rate_lph: 220
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-120mm-apfsds
+          max_qty: 30
+          initial_qty: 30
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: kheibar-shekan-brigade
+      name: Kheibar Shekan Missile Brigade
+      description: Solid-fuel MRBM formation built for deeper strikes on coalition bases, ports, and strategic infrastructure.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: Kheibar Shekan Missile Brigade
+      short_name: Kheibar
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2022
+      base_strength: 0.62
+      accuracy: 0.64
+      max_speed_mps: 15
+      cruise_speed_mps: 9
+      max_range_km: 900
+      survivability: 0.26
+      detection_range_m: 1300
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 430
+      fuel_burn_rate_lph: 82
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-kheibar-shekan
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: khordad15-battery
+      name: Khordad-15 Battery
+      description: Iranian mobile medium-to-long-range surface-to-air system for point and regional air defense.
+      domain: 1
+      form: 31
+      general_type: 73
+      specific_type: Khordad-15 Air Defense Battery
+      short_name: Khordad-15
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2019
+      base_strength: 0.58
+      accuracy: 0.68
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.32
+      detection_range_m: 150000
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 450
+      fuel_burn_rate_lph: 90
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-3rd-khordad
+          max_qty: 16
+          initial_qty: 16
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: paveh-cruise-missile-regiment
+      name: Paveh Cruise Missile Regiment
+      description: Long-range land-attack cruise missile force for dispersed stand-off strikes against fixed coalition targets.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: Paveh Cruise Missile Regiment
+      short_name: Paveh
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2023
+      base_strength: 0.54
+      accuracy: 0.7
+      max_speed_mps: 14
+      cruise_speed_mps: 8
+      max_range_km: 850
+      survivability: 0.24
+      detection_range_m: 1200
+      radar_cross_section_m2: 7
+      fuel_capacity_liters: 360
+      fuel_burn_rate_lph: 70
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-paveh
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: qiam1-missile-brigade
+      name: Qiam-1 Missile Brigade
+      description: Liquid-fuel SRBM formation suited to high-volume regional strikes against coalition air bases and infrastructure.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: Qiam-1 Missile Brigade
+      short_name: Qiam-1
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2010
+      base_strength: 0.58
+      accuracy: 0.54
+      max_speed_mps: 14
+      cruise_speed_mps: 9
+      max_range_km: 700
+      survivability: 0.24
+      detection_range_m: 1200
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 420
+      fuel_burn_rate_lph: 80
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-qiam1
+          max_qty: 6
+          initial_qty: 6
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: raad-coastal-battery
+      name: Raad Coastal Battery
+      description: Iranian mobile anti-ship coastal defense battery representative of Gulf littoral denial tactics.
+      domain: 1
+      form: 31
+      general_type: 73
+      specific_type: Raad Coastal Defense Battery
+      short_name: Raad
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2013
+      base_strength: 0.52
+      accuracy: 0.58
+      max_speed_mps: 15
+      cruise_speed_mps: 9
+      max_range_km: 300
+      survivability: 0.26
+      detection_range_m: 140000
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 350
+      fuel_burn_rate_lph: 70
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-am39-exocet
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: sejjil-missile-brigade
+      name: Sejjil Missile Brigade
+      description: Iranian solid-fuel medium-range ballistic missile formation for deeper regional strike missions.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: Sejjil Missile Brigade
+      short_name: Sejjil
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2014
+      base_strength: 0.62
+      accuracy: 0.58
+      max_speed_mps: 14
+      cruise_speed_mps: 8
+      max_range_km: 700
+      survivability: 0.28
+      detection_range_m: 1500
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 420
+      fuel_burn_rate_lph: 80
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-sejjil
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: third-khordad-battery
+      name: 3rd Khordad Battery
+      description: Mobile Iranian SAM battery suited for ambush-style medium-range defense against aircraft and larger UAVs.
+      domain: 1
+      form: 31
+      general_type: 73
+      specific_type: 3rd Khordad Air Defense Battery
+      short_name: 3rd Khordad
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2014
+      base_strength: 0.6
+      accuracy: 0.7
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.34
+      detection_range_m: 160000
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 420
+      fuel_burn_rate_lph: 85
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-3rd-khordad
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: iran-strategic-airbase
+      name: Iranian Strategic Air Base
+      description: Large hardened air base supporting fighter dispersal, strike sorties, and missile-defense coordination.
+      domain: 1
+      form: 34
+      general_type: 93
+      specific_type: Strategic Air Base
+      short_name: Air Base
+      asset_class: airbase
+      target_class: runway
+      stationary: true
+      affiliation: military
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 1985
+      base_strength: 0.42
+      accuracy: 0.05
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.38
+      detection_range_m: 18000
+      radar_cross_section_m2: 40
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: iran-national-c2-bunker
+      name: Iranian National Air Defense C2 Site
+      description: Hardened command-and-control bunker used to coordinate strategic air-defense and retaliatory strike operations.
+      domain: 1
+      form: 34
+      general_type: 93
+      specific_type: Air Defense Command and Control Site
+      short_name: C2 Site
+      asset_class: c2_site
+      target_class: hardened_infrastructure
+      stationary: true
+      affiliation: military
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2005
+      base_strength: 0.3
+      accuracy: 0.1
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.48
+      detection_range_m: 35000
+      radar_cross_section_m2: 14
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: iran-early-warning-radar-site
+      name: Iranian Early Warning Radar Site
+      description: Fixed long-range radar installation supporting national air-defense and missile warning coverage.
+      domain: 1
+      form: 34
+      general_type: 94
+      specific_type: Early Warning Radar Site
+      short_name: Radar Site
+      asset_class: radar_site
+      target_class: sam_battery
+      stationary: true
+      affiliation: military
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2010
+      base_strength: 0.26
+      accuracy: 0.18
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.24
+      detection_range_m: 320000
+      radar_cross_section_m2: 24
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: iran-gulf-oil-export-terminal
+      name: Iranian Gulf Oil Export Terminal
+      description: Fixed petroleum export terminal representing vulnerable energy infrastructure on the Gulf coast.
+      domain: 1
+      form: 34
+      general_type: 91
+      specific_type: Gulf Oil Export Terminal
+      short_name: Oil Terminal
+      asset_class: oil_field
+      target_class: civilian_energy
+      stationary: true
+      affiliation: civilian
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 1990
+      base_strength: 0.18
+      accuracy: 0.02
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.16
+      detection_range_m: 800
+      radar_cross_section_m2: 70
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: iran-underground-missile-complex
+      name: Iranian Underground Missile Complex
+      description: Hardened fixed missile garrison used to store and launch long-range conventional strike systems.
+      domain: 1
+      form: 34
+      general_type: 72
+      specific_type: Underground Missile Complex
+      short_name: Missile Site
+      asset_class: c2_site
+      target_class: hardened_infrastructure
+      stationary: true
+      affiliation: military
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2018
+      base_strength: 0.4
+      accuracy: 0.58
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.52
+      detection_range_m: 2500
+      radar_cross_section_m2: 16
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-paveh
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []

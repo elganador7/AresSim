@@ -1,0 +1,45 @@
+library:
+    id: che_land_units-v1
+    name: CHE Land Units
+    description: Land units originating from CHE.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: piranha-v-switzerland
+      name: Piranha V APC
+      description: Modern Swiss wheeled armored vehicle representative of protected mechanized mobility.
+      domain: 1
+      form: 31
+      general_type: 62
+      specific_type: Piranha V Armored Personnel Carrier
+      short_name: Piranha V
+      nation_of_origin: CHE
+      operators:
+        - CHE
+        - DNK
+      employed_by:
+        - CHE
+      service_entry_year: 2018
+      base_strength: 0.54
+      accuracy: 0.44
+      max_speed_mps: 27
+      cruise_speed_mps: 16
+      max_range_km: 600
+      survivability: 0.42
+      detection_range_m: 3500
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 700
+      fuel_burn_rate_lph: 120
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-25mm-hei
+          max_qty: 200
+          initial_qty: 200
+      default_weapon_configuration: ""
+      weapon_configurations: []

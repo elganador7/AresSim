@@ -1,0 +1,230 @@
+library:
+    id: gbr_sea_units-v1
+    name: GBR SEA Units
+    description: Sea units originating from GBR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: hunt-class-mcm
+      name: Hunt-class MCMV
+      description: British mine countermeasures vessel used for minehunting, sweeping, and chokepoint security.
+      domain: 3
+      form: 20
+      general_type: 47
+      specific_type: Hunt-class Mine Countermeasures Vessel
+      short_name: Hunt
+      nation_of_origin: GBR
+      operators:
+        - GBR
+      employed_by:
+        - GBR
+      service_entry_year: 1981
+      base_strength: 0.36
+      accuracy: 0.38
+      max_speed_mps: 6.7
+      cruise_speed_mps: 4.6
+      max_range_km: 3000
+      survivability: 0.2
+      detection_range_m: 55000
+      radar_cross_section_m2: 1000
+      fuel_capacity_liters: 90000
+      fuel_burn_rate_lph: 180
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: khareef-corvette-oman
+      name: Khareef-class Corvette
+      description: Omani corvette for Gulf of Oman patrol, escort, and local-area air defense.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Khareef-class Corvette
+      short_name: Khareef
+      nation_of_origin: GBR
+      operators:
+        - OMN
+      employed_by:
+        - OMN
+      service_entry_year: 2014
+      base_strength: 0.54
+      accuracy: 0.66
+      max_speed_mps: 13.9
+      cruise_speed_mps: 8.8
+      max_range_km: 5000
+      survivability: 0.42
+      detection_range_m: 170000
+      radar_cross_section_m2: 4000
+      fuel_capacity_liters: 360000
+      fuel_burn_rate_lph: 760
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-vl-mica
+          max_qty: 12
+          initial_qty: 12
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: muray-jib-corvette-bahrain
+      name: Muray Jib Corvette
+      description: Bahraini patrol corvette for coastal security, escort, and limited surface strike missions.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: Muray Jib-class Corvette
+      short_name: Muray Jib
+      nation_of_origin: GBR
+      operators:
+        - BHR
+      employed_by:
+        - BHR
+      service_entry_year: 1987
+      base_strength: 0.34
+      accuracy: 0.44
+      max_speed_mps: 13
+      cruise_speed_mps: 8
+      max_range_km: 3500
+      survivability: 0.24
+      detection_range_m: 90000
+      radar_cross_section_m2: 1800
+      fuel_capacity_liters: 180000
+      fuel_burn_rate_lph: 430
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-am39-exocet
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: qe-class-carrier
+      name: Queen Elizabeth-class Carrier
+      description: STOVL carrier for UK carrier strike and expeditionary aviation operations.
+      domain: 3
+      form: 20
+      general_type: 40
+      specific_type: Queen Elizabeth-class Aircraft Carrier
+      short_name: QE
+      nation_of_origin: GBR
+      operators:
+        - GBR
+      employed_by:
+        - GBR
+      service_entry_year: 2017
+      base_strength: 0.9
+      accuracy: 0.8
+      max_speed_mps: 13.9
+      cruise_speed_mps: 9.8
+      max_range_km: 18500
+      survivability: 0.82
+      detection_range_m: 250000
+      radar_cross_section_m2: 60000
+      fuel_capacity_liters: 1.8e+06
+      fuel_burn_rate_lph: 2200
+      embarked_fixed_wing_capacity: 24
+      embarked_rotary_wing_capacity: 14
+      embarked_uav_capacity: 6
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 8
+      recovery_capacity_per_interval: 8
+      sortie_interval_minutes: 20
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: river-class-opv
+      name: River-class OPV
+      description: Offshore patrol vessel suited for EEZ security, constabulary duties, and low-threat escort work.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: River-class Offshore Patrol Vessel
+      short_name: River
+      nation_of_origin: GBR
+      operators:
+        - GBR
+        - BRA
+        - THA
+      employed_by:
+        - GBR
+        - BRA
+        - THA
+      service_entry_year: 2003
+      base_strength: 0.42
+      accuracy: 0.46
+      max_speed_mps: 12.9
+      cruise_speed_mps: 8.2
+      max_range_km: 10000
+      survivability: 0.3
+      detection_range_m: 90000
+      radar_cross_section_m2: 3500
+      fuel_capacity_liters: 260000
+      fuel_burn_rate_lph: 500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: type45-daring
+      name: Type 45 Daring
+      description: Royal Navy air-defense destroyer with SAMPSON radar and area defense missiles.
+      domain: 3
+      form: 20
+      general_type: 42
+      specific_type: Type 45 Daring-class Destroyer
+      short_name: Type 45
+      nation_of_origin: GBR
+      operators:
+        - GBR
+      employed_by:
+        - GBR
+      service_entry_year: 2009
+      base_strength: 0.82
+      accuracy: 0.86
+      max_speed_mps: 15.4
+      cruise_speed_mps: 10.3
+      max_range_km: 13000
+      survivability: 0.68
+      detection_range_m: 360000
+      radar_cross_section_m2: 12000
+      fuel_capacity_liters: 1.4e+06
+      fuel_burn_rate_lph: 2200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-sm2-block3
+          max_qty: 32
+          initial_qty: 32
+        - weapon_id: gun-mk45-5in
+          max_qty: 680
+          initial_qty: 680
+      default_weapon_configuration: ""
+      weapon_configurations: []

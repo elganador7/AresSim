@@ -1,0 +1,50 @@
+library:
+    id: dza_air_units-v1
+    name: DZA AIR Units
+    description: Air units originating from DZA.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: su30mka-flanker
+      name: Su-30MKA Flanker-H
+      description: Algeria's highly capable Su-30MK variant with French and Russian avionics. Thrust vectoring, BARS PESA radar. Largest Su-30 operator in Africa.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: Su-30MKA Flanker-H
+      short_name: ""
+      nation_of_origin: DZA
+      operators:
+        - DZA
+      employed_by:
+        - DZA
+      service_entry_year: 2007
+      base_strength: 0.82
+      accuracy: 0.83
+      max_speed_mps: 772
+      cruise_speed_mps: 295
+      max_range_km: 3000
+      survivability: 0.65
+      detection_range_m: 180000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 9640
+      fuel_burn_rate_lph: 5000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 6
+          initial_qty: 6
+        - weapon_id: aam-r74m
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []

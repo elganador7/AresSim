@@ -6,7 +6,9 @@ import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2"
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { FormationPosture, MoveOrder, Position, SimTime, WeatherConditions } from "./common_pb";
 import { file_engine_v1_common } from "./common_pb";
-import type { Unit } from "./unit_pb";
+import type { CountryRelationship } from "./scenario_pb";
+import { file_engine_v1_scenario } from "./scenario_pb";
+import type { DamageState, Unit } from "./unit_pb";
 import { file_engine_v1_unit } from "./unit_pb";
 import type { OperationalStatus } from "./status_pb";
 import { file_engine_v1_status } from "./status_pb";
@@ -18,7 +20,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/events.proto.
  */
 export const file_engine_v1_events: GenFile = /*@__PURE__*/
-  fileDesc("ChZlbmdpbmUvdjEvZXZlbnRzLnByb3RvEgllbmdpbmUudjEi2AEKEUZ1bGxTdGF0ZVNuYXBzaG90Eh4KBXVuaXRzGAEgAygLMg8uZW5naW5lLnYxLlVuaXQSJAoIc2ltX3RpbWUYAyABKAsyEi5lbmdpbmUudjEuU2ltVGltZRItCgd3ZWF0aGVyGAQgASgLMhwuZW5naW5lLnYxLldlYXRoZXJDb25kaXRpb25zEhUKDXNjZW5hcmlvX25hbWUYBSABKAkSNwoSd2VhcG9uX2RlZmluaXRpb25zGAYgAygLMhsuZW5naW5lLnYxLldlYXBvbkRlZmluaXRpb24iVQoSU2NlbmFyaW9TdGF0ZUV2ZW50EisKBXN0YXRlGAEgASgOMhwuZW5naW5lLnYxLlNjZW5hcmlvUGxheVN0YXRlEhIKCnRpbWVfc2NhbGUYAiABKAIiXQoPQmF0Y2hVbml0VXBkYXRlEiQKBmRlbHRhcxgBIAMoCzIULmVuZ2luZS52MS5Vbml0RGVsdGESJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSLyAQoJVW5pdERlbHRhEg8KB3VuaXRfaWQYASABKAkSJQoIcG9zaXRpb24YAiABKAsyEy5lbmdpbmUudjEuUG9zaXRpb24SLAoGc3RhdHVzGAMgASgLMhwuZW5naW5lLnYxLk9wZXJhdGlvbmFsU3RhdHVzEiwKB3Bvc3R1cmUYBCABKA4yGy5lbmdpbmUudjEuRm9ybWF0aW9uUG9zdHVyZRIoCgptb3ZlX29yZGVyGAUgASgLMhQuZW5naW5lLnYxLk1vdmVPcmRlchInCgd3ZWFwb25zGAYgAygLMhYuZW5naW5lLnYxLldlYXBvblN0YXRlIlcKEFVuaXRTcGF3bmVkRXZlbnQSHQoEdW5pdBgBIAEoCzIPLmVuZ2luZS52MS5Vbml0EiQKCHNpbV90aW1lGAIgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUibwoSVW5pdERlc3Ryb3llZEV2ZW50Eg8KB3VuaXRfaWQYASABKAkSDQoFY2F1c2UYAiABKAkSJAoIc2ltX3RpbWUYAyABKAsyEi5lbmdpbmUudjEuU2ltVGltZRITCgthdHRhY2tlcl9pZBgEIAEoCSJjCg9EZXRlY3Rpb25VcGRhdGUSFgoOZGV0ZWN0aW5nX3NpZGUYASABKAkSGQoRZGV0ZWN0ZWRfdW5pdF9pZHMYAiADKAkSHQoVZGV0ZWN0ZWRfbXVuaXRpb25faWRzGAMgAygJImwKEEluRmxpZ2h0TXVuaXRpb24SCgoCaWQYASABKAkSEQoJd2VhcG9uX2lkGAIgASgJEhIKCnNob290ZXJfaWQYAyABKAkSJQoIcG9zaXRpb24YBCABKAsyEy5lbmdpbmUudjEuUG9zaXRpb24iZgoOTXVuaXRpb25VcGRhdGUSLgoJbXVuaXRpb25zGAEgAygLMhsuZW5naW5lLnYxLkluRmxpZ2h0TXVuaXRpb24SJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSJPCg5OYXJyYXRpdmVFdmVudBIMCgR0ZXh0GAEgASgJEhAKCGNhdGVnb3J5GAIgASgJEg8KB3VuaXRfaWQYAyABKAkSDAoEc2lkZRgEIAEoCSpsChFTY2VuYXJpb1BsYXlTdGF0ZRIYChRTQ0VOQVJJT19VTlNQRUNJRklFRBAAEhMKD1NDRU5BUklPX1BBVVNFRBABEhQKEFNDRU5BUklPX1JVTk5JTkcQAhISCg5TQ0VOQVJJT19FTkRFRBADQitaKWdpdGh1Yi5jb20vYXJlc3NpbS9pbnRlcm5hbC9nZW4vZW5naW5lL3YxYgZwcm90bzM", [file_engine_v1_common, file_engine_v1_unit, file_engine_v1_status, file_engine_v1_weapon]);
+  fileDesc("ChZlbmdpbmUvdjEvZXZlbnRzLnByb3RvEgllbmdpbmUudjEijwIKEUZ1bGxTdGF0ZVNuYXBzaG90Eh4KBXVuaXRzGAEgAygLMg8uZW5naW5lLnYxLlVuaXQSJAoIc2ltX3RpbWUYAyABKAsyEi5lbmdpbmUudjEuU2ltVGltZRItCgd3ZWF0aGVyGAQgASgLMhwuZW5naW5lLnYxLldlYXRoZXJDb25kaXRpb25zEhUKDXNjZW5hcmlvX25hbWUYBSABKAkSNwoSd2VhcG9uX2RlZmluaXRpb25zGAYgAygLMhsuZW5naW5lLnYxLldlYXBvbkRlZmluaXRpb24SNQoNcmVsYXRpb25zaGlwcxgHIAMoCzIeLmVuZ2luZS52MS5Db3VudHJ5UmVsYXRpb25zaGlwIlUKElNjZW5hcmlvU3RhdGVFdmVudBIrCgVzdGF0ZRgBIAEoDjIcLmVuZ2luZS52MS5TY2VuYXJpb1BsYXlTdGF0ZRISCgp0aW1lX3NjYWxlGAIgASgCIl0KD0JhdGNoVW5pdFVwZGF0ZRIkCgZkZWx0YXMYASADKAsyFC5lbmdpbmUudjEuVW5pdERlbHRhEiQKCHNpbV90aW1lGAIgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUioAIKCVVuaXREZWx0YRIPCgd1bml0X2lkGAEgASgJEiUKCHBvc2l0aW9uGAIgASgLMhMuZW5naW5lLnYxLlBvc2l0aW9uEiwKBnN0YXR1cxgDIAEoCzIcLmVuZ2luZS52MS5PcGVyYXRpb25hbFN0YXR1cxIsCgdwb3N0dXJlGAQgASgOMhsuZW5naW5lLnYxLkZvcm1hdGlvblBvc3R1cmUSKAoKbW92ZV9vcmRlchgFIAEoCzIULmVuZ2luZS52MS5Nb3ZlT3JkZXISJwoHd2VhcG9ucxgGIAMoCzIWLmVuZ2luZS52MS5XZWFwb25TdGF0ZRIsCgxkYW1hZ2Vfc3RhdGUYByABKA4yFi5lbmdpbmUudjEuRGFtYWdlU3RhdGUiVwoQVW5pdFNwYXduZWRFdmVudBIdCgR1bml0GAEgASgLMg8uZW5naW5lLnYxLlVuaXQSJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSJvChJVbml0RGVzdHJveWVkRXZlbnQSDwoHdW5pdF9pZBgBIAEoCRINCgVjYXVzZRgCIAEoCRIkCghzaW1fdGltZRgDIAEoCzISLmVuZ2luZS52MS5TaW1UaW1lEhMKC2F0dGFja2VyX2lkGAQgASgJIpcBCg9EZXRlY3Rpb25VcGRhdGUSFgoOZGV0ZWN0aW5nX3NpZGUYASABKAkSGQoRZGV0ZWN0ZWRfdW5pdF9pZHMYAiADKAkSHQoVZGV0ZWN0ZWRfbXVuaXRpb25faWRzGAMgAygJEjIKDXVuaXRfY29udGFjdHMYBCADKAsyGy5lbmdpbmUudjEuRGV0ZWN0aW9uQ29udGFjdCJIChBEZXRlY3Rpb25Db250YWN0Eg8KB3VuaXRfaWQYASABKAkSEwoLc291cmNlX3RlYW0YAiABKAkSDgoGc2hhcmVkGAMgASgIImwKEEluRmxpZ2h0TXVuaXRpb24SCgoCaWQYASABKAkSEQoJd2VhcG9uX2lkGAIgASgJEhIKCnNob290ZXJfaWQYAyABKAkSJQoIcG9zaXRpb24YBCABKAsyEy5lbmdpbmUudjEuUG9zaXRpb24iZgoOTXVuaXRpb25VcGRhdGUSLgoJbXVuaXRpb25zGAEgAygLMhsuZW5naW5lLnYxLkluRmxpZ2h0TXVuaXRpb24SJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSJPCg5OYXJyYXRpdmVFdmVudBIMCgR0ZXh0GAEgASgJEhAKCGNhdGVnb3J5GAIgASgJEg8KB3VuaXRfaWQYAyABKAkSDAoEc2lkZRgEIAEoCSpsChFTY2VuYXJpb1BsYXlTdGF0ZRIYChRTQ0VOQVJJT19VTlNQRUNJRklFRBAAEhMKD1NDRU5BUklPX1BBVVNFRBABEhQKEFNDRU5BUklPX1JVTk5JTkcQAhISCg5TQ0VOQVJJT19FTkRFRBADQitaKWdpdGh1Yi5jb20vYXJlc3NpbS9pbnRlcm5hbC9nZW4vZW5naW5lL3YxYgZwcm90bzM", [file_engine_v1_common, file_engine_v1_scenario, file_engine_v1_unit, file_engine_v1_status, file_engine_v1_weapon]);
 
 /**
  * @generated from message engine.v1.FullStateSnapshot
@@ -51,6 +53,11 @@ export type FullStateSnapshot = Message<"engine.v1.FullStateSnapshot"> & {
    * @generated from field: repeated engine.v1.WeaponDefinition weapon_definitions = 6;
    */
   weaponDefinitions: WeaponDefinition[];
+
+  /**
+   * @generated from field: repeated engine.v1.CountryRelationship relationships = 7;
+   */
+  relationships: CountryRelationship[];
 };
 
 /**
@@ -147,6 +154,13 @@ export type UnitDelta = Message<"engine.v1.UnitDelta"> & {
    * @generated from field: repeated engine.v1.WeaponState weapons = 6;
    */
   weapons: WeaponState[];
+
+  /**
+   * present if damage state changed
+   *
+   * @generated from field: engine.v1.DamageState damage_state = 7;
+   */
+  damageState: DamageState;
 };
 
 /**
@@ -236,6 +250,11 @@ export type DetectionUpdate = Message<"engine.v1.DetectionUpdate"> & {
    * @generated from field: repeated string detected_munition_ids = 3;
    */
   detectedMunitionIds: string[];
+
+  /**
+   * @generated from field: repeated engine.v1.DetectionContact unit_contacts = 4;
+   */
+  unitContacts: DetectionContact[];
 };
 
 /**
@@ -244,6 +263,33 @@ export type DetectionUpdate = Message<"engine.v1.DetectionUpdate"> & {
  */
 export const DetectionUpdateSchema: GenMessage<DetectionUpdate> = /*@__PURE__*/
   messageDesc(file_engine_v1_events, 6);
+
+/**
+ * @generated from message engine.v1.DetectionContact
+ */
+export type DetectionContact = Message<"engine.v1.DetectionContact"> & {
+  /**
+   * @generated from field: string unit_id = 1;
+   */
+  unitId: string;
+
+  /**
+   * @generated from field: string source_team = 2;
+   */
+  sourceTeam: string;
+
+  /**
+   * @generated from field: bool shared = 3;
+   */
+  shared: boolean;
+};
+
+/**
+ * Describes the message engine.v1.DetectionContact.
+ * Use `create(DetectionContactSchema)` to create a new message.
+ */
+export const DetectionContactSchema: GenMessage<DetectionContact> = /*@__PURE__*/
+  messageDesc(file_engine_v1_events, 7);
 
 /**
  * @generated from message engine.v1.InFlightMunition
@@ -283,7 +329,7 @@ export type InFlightMunition = Message<"engine.v1.InFlightMunition"> & {
  * Use `create(InFlightMunitionSchema)` to create a new message.
  */
 export const InFlightMunitionSchema: GenMessage<InFlightMunition> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 7);
+  messageDesc(file_engine_v1_events, 8);
 
 /**
  * Emitted every tick with the complete set of in-flight munitions.
@@ -308,7 +354,7 @@ export type MunitionUpdate = Message<"engine.v1.MunitionUpdate"> & {
  * Use `create(MunitionUpdateSchema)` to create a new message.
  */
 export const MunitionUpdateSchema: GenMessage<MunitionUpdate> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 8);
+  messageDesc(file_engine_v1_events, 9);
 
 /**
  * @generated from message engine.v1.NarrativeEvent
@@ -342,7 +388,7 @@ export type NarrativeEvent = Message<"engine.v1.NarrativeEvent"> & {
  * Use `create(NarrativeEventSchema)` to create a new message.
  */
 export const NarrativeEventSchema: GenMessage<NarrativeEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 9);
+  messageDesc(file_engine_v1_events, 10);
 
 /**
  * @generated from enum engine.v1.ScenarioPlayState

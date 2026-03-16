@@ -1,0 +1,291 @@
+library:
+    id: fra_sea_units-v1
+    name: FRA SEA Units
+    description: Sea units originating from FRA.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: al-riyadh-frigate-saudi
+      name: Al Riyadh-class Frigate
+      description: Saudi air-defense frigate used for Red Sea and Gulf escort, fleet protection, and maritime strike.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: Al Riyadh-class Frigate
+      short_name: Al Riyadh
+      nation_of_origin: FRA
+      operators:
+        - SAU
+      employed_by:
+        - SAU
+      service_entry_year: 2002
+      base_strength: 0.68
+      accuracy: 0.74
+      max_speed_mps: 15
+      cruise_speed_mps: 9.6
+      max_range_km: 7000
+      survivability: 0.54
+      detection_range_m: 240000
+      radar_cross_section_m2: 9000
+      fuel_capacity_liters: 780000
+      fuel_burn_rate_lph: 1450
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-vl-mica
+          max_qty: 32
+          initial_qty: 32
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: charles-de-gaulle
+      name: Charles de Gaulle (R91)
+      description: French CATOBAR carrier that anchors national strike groups and can surge fixed-wing sorties from a compact deck.
+      domain: 3
+      form: 20
+      general_type: 40
+      specific_type: Charles de Gaulle-class Aircraft Carrier
+      short_name: CdG
+      nation_of_origin: FRA
+      operators:
+        - FRA
+      employed_by:
+        - FRA
+      service_entry_year: 2001
+      base_strength: 0.9
+      accuracy: 0.84
+      max_speed_mps: 14.9
+      cruise_speed_mps: 10
+      max_range_km: 999999
+      survivability: 0.84
+      detection_range_m: 300000
+      radar_cross_section_m2: 80000
+      fuel_capacity_liters: 2.2e+06
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 30
+      embarked_rotary_wing_capacity: 8
+      embarked_uav_capacity: 4
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 10
+      recovery_capacity_per_interval: 10
+      sortie_interval_minutes: 20
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: formidable-frigate-singapore
+      name: Formidable-class Frigate
+      description: Singaporean stealth frigate built for local sea control and regional networked warfare.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: Formidable-class Frigate
+      short_name: Formidable
+      nation_of_origin: FRA
+      operators:
+        - SGP
+      employed_by:
+        - SGP
+      service_entry_year: 2007
+      base_strength: 0.64
+      accuracy: 0.7
+      max_speed_mps: 14.5
+      cruise_speed_mps: 9.2
+      max_range_km: 7200
+      survivability: 0.52
+      detection_range_m: 220000
+      radar_cross_section_m2: 6000
+      fuel_capacity_liters: 680000
+      fuel_burn_rate_lph: 1350
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: sam-sm2-block3
+          max_qty: 16
+          initial_qty: 16
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: fremm-frigate
+      name: FREMM Frigate
+      description: European multipurpose frigate family used for ASW, area escort, and strike.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: FREMM Multi-Mission Frigate
+      short_name: FREMM
+      nation_of_origin: FRA
+      operators:
+        - FRA
+        - ITA
+        - EGY
+        - MAR
+      employed_by:
+        - FRA
+        - ITA
+        - EGY
+        - MAR
+      service_entry_year: 2012
+      base_strength: 0.78
+      accuracy: 0.82
+      max_speed_mps: 14.9
+      cruise_speed_mps: 9.8
+      max_range_km: 11000
+      survivability: 0.62
+      detection_range_m: 260000
+      radar_cross_section_m2: 9000
+      fuel_capacity_liters: 950000
+      fuel_burn_rate_lph: 1700
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: asw-vlasroc
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: gun-mk45-5in
+          max_qty: 600
+          initial_qty: 600
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: gowind-2500-corvette
+      name: Gowind 2500 Corvette
+      description: Modern export corvette family used for patrol, ASW, and littoral strike missions.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Gowind 2500 Corvette
+      short_name: Gowind
+      nation_of_origin: FRA
+      operators:
+        - EGY
+        - MYS
+        - ARE
+        - ARG
+      employed_by:
+        - EGY
+        - MYS
+        - ARE
+        - ARG
+      service_entry_year: 2017
+      base_strength: 0.58
+      accuracy: 0.72
+      max_speed_mps: 15
+      cruise_speed_mps: 9.5
+      max_range_km: 7000
+      survivability: 0.46
+      detection_range_m: 190000
+      radar_cross_section_m2: 6500
+      fuel_capacity_liters: 520000
+      fuel_burn_rate_lph: 1100
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mistral-class-lhd
+      name: Mistral-class LHD
+      description: French amphibious assault ship with strong helicopter lift, command, and humanitarian support capacity.
+      domain: 3
+      form: 20
+      general_type: 46
+      specific_type: Mistral-class Amphibious Assault Ship
+      short_name: Mistral
+      nation_of_origin: FRA
+      operators:
+        - FRA
+        - EGY
+      employed_by:
+        - FRA
+        - EGY
+      service_entry_year: 2006
+      base_strength: 0.68
+      accuracy: 0.5
+      max_speed_mps: 10.8
+      cruise_speed_mps: 8
+      max_range_km: 11000
+      survivability: 0.52
+      detection_range_m: 140000
+      radar_cross_section_m2: 24000
+      fuel_capacity_liters: 900000
+      fuel_burn_rate_lph: 1200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 16
+      embarked_uav_capacity: 4
+      embarked_surface_connector_capacity: 4
+      launch_capacity_per_interval: 4
+      recovery_capacity_per_interval: 4
+      sortie_interval_minutes: 25
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: tripartite-mcmv
+      name: Tripartite MCMV
+      description: Widely exported Franco-Belgian-Dutch minehunter family for coastal mine warfare and harbor access.
+      domain: 3
+      form: 20
+      general_type: 47
+      specific_type: Tripartite-class Minehunter
+      short_name: Tripartite
+      nation_of_origin: FRA
+      operators:
+        - FRA
+        - BEL
+        - NLD
+        - PAK
+        - IDN
+      employed_by:
+        - FRA
+        - BEL
+        - NLD
+        - PAK
+        - IDN
+      service_entry_year: 1984
+      base_strength: 0.34
+      accuracy: 0.36
+      max_speed_mps: 7.2
+      cruise_speed_mps: 4.6
+      max_range_km: 3000
+      survivability: 0.2
+      detection_range_m: 55000
+      radar_cross_section_m2: 1000
+      fuel_capacity_liters: 95000
+      fuel_burn_rate_lph: 190
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

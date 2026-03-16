@@ -1,0 +1,135 @@
+library:
+    id: fra_land_units-v1
+    name: FRA Land Units
+    description: Land units originating from FRA.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: caesar-155
+      name: CAESAR 155mm
+      description: Truck-mounted 155mm howitzer combining road mobility with long-range fires.
+      domain: 1
+      form: 31
+      general_type: 70
+      specific_type: CAESAR 155mm Self-Propelled Howitzer
+      short_name: CAESAR
+      nation_of_origin: FRA
+      operators:
+        - FRA
+        - BEL
+        - CZE
+        - DNK
+        - EST
+        - IDN
+        - LTU
+        - MAR
+        - SAU
+        - THA
+        - UKR
+      employed_by:
+        - FRA
+        - BEL
+        - CZE
+        - DNK
+        - EST
+        - IDN
+        - LTU
+        - MAR
+        - SAU
+        - THA
+        - UKR
+      service_entry_year: 2008
+      base_strength: 0.68
+      accuracy: 0.78
+      max_speed_mps: 22
+      cruise_speed_mps: 15
+      max_range_km: 600
+      survivability: 0.3
+      detection_range_m: 900
+      radar_cross_section_m2: 6
+      fuel_capacity_liters: 350
+      fuel_burn_rate_lph: 75
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: leclerc-xlr
+      name: Leclerc XLR
+      description: French MBT modernization with digital networking and improved survivability.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: Leclerc XLR
+      short_name: Leclerc
+      nation_of_origin: FRA
+      operators:
+        - FRA
+        - ARE
+        - JOR
+      employed_by:
+        - FRA
+        - ARE
+        - JOR
+      service_entry_year: 2024
+      base_strength: 0.9
+      accuracy: 0.84
+      max_speed_mps: 19.7
+      cruise_speed_mps: 11
+      max_range_km: 550
+      survivability: 0.76
+      detection_range_m: 4100
+      radar_cross_section_m2: 11
+      fuel_capacity_liters: 1300
+      fuel_burn_rate_lph: 290
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: vbci-ifv
+      name: VBCI IFV
+      description: French wheeled IFV used for expeditionary mechanized infantry operations.
+      domain: 1
+      form: 31
+      general_type: 61
+      specific_type: VBCI Infantry Fighting Vehicle
+      short_name: VBCI
+      nation_of_origin: FRA
+      operators:
+        - FRA
+        - QAT
+      employed_by:
+        - FRA
+        - QAT
+      service_entry_year: 2008
+      base_strength: 0.68
+      accuracy: 0.72
+      max_speed_mps: 27
+      cruise_speed_mps: 18
+      max_range_km: 750
+      survivability: 0.54
+      detection_range_m: 2500
+      radar_cross_section_m2: 6
+      fuel_capacity_liters: 450
+      fuel_burn_rate_lph: 95
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

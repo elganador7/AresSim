@@ -1,0 +1,95 @@
+library:
+    id: esp_air_units-v1
+    name: ESP AIR Units
+    description: Air units originating from ESP.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: c295w-transport
+      name: C-295W
+      description: Medium tactical transport aircraft used widely for lift, ISR, maritime patrol, and special missions.
+      domain: 2
+      form: 10
+      general_type: 14
+      specific_type: Airbus C-295W
+      short_name: C-295
+      nation_of_origin: ESP
+      operators:
+        - ESP
+        - POL
+        - IND
+        - EGY
+        - JOR
+        - MEX
+        - PHL
+        - BRA
+        - DZA
+        - COL
+        - ARE
+      employed_by:
+        - ESP
+        - POL
+        - IND
+        - EGY
+        - JOR
+        - MEX
+        - PHL
+        - BRA
+        - DZA
+        - COL
+        - ARE
+      service_entry_year: 2014
+      base_strength: 0.34
+      accuracy: 0.1
+      max_speed_mps: 160
+      cruise_speed_mps: 133
+      max_range_km: 5600
+      survivability: 0.24
+      detection_range_m: 8000
+      radar_cross_section_m2: 18
+      fuel_capacity_liters: 13000
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: cn235-mpa-oman
+      name: CN-235 MPA (Oman)
+      description: Omani maritime patrol aircraft for sea-lane surveillance, fisheries protection, and coastal ISR.
+      domain: 2
+      form: 10
+      general_type: 15
+      specific_type: CN-235 Maritime Patrol Aircraft
+      short_name: CN-235 MPA
+      nation_of_origin: ESP
+      operators:
+        - OMN
+      employed_by:
+        - OMN
+      service_entry_year: 2013
+      base_strength: 0.36
+      accuracy: 0.14
+      max_speed_mps: 140
+      cruise_speed_mps: 125
+      max_range_km: 4200
+      survivability: 0.22
+      detection_range_m: 180000
+      radar_cross_section_m2: 14
+      fuel_capacity_liters: 9000
+      fuel_burn_rate_lph: 1900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

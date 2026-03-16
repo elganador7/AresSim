@@ -1,0 +1,122 @@
+library:
+    id: deu_sea_units-v1
+    name: DEU SEA Units
+    description: Sea units originating from DEU.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: braunschweig-corvette
+      name: Braunschweig-class Corvette
+      description: German littoral corvette designed for coastal strike, patrol, and maritime security missions.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Braunschweig-class Corvette
+      short_name: K130
+      nation_of_origin: DEU
+      operators:
+        - DEU
+      employed_by:
+        - DEU
+      service_entry_year: 2008
+      base_strength: 0.56
+      accuracy: 0.7
+      max_speed_mps: 13.9
+      cruise_speed_mps: 9.3
+      max_range_km: 7400
+      survivability: 0.44
+      detection_range_m: 170000
+      radar_cross_section_m2: 5000
+      fuel_capacity_liters: 450000
+      fuel_burn_rate_lph: 900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-nsm
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: meko-a200-frigate
+      name: MEKO A-200 Frigate
+      description: Export-oriented modular frigate family used by multiple regional navies.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: MEKO A-200 Frigate
+      short_name: MEKO A200
+      nation_of_origin: DEU
+      operators:
+        - ZAF
+        - DZA
+        - EGY
+      employed_by:
+        - ZAF
+        - DZA
+        - EGY
+      service_entry_year: 2006
+      base_strength: 0.68
+      accuracy: 0.76
+      max_speed_mps: 15
+      cruise_speed_mps: 9.8
+      max_range_km: 7200
+      survivability: 0.54
+      detection_range_m: 220000
+      radar_cross_section_m2: 8500
+      fuel_capacity_liters: 800000
+      fuel_burn_rate_lph: 1500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: padilla-frigate-colombia
+      name: Padilla-class Frigate
+      description: Colombian frigate used for Caribbean and Pacific maritime security and patrol missions.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: Almirante Padilla-class Frigate
+      short_name: Padilla
+      nation_of_origin: DEU
+      operators:
+        - COL
+      employed_by:
+        - COL
+      service_entry_year: 1983
+      base_strength: 0.44
+      accuracy: 0.5
+      max_speed_mps: 14
+      cruise_speed_mps: 8.8
+      max_range_km: 5000
+      survivability: 0.34
+      detection_range_m: 150000
+      radar_cross_section_m2: 6500
+      fuel_capacity_liters: 520000
+      fuel_burn_rate_lph: 1000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-am39-exocet
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []

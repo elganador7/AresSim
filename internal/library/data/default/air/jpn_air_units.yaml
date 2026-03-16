@@ -1,0 +1,93 @@
+library:
+    id: jpn_air_units-v1
+    name: JPN AIR Units
+    description: Air units originating from JPN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: f15j-eagle
+      name: F-15J Eagle
+      description: Japanese license-built air-superiority variant of the F-15C with AAM-3/AAM-4/AAM-5 missiles. Upgraded MSIP-II aircraft receiving J/APG-2 AESA radar.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: F-15J Eagle
+      short_name: ""
+      nation_of_origin: JPN
+      operators:
+        - JPN
+      employed_by:
+        - JPN
+      service_entry_year: 1981
+      base_strength: 0.8
+      accuracy: 0.86
+      max_speed_mps: 807
+      cruise_speed_mps: 272
+      max_range_km: 3765
+      survivability: 0.66
+      detection_range_m: 185000
+      radar_cross_section_m2: 25
+      fuel_capacity_liters: 6103
+      fuel_burn_rate_lph: 4200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 940
+          initial_qty: 940
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f2-viper-zero
+      name: Mitsubishi F-2
+      description: Japan's 4th-generation multirole fighter developed from the F-16, with 25% larger composite wing, J/APG-1 AESA radar, and ASM-1C anti-ship missile integration.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: Mitsubishi F-2
+      short_name: ""
+      nation_of_origin: JPN
+      operators:
+        - JPN
+      employed_by:
+        - JPN
+      service_entry_year: 2000
+      base_strength: 0.78
+      accuracy: 0.84
+      max_speed_mps: 600
+      cruise_speed_mps: 270
+      max_range_km: 4000
+      survivability: 0.61
+      detection_range_m: 180000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 4750
+      fuel_burn_rate_lph: 2900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 511
+          initial_qty: 511
+      default_weapon_configuration: ""
+      weapon_configurations: []

@@ -1,0 +1,115 @@
+library:
+    id: jpn_sea_units-v1
+    name: JPN SEA Units
+    description: Sea units originating from JPN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: hyuga-helicopter-destroyer
+      name: Hyuga-class Helicopter Destroyer
+      description: Japanese aviation destroyer built around ASW helicopter operations and fleet command support.
+      domain: 3
+      form: 20
+      general_type: 46
+      specific_type: Hyuga-class Helicopter Destroyer
+      short_name: Hyuga
+      nation_of_origin: JPN
+      operators:
+        - JPN
+      employed_by:
+        - JPN
+      service_entry_year: 2009
+      base_strength: 0.7
+      accuracy: 0.58
+      max_speed_mps: 15.4
+      cruise_speed_mps: 10
+      max_range_km: 11000
+      survivability: 0.56
+      detection_range_m: 170000
+      radar_cross_section_m2: 20000
+      fuel_capacity_liters: 1.1e+06
+      fuel_burn_rate_lph: 1500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 11
+      embarked_uav_capacity: 2
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 3
+      recovery_capacity_per_interval: 3
+      sortie_interval_minutes: 25
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: izumo-helicopter-destroyer
+      name: Izumo-class Helicopter Destroyer
+      description: Large Japanese deck ship capable of helicopter operations and F-35B conversion.
+      domain: 3
+      form: 20
+      general_type: 46
+      specific_type: Izumo-class Multi-Purpose Operation Destroyer
+      short_name: Izumo
+      nation_of_origin: JPN
+      operators:
+        - JPN
+      employed_by:
+        - JPN
+      service_entry_year: 2015
+      base_strength: 0.74
+      accuracy: 0.62
+      max_speed_mps: 15.4
+      cruise_speed_mps: 10
+      max_range_km: 14000
+      survivability: 0.64
+      detection_range_m: 180000
+      radar_cross_section_m2: 26000
+      fuel_capacity_liters: 1.25e+06
+      fuel_burn_rate_lph: 1700
+      embarked_fixed_wing_capacity: 10
+      embarked_rotary_wing_capacity: 14
+      embarked_uav_capacity: 4
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 5
+      recovery_capacity_per_interval: 5
+      sortie_interval_minutes: 20
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mogami-frigate
+      name: Mogami-class Frigate
+      description: Japanese multi-mission frigate with reduced signature and high automation.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: Mogami-class Frigate
+      short_name: Mogami
+      nation_of_origin: JPN
+      operators:
+        - JPN
+      employed_by:
+        - JPN
+      service_entry_year: 2022
+      base_strength: 0.72
+      accuracy: 0.79
+      max_speed_mps: 15.4
+      cruise_speed_mps: 10
+      max_range_km: 10000
+      survivability: 0.58
+      detection_range_m: 240000
+      radar_cross_section_m2: 6500
+      fuel_capacity_liters: 800000
+      fuel_burn_rate_lph: 1600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: asm-nsm
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: asw-vlasroc
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []

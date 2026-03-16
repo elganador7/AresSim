@@ -1,0 +1,115 @@
+library:
+    id: usa_subsurface_units-v1
+    name: USA Subsurface Units
+    description: Subsurface units originating from USA.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: columbia-ssbn
+      name: Columbia-class SSBN
+      description: Next-generation US ballistic missile submarine with improved quieting and survivability.
+      domain: 4
+      form: 21
+      general_type: 51
+      specific_type: Columbia-class Ballistic Missile Submarine
+      short_name: Columbia
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2031
+      base_strength: 0.98
+      accuracy: 0.55
+      max_speed_mps: 12.4
+      cruise_speed_mps: 7.2
+      max_range_km: 999999
+      survivability: 0.92
+      detection_range_m: 180000
+      radar_cross_section_m2: 0.12
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: ohio-ssgn
+      name: Ohio-class SSGN
+      description: Converted guided-missile submarine with very large Tomahawk strike capacity.
+      domain: 4
+      form: 21
+      general_type: 52
+      specific_type: Ohio-class Guided Missile Submarine
+      short_name: Ohio SSGN
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2006
+      base_strength: 0.94
+      accuracy: 0.9
+      max_speed_mps: 13.4
+      cruise_speed_mps: 7.7
+      max_range_km: 999999
+      survivability: 0.86
+      detection_range_m: 220000
+      radar_cross_section_m2: 0.18
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-tomahawk
+          max_qty: 40
+          initial_qty: 40
+        - weapon_id: torp-mk48
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: virginia-block-v
+      name: Virginia Block V
+      description: US fast attack submarine with VPM strike capacity.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Virginia-class Attack Submarine
+      short_name: SSN-774
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2020
+      base_strength: 0.93
+      accuracy: 0.9
+      max_speed_mps: 13.4
+      cruise_speed_mps: 7.7
+      max_range_km: 999999
+      survivability: 0.85
+      detection_range_m: 200000
+      radar_cross_section_m2: 0.15
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

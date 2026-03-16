@@ -1,0 +1,93 @@
+library:
+    id: pak_air_units-v1
+    name: PAK AIR Units
+    description: Air units originating from PAK.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: jf17-block3
+      name: JF-17 Block III
+      description: Affordable single-engine multirole fighter with AESA radar and export-oriented weapon integration.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: JF-17 Block III Thunder
+      short_name: JF-17
+      nation_of_origin: PAK
+      operators:
+        - PAK
+        - NGA
+        - MMR
+        - AZE
+      employed_by:
+        - PAK
+        - NGA
+        - MMR
+        - AZE
+      service_entry_year: 2023
+      base_strength: 0.7
+      accuracy: 0.76
+      max_speed_mps: 530
+      cruise_speed_mps: 255
+      max_range_km: 2000
+      survivability: 0.46
+      detection_range_m: 150000
+      radar_cross_section_m2: 3.2
+      fuel_capacity_liters: 2400
+      fuel_burn_rate_lph: 2100
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-pl12
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-pl10
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: jf17-myanmar
+      name: JF-17 (Myanmar)
+      description: Myanmar's lightweight multirole fighter used for regional strike and air-defense missions.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: JF-17 Thunder
+      short_name: JF-17
+      nation_of_origin: PAK
+      operators:
+        - MMR
+      employed_by:
+        - MMR
+      service_entry_year: 2018
+      base_strength: 0.54
+      accuracy: 0.56
+      max_speed_mps: 530
+      cruise_speed_mps: 220
+      max_range_km: 2000
+      survivability: 0.34
+      detection_range_m: 150000
+      radar_cross_section_m2: 3.5
+      fuel_capacity_liters: 4700
+      fuel_burn_rate_lph: 2200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-derby
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gbu-32-jdam
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []

@@ -1,0 +1,102 @@
+library:
+    id: nor_land_units-v1
+    name: NOR Land Units
+    description: Land units originating from NOR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: nasams-3-battery
+      name: NASAMS 3 Battery
+      description: Networked medium-range air defense battery using AMRAAM-family interceptors.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: NASAMS 3 Battery
+      short_name: NASAMS
+      nation_of_origin: NOR
+      operators:
+        - NOR
+        - USA
+        - NLD
+        - ESP
+        - FIN
+        - HUN
+        - LTU
+        - IDN
+        - QAT
+        - UKR
+      employed_by:
+        - NOR
+        - USA
+        - NLD
+        - ESP
+        - FIN
+        - HUN
+        - LTU
+        - IDN
+        - QAT
+        - UKR
+      service_entry_year: 2019
+      base_strength: 0.74
+      accuracy: 0.82
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.36
+      detection_range_m: 120000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: nsm-coastal-defense
+      name: NSM Coastal Defense Battery
+      description: Truck-mounted anti-ship missile battery for littoral denial and distributed coastal defense.
+      domain: 1
+      form: 31
+      general_type: 73
+      specific_type: Naval Strike Missile Coastal Defense Battery
+      short_name: NSM CDS
+      nation_of_origin: NOR
+      operators:
+        - NOR
+        - POL
+        - USA
+        - ROU
+      employed_by:
+        - NOR
+        - POL
+        - USA
+        - ROU
+      service_entry_year: 2020
+      base_strength: 0.58
+      accuracy: 0.76
+      max_speed_mps: 18
+      cruise_speed_mps: 11
+      max_range_km: 700
+      survivability: 0.32
+      detection_range_m: 180000
+      radar_cross_section_m2: 7
+      fuel_capacity_liters: 350
+      fuel_burn_rate_lph: 80
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-nsm
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []

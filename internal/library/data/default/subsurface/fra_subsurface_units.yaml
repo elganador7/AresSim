@@ -1,0 +1,84 @@
+library:
+    id: fra_subsurface_units-v1
+    name: FRA Subsurface Units
+    description: Subsurface units originating from FRA.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: scorpene-chile
+      name: Scorpene-class Submarine (Chile)
+      description: Chilean diesel-electric attack submarine used for sea denial and Pacific littoral deterrence.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Scorpene-class Attack Submarine
+      short_name: Scorpene
+      nation_of_origin: FRA
+      operators:
+        - CHL
+      employed_by:
+        - CHL
+      service_entry_year: 2005
+      base_strength: 0.58
+      accuracy: 0.62
+      max_speed_mps: 9
+      cruise_speed_mps: 5
+      max_range_km: 6500
+      survivability: 0.56
+      detection_range_m: 90000
+      radar_cross_section_m2: 0.18
+      fuel_capacity_liters: 150000
+      fuel_burn_rate_lph: 140
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: torp-mk48
+          max_qty: 6
+          initial_qty: 6
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: suffren-class-ssn
+      name: Suffren-class SSN
+      description: French nuclear attack submarine with land-attack and carrier-escort mission flexibility.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Suffren-class Attack Submarine
+      short_name: Suffren
+      nation_of_origin: FRA
+      operators:
+        - FRA
+      employed_by:
+        - FRA
+      service_entry_year: 2020
+      base_strength: 0.88
+      accuracy: 0.84
+      max_speed_mps: 14.4
+      cruise_speed_mps: 8
+      max_range_km: 999999
+      survivability: 0.8
+      detection_range_m: 200000
+      radar_cross_section_m2: 0.13
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-am39-exocet
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: torp-mk48
+          max_qty: 10
+          initial_qty: 10
+      default_weapon_configuration: ""
+      weapon_configurations: []

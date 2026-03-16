@@ -124,6 +124,47 @@ enum UnitGeneralType {
   GENERAL_TYPE_ELECTRONIC_WARFARE   = 94;
 }
 
+enum AssetClass {
+  ASSET_CLASS_UNSPECIFIED   = 0;
+  ASSET_CLASS_COMBAT_UNIT   = 1;
+  ASSET_CLASS_AIRBASE       = 2;
+  ASSET_CLASS_PORT          = 3;
+  ASSET_CLASS_OIL_FIELD     = 4;
+  ASSET_CLASS_PIPELINE_NODE = 5;
+  ASSET_CLASS_DESALINATION_PLANT = 6;
+  ASSET_CLASS_POWER_PLANT   = 7;
+  ASSET_CLASS_RADAR_SITE    = 8;
+  ASSET_CLASS_C2_SITE       = 9;
+}
+
+enum TargetClass {
+  TARGET_CLASS_UNSPECIFIED           = 0;
+  TARGET_CLASS_SURFACE_WARSHIP       = 1;
+  TARGET_CLASS_SUBMARINE             = 2;
+  TARGET_CLASS_AIRCRAFT              = 3;
+  TARGET_CLASS_SAM_BATTERY           = 4;
+  TARGET_CLASS_ARMOR                 = 5;
+  TARGET_CLASS_SOFT_INFRASTRUCTURE   = 6;
+  TARGET_CLASS_HARDENED_INFRASTRUCTURE = 7;
+  TARGET_CLASS_RUNWAY                = 8;
+  TARGET_CLASS_CIVILIAN_ENERGY       = 9;
+  TARGET_CLASS_CIVILIAN_WATER        = 10;
+}
+
+enum Affiliation {
+  AFFILIATION_UNSPECIFIED = 0;
+  AFFILIATION_MILITARY    = 1;
+  AFFILIATION_CIVILIAN    = 2;
+  AFFILIATION_DUAL_USE    = 3;
+}
+
+enum EmploymentRole {
+  EMPLOYMENT_ROLE_UNSPECIFIED = 0;
+  EMPLOYMENT_ROLE_OFFENSIVE   = 1;
+  EMPLOYMENT_ROLE_DEFENSIVE   = 2;
+  EMPLOYMENT_ROLE_DUAL_USE    = 3;
+}
+
 // ── UNIT DEFINITION ───────────────────────────────────────────────────────────
 // Canonical template describing a specific platform type.
 // A live Unit instance references a definition by definition_id.
@@ -168,4 +209,11 @@ message UnitDefinition {
   // ── Logistics ─────────────────────────────────────────────────────────────
   float fuel_capacity_liters = 50;
   float fuel_burn_rate_lph   = 51;  // Litres per hour at cruise speed
+
+  // ── Asset semantics ───────────────────────────────────────────────────────
+  AssetClass  asset_class  = 60;
+  TargetClass target_class = 61;
+  bool        stationary   = 62;
+  Affiliation affiliation  = 63;
+  EmploymentRole employment_role = 64;
 }

@@ -1,0 +1,303 @@
+library:
+    id: prk_land_units-v1
+    name: PRK Land Units
+    description: Land units originating from PRK.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: kn23-missile-brigade
+      name: KN-23 Missile Brigade
+      description: North Korean solid-fuel SRBM formation built for maneuvering theater strikes against regional targets.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: KN-23 Short-Range Ballistic Missile Brigade
+      short_name: KN-23
+      nation_of_origin: PRK
+      operators:
+        - PRK
+      employed_by:
+        - PRK
+      service_entry_year: 2019
+      base_strength: 0.62
+      accuracy: 0.58
+      max_speed_mps: 15
+      cruise_speed_mps: 9
+      max_range_km: 400
+      survivability: 0.3
+      detection_range_m: 1500
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 420
+      fuel_burn_rate_lph: 80
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-kalibr
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: kn24-missile-brigade
+      name: KN-24 Missile Brigade
+      description: North Korean quasi-ballistic missile force designed for precision regional strikes and airbase attack.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: KN-24 Missile Brigade
+      short_name: KN-24
+      nation_of_origin: PRK
+      operators:
+        - PRK
+      employed_by:
+        - PRK
+      service_entry_year: 2019
+      base_strength: 0.6
+      accuracy: 0.56
+      max_speed_mps: 15
+      cruise_speed_mps: 9
+      max_range_km: 400
+      survivability: 0.28
+      detection_range_m: 1500
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 420
+      fuel_burn_rate_lph: 80
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-kalibr
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: kn25-rocket-brigade
+      name: KN-25 Rocket Brigade
+      description: North Korean super-large rocket artillery force used as a quasi-tactical ballistic strike system.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: KN-25 Super-Large Rocket Brigade
+      short_name: KN-25
+      nation_of_origin: PRK
+      operators:
+        - PRK
+      employed_by:
+        - PRK
+      service_entry_year: 2020
+      base_strength: 0.58
+      accuracy: 0.52
+      max_speed_mps: 15
+      cruise_speed_mps: 9
+      max_range_km: 350
+      survivability: 0.26
+      detection_range_m: 1400
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 380
+      fuel_burn_rate_lph: 75
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-gmlrs
+          max_qty: 6
+          initial_qty: 6
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: koksan-spg
+      name: M-1978 Koksan
+      description: North Korean long-range artillery system designed to threaten rear areas and urban centers from standoff range.
+      domain: 1
+      form: 32
+      general_type: 70
+      specific_type: M-1978 Koksan Self-Propelled Gun
+      short_name: Koksan
+      nation_of_origin: PRK
+      operators:
+        - PRK
+      employed_by:
+        - PRK
+      service_entry_year: 1978
+      base_strength: 0.5
+      accuracy: 0.48
+      max_speed_mps: 12
+      cruise_speed_mps: 7
+      max_range_km: 300
+      survivability: 0.24
+      detection_range_m: 2500
+      radar_cross_section_m2: 11
+      fuel_capacity_liters: 900
+      fuel_burn_rate_lph: 180
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-155mm-he
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: m1989-koksan-mlrs
+      name: M1989 MLRS
+      description: North Korean heavy multiple rocket launcher used for massed fires and saturation attack near the DMZ.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: M1989 Multiple Launch Rocket System
+      short_name: M1989
+      nation_of_origin: PRK
+      operators:
+        - PRK
+      employed_by:
+        - PRK
+      service_entry_year: 1989
+      base_strength: 0.48
+      accuracy: 0.42
+      max_speed_mps: 11
+      cruise_speed_mps: 7
+      max_range_km: 200
+      survivability: 0.22
+      detection_range_m: 2200
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 850
+      fuel_burn_rate_lph: 170
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-gmlrs
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: m2020-mbt
+      name: M2020 MBT
+      description: North Korean new-generation main battle tank fielded in small numbers for elite formations.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: M2020 Main Battle Tank
+      short_name: M2020
+      nation_of_origin: PRK
+      operators:
+        - PRK
+      employed_by:
+        - PRK
+      service_entry_year: 2020
+      base_strength: 0.64
+      accuracy: 0.62
+      max_speed_mps: 18
+      cruise_speed_mps: 10
+      max_range_km: 450
+      survivability: 0.5
+      detection_range_m: 5000
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 1100
+      fuel_burn_rate_lph: 210
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-120mm-apfsds
+          max_qty: 28
+          initial_qty: 28
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: nodong-missile-brigade
+      name: Nodong Missile Brigade
+      description: North Korean medium-range ballistic missile formation representative of the regime's longstanding regional strike inventory.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: Nodong Missile Brigade
+      short_name: Nodong
+      nation_of_origin: PRK
+      operators:
+        - PRK
+      employed_by:
+        - PRK
+      service_entry_year: 1998
+      base_strength: 0.54
+      accuracy: 0.44
+      max_speed_mps: 12
+      cruise_speed_mps: 7
+      max_range_km: 900
+      survivability: 0.22
+      detection_range_m: 1200
+      radar_cross_section_m2: 9
+      fuel_capacity_liters: 450
+      fuel_burn_rate_lph: 90
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-kalibr
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: pongae5-battery
+      name: Pongae-5 Battery
+      description: North Korean long-range surface-to-air system associated with strategic homeland air defense.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: Pongae-5 Air Defense Battery
+      short_name: Pongae-5
+      nation_of_origin: PRK
+      operators:
+        - PRK
+      employed_by:
+        - PRK
+      service_entry_year: 2017
+      base_strength: 0.54
+      accuracy: 0.56
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.28
+      detection_range_m: 180000
+      radar_cross_section_m2: 16
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-hq9b
+          max_qty: 16
+          initial_qty: 16
+      default_weapon_configuration: ""
+      weapon_configurations: []

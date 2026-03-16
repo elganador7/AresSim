@@ -1,0 +1,81 @@
+library:
+    id: jpn_subsurface_units-v1
+    name: JPN Subsurface Units
+    description: Subsurface units originating from JPN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: soryu-class-ss
+      name: Soryu-class Submarine
+      description: Japanese diesel-electric attack submarine with strong acoustic discretion and ASW emphasis.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Soryu-class Attack Submarine
+      short_name: Soryu
+      nation_of_origin: JPN
+      operators:
+        - JPN
+      employed_by:
+        - JPN
+      service_entry_year: 2009
+      base_strength: 0.78
+      accuracy: 0.8
+      max_speed_mps: 10.8
+      cruise_speed_mps: 5.8
+      max_range_km: 11000
+      survivability: 0.8
+      detection_range_m: 170000
+      radar_cross_section_m2: 0.09
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: torp-mk48
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: taigei-class-ss
+      name: Taigei-class Submarine
+      description: New Japanese diesel-electric attack submarine with improved batteries and quieting.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Taigei-class Attack Submarine
+      short_name: Taigei
+      nation_of_origin: JPN
+      operators:
+        - JPN
+      employed_by:
+        - JPN
+      service_entry_year: 2022
+      base_strength: 0.82
+      accuracy: 0.82
+      max_speed_mps: 10.8
+      cruise_speed_mps: 5.8
+      max_range_km: 12000
+      survivability: 0.82
+      detection_range_m: 180000
+      radar_cross_section_m2: 0.08
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: torp-mk48
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []

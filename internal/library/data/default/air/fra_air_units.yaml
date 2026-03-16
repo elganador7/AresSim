@@ -1,0 +1,303 @@
+library:
+    id: fra_air_units-v1
+    name: FRA AIR Units
+    description: Air units originating from FRA.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: a330-mrtt
+      name: A330 MRTT
+      description: Widebody aerial refueling and strategic transport aircraft used for long-range sustainment and coalition air operations.
+      domain: 2
+      form: 10
+      general_type: 17
+      specific_type: Airbus A330 MRTT
+      short_name: MRTT
+      nation_of_origin: FRA
+      operators:
+        - FRA
+        - GBR
+        - AUS
+        - SAU
+        - ARE
+        - QAT
+        - SGP
+        - KOR
+      employed_by:
+        - FRA
+        - GBR
+        - AUS
+        - SAU
+        - ARE
+        - QAT
+        - SGP
+        - KOR
+      service_entry_year: 2011
+      base_strength: 0.38
+      accuracy: 0.1
+      max_speed_mps: 250
+      cruise_speed_mps: 236
+      max_range_km: 14800
+      survivability: 0.26
+      detection_range_m: 180000
+      radar_cross_section_m2: 34
+      fuel_capacity_liters: 111000
+      fuel_burn_rate_lph: 9200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mirage2000-5
+      name: Dassault Mirage 2000-5
+      description: 4th-generation single-engine delta-wing multirole fighter. RDY-2 multimode radar, MICA BVR missiles. Operated by France, India, Greece, Qatar, UAE, Taiwan, Peru.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: Mirage 2000-5
+      short_name: ""
+      nation_of_origin: FRA
+      operators:
+        - FRA
+        - GRC
+        - TWN
+        - QAT
+        - ARE
+        - EGY
+      employed_by:
+        - FRA
+        - GRC
+        - TWN
+        - QAT
+        - ARE
+        - EGY
+      service_entry_year: 1997
+      base_strength: 0.73
+      accuracy: 0.82
+      max_speed_mps: 748
+      cruise_speed_mps: 275
+      max_range_km: 1850
+      survivability: 0.57
+      detection_range_m: 130000
+      radar_cross_section_m2: 2
+      fuel_capacity_liters: 3160
+      fuel_burn_rate_lph: 2500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-mica-em
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-mica-ir
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-defa554-30mm
+          max_qty: 125
+          initial_qty: 125
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mirage2000-5
+      name: Mirage 2000-5
+      description: Upgraded Mirage 2000 interceptor and multirole export standard.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: Mirage 2000-5
+      short_name: M2000-5
+      nation_of_origin: FRA
+      operators:
+        - FRA
+        - GRC
+        - TWN
+        - QAT
+        - ARE
+        - EGY
+      employed_by:
+        - FRA
+        - GRC
+        - TWN
+        - QAT
+        - ARE
+        - EGY
+      service_entry_year: 1999
+      base_strength: 0.74
+      accuracy: 0.82
+      max_speed_mps: 650
+      cruise_speed_mps: 270
+      max_range_km: 1550
+      survivability: 0.52
+      detection_range_m: 140000
+      radar_cross_section_m2: 2.2
+      fuel_capacity_liters: 3978
+      fuel_burn_rate_lph: 2600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-mica-em
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-mica-ir
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-defa554-30mm
+          max_qty: 125
+          initial_qty: 125
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mirage2000d-rmv
+      name: Mirage 2000D RMV
+      description: French strike-oriented Mirage modernization for precision attack and escort missions.
+      domain: 2
+      form: 10
+      general_type: 12
+      specific_type: Mirage 2000D RMV
+      short_name: M2000D
+      nation_of_origin: FRA
+      operators:
+        - FRA
+      employed_by:
+        - FRA
+      service_entry_year: 2022
+      base_strength: 0.72
+      accuracy: 0.81
+      max_speed_mps: 600
+      cruise_speed_mps: 255
+      max_range_km: 1800
+      survivability: 0.5
+      detection_range_m: 125000
+      radar_cross_section_m2: 2.4
+      fuel_capacity_liters: 3950
+      fuel_burn_rate_lph: 2500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-154-jsow
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-mica-ir
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: rafale-f3r
+      name: Dassault Rafale F3-R
+      description: 4.5th-generation twin-engine omnirole canard-delta fighter. RBE2-AA AESA radar, OSF IRST, Meteor and MICA BVR missiles. Exported to India, Egypt, Greece, Qatar, UAE, Indonesia, Croatia.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: Dassault Rafale F3-R
+      short_name: ""
+      nation_of_origin: FRA
+      operators:
+        - FRA
+        - EGY
+        - IND
+        - QAT
+        - GRC
+        - HRV
+        - ARE
+        - IDN
+      employed_by:
+        - FRA
+        - EGY
+        - IND
+        - QAT
+        - GRC
+        - HRV
+        - ARE
+        - IDN
+      service_entry_year: 2001
+      base_strength: 0.86
+      accuracy: 0.9
+      max_speed_mps: 617
+      cruise_speed_mps: 290
+      max_range_km: 3700
+      survivability: 0.71
+      detection_range_m: 200000
+      radar_cross_section_m2: 1
+      fuel_capacity_liters: 4700
+      fuel_burn_rate_lph: 3200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-meteor
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-mica-ir
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-defa554-30mm
+          max_qty: 125
+          initial_qty: 125
+      default_weapon_configuration: omnirole
+      weapon_configurations:
+        - id: omnirole
+          name: Omnirole
+          description: Balanced Rafale fit with BVR, WVR, and precision strike.
+          loadout:
+            - weapon_id: aam-meteor
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-mica-ir
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gbu-32-jdam
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-defa554-30mm
+              max_qty: 125
+              initial_qty: 125
+        - id: air_superiority
+          name: Air Superiority
+          description: Meteor-forward counter-air configuration.
+          loadout:
+            - weapon_id: aam-meteor
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-mica-ir
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-defa554-30mm
+              max_qty: 125
+              initial_qty: 125
+        - id: anti_ship
+          name: Anti-Ship
+          description: Stand-in maritime strike fit using Harpoon-class antiship missiles.
+          loadout:
+            - weapon_id: agm-84-harpoon
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-meteor
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-mica-ir
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-defa554-30mm
+              max_qty: 125
+              initial_qty: 125

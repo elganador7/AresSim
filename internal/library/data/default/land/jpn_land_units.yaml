@@ -1,0 +1,41 @@
+library:
+    id: jpn_land_units-v1
+    name: JPN Land Units
+    description: Land units originating from JPN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: type10-mbt
+      name: Type 10 MBT
+      description: Japanese lightweight main battle tank optimized for mobility and networked operations.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: Type 10 Main Battle Tank
+      short_name: Type 10
+      nation_of_origin: JPN
+      operators:
+        - JPN
+      employed_by:
+        - JPN
+      service_entry_year: 2012
+      base_strength: 0.86
+      accuracy: 0.83
+      max_speed_mps: 19.4
+      cruise_speed_mps: 11
+      max_range_km: 440
+      survivability: 0.7
+      detection_range_m: 3900
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 1100
+      fuel_burn_rate_lph: 260
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

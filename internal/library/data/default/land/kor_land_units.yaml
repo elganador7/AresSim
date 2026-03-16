@@ -1,0 +1,129 @@
+library:
+    id: kor_land_units-v1
+    name: KOR Land Units
+    description: Land units originating from KOR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: k2-black-panther
+      name: K2 Black Panther
+      description: South Korean main battle tank with advanced fire control and hydropneumatic suspension.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: K2 Black Panther
+      short_name: K2
+      nation_of_origin: KOR
+      operators:
+        - KOR
+        - POL
+      employed_by:
+        - KOR
+        - POL
+      service_entry_year: 2014
+      base_strength: 0.94
+      accuracy: 0.87
+      max_speed_mps: 19.4
+      cruise_speed_mps: 11
+      max_range_km: 450
+      survivability: 0.79
+      detection_range_m: 4300
+      radar_cross_section_m2: 11
+      fuel_capacity_liters: 1300
+      fuel_burn_rate_lph: 310
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: k21-ifv
+      name: K21 IFV
+      description: South Korean infantry fighting vehicle emphasizing mobility, amphibious capability, and infantry transport.
+      domain: 1
+      form: 32
+      general_type: 61
+      specific_type: K21 Infantry Fighting Vehicle
+      short_name: K21
+      nation_of_origin: KOR
+      operators:
+        - KOR
+      employed_by:
+        - KOR
+      service_entry_year: 2009
+      base_strength: 0.72
+      accuracy: 0.76
+      max_speed_mps: 19.4
+      cruise_speed_mps: 11
+      max_range_km: 450
+      survivability: 0.58
+      detection_range_m: 2800
+      radar_cross_section_m2: 7
+      fuel_capacity_liters: 700
+      fuel_burn_rate_lph: 145
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: k9a1-thunder
+      name: K9A1 Thunder
+      description: South Korean tracked self-propelled howitzer widely exported for mobile artillery support.
+      domain: 1
+      form: 32
+      general_type: 70
+      specific_type: K9A1 Thunder
+      short_name: K9A1
+      nation_of_origin: KOR
+      operators:
+        - KOR
+        - AUS
+        - EGY
+        - EST
+        - FIN
+        - IND
+        - NOR
+        - POL
+        - ROU
+        - TUR
+      employed_by:
+        - KOR
+        - AUS
+        - EGY
+        - EST
+        - FIN
+        - IND
+        - NOR
+        - POL
+        - ROU
+        - TUR
+      service_entry_year: 2018
+      base_strength: 0.74
+      accuracy: 0.8
+      max_speed_mps: 18.9
+      cruise_speed_mps: 11
+      max_range_km: 360
+      survivability: 0.42
+      detection_range_m: 1000
+      radar_cross_section_m2: 9
+      fuel_capacity_liters: 1000
+      fuel_burn_rate_lph: 180
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

@@ -1,0 +1,41 @@
+library:
+    id: can_air_units-v1
+    name: CAN AIR Units
+    description: Air units originating from CAN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: dash8-mpa-uae
+      name: Dash 8 MPA (UAE)
+      description: UAE maritime patrol aircraft for littoral surveillance, EEZ monitoring, and over-water ISR.
+      domain: 2
+      form: 10
+      general_type: 15
+      specific_type: Dash 8 Maritime Patrol Aircraft
+      short_name: Dash 8 MPA
+      nation_of_origin: CAN
+      operators:
+        - ARE
+      employed_by:
+        - ARE
+      service_entry_year: 2011
+      base_strength: 0.4
+      accuracy: 0.16
+      max_speed_mps: 170
+      cruise_speed_mps: 145
+      max_range_km: 2800
+      survivability: 0.24
+      detection_range_m: 220000
+      radar_cross_section_m2: 16
+      fuel_capacity_liters: 10000
+      fuel_burn_rate_lph: 2200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

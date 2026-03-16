@@ -1,0 +1,50 @@
+library:
+    id: twn_air_units-v1
+    name: TWN AIR Units
+    description: Air units originating from TWN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: f-ck1-ching-kuo
+      name: AIDC F-CK-1 Ching-kuo
+      description: Taiwan's indigenously designed lightweight multirole fighter. GD-53 Golden Dragon multimode radar; armed with TC-2 BVRAAM (Tien Chien II).
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: AIDC F-CK-1C/D Ching-kuo
+      short_name: ""
+      nation_of_origin: TWN
+      operators:
+        - TWN
+      employed_by:
+        - TWN
+      service_entry_year: 1994
+      base_strength: 0.62
+      accuracy: 0.76
+      max_speed_mps: 617
+      cruise_speed_mps: 260
+      max_range_km: 1100
+      survivability: 0.5
+      detection_range_m: 90000
+      radar_cross_section_m2: 3
+      fuel_capacity_liters: 2000
+      fuel_burn_rate_lph: 2000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-derby
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-python5
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 511
+          initial_qty: 511
+      default_weapon_configuration: ""
+      weapon_configurations: []

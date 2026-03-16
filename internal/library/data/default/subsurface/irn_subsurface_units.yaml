@@ -1,0 +1,81 @@
+library:
+    id: irn_subsurface_units-v1
+    name: IRN Subsurface Units
+    description: Subsurface units originating from IRN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: fateh-submarine
+      name: Fateh-class Submarine
+      description: Iranian coastal submarine intended for sea denial, ambush, and littoral deterrence missions.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Fateh-class Submarine
+      short_name: Fateh
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2019
+      base_strength: 0.42
+      accuracy: 0.5
+      max_speed_mps: 8
+      cruise_speed_mps: 4.5
+      max_range_km: 3500
+      survivability: 0.4
+      detection_range_m: 70000
+      radar_cross_section_m2: 0.18
+      fuel_capacity_liters: 120000
+      fuel_burn_rate_lph: 120
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: torp-mk48
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: ghadir-midget-submarine
+      name: Ghadir Midget Submarine
+      description: Very small Iranian coastal submarine optimized for ambush, mine-like disruption, and confined-water sea denial.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Ghadir-class Midget Submarine
+      short_name: Ghadir Sub
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2007
+      base_strength: 0.28
+      accuracy: 0.36
+      max_speed_mps: 6
+      cruise_speed_mps: 3.5
+      max_range_km: 1500
+      survivability: 0.36
+      detection_range_m: 50000
+      radar_cross_section_m2: 0.08
+      fuel_capacity_liters: 40000
+      fuel_burn_rate_lph: 60
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: torp-mk48
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []

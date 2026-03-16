@@ -2,8 +2,8 @@
 // @generated from file engine/v1/unit.proto (package engine.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { FormationPosture, MoveOrder, Position } from "./common_pb";
 import { file_engine_v1_common } from "./common_pb";
 import type { OperationalStatus } from "./status_pb";
@@ -16,7 +16,39 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/unit.proto.
  */
 export const file_engine_v1_unit: GenFile = /*@__PURE__*/
-  fileDesc("ChRlbmdpbmUvdjEvdW5pdC5wcm90bxIJZW5naW5lLnYxIugCCgRVbml0EgoKAmlkGAEgASgJEhQKDGRpc3BsYXlfbmFtZRgCIAEoCRIRCglmdWxsX25hbWUYAyABKAkSDAoEc2lkZRgEIAEoCRIVCg1kZWZpbml0aW9uX2lkGAUgASgJEiUKCHBvc2l0aW9uGAogASgLMhMuZW5naW5lLnYxLlBvc2l0aW9uEiwKBnN0YXR1cxgMIAEoCzIcLmVuZ2luZS52MS5PcGVyYXRpb25hbFN0YXR1cxIWCg5wYXJlbnRfdW5pdF9pZBgOIAEoCRIsCgdwb3N0dXJlGBEgASgOMhsuZW5naW5lLnYxLkZvcm1hdGlvblBvc3R1cmUSGAoQbmF0b19zeW1ib2xfc2lkYxgSIAEoCRIoCgptb3ZlX29yZGVyGBQgASgLMhQuZW5naW5lLnYxLk1vdmVPcmRlchInCgd3ZWFwb25zGBUgAygLMhYuZW5naW5lLnYxLldlYXBvblN0YXRlQitaKWdpdGh1Yi5jb20vYXJlc3NpbS9pbnRlcm5hbC9nZW4vZW5naW5lL3YxYgZwcm90bzM", [file_engine_v1_common, file_engine_v1_status, file_engine_v1_weapon]);
+  fileDesc("ChRlbmdpbmUvdjEvdW5pdC5wcm90bxIJZW5naW5lLnYxIqABCgtBdHRhY2tPcmRlchIuCgpvcmRlcl90eXBlGAEgASgOMhouZW5naW5lLnYxLkF0dGFja09yZGVyVHlwZRIWCg50YXJnZXRfdW5pdF9pZBgCIAEoCRIwCg5kZXNpcmVkX2VmZmVjdBgDIAEoDjIYLmVuZ2luZS52MS5EZXNpcmVkRWZmZWN0EhcKD3BraWxsX3RocmVzaG9sZBgEIAEoAiLtBAoEVW5pdBIKCgJpZBgBIAEoCRIUCgxkaXNwbGF5X25hbWUYAiABKAkSEQoJZnVsbF9uYW1lGAMgASgJEgwKBHNpZGUYBCABKAkSFQoNZGVmaW5pdGlvbl9pZBgFIAEoCRIPCgd0ZWFtX2lkGAYgASgJEhQKDGNvYWxpdGlvbl9pZBgHIAEoCRIlCghwb3NpdGlvbhgKIAEoCzITLmVuZ2luZS52MS5Qb3NpdGlvbhIsCgZzdGF0dXMYDCABKAsyHC5lbmdpbmUudjEuT3BlcmF0aW9uYWxTdGF0dXMSFgoOcGFyZW50X3VuaXRfaWQYDiABKAkSLAoHcG9zdHVyZRgRIAEoDjIbLmVuZ2luZS52MS5Gb3JtYXRpb25Qb3N0dXJlEhgKEG5hdG9fc3ltYm9sX3NpZGMYEiABKAkSKAoKbW92ZV9vcmRlchgUIAEoCzIULmVuZ2luZS52MS5Nb3ZlT3JkZXISJwoHd2VhcG9ucxgVIAMoCzIWLmVuZ2luZS52MS5XZWFwb25TdGF0ZRIgChhsb2Fkb3V0X2NvbmZpZ3VyYXRpb25faWQYFiABKAkSLAoMZGFtYWdlX3N0YXRlGBcgASgOMhYuZW5naW5lLnYxLkRhbWFnZVN0YXRlEjoKE2VuZ2FnZW1lbnRfYmVoYXZpb3IYGCABKA4yHS5lbmdpbmUudjEuRW5nYWdlbWVudEJlaGF2aW9yEiIKGmVuZ2FnZW1lbnRfcGtpbGxfdGhyZXNob2xkGBkgASgCEiwKDGF0dGFja19vcmRlchgaIAEoCzIWLmVuZ2luZS52MS5BdHRhY2tPcmRlciqgAQoLRGFtYWdlU3RhdGUSHAoYREFNQUdFX1NUQVRFX1VOU1BFQ0lGSUVEEAASHAoYREFNQUdFX1NUQVRFX09QRVJBVElPTkFMEAESGAoUREFNQUdFX1NUQVRFX0RBTUFHRUQQAhIfChtEQU1BR0VfU1RBVEVfTUlTU0lPTl9LSUxMRUQQAxIaChZEQU1BR0VfU1RBVEVfREVTVFJPWUVEEAQqrwIKEkVuZ2FnZW1lbnRCZWhhdmlvchIjCh9FTkdBR0VNRU5UX0JFSEFWSU9SX1VOU1BFQ0lGSUVEEAASIwofRU5HQUdFTUVOVF9CRUhBVklPUl9BVVRPX0VOR0FHRRABEikKJUVOR0FHRU1FTlRfQkVIQVZJT1JfU0VMRl9ERUZFTlNFX09OTFkQAhIhCh1FTkdBR0VNRU5UX0JFSEFWSU9SX0hPTERfRklSRRADEi0KKUVOR0FHRU1FTlRfQkVIQVZJT1JfQVNTSUdORURfVEFSR0VUU19PTkxZEAQSJgoiRU5HQUdFTUVOVF9CRUhBVklPUl9TSEFET1dfQ09OVEFDVBAFEioKJkVOR0FHRU1FTlRfQkVIQVZJT1JfV0lUSERSQVdfT05fREVURUNUEAYqjQEKD0F0dGFja09yZGVyVHlwZRIhCh1BVFRBQ0tfT1JERVJfVFlQRV9VTlNQRUNJRklFRBAAEiwKKEFUVEFDS19PUkRFUl9UWVBFX0FUVEFDS19BU1NJR05FRF9UQVJHRVQQARIpCiVBVFRBQ0tfT1JERVJfVFlQRV9TVFJJS0VfVU5USUxfRUZGRUNUEAIqhwEKDURlc2lyZWRFZmZlY3QSHgoaREVTSVJFRF9FRkZFQ1RfVU5TUEVDSUZJRUQQABIZChVERVNJUkVEX0VGRkVDVF9EQU1BR0UQARIfChtERVNJUkVEX0VGRkVDVF9NSVNTSU9OX0tJTEwQAhIaChZERVNJUkVEX0VGRkVDVF9ERVNUUk9ZEANCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common, file_engine_v1_status, file_engine_v1_weapon]);
+
+/**
+ * @generated from message engine.v1.AttackOrder
+ */
+export type AttackOrder = Message<"engine.v1.AttackOrder"> & {
+  /**
+   * @generated from field: engine.v1.AttackOrderType order_type = 1;
+   */
+  orderType: AttackOrderType;
+
+  /**
+   * @generated from field: string target_unit_id = 2;
+   */
+  targetUnitId: string;
+
+  /**
+   * @generated from field: engine.v1.DesiredEffect desired_effect = 3;
+   */
+  desiredEffect: DesiredEffect;
+
+  /**
+   * @generated from field: float pkill_threshold = 4;
+   */
+  pkillThreshold: number;
+};
+
+/**
+ * Describes the message engine.v1.AttackOrder.
+ * Use `create(AttackOrderSchema)` to create a new message.
+ */
+export const AttackOrderSchema: GenMessage<AttackOrder> = /*@__PURE__*/
+  messageDesc(file_engine_v1_unit, 0);
 
 /**
  * @generated from message engine.v1.Unit
@@ -58,6 +90,20 @@ export type Unit = Message<"engine.v1.Unit"> & {
    * @generated from field: string definition_id = 5;
    */
   definitionId: string;
+
+  /**
+   * Owning team / nation, e.g. "ISR", "USA", "IRN"
+   *
+   * @generated from field: string team_id = 6;
+   */
+  teamId: string;
+
+  /**
+   * Friendly grouping used for combat / detection sharing
+   *
+   * @generated from field: string coalition_id = 7;
+   */
+  coalitionId: string;
 
   /**
    * Geospatial
@@ -108,6 +154,34 @@ export type Unit = Message<"engine.v1.Unit"> & {
    * @generated from field: repeated engine.v1.WeaponState weapons = 21;
    */
   weapons: WeaponState[];
+
+  /**
+   * Optional named mission loadout selected from the unit definition's
+   * authored weapon configurations, e.g. "air_superiority" or "anti_ship".
+   *
+   * @generated from field: string loadout_configuration_id = 22;
+   */
+  loadoutConfigurationId: string;
+
+  /**
+   * @generated from field: engine.v1.DamageState damage_state = 23;
+   */
+  damageState: DamageState;
+
+  /**
+   * @generated from field: engine.v1.EngagementBehavior engagement_behavior = 24;
+   */
+  engagementBehavior: EngagementBehavior;
+
+  /**
+   * @generated from field: float engagement_pkill_threshold = 25;
+   */
+  engagementPkillThreshold: number;
+
+  /**
+   * @generated from field: engine.v1.AttackOrder attack_order = 26;
+   */
+  attackOrder?: AttackOrder;
 };
 
 /**
@@ -115,5 +189,144 @@ export type Unit = Message<"engine.v1.Unit"> & {
  * Use `create(UnitSchema)` to create a new message.
  */
 export const UnitSchema: GenMessage<Unit> = /*@__PURE__*/
-  messageDesc(file_engine_v1_unit, 0);
+  messageDesc(file_engine_v1_unit, 1);
+
+/**
+ * @generated from enum engine.v1.DamageState
+ */
+export enum DamageState {
+  /**
+   * @generated from enum value: DAMAGE_STATE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: DAMAGE_STATE_OPERATIONAL = 1;
+   */
+  OPERATIONAL = 1,
+
+  /**
+   * @generated from enum value: DAMAGE_STATE_DAMAGED = 2;
+   */
+  DAMAGED = 2,
+
+  /**
+   * @generated from enum value: DAMAGE_STATE_MISSION_KILLED = 3;
+   */
+  MISSION_KILLED = 3,
+
+  /**
+   * @generated from enum value: DAMAGE_STATE_DESTROYED = 4;
+   */
+  DESTROYED = 4,
+}
+
+/**
+ * Describes the enum engine.v1.DamageState.
+ */
+export const DamageStateSchema: GenEnum<DamageState> = /*@__PURE__*/
+  enumDesc(file_engine_v1_unit, 0);
+
+/**
+ * @generated from enum engine.v1.EngagementBehavior
+ */
+export enum EngagementBehavior {
+  /**
+   * @generated from enum value: ENGAGEMENT_BEHAVIOR_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ENGAGEMENT_BEHAVIOR_AUTO_ENGAGE = 1;
+   */
+  AUTO_ENGAGE = 1,
+
+  /**
+   * @generated from enum value: ENGAGEMENT_BEHAVIOR_SELF_DEFENSE_ONLY = 2;
+   */
+  SELF_DEFENSE_ONLY = 2,
+
+  /**
+   * @generated from enum value: ENGAGEMENT_BEHAVIOR_HOLD_FIRE = 3;
+   */
+  HOLD_FIRE = 3,
+
+  /**
+   * @generated from enum value: ENGAGEMENT_BEHAVIOR_ASSIGNED_TARGETS_ONLY = 4;
+   */
+  ASSIGNED_TARGETS_ONLY = 4,
+
+  /**
+   * @generated from enum value: ENGAGEMENT_BEHAVIOR_SHADOW_CONTACT = 5;
+   */
+  SHADOW_CONTACT = 5,
+
+  /**
+   * @generated from enum value: ENGAGEMENT_BEHAVIOR_WITHDRAW_ON_DETECT = 6;
+   */
+  WITHDRAW_ON_DETECT = 6,
+}
+
+/**
+ * Describes the enum engine.v1.EngagementBehavior.
+ */
+export const EngagementBehaviorSchema: GenEnum<EngagementBehavior> = /*@__PURE__*/
+  enumDesc(file_engine_v1_unit, 1);
+
+/**
+ * @generated from enum engine.v1.AttackOrderType
+ */
+export enum AttackOrderType {
+  /**
+   * @generated from enum value: ATTACK_ORDER_TYPE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ATTACK_ORDER_TYPE_ATTACK_ASSIGNED_TARGET = 1;
+   */
+  ATTACK_ASSIGNED_TARGET = 1,
+
+  /**
+   * @generated from enum value: ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT = 2;
+   */
+  STRIKE_UNTIL_EFFECT = 2,
+}
+
+/**
+ * Describes the enum engine.v1.AttackOrderType.
+ */
+export const AttackOrderTypeSchema: GenEnum<AttackOrderType> = /*@__PURE__*/
+  enumDesc(file_engine_v1_unit, 2);
+
+/**
+ * @generated from enum engine.v1.DesiredEffect
+ */
+export enum DesiredEffect {
+  /**
+   * @generated from enum value: DESIRED_EFFECT_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: DESIRED_EFFECT_DAMAGE = 1;
+   */
+  DAMAGE = 1,
+
+  /**
+   * @generated from enum value: DESIRED_EFFECT_MISSION_KILL = 2;
+   */
+  MISSION_KILL = 2,
+
+  /**
+   * @generated from enum value: DESIRED_EFFECT_DESTROY = 3;
+   */
+  DESTROY = 3,
+}
+
+/**
+ * Describes the enum engine.v1.DesiredEffect.
+ */
+export const DesiredEffectSchema: GenEnum<DesiredEffect> = /*@__PURE__*/
+  enumDesc(file_engine_v1_unit, 3);
 

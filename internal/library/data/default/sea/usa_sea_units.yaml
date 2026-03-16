@@ -1,0 +1,471 @@
+library:
+    id: usa_sea_units-v1
+    name: USA SEA Units
+    description: Sea units originating from USA.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: al-jubail-mmsc-saudi
+      name: Al Jubail MMSC
+      description: Saudi multirole surface combatant for fleet escort, local air defense, and anti-ship warfare.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: Al Jubail Multi-Mission Surface Combatant
+      short_name: Al Jubail
+      nation_of_origin: USA
+      operators:
+        - SAU
+      employed_by:
+        - SAU
+      service_entry_year: 2023
+      base_strength: 0.64
+      accuracy: 0.72
+      max_speed_mps: 15.4
+      cruise_speed_mps: 9.5
+      max_range_km: 6000
+      survivability: 0.5
+      detection_range_m: 220000
+      radar_cross_section_m2: 7000
+      fuel_capacity_liters: 600000
+      fuel_burn_rate_lph: 1180
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-sm2-block3
+          max_qty: 16
+          initial_qty: 16
+        - weapon_id: asm-nsm
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: avenger-mcm
+      name: Avenger-class MCM
+      description: Mine countermeasures ship optimized for route clearance, hunting, and low-signature operations.
+      domain: 3
+      form: 20
+      general_type: 47
+      specific_type: Avenger-class Mine Countermeasures Ship
+      short_name: Avenger
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 1987
+      base_strength: 0.38
+      accuracy: 0.38
+      max_speed_mps: 7.2
+      cruise_speed_mps: 5.1
+      max_range_km: 4600
+      survivability: 0.22
+      detection_range_m: 60000
+      radar_cross_section_m2: 1200
+      fuel_capacity_liters: 120000
+      fuel_burn_rate_lph: 220
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 2
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: cg47-ticonderoga
+      name: Ticonderoga-class Cruiser
+      description: Large AAW and strike surface combatant built around Aegis.
+      domain: 3
+      form: 20
+      general_type: 41
+      specific_type: Ticonderoga-class Cruiser
+      short_name: CG-47
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 1983
+      base_strength: 0.88
+      accuracy: 0.87
+      max_speed_mps: 16
+      cruise_speed_mps: 10.3
+      max_range_km: 11000
+      survivability: 0.72
+      detection_range_m: 370000
+      radar_cross_section_m2: 14000
+      fuel_capacity_liters: 1.9e+06
+      fuel_burn_rate_lph: 2500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 2
+      embarked_uav_capacity: 2
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: cvn68-nimitz
+      name: USS Nimitz (CVN-68)
+      description: Nuclear-powered aircraft carrier and fleet flagship.
+      domain: 3
+      form: 20
+      general_type: 40
+      specific_type: Nimitz-class Aircraft Carrier
+      short_name: CVN-68
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 1975
+      base_strength: 1
+      accuracy: 0.88
+      max_speed_mps: 15.4
+      cruise_speed_mps: 10.3
+      max_range_km: 999999
+      survivability: 0.9
+      detection_range_m: 370000
+      radar_cross_section_m2: 100000
+      fuel_capacity_liters: 3e+06
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 70
+      embarked_rotary_wing_capacity: 12
+      embarked_uav_capacity: 8
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 20
+      recovery_capacity_per_interval: 20
+      sortie_interval_minutes: 15
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: cvn78-ford
+      name: USS Gerald R. Ford (CVN-78)
+      description: Newest US nuclear aircraft carrier with expanded sortie generation capacity.
+      domain: 3
+      form: 20
+      general_type: 40
+      specific_type: Ford-class Aircraft Carrier
+      short_name: CVN-78
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2017
+      base_strength: 1
+      accuracy: 0.9
+      max_speed_mps: 15.4
+      cruise_speed_mps: 10.3
+      max_range_km: 999999
+      survivability: 0.92
+      detection_range_m: 380000
+      radar_cross_section_m2: 110000
+      fuel_capacity_liters: 3e+06
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 75
+      embarked_rotary_wing_capacity: 12
+      embarked_uav_capacity: 10
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 24
+      recovery_capacity_per_interval: 24
+      sortie_interval_minutes: 12
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: cyclone-patrol-ship
+      name: Cyclone-class Patrol Ship
+      description: Fast patrol combatant built for coastal interdiction, escort, and special operations support.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: Cyclone-class Patrol Ship
+      short_name: Cyclone
+      nation_of_origin: USA
+      operators:
+        - USA
+        - PHL
+      employed_by:
+        - USA
+        - PHL
+      service_entry_year: 1993
+      base_strength: 0.36
+      accuracy: 0.44
+      max_speed_mps: 18
+      cruise_speed_mps: 10.3
+      max_range_km: 3700
+      survivability: 0.26
+      detection_range_m: 70000
+      radar_cross_section_m2: 2200
+      fuel_capacity_liters: 140000
+      fuel_burn_rate_lph: 450
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: ddg51-flight-iia
+      name: Arleigh Burke Flight IIA
+      description: Multi-mission guided missile destroyer with Aegis combat system.
+      domain: 3
+      form: 20
+      general_type: 42
+      specific_type: Arleigh Burke-class Destroyer
+      short_name: DDG-51
+      nation_of_origin: USA
+      operators:
+        - USA
+        - JPN
+        - KOR
+        - AUS
+      employed_by:
+        - USA
+        - JPN
+        - KOR
+        - AUS
+      service_entry_year: 1997
+      base_strength: 0.86
+      accuracy: 0.86
+      max_speed_mps: 16
+      cruise_speed_mps: 10.3
+      max_range_km: 8100
+      survivability: 0.7
+      detection_range_m: 370000
+      radar_cross_section_m2: 12000
+      fuel_capacity_liters: 1.8e+06
+      fuel_burn_rate_lph: 2400
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 2
+      embarked_uav_capacity: 2
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: ffg62-constellation
+      name: Constellation-class Frigate
+      description: Modern guided missile frigate focused on escort and ASW.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: Constellation-class Frigate
+      short_name: FFG-62
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2026
+      base_strength: 0.76
+      accuracy: 0.83
+      max_speed_mps: 14.4
+      cruise_speed_mps: 9.3
+      max_range_km: 7400
+      survivability: 0.6
+      detection_range_m: 300000
+      radar_cross_section_m2: 9000
+      fuel_capacity_liters: 900000
+      fuel_burn_rate_lph: 1800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 2
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: freedom-lcs
+      name: Freedom-class LCS
+      description: High-speed littoral combat ship for patrol, escort, and modular mission packages.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: Freedom-class Littoral Combat Ship
+      short_name: LCS
+      nation_of_origin: USA
+      operators:
+        - USA
+        - SAU
+      employed_by:
+        - USA
+        - SAU
+      service_entry_year: 2008
+      base_strength: 0.5
+      accuracy: 0.62
+      max_speed_mps: 24
+      cruise_speed_mps: 12
+      max_range_km: 6500
+      survivability: 0.38
+      detection_range_m: 150000
+      radar_cross_section_m2: 5000
+      fuel_capacity_liters: 450000
+      fuel_burn_rate_lph: 1100
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 2
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: lha6-america
+      name: USS America (LHA-6)
+      description: Amphibious assault ship for expeditionary air and marine operations.
+      domain: 3
+      form: 20
+      general_type: 46
+      specific_type: America-class Amphibious Assault Ship
+      short_name: LHA-6
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2014
+      base_strength: 0.74
+      accuracy: 0.65
+      max_speed_mps: 12.9
+      cruise_speed_mps: 9
+      max_range_km: 17500
+      survivability: 0.66
+      detection_range_m: 220000
+      radar_cross_section_m2: 25000
+      fuel_capacity_liters: 1.4e+06
+      fuel_burn_rate_lph: 1800
+      embarked_fixed_wing_capacity: 20
+      embarked_rotary_wing_capacity: 24
+      embarked_uav_capacity: 6
+      embarked_surface_connector_capacity: 2
+      launch_capacity_per_interval: 8
+      recovery_capacity_per_interval: 8
+      sortie_interval_minutes: 20
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: rbns-sabha-frigate-bahrain
+      name: RBNS Sabha Frigate
+      description: Bahraini principal surface combatant for escort, maritime security, and Gulf patrol missions.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: RBNS Sabha Frigate
+      short_name: Sabha
+      nation_of_origin: USA
+      operators:
+        - BHR
+      employed_by:
+        - BHR
+      service_entry_year: 1997
+      base_strength: 0.46
+      accuracy: 0.56
+      max_speed_mps: 14.5
+      cruise_speed_mps: 9
+      max_range_km: 6000
+      survivability: 0.36
+      detection_range_m: 160000
+      radar_cross_section_m2: 5000
+      fuel_capacity_liters: 520000
+      fuel_burn_rate_lph: 980
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-sm2-block3
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: asm-am39-exocet
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: san-antonio-lpd
+      name: San Antonio-class LPD
+      description: Amphibious transport dock for Marines, landing craft, and expeditionary support.
+      domain: 3
+      form: 20
+      general_type: 46
+      specific_type: San Antonio-class Amphibious Transport Dock
+      short_name: LPD-17
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2006
+      base_strength: 0.64
+      accuracy: 0.48
+      max_speed_mps: 11.8
+      cruise_speed_mps: 8.7
+      max_range_km: 12000
+      survivability: 0.54
+      detection_range_m: 140000
+      radar_cross_section_m2: 22000
+      fuel_capacity_liters: 1e+06
+      fuel_burn_rate_lph: 1400
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 4
+      embarked_uav_capacity: 2
+      embarked_surface_connector_capacity: 2
+      launch_capacity_per_interval: 2
+      recovery_capacity_per_interval: 2
+      sortie_interval_minutes: 30
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: wasp-class-lhd
+      name: Wasp-class LHD
+      description: Large US amphibious assault ship optimized for Marine air-ground task force operations.
+      domain: 3
+      form: 20
+      general_type: 46
+      specific_type: Wasp-class Landing Helicopter Dock
+      short_name: Wasp
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 1989
+      base_strength: 0.74
+      accuracy: 0.56
+      max_speed_mps: 12.9
+      cruise_speed_mps: 8.7
+      max_range_km: 17500
+      survivability: 0.62
+      detection_range_m: 170000
+      radar_cross_section_m2: 32000
+      fuel_capacity_liters: 1.3e+06
+      fuel_burn_rate_lph: 1700
+      embarked_fixed_wing_capacity: 20
+      embarked_rotary_wing_capacity: 24
+      embarked_uav_capacity: 6
+      embarked_surface_connector_capacity: 3
+      launch_capacity_per_interval: 8
+      recovery_capacity_per_interval: 8
+      sortie_interval_minutes: 20
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

@@ -1,0 +1,47 @@
+library:
+    id: isr_subsurface_units-v1
+    name: ISR Subsurface Units
+    description: Subsurface units originating from ISR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: dolphin-ii-submarine
+      name: Dolphin II-class Submarine
+      description: Israeli diesel-electric attack submarine for sea denial, ISR, and long-range strike support.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Dolphin II-class Submarine
+      short_name: Dolphin II
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2014
+      base_strength: 0.72
+      accuracy: 0.74
+      max_speed_mps: 9
+      cruise_speed_mps: 5
+      max_range_km: 8000
+      survivability: 0.68
+      detection_range_m: 110000
+      radar_cross_section_m2: 0.16
+      fuel_capacity_liters: 180000
+      fuel_burn_rate_lph: 160
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: torp-mk48
+          max_qty: 10
+          initial_qty: 10
+        - weapon_id: asm-gabriel-v
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []

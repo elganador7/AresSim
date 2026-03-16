@@ -1,0 +1,41 @@
+library:
+    id: prk_subsurface_units-v1
+    name: PRK Subsurface Units
+    description: Subsurface units originating from PRK.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: sinpo-c-ssb
+      name: Sinpo-C SSB
+      description: North Korean ballistic missile submarine intended to strengthen a nascent sea-based deterrent.
+      domain: 4
+      form: 21
+      general_type: 51
+      specific_type: Sinpo-C Ballistic Missile Submarine
+      short_name: Sinpo-C
+      nation_of_origin: PRK
+      operators:
+        - PRK
+      employed_by:
+        - PRK
+      service_entry_year: 2023
+      base_strength: 0.42
+      accuracy: 0.44
+      max_speed_mps: 8
+      cruise_speed_mps: 4.5
+      max_range_km: 2500
+      survivability: 0.34
+      detection_range_m: 70000
+      radar_cross_section_m2: 0.25
+      fuel_capacity_liters: 100000
+      fuel_burn_rate_lph: 110
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

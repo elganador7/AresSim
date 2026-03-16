@@ -1,0 +1,124 @@
+library:
+    id: isr_sea_units-v1
+    name: ISR SEA Units
+    description: Sea units originating from ISR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: saar45-missile-boat
+      name: Sa'ar 4.5 Missile Boat
+      description: Israeli fast missile craft used for littoral sea control, escort, and precision maritime strike.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: Sa'ar 4.5 Missile Boat
+      short_name: Sa'ar 4.5
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 1981
+      base_strength: 0.48
+      accuracy: 0.58
+      max_speed_mps: 17
+      cruise_speed_mps: 10
+      max_range_km: 4000
+      survivability: 0.32
+      detection_range_m: 140000
+      radar_cross_section_m2: 3000
+      fuel_capacity_liters: 220000
+      fuel_burn_rate_lph: 500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-gabriel-v
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: gun-phalanx-20mm
+          max_qty: 8000
+          initial_qty: 8000
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: saar6-corvette
+      name: Sa'ar 6 Corvette
+      description: Israeli corvette optimized for offshore infrastructure defense, area air defense, and anti-ship warfare.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Sa'ar 6 Corvette
+      short_name: Sa'ar 6
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2020
+      base_strength: 0.68
+      accuracy: 0.74
+      max_speed_mps: 14.5
+      cruise_speed_mps: 9.3
+      max_range_km: 4500
+      survivability: 0.54
+      detection_range_m: 240000
+      radar_cross_section_m2: 5500
+      fuel_capacity_liters: 520000
+      fuel_burn_rate_lph: 1100
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-barak-8
+          max_qty: 32
+          initial_qty: 32
+        - weapon_id: asm-gabriel-v
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: gun-phalanx-20mm
+          max_qty: 12000
+          initial_qty: 12000
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: shaldag-mkv
+      name: Shaldag Mk V
+      description: Israeli patrol and interdiction craft for coastal security, special operations support, and littoral strike.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: Shaldag Mk V Patrol Boat
+      short_name: Shaldag V
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2021
+      base_strength: 0.3
+      accuracy: 0.42
+      max_speed_mps: 20
+      cruise_speed_mps: 12
+      max_range_km: 1600
+      survivability: 0.18
+      detection_range_m: 70000
+      radar_cross_section_m2: 1200
+      fuel_capacity_liters: 70000
+      fuel_burn_rate_lph: 180
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

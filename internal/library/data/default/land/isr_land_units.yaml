@@ -1,0 +1,658 @@
+library:
+    id: isr_land_units-v1
+    name: ISR Land Units
+    description: Land units originating from ISR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: arrow2-battery
+      name: Arrow-2 Battery
+      description: Israeli upper-tier ballistic missile defense battery for high-altitude endo-atmospheric intercepts beneath Arrow-3.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: Arrow-2 Battery
+      short_name: Arrow-2
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2000
+      base_strength: 0.8
+      accuracy: 0.79
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.37
+      detection_range_m: 340000
+      radar_cross_section_m2: 19
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-arrow2
+          max_qty: 18
+          initial_qty: 18
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: arrow3-battery
+      name: Arrow-3 Battery
+      description: Israeli strategic ballistic missile defense battery for high-altitude and exo-atmospheric intercepts.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: Arrow-3 Battery
+      short_name: Arrow-3
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2017
+      base_strength: 0.82
+      accuracy: 0.8
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.38
+      detection_range_m: 400000
+      radar_cross_section_m2: 20
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-arrow3
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: barak-mx-battery
+      name: Barak MX Battery
+      description: Israeli modular air and missile defense system exported for layered regional defense.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: Barak MX Battery
+      short_name: Barak MX
+      nation_of_origin: ISR
+      operators:
+        - ISR
+        - IND
+        - AZE
+        - MAR
+      employed_by:
+        - ISR
+        - IND
+        - AZE
+        - MAR
+      service_entry_year: 2018
+      base_strength: 0.68
+      accuracy: 0.78
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.34
+      detection_range_m: 170000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-barak-8
+          max_qty: 24
+          initial_qty: 24
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: d9r-armored-bulldozer
+      name: D9R Armored Bulldozer
+      description: Armored combat engineering bulldozer widely used for obstacle reduction and urban breaching.
+      domain: 1
+      form: 31
+      general_type: 90
+      specific_type: D9R Armored Bulldozer
+      short_name: D9R
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 1986
+      base_strength: 0.58
+      accuracy: 0.2
+      max_speed_mps: 11
+      cruise_speed_mps: 6
+      max_range_km: 150
+      survivability: 0.6
+      detection_range_m: 1000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 900
+      fuel_burn_rate_lph: 180
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: davids-sling-battery
+      name: David's Sling Battery
+      description: Israeli medium-to-long-range interceptor battery for cruise missiles, aircraft, and ballistic threats.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: David's Sling Battery
+      short_name: David's Sling
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2017
+      base_strength: 0.8
+      accuracy: 0.82
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.36
+      detection_range_m: 260000
+      radar_cross_section_m2: 18
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-stunner
+          max_qty: 24
+          initial_qty: 24
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: eitan-afv
+      name: Eitan AFV
+      description: Israeli wheeled armored vehicle for fast protected mobility and infantry combat.
+      domain: 1
+      form: 31
+      general_type: 61
+      specific_type: Eitan Armored Fighting Vehicle
+      short_name: Eitan
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2023
+      base_strength: 0.7
+      accuracy: 0.64
+      max_speed_mps: 25
+      cruise_speed_mps: 15
+      max_range_km: 700
+      survivability: 0.58
+      detection_range_m: 3000
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 700
+      fuel_burn_rate_lph: 120
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-25mm-hei
+          max_qty: 240
+          initial_qty: 240
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: iron-dome-battery
+      name: Iron Dome Battery
+      description: Israeli short-range air and rocket defense battery for point and area protection.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: Iron Dome Battery
+      short_name: Iron Dome
+      nation_of_origin: ISR
+      operators:
+        - ISR
+        - USA
+      employed_by:
+        - ISR
+      service_entry_year: 2011
+      base_strength: 0.78
+      accuracy: 0.84
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.34
+      detection_range_m: 120000
+      radar_cross_section_m2: 16
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-tamir
+          max_qty: 60
+          initial_qty: 60
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: m109d-doher
+      name: M109D Doher
+      description: Israeli upgraded self-propelled 155 mm artillery system for responsive battalion and brigade fires.
+      domain: 1
+      form: 32
+      general_type: 70
+      specific_type: M109D Doher
+      short_name: Doher
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 1990
+      base_strength: 0.66
+      accuracy: 0.72
+      max_speed_mps: 11
+      cruise_speed_mps: 8
+      max_range_km: 350
+      survivability: 0.42
+      detection_range_m: 1000
+      radar_cross_section_m2: 9
+      fuel_capacity_liters: 500
+      fuel_burn_rate_lph: 120
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-155mm-he
+          max_qty: 36
+          initial_qty: 36
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: merkava-mk4m
+      name: Merkava Mk4M
+      description: Israeli main battle tank with active protection system and strong crew survivability focus.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: Merkava Mk4M
+      short_name: Merkava
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2014
+      base_strength: 0.91
+      accuracy: 0.84
+      max_speed_mps: 17.5
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.82
+      detection_range_m: 4000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 1400
+      fuel_burn_rate_lph: 300
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: namer-apc
+      name: Namer APC
+      description: Heavy armored personnel carrier derived from Merkava chassis for protected mechanized infantry operations.
+      domain: 1
+      form: 32
+      general_type: 62
+      specific_type: Namer Heavy APC
+      short_name: Namer
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2008
+      base_strength: 0.8
+      accuracy: 0.6
+      max_speed_mps: 16
+      cruise_speed_mps: 9
+      max_range_km: 500
+      survivability: 0.76
+      detection_range_m: 2600
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 1200
+      fuel_burn_rate_lph: 220
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-25mm-hei
+          max_qty: 200
+          initial_qty: 200
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: spyder-mr-battery
+      name: SPYDER-MR Battery
+      description: Israeli medium-range mobile air-defense battery using Derby-class interceptors for layered protection of maneuver forces and fixed sites.
+      domain: 1
+      form: 31
+      general_type: 73
+      specific_type: SPYDER-MR Battery
+      short_name: SPYDER-MR
+      nation_of_origin: ISR
+      operators:
+        - ISR
+        - IND
+        - SGP
+        - CZE
+        - PER
+        - MAR
+        - PHL
+        - VNM
+        - ETH
+      employed_by:
+        - ISR
+      service_entry_year: 2012
+      base_strength: 0.72
+      accuracy: 0.79
+      max_speed_mps: 18
+      cruise_speed_mps: 10
+      max_range_km: 600
+      survivability: 0.35
+      detection_range_m: 140000
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 500
+      fuel_burn_rate_lph: 95
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-spyder-derby-er
+          max_qty: 24
+          initial_qty: 24
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: spyder-sr-battery
+      name: SPYDER-SR Battery
+      description: Israeli short-range quick-reaction battery for mobile force protection against aircraft, UAVs, and cruise-missile threats.
+      domain: 1
+      form: 31
+      general_type: 73
+      specific_type: SPYDER-SR Battery
+      short_name: SPYDER-SR
+      nation_of_origin: ISR
+      operators:
+        - ISR
+        - IND
+        - SGP
+        - CZE
+        - PER
+        - MAR
+        - PHL
+        - VNM
+        - ETH
+      employed_by:
+        - ISR
+      service_entry_year: 2005
+      base_strength: 0.7
+      accuracy: 0.8
+      max_speed_mps: 18
+      cruise_speed_mps: 10
+      max_range_km: 600
+      survivability: 0.34
+      detection_range_m: 80000
+      radar_cross_section_m2: 9
+      fuel_capacity_liters: 450
+      fuel_burn_rate_lph: 90
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-spyder-python5
+          max_qty: 24
+          initial_qty: 24
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: israel-strategic-airbase
+      name: Israeli Strategic Air Base
+      description: Major Israeli air base supporting high-tempo fighter, tanker, and strike operations with hardened support infrastructure.
+      domain: 1
+      form: 34
+      general_type: 93
+      specific_type: Strategic Air Base
+      short_name: Air Base
+      asset_class: airbase
+      target_class: runway
+      stationary: true
+      affiliation: military
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 1980
+      base_strength: 0.46
+      accuracy: 0.05
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.42
+      detection_range_m: 20000
+      radar_cross_section_m2: 42
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: israel-national-c2-site
+      name: Israeli National C2 Site
+      description: Hardened operational headquarters used to coordinate homeland air defense, strike management, and theater command.
+      domain: 1
+      form: 34
+      general_type: 93
+      specific_type: National Command and Control Site
+      short_name: C2 Site
+      asset_class: c2_site
+      target_class: hardened_infrastructure
+      stationary: true
+      affiliation: military
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2000
+      base_strength: 0.32
+      accuracy: 0.12
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.5
+      detection_range_m: 40000
+      radar_cross_section_m2: 14
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: israel-early-warning-radar-site
+      name: Israeli Early Warning Radar Site
+      description: Strategic fixed radar installation supporting long-range air and missile warning for homeland defense.
+      domain: 1
+      form: 34
+      general_type: 94
+      specific_type: Early Warning Radar Site
+      short_name: Radar Site
+      asset_class: radar_site
+      target_class: sam_battery
+      stationary: true
+      affiliation: military
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2008
+      base_strength: 0.28
+      accuracy: 0.18
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.28
+      detection_range_m: 360000
+      radar_cross_section_m2: 24
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: israel-mediterranean-port
+      name: Israeli Mediterranean Port
+      description: Dual-use port handling civilian commerce, naval logistics, and strategic sealift support.
+      domain: 1
+      form: 34
+      general_type: 91
+      specific_type: Mediterranean Port Facility
+      short_name: Port
+      asset_class: port
+      target_class: soft_infrastructure
+      stationary: true
+      affiliation: dual_use
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 1975
+      base_strength: 0.24
+      accuracy: 0.02
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.22
+      detection_range_m: 1200
+      radar_cross_section_m2: 52
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: israel-desalination-complex
+      name: Israeli Desalination Complex
+      description: Large coastal desalination facility critical to civilian water supply and economic continuity.
+      domain: 1
+      form: 34
+      general_type: 91
+      specific_type: Coastal Desalination Complex
+      short_name: Desal
+      asset_class: desalination_plant
+      target_class: civilian_water
+      stationary: true
+      affiliation: civilian
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      service_entry_year: 2013
+      base_strength: 0.16
+      accuracy: 0.01
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.18
+      detection_range_m: 500
+      radar_cross_section_m2: 44
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

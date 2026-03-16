@@ -1,0 +1,41 @@
+library:
+    id: chn_subsurface_units-v1
+    name: CHN Subsurface Units
+    description: Subsurface units originating from CHN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: jin-class-ssbn
+      name: Type 094 Jin-class SSBN
+      description: Chinese ballistic missile submarine for sea-based nuclear deterrence patrols.
+      domain: 4
+      form: 21
+      general_type: 51
+      specific_type: Type 094 Jin-class Ballistic Missile Submarine
+      short_name: Type 094
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2007
+      base_strength: 0.84
+      accuracy: 0.46
+      max_speed_mps: 12.4
+      cruise_speed_mps: 7
+      max_range_km: 999999
+      survivability: 0.78
+      detection_range_m: 150000
+      radar_cross_section_m2: 0.22
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

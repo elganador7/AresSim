@@ -1,0 +1,651 @@
+library:
+    id: chn_air_units-v1
+    name: CHN AIR Units
+    description: Air units originating from CHN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: h6k-badger
+      name: H-6K
+      description: Chinese theater bomber used for standoff land-attack and anti-ship strike missions.
+      domain: 2
+      form: 10
+      general_type: 13
+      specific_type: H-6K Bomber
+      short_name: H-6K
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2011
+      base_strength: 0.66
+      accuracy: 0.74
+      max_speed_mps: 285
+      cruise_speed_mps: 220
+      max_range_km: 3500
+      survivability: 0.34
+      detection_range_m: 220000
+      radar_cross_section_m2: 35
+      fuel_capacity_liters: 37000
+      fuel_burn_rate_lph: 6500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-brahmos
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: h6k-badger
+      name: H-6K Badger
+      description: Chinese missile-carrying bomber adapted for maritime and land strike.
+      domain: 2
+      form: 10
+      general_type: 13
+      specific_type: H-6K Badger
+      short_name: H-6K
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2011
+      base_strength: 0.74
+      accuracy: 0.76
+      max_speed_mps: 290
+      cruise_speed_mps: 210
+      max_range_km: 6000
+      survivability: 0.4
+      detection_range_m: 220000
+      radar_cross_section_m2: 35
+      fuel_capacity_liters: 58000
+      fuel_burn_rate_lph: 9800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-brahmos
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: j10c-vigorous-dragon
+      name: J-10C Vigorous Dragon
+      description: 4.5th-generation single-engine delta-canard multirole fighter with KLJ-7A AESA radar and PL-15 BVR missile. Exported to Pakistan.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: J-10C Vigorous Dragon
+      short_name: ""
+      nation_of_origin: CHN
+      operators:
+        - CHN
+        - PAK
+      employed_by:
+        - CHN
+        - PAK
+      service_entry_year: 2018
+      base_strength: 0.78
+      accuracy: 0.85
+      max_speed_mps: 686
+      cruise_speed_mps: 275
+      max_range_km: 1850
+      survivability: 0.62
+      detection_range_m: 200000
+      radar_cross_section_m2: 3
+      fuel_capacity_liters: 4500
+      fuel_burn_rate_lph: 2800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-pl15
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-pl10
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 200
+          initial_qty: 200
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: j11b-flanker
+      name: J-11B
+      description: China's reverse-engineered and domestically produced Su-27SK derivative with Chinese avionics and WS-10A engines. Air-superiority role.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: J-11B
+      short_name: ""
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2003
+      base_strength: 0.76
+      accuracy: 0.79
+      max_speed_mps: 807
+      cruise_speed_mps: 295
+      max_range_km: 3530
+      survivability: 0.64
+      detection_range_m: 160000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 9400
+      fuel_burn_rate_lph: 5100
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-pl12
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-pl10
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: j15-flying-shark
+      name: J-15 Flying Shark
+      description: Carrier-based naval fighter derived from the Su-33. Operates from PLAN Liaoning and Shandong carriers. Now joined by the J-15T catapult variant.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: J-15 Flying Shark
+      short_name: ""
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2013
+      base_strength: 0.78
+      accuracy: 0.82
+      max_speed_mps: 772
+      cruise_speed_mps: 280
+      max_range_km: 3500
+      survivability: 0.63
+      detection_range_m: 180000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 9400
+      fuel_burn_rate_lph: 5000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-pl12
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-pl10
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: j16-flanker
+      name: J-16
+      description: 4th-generation twin-seat multirole strike fighter derived from Su-30MKK. AESA radar, PL-15/PL-10 missiles, and PL-12D anti-radiation missiles.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: J-16
+      short_name: ""
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2013
+      base_strength: 0.83
+      accuracy: 0.85
+      max_speed_mps: 772
+      cruise_speed_mps: 295
+      max_range_km: 4000
+      survivability: 0.67
+      detection_range_m: 220000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 9640
+      fuel_burn_rate_lph: 5000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-pl15
+          max_qty: 6
+          initial_qty: 6
+        - weapon_id: aam-pl10
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: j20a-mighty-dragon
+      name: J-20A Mighty Dragon
+      description: China's 5th-generation stealth air-superiority fighter with WS-10C engines. Internal weapons bays with PL-15 BVR and PL-10 WVR missiles.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: J-20A Mighty Dragon
+      short_name: ""
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2017
+      base_strength: 0.91
+      accuracy: 0.9
+      max_speed_mps: 686
+      cruise_speed_mps: 292
+      max_range_km: 5500
+      survivability: 0.8
+      detection_range_m: 300000
+      radar_cross_section_m2: 0.05
+      fuel_capacity_liters: 11000
+      fuel_burn_rate_lph: 4200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-pl15
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-pl10
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 300
+          initial_qty: 300
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: j20b-mighty-dragon
+      name: J-20B Mighty Dragon
+      description: Improved J-20 variant with WS-15 Emei high-thrust turbofan enabling sustained supercruise. Enhanced sensors and reduced radar cross-section.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: J-20B Mighty Dragon
+      short_name: ""
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2023
+      base_strength: 0.94
+      accuracy: 0.92
+      max_speed_mps: 686
+      cruise_speed_mps: 617
+      max_range_km: 5500
+      survivability: 0.83
+      detection_range_m: 350000
+      radar_cross_section_m2: 0.03
+      fuel_capacity_liters: 11000
+      fuel_burn_rate_lph: 4000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-pl15
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-pl10
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 300
+          initial_qty: 300
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: jf17-thunder-blk3
+      name: JF-17 Thunder Block III
+      description: 4th-generation lightweight single-engine multirole fighter jointly developed by Pakistan and China. Block III features KLJ-7A AESA radar and PL-15 integration.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: JF-17 Thunder Block III
+      short_name: ""
+      nation_of_origin: CHN
+      operators:
+        - PAK
+        - NGA
+        - MMR
+        - AZE
+      employed_by:
+        - PAK
+        - NGA
+        - MMR
+        - AZE
+      service_entry_year: 2021
+      base_strength: 0.68
+      accuracy: 0.8
+      max_speed_mps: 549
+      cruise_speed_mps: 265
+      max_range_km: 1350
+      survivability: 0.52
+      detection_range_m: 150000
+      radar_cross_section_m2: 3
+      fuel_capacity_liters: 2300
+      fuel_burn_rate_lph: 2200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-pl15
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-pl10
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: jh7a-flying-leopard
+      name: JH-7A Flying Leopard
+      description: Chinese twin-seat strike aircraft used for maritime strike and theater attack missions.
+      domain: 2
+      form: 10
+      general_type: 12
+      specific_type: JH-7A Flying Leopard
+      short_name: JH-7A
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2004
+      base_strength: 0.69
+      accuracy: 0.76
+      max_speed_mps: 500
+      cruise_speed_mps: 240
+      max_range_km: 3650
+      survivability: 0.5
+      detection_range_m: 150000
+      radar_cross_section_m2: 9
+      fuel_capacity_liters: 9000
+      fuel_burn_rate_lph: 3900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-brahmos
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-pl12
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-pl10
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: kj500-aew
+      name: KJ-500
+      description: Chinese airborne early warning aircraft used to extend battlespace awareness and coordinate large air packages.
+      domain: 2
+      form: 10
+      general_type: 16
+      specific_type: KJ-500 AEW&C
+      short_name: KJ-500
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2015
+      base_strength: 0.54
+      accuracy: 0.72
+      max_speed_mps: 185
+      cruise_speed_mps: 155
+      max_range_km: 5700
+      survivability: 0.24
+      detection_range_m: 420000
+      radar_cross_section_m2: 18
+      fuel_capacity_liters: 26000
+      fuel_burn_rate_lph: 3800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: liaoning-j15-airwing
+      name: J-15 Flying Shark
+      description: Chinese carrier-capable multirole fighter used for fleet defense and maritime strike.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: J-15 Flying Shark
+      short_name: J-15
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2013
+      base_strength: 0.72
+      accuracy: 0.78
+      max_speed_mps: 620
+      cruise_speed_mps: 260
+      max_range_km: 3500
+      survivability: 0.56
+      detection_range_m: 240000
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 9400
+      fuel_burn_rate_lph: 4100
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-pl12
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-pl10
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: asm-nsm
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: y20-transport
+      name: Y-20 Kunpeng
+      description: Chinese heavy transport aircraft for strategic airlift, airborne insertion, and logistics support.
+      domain: 2
+      form: 10
+      general_type: 14
+      specific_type: Y-20 Strategic Transport
+      short_name: Y-20
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2016
+      base_strength: 0.5
+      accuracy: 0.42
+      max_speed_mps: 245
+      cruise_speed_mps: 215
+      max_range_km: 7800
+      survivability: 0.2
+      detection_range_m: 130000
+      radar_cross_section_m2: 40
+      fuel_capacity_liters: 98000
+      fuel_burn_rate_lph: 9000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: y20u-tanker
+      name: YY-20
+      description: Chinese aerial refueling variant of the Y-20 used to extend fighter and bomber reach.
+      domain: 2
+      form: 10
+      general_type: 17
+      specific_type: YY-20 Tanker
+      short_name: YY-20
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2022
+      base_strength: 0.52
+      accuracy: 0.44
+      max_speed_mps: 245
+      cruise_speed_mps: 215
+      max_range_km: 7000
+      survivability: 0.2
+      detection_range_m: 140000
+      radar_cross_section_m2: 40
+      fuel_capacity_liters: 100000
+      fuel_burn_rate_lph: 9200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: z10-attack-helicopter
+      name: Z-10 Attack Helicopter
+      description: Chinese dedicated attack helicopter for anti-armor and close support operations.
+      domain: 2
+      form: 11
+      general_type: 20
+      specific_type: CAIC Z-10
+      short_name: Z-10
+      nation_of_origin: CHN
+      operators:
+        - CHN
+        - PAK
+      employed_by:
+        - CHN
+        - PAK
+      service_entry_year: 2012
+      base_strength: 0.67
+      accuracy: 0.78
+      max_speed_mps: 83
+      cruise_speed_mps: 72
+      max_range_km: 800
+      survivability: 0.5
+      detection_range_m: 24000
+      radar_cross_section_m2: 3
+      fuel_capacity_liters: 1250
+      fuel_burn_rate_lph: 450
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-114-hellfire
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: z20-utility-helicopter
+      name: Z-20 Utility Helicopter
+      description: Chinese medium utility helicopter comparable to the Black Hawk family.
+      domain: 2
+      form: 11
+      general_type: 21
+      specific_type: Harbin Z-20
+      short_name: Z-20
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2018
+      base_strength: 0.4
+      accuracy: 0.15
+      max_speed_mps: 78
+      cruise_speed_mps: 68
+      max_range_km: 600
+      survivability: 0.34
+      detection_range_m: 10000
+      radar_cross_section_m2: 4.1
+      fuel_capacity_liters: 1400
+      fuel_burn_rate_lph: 420
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

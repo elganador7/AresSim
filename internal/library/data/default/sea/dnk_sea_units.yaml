@@ -1,0 +1,47 @@
+library:
+    id: dnk_sea_units-v1
+    name: DNK SEA Units
+    description: Sea units originating from DNK.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: iver-huitfeldt-denmark
+      name: Iver Huitfeldt-class Frigate
+      description: Danish air-defense frigate built for NATO escort and long-range maritime presence.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: Iver Huitfeldt-class Frigate
+      short_name: Iver
+      nation_of_origin: DNK
+      operators:
+        - DNK
+      employed_by:
+        - DNK
+      service_entry_year: 2011
+      base_strength: 0.66
+      accuracy: 0.72
+      max_speed_mps: 14.5
+      cruise_speed_mps: 9.3
+      max_range_km: 9000
+      survivability: 0.56
+      detection_range_m: 260000
+      radar_cross_section_m2: 8500
+      fuel_capacity_liters: 760000
+      fuel_burn_rate_lph: 1450
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-sm2-block3
+          max_qty: 32
+          initial_qty: 32
+        - weapon_id: asm-nsm
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []

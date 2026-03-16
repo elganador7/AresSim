@@ -1,0 +1,1022 @@
+library:
+    id: rus_air_units-v1
+    name: RUS AIR Units
+    description: Air units originating from RUS.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: a50u-mainstay
+      name: A-50U Mainstay
+      description: Russian AEW platform for long-range air search, battle management, and interceptor control.
+      domain: 2
+      form: 10
+      general_type: 16
+      specific_type: A-50U Mainstay
+      short_name: A-50U
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2011
+      base_strength: 0.5
+      accuracy: 0.68
+      max_speed_mps: 210
+      cruise_speed_mps: 180
+      max_range_km: 7500
+      survivability: 0.2
+      detection_range_m: 420000
+      radar_cross_section_m2: 25
+      fuel_capacity_liters: 109000
+      fuel_burn_rate_lph: 9600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: il78m-tanker
+      name: Il-78M Midas
+      description: Russian strategic tanker used to support long-range fighter, bomber, and patrol aviation.
+      domain: 2
+      form: 10
+      general_type: 17
+      specific_type: Il-78M Tanker
+      short_name: Il-78M
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - CHN
+        - IND
+        - PAK
+      employed_by:
+        - RUS
+        - CHN
+        - IND
+        - PAK
+      service_entry_year: 1987
+      base_strength: 0.48
+      accuracy: 0.4
+      max_speed_mps: 235
+      cruise_speed_mps: 205
+      max_range_km: 7300
+      survivability: 0.18
+      detection_range_m: 120000
+      radar_cross_section_m2: 42
+      fuel_capacity_liters: 118000
+      fuel_burn_rate_lph: 10000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: ka52m-alligator
+      name: Ka-52M Alligator
+      description: Russian coaxial-rotor attack helicopter with anti-armor and reconnaissance capability.
+      domain: 2
+      form: 11
+      general_type: 20
+      specific_type: Ka-52M Alligator
+      short_name: Ka-52M
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2022
+      base_strength: 0.7
+      accuracy: 0.8
+      max_speed_mps: 83
+      cruise_speed_mps: 72
+      max_range_km: 460
+      survivability: 0.56
+      detection_range_m: 30000
+      radar_cross_section_m2: 3.5
+      fuel_capacity_liters: 1450
+      fuel_burn_rate_lph: 520
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-65-maverick
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mi24vp-hind
+      name: Mi-24VP Hind
+      description: Armed assault helicopter combining troop lift with close air support firepower.
+      domain: 2
+      form: 11
+      general_type: 20
+      specific_type: Mi-24VP Hind
+      short_name: Mi-24VP
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - AZE
+        - DZA
+        - MMR
+        - SYR
+        - UKR
+      employed_by:
+        - RUS
+        - AZE
+        - DZA
+        - MMR
+        - SYR
+        - UKR
+      service_entry_year: 1989
+      base_strength: 0.6
+      accuracy: 0.7
+      max_speed_mps: 92
+      cruise_speed_mps: 75
+      max_range_km: 450
+      survivability: 0.48
+      detection_range_m: 18000
+      radar_cross_section_m2: 4.2
+      fuel_capacity_liters: 1500
+      fuel_burn_rate_lph: 600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mi28nm-havoc
+      name: Mi-28NM Havoc
+      description: Night-capable Russian attack helicopter with mast radar and improved missile integration.
+      domain: 2
+      form: 11
+      general_type: 20
+      specific_type: Mi-28NM Havoc
+      short_name: Mi-28NM
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - IRQ
+        - DZA
+      employed_by:
+        - RUS
+        - IRQ
+        - DZA
+      service_entry_year: 2019
+      base_strength: 0.68
+      accuracy: 0.79
+      max_speed_mps: 84
+      cruise_speed_mps: 70
+      max_range_km: 435
+      survivability: 0.54
+      detection_range_m: 28000
+      radar_cross_section_m2: 3.4
+      fuel_capacity_liters: 1500
+      fuel_burn_rate_lph: 540
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-65-maverick
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mi35-myanmar
+      name: Mi-35P (Myanmar)
+      description: Myanmar attack helicopter used for close air support and internal-security operations.
+      domain: 2
+      form: 11
+      general_type: 20
+      specific_type: Mi-35P Hind-F
+      short_name: Mi-35P
+      nation_of_origin: RUS
+      operators:
+        - MMR
+      employed_by:
+        - MMR
+      service_entry_year: 2019
+      base_strength: 0.5
+      accuracy: 0.56
+      max_speed_mps: 86
+      cruise_speed_mps: 68
+      max_range_km: 450
+      survivability: 0.3
+      detection_range_m: 65000
+      radar_cross_section_m2: 2.5
+      fuel_capacity_liters: 1500
+      fuel_burn_rate_lph: 520
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-114-hellfire
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mig29-syria
+      name: MiG-29 (Syrian Arab Air Force)
+      description: Syrian frontline fighter used for point air defense and limited interception.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: MiG-29 Fulcrum
+      short_name: MiG-29
+      nation_of_origin: RUS
+      operators:
+        - SYR
+      employed_by:
+        - SYR
+      service_entry_year: 1987
+      base_strength: 0.42
+      accuracy: 0.46
+      max_speed_mps: 600
+      cruise_speed_mps: 240
+      max_range_km: 1500
+      survivability: 0.34
+      detection_range_m: 140000
+      radar_cross_section_m2: 5
+      fuel_capacity_liters: 4300
+      fuel_burn_rate_lph: 2800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-r74m
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mig29k-fulcrum-d
+      name: MiG-29K Fulcrum-D
+      description: Carrier-based multirole variant of the MiG-29 with folding wings, Zhuk-ME PESA radar, and air-to-ground capability. Operated by Indian Navy (INS Vikrant/Vikramaditya).
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: MiG-29K Fulcrum-D
+      short_name: ""
+      nation_of_origin: RUS
+      operators:
+        - IND
+        - RUS
+      employed_by:
+        - IND
+        - RUS
+      service_entry_year: 2010
+      base_strength: 0.72
+      accuracy: 0.79
+      max_speed_mps: 686
+      cruise_speed_mps: 275
+      max_range_km: 1600
+      survivability: 0.56
+      detection_range_m: 130000
+      radar_cross_section_m2: 5
+      fuel_capacity_liters: 5800
+      fuel_burn_rate_lph: 3100
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-r74m
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mig29m-fulcrum-e
+      name: MiG-29M/M2 Fulcrum-E
+      description: Modernized MiG-29 with new fly-by-wire system, enlarged fuel capacity, and Zhuk-ME radar. Operated by Egypt, Algeria, and the Russian Navy.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: MiG-29M Fulcrum-E
+      short_name: ""
+      nation_of_origin: RUS
+      operators:
+        - EGY
+        - DZA
+      employed_by:
+        - EGY
+        - DZA
+      service_entry_year: 2013
+      base_strength: 0.73
+      accuracy: 0.8
+      max_speed_mps: 772
+      cruise_speed_mps: 280
+      max_range_km: 2900
+      survivability: 0.57
+      detection_range_m: 140000
+      radar_cross_section_m2: 5
+      fuel_capacity_liters: 5300
+      fuel_burn_rate_lph: 2900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-r74m
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mig29s-fulcrum-c
+      name: MiG-29S Fulcrum-C
+      description: 4th-generation lightweight multirole fighter. Widely exported; in service with Russia, Ukraine, Poland, India, Algeria, Syria, Cuba, and many others.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: MiG-29S Fulcrum-C
+      short_name: ""
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - UKR
+        - POL
+        - IND
+        - DZA
+        - SYR
+        - AZE
+        - KAZ
+      employed_by:
+        - RUS
+        - UKR
+        - POL
+        - IND
+        - DZA
+        - SYR
+        - AZE
+        - KAZ
+      service_entry_year: 1983
+      base_strength: 0.67
+      accuracy: 0.76
+      max_speed_mps: 772
+      cruise_speed_mps: 280
+      max_range_km: 2100
+      survivability: 0.54
+      detection_range_m: 100000
+      radar_cross_section_m2: 5
+      fuel_capacity_liters: 4360
+      fuel_burn_rate_lph: 3000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-r74m
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mig31bm-foxhound
+      name: MiG-31BM Foxhound
+      description: Dedicated long-range supersonic interceptor. Carries the R-37M missile with a 300 km+ range; Zaslon PESA radar with 400 km detection range. Maximum speed Mach 2.83.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: MiG-31BM Foxhound
+      short_name: ""
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - KAZ
+      employed_by:
+        - RUS
+        - KAZ
+      service_entry_year: 1981
+      base_strength: 0.82
+      accuracy: 0.84
+      max_speed_mps: 972
+      cruise_speed_mps: 807
+      max_range_km: 3000
+      survivability: 0.64
+      detection_range_m: 400000
+      radar_cross_section_m2: 20
+      fuel_capacity_liters: 15500
+      fuel_burn_rate_lph: 7000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r37m
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-r74m
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 260
+          initial_qty: 260
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mig35s-fulcrum-f
+      name: MiG-35S Fulcrum-F
+      description: 4++ generation multirole derivative of MiG-29 with Zhuk-AE AESA radar, IRST, and enhanced avionics. Limited production for VKS.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: MiG-35S Fulcrum-F
+      short_name: ""
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2019
+      base_strength: 0.75
+      accuracy: 0.82
+      max_speed_mps: 772
+      cruise_speed_mps: 280
+      max_range_km: 3100
+      survivability: 0.58
+      detection_range_m: 200000
+      radar_cross_section_m2: 4
+      fuel_capacity_liters: 5200
+      fuel_burn_rate_lph: 2800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 6
+          initial_qty: 6
+        - weapon_id: aam-r74m
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: su24mk-strike-squadron-iran
+      name: Su-24MK Strike Squadron
+      description: Iranian deep-strike aircraft squadron for maritime strike, stand-off attack, and conventional theater strike.
+      domain: 2
+      form: 10
+      general_type: 12
+      specific_type: Su-24MK Fencer-D
+      short_name: Su-24MK
+      nation_of_origin: RUS
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 1991
+      base_strength: 0.54
+      accuracy: 0.62
+      max_speed_mps: 470
+      cruise_speed_mps: 250
+      max_range_km: 2850
+      survivability: 0.36
+      detection_range_m: 110000
+      radar_cross_section_m2: 24
+      fuel_capacity_liters: 11700
+      fuel_burn_rate_lph: 5200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-noor
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: agm-65-maverick
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: su27s-flanker-b
+      name: Su-27S Flanker-B
+      description: 4th-generation dedicated air-superiority fighter. Long range and high agility; backbone of Russian, Ukrainian, and several export air forces.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: Su-27S Flanker-B
+      short_name: ""
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - UKR
+        - CHN
+        - ETH
+        - ERI
+        - KAZ
+        - UZB
+        - VNM
+      employed_by:
+        - RUS
+        - UKR
+        - CHN
+        - ETH
+        - ERI
+        - KAZ
+        - UZB
+        - VNM
+      service_entry_year: 1985
+      base_strength: 0.77
+      accuracy: 0.8
+      max_speed_mps: 807
+      cruise_speed_mps: 295
+      max_range_km: 3530
+      survivability: 0.64
+      detection_range_m: 150000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 9400
+      fuel_burn_rate_lph: 5200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-r74m
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: su30sm-armenia
+      name: Su-30SM (Armenia)
+      description: Armenian heavy fighter providing long-range interception and strike capability.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: Su-30SM Flanker-H
+      short_name: Su-30SM
+      nation_of_origin: RUS
+      operators:
+        - ARM
+      employed_by:
+        - ARM
+      service_entry_year: 2020
+      base_strength: 0.72
+      accuracy: 0.76
+      max_speed_mps: 590
+      cruise_speed_mps: 250
+      max_range_km: 3000
+      survivability: 0.56
+      detection_range_m: 220000
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 9600
+      fuel_burn_rate_lph: 3800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-r74m
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: su30sm-flanker-h
+      name: Su-30SM Flanker-H
+      description: 4th-generation twin-seat multirole derivative of the Su-27. Thrust vectoring, canards, and updated avionics. Primary VKS multirole platform.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: Su-30SM Flanker-H
+      short_name: ""
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - BLR
+        - KAZ
+        - ARM
+      employed_by:
+        - RUS
+        - BLR
+        - KAZ
+        - ARM
+      service_entry_year: 2012
+      base_strength: 0.83
+      accuracy: 0.84
+      max_speed_mps: 772
+      cruise_speed_mps: 295
+      max_range_km: 3000
+      survivability: 0.66
+      detection_range_m: 180000
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 9640
+      fuel_burn_rate_lph: 5000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: aam-r74m
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: su34-fullback
+      name: Su-34 Fullback
+      description: Russian strike fighter optimized for long-range interdiction, maritime strike, and heavy conventional attack.
+      domain: 2
+      form: 10
+      general_type: 12
+      specific_type: Su-34 Fullback
+      short_name: Su-34
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2014
+      base_strength: 0.78
+      accuracy: 0.8
+      max_speed_mps: 530
+      cruise_speed_mps: 270
+      max_range_km: 4000
+      survivability: 0.62
+      detection_range_m: 250000
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 12100
+      fuel_burn_rate_lph: 4300
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: asm-brahmos
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gbu-32-jdam
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: su34-fullback
+      name: Su-34 Fullback
+      description: Russian strike fighter-bomber with long range and robust low-level strike capability.
+      domain: 2
+      form: 10
+      general_type: 12
+      specific_type: Su-34 Fullback
+      short_name: Su-34
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2014
+      base_strength: 0.83
+      accuracy: 0.84
+      max_speed_mps: 526
+      cruise_speed_mps: 295
+      max_range_km: 4000
+      survivability: 0.66
+      detection_range_m: 180000
+      radar_cross_section_m2: 9
+      fuel_capacity_liters: 12100
+      fuel_burn_rate_lph: 4800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-kh31p
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-r77-1
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-r74m
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: su35s-flanker-e
+      name: Su-35S Flanker-E
+      description: 4++ generation air superiority fighter. Irbis-E PESA radar with 400 km range; 3D thrust-vectoring; the most capable non-stealth Russian fighter.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: Su-35S Flanker-E
+      short_name: ""
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - CHN
+        - IRN
+      employed_by:
+        - RUS
+        - CHN
+        - IRN
+      service_entry_year: 2014
+      base_strength: 0.88
+      accuracy: 0.87
+      max_speed_mps: 772
+      cruise_speed_mps: 295
+      max_range_km: 3600
+      survivability: 0.7
+      detection_range_m: 400000
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 11500
+      fuel_burn_rate_lph: 5500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 8
+          initial_qty: 8
+        - weapon_id: aam-r74m
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: su57-felon
+      name: Su-57 Felon
+      description: Russia's 5th-generation stealth multirole fighter. Internal weapons bays, AESA radar suite, supercruise capability. Limited production numbers.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: Su-57 Felon
+      short_name: ""
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2020
+      base_strength: 0.92
+      accuracy: 0.9
+      max_speed_mps: 686
+      cruise_speed_mps: 617
+      max_range_km: 5500
+      survivability: 0.78
+      detection_range_m: 400000
+      radar_cross_section_m2: 0.1
+      fuel_capacity_liters: 11000
+      fuel_burn_rate_lph: 4500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-r77-1
+          max_qty: 6
+          initial_qty: 6
+        - weapon_id: aam-r74m
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: gun-gsh301-30mm
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: tu160m-blackjack
+      name: Tu-160M Blackjack
+      description: Russian supersonic strategic bomber with very long-range cruise missile capacity.
+      domain: 2
+      form: 10
+      general_type: 13
+      specific_type: Tu-160M Blackjack
+      short_name: Tu-160M
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2021
+      base_strength: 0.9
+      accuracy: 0.84
+      max_speed_mps: 610
+      cruise_speed_mps: 255
+      max_range_km: 12300
+      survivability: 0.52
+      detection_range_m: 240000
+      radar_cross_section_m2: 30
+      fuel_capacity_liters: 148000
+      fuel_burn_rate_lph: 16000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-kalibr
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: tu214r-isr
+      name: Tu-214R
+      description: Russian multi-intelligence collection aircraft used for stand-off ISR and theater reconnaissance.
+      domain: 2
+      form: 10
+      general_type: 18
+      specific_type: Tu-214R ISR Aircraft
+      short_name: Tu-214R
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2014
+      base_strength: 0.46
+      accuracy: 0.58
+      max_speed_mps: 250
+      cruise_speed_mps: 220
+      max_range_km: 6500
+      survivability: 0.18
+      detection_range_m: 300000
+      radar_cross_section_m2: 30
+      fuel_capacity_liters: 52000
+      fuel_burn_rate_lph: 6200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: tu95msm-bear
+      name: Tu-95MSM Bear-H
+      description: Long-range turboprop cruise missile carrier used for strategic stand-off attacks.
+      domain: 2
+      form: 10
+      general_type: 13
+      specific_type: Tu-95MSM Bear-H
+      short_name: Tu-95MSM
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2020
+      base_strength: 0.75
+      accuracy: 0.74
+      max_speed_mps: 255
+      cruise_speed_mps: 205
+      max_range_km: 15000
+      survivability: 0.38
+      detection_range_m: 180000
+      radar_cross_section_m2: 38
+      fuel_capacity_liters: 90000
+      fuel_burn_rate_lph: 12000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-kalibr
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mi17v5-iraq
+      name: Mi-17V-5 (Iraq)
+      description: Iraqi medium transport helicopter for tactical lift, logistics resupply, and internal security reinforcement.
+      domain: 2
+      form: 11
+      general_type: 21
+      specific_type: Mi-17V-5 Transport Helicopter
+      short_name: Mi-17
+      nation_of_origin: RUS
+      operators:
+        - IRQ
+      employed_by:
+        - IRQ
+      service_entry_year: 2012
+      base_strength: 0.32
+      accuracy: 0.1
+      max_speed_mps: 69
+      cruise_speed_mps: 58
+      max_range_km: 580
+      survivability: 0.22
+      detection_range_m: 10000
+      radar_cross_section_m2: 4.8
+      fuel_capacity_liters: 1500
+      fuel_burn_rate_lph: 420
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

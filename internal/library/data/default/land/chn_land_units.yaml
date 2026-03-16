@@ -1,0 +1,152 @@
+library:
+    id: chn_land_units-v1
+    name: CHN Land Units
+    description: Land units originating from CHN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: hq9b-battery
+      name: HQ-9B Battery
+      description: Chinese long-range area air defense system for strategic and theater coverage.
+      domain: 1
+      form: 34
+      general_type: 73
+      specific_type: HQ-9B Battery
+      short_name: HQ-9B
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2015
+      base_strength: 0.76
+      accuracy: 0.77
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.4
+      detection_range_m: 300000
+      radar_cross_section_m2: 18
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: sam-hq9b
+          max_qty: 32
+          initial_qty: 32
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: pcl191-rocket-brigade
+      name: PCL-191 Rocket Brigade
+      description: Chinese modular rocket artillery system for long-range precision strike.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: PCL-191 Rocket Artillery Brigade
+      short_name: PCL-191
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2019
+      base_strength: 0.74
+      accuracy: 0.74
+      max_speed_mps: 20
+      cruise_speed_mps: 12
+      max_range_km: 650
+      survivability: 0.36
+      detection_range_m: 1500
+      radar_cross_section_m2: 7
+      fuel_capacity_liters: 420
+      fuel_burn_rate_lph: 80
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-gmlrs
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: type99a-mbt
+      name: Type 99A
+      description: Chinese heavy main battle tank designed for high-end armored combat and breakthrough operations.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: Type 99A Main Battle Tank
+      short_name: Type 99A
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2011
+      base_strength: 0.8
+      accuracy: 0.8
+      max_speed_mps: 22
+      cruise_speed_mps: 12
+      max_range_km: 600
+      survivability: 0.68
+      detection_range_m: 6200
+      radar_cross_section_m2: 9
+      fuel_capacity_liters: 1500
+      fuel_burn_rate_lph: 240
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-120mm-apfsds
+          max_qty: 32
+          initial_qty: 32
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: type99a-mbt
+      name: Type 99A MBT
+      description: Chinese third-generation MBT with advanced armor, thermal sights, and high mobility.
+      domain: 1
+      form: 32
+      general_type: 60
+      specific_type: Type 99A Main Battle Tank
+      short_name: Type 99A
+      nation_of_origin: CHN
+      operators:
+        - CHN
+      employed_by:
+        - CHN
+      service_entry_year: 2011
+      base_strength: 0.9
+      accuracy: 0.83
+      max_speed_mps: 18.3
+      cruise_speed_mps: 10.5
+      max_range_km: 500
+      survivability: 0.76
+      detection_range_m: 3900
+      radar_cross_section_m2: 11
+      fuel_capacity_liters: 1500
+      fuel_burn_rate_lph: 300
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

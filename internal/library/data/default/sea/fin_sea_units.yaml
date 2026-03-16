@@ -1,0 +1,44 @@
+library:
+    id: fin_sea_units-v1
+    name: FIN SEA Units
+    description: Sea units originating from FIN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: hamina-missile-boat-finland
+      name: Hamina-class Missile Boat
+      description: Finnish fast attack craft tailored for archipelagic sea denial and coastal defense.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: Hamina-class Missile Boat
+      short_name: Hamina
+      nation_of_origin: FIN
+      operators:
+        - FIN
+      employed_by:
+        - FIN
+      service_entry_year: 1998
+      base_strength: 0.4
+      accuracy: 0.56
+      max_speed_mps: 15.5
+      cruise_speed_mps: 9.5
+      max_range_km: 1500
+      survivability: 0.26
+      detection_range_m: 90000
+      radar_cross_section_m2: 1800
+      fuel_capacity_liters: 120000
+      fuel_burn_rate_lph: 280
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-nsm
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []

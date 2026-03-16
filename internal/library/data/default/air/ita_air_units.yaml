@@ -1,0 +1,59 @@
+library:
+    id: ita_air_units-v1
+    name: ITA AIR Units
+    description: Air units originating from ITA.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: m346fa-master
+      name: M-346FA Master
+      description: Light fighter and lead-in fighter trainer adapted for air policing and precision attack.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: M-346FA Master
+      short_name: M-346FA
+      nation_of_origin: ITA
+      operators:
+        - ITA
+        - TKM
+        - NGA
+        - AUT
+        - POL
+        - ISR
+        - GRC
+      employed_by:
+        - ITA
+        - TKM
+        - NGA
+        - AUT
+        - POL
+        - ISR
+        - GRC
+      service_entry_year: 2021
+      base_strength: 0.58
+      accuracy: 0.7
+      max_speed_mps: 295
+      cruise_speed_mps: 220
+      max_range_km: 2500
+      survivability: 0.38
+      detection_range_m: 90000
+      radar_cross_section_m2: 3
+      fuel_capacity_liters: 2200
+      fuel_burn_rate_lph: 1500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-iris-t
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: agm-65-maverick
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []

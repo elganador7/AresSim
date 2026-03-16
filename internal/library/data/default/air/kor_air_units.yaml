@@ -1,0 +1,242 @@
+library:
+    id: kor_air_units-v1
+    name: KOR AIR Units
+    description: Air units originating from KOR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: f15k-slam-eagle
+      name: F-15K Slam Eagle
+      description: South Korean advanced strike/air superiority variant of the F-15E with AN/APG-63(V)1 radar, CFTs, and Taurus KEPD 350 stand-off cruise missile.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: F-15K Slam Eagle
+      short_name: ""
+      nation_of_origin: KOR
+      operators:
+        - KOR
+      employed_by:
+        - KOR
+      service_entry_year: 2005
+      base_strength: 0.86
+      accuracy: 0.89
+      max_speed_mps: 807
+      cruise_speed_mps: 272
+      max_range_km: 4400
+      survivability: 0.7
+      detection_range_m: 200000
+      radar_cross_section_m2: 25
+      fuel_capacity_liters: 6103
+      fuel_burn_rate_lph: 4000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 940
+          initial_qty: 940
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f15k-slam-eagle
+      name: F-15K Slam Eagle
+      description: South Korean strike fighter optimized for maritime strike and long-range interdiction.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: F-15K Slam Eagle
+      short_name: F-15K
+      nation_of_origin: KOR
+      operators:
+        - KOR
+      employed_by:
+        - KOR
+      service_entry_year: 2005
+      base_strength: 0.87
+      accuracy: 0.88
+      max_speed_mps: 730
+      cruise_speed_mps: 285
+      max_range_km: 3900
+      survivability: 0.68
+      detection_range_m: 220000
+      radar_cross_section_m2: 7
+      fuel_capacity_liters: 13455
+      fuel_burn_rate_lph: 4600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-158c-lrasm
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 510
+          initial_qty: 510
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: fa50-block20
+      name: FA-50 Block 20
+      description: Light combat aircraft for point defense, interdiction, and affordable multirole operations.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: FA-50 Block 20
+      short_name: FA-50
+      nation_of_origin: KOR
+      operators:
+        - KOR
+        - PHL
+        - THA
+        - IDN
+        - IRQ
+        - POL
+        - MYS
+      employed_by:
+        - KOR
+        - PHL
+        - THA
+        - IDN
+        - IRQ
+        - POL
+        - MYS
+      service_entry_year: 2028
+      base_strength: 0.68
+      accuracy: 0.78
+      max_speed_mps: 520
+      cruise_speed_mps: 250
+      max_range_km: 1850
+      survivability: 0.48
+      detection_range_m: 120000
+      radar_cross_section_m2: 3.5
+      fuel_capacity_liters: 2655
+      fuel_burn_rate_lph: 2200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: agm-65-maverick
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 205
+          initial_qty: 205
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: kf21-boramae
+      name: KAI KF-21 Boramae
+      description: South Korea's indigenously developed 4.5th-generation twin-engine multirole fighter. AESA radar, 10 hardpoints, entering service 2026. METEOR BVR planned.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: KAI KF-21 Boramae
+      short_name: ""
+      nation_of_origin: KOR
+      operators:
+        - KOR
+      employed_by:
+        - KOR
+      service_entry_year: 2026
+      base_strength: 0.82
+      accuracy: 0.87
+      max_speed_mps: 617
+      cruise_speed_mps: 280
+      max_range_km: 2900
+      survivability: 0.65
+      detection_range_m: 250000
+      radar_cross_section_m2: 0.5
+      fuel_capacity_liters: 4800
+      fuel_burn_rate_lph: 3000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-meteor
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-mauser-bk27
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: kf21-boramae
+      name: KF-21 Boramae
+      description: South Korean 4.5-generation multirole fighter intended for regional air superiority and strike missions.
+      domain: 2
+      form: 10
+      general_type: 11
+      specific_type: KF-21 Boramae
+      short_name: KF-21
+      nation_of_origin: KOR
+      operators:
+        - KOR
+        - IDN
+      employed_by:
+        - KOR
+        - IDN
+      service_entry_year: 2026
+      base_strength: 0.86
+      accuracy: 0.88
+      max_speed_mps: 611
+      cruise_speed_mps: 280
+      max_range_km: 2900
+      survivability: 0.7
+      detection_range_m: 220000
+      radar_cross_section_m2: 1.5
+      fuel_capacity_liters: 7700
+      fuel_burn_rate_lph: 3400
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 480
+          initial_qty: 480
+      default_weapon_configuration: ""
+      weapon_configurations: []

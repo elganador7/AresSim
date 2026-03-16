@@ -1,0 +1,44 @@
+library:
+    id: swe_sea_units-v1
+    name: SWE SEA Units
+    description: Sea units originating from SWE.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: visby-corvette
+      name: Visby-class Corvette
+      description: Low-signature corvette designed for littoral warfare and coastal defense.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Visby-class Corvette
+      short_name: Visby
+      nation_of_origin: SWE
+      operators:
+        - SWE
+      employed_by:
+        - SWE
+      service_entry_year: 2009
+      base_strength: 0.58
+      accuracy: 0.72
+      max_speed_mps: 18
+      cruise_speed_mps: 11
+      max_range_km: 2500
+      survivability: 0.42
+      detection_range_m: 160000
+      radar_cross_section_m2: 900
+      fuel_capacity_liters: 180000
+      fuel_burn_rate_lph: 600
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-nsm
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []

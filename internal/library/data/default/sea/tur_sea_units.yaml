@@ -1,0 +1,50 @@
+library:
+    id: tur_sea_units-v1
+    name: TUR SEA Units
+    description: Sea units originating from TUR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: ada-class-corvette
+      name: Ada-class Corvette
+      description: Turkish corvette design exported for patrol, escort, and littoral strike missions.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Ada-class Corvette
+      short_name: Ada
+      nation_of_origin: TUR
+      operators:
+        - TUR
+        - PAK
+        - UKR
+        - MYS
+      employed_by:
+        - TUR
+        - PAK
+        - UKR
+        - MYS
+      service_entry_year: 2011
+      base_strength: 0.56
+      accuracy: 0.7
+      max_speed_mps: 15.9
+      cruise_speed_mps: 9.8
+      max_range_km: 6500
+      survivability: 0.44
+      detection_range_m: 180000
+      radar_cross_section_m2: 6000
+      fuel_capacity_liters: 500000
+      fuel_burn_rate_lph: 1000
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []

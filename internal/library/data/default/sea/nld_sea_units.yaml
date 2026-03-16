@@ -1,0 +1,84 @@
+library:
+    id: nld_sea_units-v1
+    name: NLD SEA Units
+    description: Sea units originating from NLD.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: bartolomeu-dias-portugal
+      name: Bartolomeu Dias-class Frigate
+      description: Portuguese frigate used for Atlantic escort, maritime security, and NATO task groups.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: Bartolomeu Dias-class Frigate
+      short_name: Dias
+      nation_of_origin: NLD
+      operators:
+        - PRT
+      employed_by:
+        - PRT
+      service_entry_year: 2009
+      base_strength: 0.56
+      accuracy: 0.62
+      max_speed_mps: 15
+      cruise_speed_mps: 9
+      max_range_km: 6500
+      survivability: 0.46
+      detection_range_m: 210000
+      radar_cross_section_m2: 7000
+      fuel_capacity_liters: 640000
+      fuel_burn_rate_lph: 1300
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-sm2-block3
+          max_qty: 16
+          initial_qty: 16
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: de-zeven-provincien
+      name: De Zeven Provinciën-class Frigate
+      description: Dutch command frigate optimized for area air defense and task group control.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: De Zeven Provinciën-class Frigate
+      short_name: DZP
+      nation_of_origin: NLD
+      operators:
+        - NLD
+      employed_by:
+        - NLD
+      service_entry_year: 2005
+      base_strength: 0.8
+      accuracy: 0.84
+      max_speed_mps: 15.4
+      cruise_speed_mps: 10
+      max_range_km: 9000
+      survivability: 0.64
+      detection_range_m: 340000
+      radar_cross_section_m2: 11000
+      fuel_capacity_liters: 1.1e+06
+      fuel_burn_rate_lph: 1900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-sm2-block3
+          max_qty: 40
+          initial_qty: 40
+      default_weapon_configuration: ""
+      weapon_configurations: []

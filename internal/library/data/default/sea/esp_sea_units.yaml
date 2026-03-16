@@ -1,0 +1,159 @@
+library:
+    id: esp_sea_units-v1
+    name: ESP SEA Units
+    description: Sea units originating from ESP.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: alvaro-de-bazan
+      name: Álvaro de Bazán-class Frigate
+      description: Spanish Aegis frigate family used as the basis for multiple allied escort designs.
+      domain: 3
+      form: 20
+      general_type: 43
+      specific_type: Álvaro de Bazán-class Frigate
+      short_name: F-100
+      nation_of_origin: ESP
+      operators:
+        - ESP
+      employed_by:
+        - ESP
+      service_entry_year: 2002
+      base_strength: 0.76
+      accuracy: 0.82
+      max_speed_mps: 14.9
+      cruise_speed_mps: 9.8
+      max_range_km: 8300
+      survivability: 0.6
+      detection_range_m: 300000
+      radar_cross_section_m2: 9500
+      fuel_capacity_liters: 950000
+      fuel_burn_rate_lph: 1800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 1
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-sm2-block3
+          max_qty: 32
+          initial_qty: 32
+        - weapon_id: gun-mk45-5in
+          max_qty: 600
+          initial_qty: 600
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: avante-2200-corvette-saudi
+      name: Avante 2200 Corvette
+      description: Saudi modern corvette optimized for littoral air defense, escort, and anti-ship warfare.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Avante 2200 Corvette
+      short_name: Avante 2200
+      nation_of_origin: ESP
+      operators:
+        - SAU
+      employed_by:
+        - SAU
+      service_entry_year: 2022
+      base_strength: 0.6
+      accuracy: 0.7
+      max_speed_mps: 13.9
+      cruise_speed_mps: 9
+      max_range_km: 4500
+      survivability: 0.46
+      detection_range_m: 190000
+      radar_cross_section_m2: 5200
+      fuel_capacity_liters: 480000
+      fuel_burn_rate_lph: 950
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-vl-mica
+          max_qty: 16
+          initial_qty: 16
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: canberra-class-lhd
+      name: Canberra-class LHD
+      description: Australian amphibious assault ship for expeditionary aviation and lift missions.
+      domain: 3
+      form: 20
+      general_type: 46
+      specific_type: Canberra-class Landing Helicopter Dock
+      short_name: Canberra
+      nation_of_origin: ESP
+      operators:
+        - AUS
+      employed_by:
+        - AUS
+      service_entry_year: 2014
+      base_strength: 0.7
+      accuracy: 0.5
+      max_speed_mps: 11.8
+      cruise_speed_mps: 8.5
+      max_range_km: 9000
+      survivability: 0.56
+      detection_range_m: 140000
+      radar_cross_section_m2: 24000
+      fuel_capacity_liters: 1.1e+06
+      fuel_burn_rate_lph: 1400
+      embarked_fixed_wing_capacity: 10
+      embarked_rotary_wing_capacity: 18
+      embarked_uav_capacity: 4
+      embarked_surface_connector_capacity: 4
+      launch_capacity_per_interval: 5
+      recovery_capacity_per_interval: 5
+      sortie_interval_minutes: 25
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: juan-carlos-i
+      name: Juan Carlos I (L61)
+      description: Spanish amphibious assault ship and light carrier able to embark helicopters, landing craft, and STOVL aircraft.
+      domain: 3
+      form: 20
+      general_type: 46
+      specific_type: Juan Carlos I-class Landing Helicopter Dock
+      short_name: JC-1
+      nation_of_origin: ESP
+      operators:
+        - ESP
+        - AUS
+        - TUR
+      employed_by:
+        - ESP
+        - AUS
+        - TUR
+      service_entry_year: 2010
+      base_strength: 0.72
+      accuracy: 0.54
+      max_speed_mps: 11.8
+      cruise_speed_mps: 8.5
+      max_range_km: 9000
+      survivability: 0.56
+      detection_range_m: 145000
+      radar_cross_section_m2: 25000
+      fuel_capacity_liters: 1e+06
+      fuel_burn_rate_lph: 1400
+      embarked_fixed_wing_capacity: 10
+      embarked_rotary_wing_capacity: 20
+      embarked_uav_capacity: 4
+      embarked_surface_connector_capacity: 4
+      launch_capacity_per_interval: 5
+      recovery_capacity_per_interval: 5
+      sortie_interval_minutes: 25
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

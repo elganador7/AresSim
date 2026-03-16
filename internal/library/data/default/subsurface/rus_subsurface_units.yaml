@@ -1,0 +1,163 @@
+library:
+    id: rus_subsurface_units-v1
+    name: RUS Subsurface Units
+    description: Subsurface units originating from RUS.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: borei-a-ssbn
+      name: Borei-A SSBN
+      description: Improved Russian ballistic missile submarine with enhanced quieting and survivability.
+      domain: 4
+      form: 21
+      general_type: 51
+      specific_type: Borei-A Ballistic Missile Submarine
+      short_name: Borei-A
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2020
+      base_strength: 0.96
+      accuracy: 0.54
+      max_speed_mps: 13.5
+      cruise_speed_mps: 7.5
+      max_range_km: 999999
+      survivability: 0.9
+      detection_range_m: 190000
+      radar_cross_section_m2: 0.12
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: kilo-636-3
+      name: Kilo 636.3 Improved
+      description: Quiet diesel-electric attack submarine used widely for coastal denial.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Project 636.3 Kilo-class Submarine
+      short_name: Kilo
+      nation_of_origin: RUS
+      operators:
+        - RUS
+        - CHN
+        - VNM
+        - DZA
+        - IND
+      employed_by:
+        - RUS
+        - CHN
+        - VNM
+        - DZA
+        - IND
+      service_entry_year: 2010
+      base_strength: 0.78
+      accuracy: 0.82
+      max_speed_mps: 10
+      cruise_speed_mps: 5.5
+      max_range_km: 7500
+      survivability: 0.74
+      detection_range_m: 120000
+      radar_cross_section_m2: 0.2
+      fuel_capacity_liters: 250000
+      fuel_burn_rate_lph: 220
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: tareq-kilo-submarine
+      name: Tareq Kilo-class Submarine
+      description: Iranian Kilo-class submarine used for Gulf of Oman sea denial, ambush, and limited stand-off strike.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Tareq Kilo-class Submarine
+      short_name: Tareq Kilo
+      nation_of_origin: RUS
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 1993
+      base_strength: 0.58
+      accuracy: 0.62
+      max_speed_mps: 9
+      cruise_speed_mps: 5
+      max_range_km: 6000
+      survivability: 0.54
+      detection_range_m: 100000
+      radar_cross_section_m2: 0.14
+      fuel_capacity_liters: 220000
+      fuel_burn_rate_lph: 180
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: torp-mk48
+          max_qty: 6
+          initial_qty: 6
+        - weapon_id: asm-noor
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: yasenm-ssgn
+      name: Yasen-M SSGN
+      description: Modern Russian nuclear attack submarine with substantial cruise missile strike capacity.
+      domain: 4
+      form: 21
+      general_type: 52
+      specific_type: Yasen-M Guided Missile Submarine
+      short_name: Yasen-M
+      nation_of_origin: RUS
+      operators:
+        - RUS
+      employed_by:
+        - RUS
+      service_entry_year: 2021
+      base_strength: 0.93
+      accuracy: 0.88
+      max_speed_mps: 16
+      cruise_speed_mps: 8.5
+      max_range_km: 999999
+      survivability: 0.84
+      detection_range_m: 210000
+      radar_cross_section_m2: 0.16
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-kalibr
+          max_qty: 24
+          initial_qty: 24
+        - weapon_id: torp-mk48
+          max_qty: 10
+          initial_qty: 10
+      default_weapon_configuration: ""
+      weapon_configurations: []

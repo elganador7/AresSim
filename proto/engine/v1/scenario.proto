@@ -5,6 +5,15 @@ option go_package = "github.com/aressim/internal/gen/engine/v1";
 import "engine/v1/common.proto";
 import "engine/v1/unit.proto";
 
+message CountryRelationship {
+  string from_country = 1;
+  string to_country = 2;
+  bool share_intel = 3;
+  bool airspace_transit_allowed = 4;
+  bool airspace_strike_allowed = 5;
+  bool defensive_positioning_allowed = 6;
+}
+
 message Scenario {
   string id             = 1; // UUID
   string name           = 2;
@@ -16,6 +25,7 @@ message Scenario {
   SimulationSettings settings = 8;
   MapSettings        map      = 9;
   repeated Unit      units    = 11;
+  repeated CountryRelationship relationships = 12;
 }
 
 message SimulationSettings {

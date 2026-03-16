@@ -1,0 +1,54 @@
+library:
+    id: bra_land_units-v1
+    name: BRA Land Units
+    description: Land units originating from BRA.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: astros-ii
+      name: ASTROS II
+      description: Brazilian wheeled rocket artillery system exported for long-range fires and saturation attack.
+      domain: 1
+      form: 31
+      general_type: 72
+      specific_type: ASTROS II MLRS
+      short_name: ASTROS
+      nation_of_origin: BRA
+      operators:
+        - BRA
+        - SAU
+        - QAT
+        - BHR
+        - IDN
+        - MYS
+      employed_by:
+        - BRA
+        - SAU
+        - QAT
+        - BHR
+        - IDN
+        - MYS
+      service_entry_year: 1983
+      base_strength: 0.7
+      accuracy: 0.68
+      max_speed_mps: 22
+      cruise_speed_mps: 14
+      max_range_km: 600
+      survivability: 0.34
+      detection_range_m: 1200
+      radar_cross_section_m2: 7
+      fuel_capacity_liters: 400
+      fuel_burn_rate_lph: 75
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gnd-gmlrs
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []

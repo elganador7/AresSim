@@ -1,0 +1,58 @@
+library:
+    id: deu_air_units-v1
+    name: DEU AIR Units
+    description: Air units originating from DEU.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: nh90-nfh
+      name: NH90 NFH
+      description: European naval helicopter used for ASW, ASuW, and maritime utility missions.
+      domain: 2
+      form: 11
+      general_type: 22
+      specific_type: NH90 NATO Frigate Helicopter
+      short_name: NH90
+      nation_of_origin: DEU
+      operators:
+        - BEL
+        - DEU
+        - FRA
+        - ITA
+        - NLD
+        - NOR
+        - OMN
+        - QAT
+      employed_by:
+        - BEL
+        - DEU
+        - FRA
+        - ITA
+        - NLD
+        - NOR
+        - OMN
+        - QAT
+      service_entry_year: 2011
+      base_strength: 0.5
+      accuracy: 0.5
+      max_speed_mps: 83
+      cruise_speed_mps: 70
+      max_range_km: 800
+      survivability: 0.38
+      detection_range_m: 160000
+      radar_cross_section_m2: 4.2
+      fuel_capacity_liters: 2500
+      fuel_burn_rate_lph: 520
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: torp-mk54
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []

@@ -1,0 +1,151 @@
+library:
+    id: bhr_land_units-v1
+    name: BHR Land Units
+    description: Land units originating from BHR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: bahraini-airbase
+      name: Bahraini Air Base
+      description: Compact but strategically important air base supporting Gulf air-defense and coalition operations.
+      domain: 1
+      form: 34
+      general_type: 93
+      specific_type: Air Base
+      short_name: Air Base
+      asset_class: airbase
+      target_class: runway
+      stationary: true
+      affiliation: military
+      nation_of_origin: BHR
+      operators: [BHR]
+      employed_by: [BHR]
+      service_entry_year: 1986
+      base_strength: 0.38
+      accuracy: 0.05
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.28
+      detection_range_m: 14000
+      radar_cross_section_m2: 34
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: bahraini-naval-support-base
+      name: Bahraini Naval Support Base
+      description: Port and logistics complex supporting coalition maritime presence and local naval operations.
+      domain: 1
+      form: 34
+      general_type: 91
+      specific_type: Naval Support Base
+      short_name: Port
+      asset_class: port
+      target_class: soft_infrastructure
+      stationary: true
+      affiliation: dual_use
+      nation_of_origin: BHR
+      operators: [BHR]
+      employed_by: [BHR]
+      service_entry_year: 1975
+      base_strength: 0.24
+      accuracy: 0.02
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.2
+      detection_range_m: 1000
+      radar_cross_section_m2: 50
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: bahraini-refinery-terminal
+      name: Bahraini Refinery Terminal
+      description: Refinery and export terminal complex representing dual-use petroleum infrastructure on the island.
+      domain: 1
+      form: 34
+      general_type: 91
+      specific_type: Refinery Terminal
+      short_name: Refinery
+      asset_class: power_plant
+      target_class: civilian_energy
+      stationary: true
+      affiliation: civilian
+      nation_of_origin: BHR
+      operators: [BHR]
+      employed_by: [BHR]
+      service_entry_year: 1980
+      base_strength: 0.18
+      accuracy: 0.02
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.18
+      detection_range_m: 700
+      radar_cross_section_m2: 44
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: bahraini-power-water-plant
+      name: Bahraini Power and Water Plant
+      description: Combined utility plant supporting urban electrical generation and desalinated water output.
+      domain: 1
+      form: 34
+      general_type: 91
+      specific_type: Combined Power and Water Plant
+      short_name: Utility
+      asset_class: desalination_plant
+      target_class: civilian_water
+      stationary: true
+      affiliation: civilian
+      nation_of_origin: BHR
+      operators: [BHR]
+      employed_by: [BHR]
+      service_entry_year: 2006
+      base_strength: 0.16
+      accuracy: 0.01
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.16
+      detection_range_m: 500
+      radar_cross_section_m2: 36
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

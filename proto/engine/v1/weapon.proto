@@ -20,6 +20,19 @@ enum GuidanceType {
   GUIDANCE_SONAR       = 7;  // Acoustic sonar — torpedo self-homing, always tracks
 }
 
+enum WeaponEffectType {
+  WEAPON_EFFECT_TYPE_UNSPECIFIED = 0;
+  WEAPON_EFFECT_TYPE_ANTI_AIR = 1;
+  WEAPON_EFFECT_TYPE_ANTI_SHIP = 2;
+  WEAPON_EFFECT_TYPE_ANTI_ARMOR = 3;
+  WEAPON_EFFECT_TYPE_LAND_STRIKE = 4;
+  WEAPON_EFFECT_TYPE_SEAD = 5;
+  WEAPON_EFFECT_TYPE_BALLISTIC_STRIKE = 6;
+  WEAPON_EFFECT_TYPE_INTERCEPTOR = 7;
+  WEAPON_EFFECT_TYPE_GUNFIRE = 8;
+  WEAPON_EFFECT_TYPE_TORPEDO = 9;
+}
+
 // ── WeaponDefinition ──────────────────────────────────────────────────────────
 // Global catalog entry describing a munition type.
 // Authored once (seeded from Go defaults); referenced by WeaponState.weapon_id.
@@ -40,6 +53,7 @@ message WeaponDefinition {
 
   // Guidance mechanism; determines tracking behaviour in AdvanceMunitions.
   GuidanceType guidance = 8;
+  WeaponEffectType effect_type = 9;
 }
 
 // ── WeaponState ───────────────────────────────────────────────────────────────

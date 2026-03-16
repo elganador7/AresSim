@@ -1,0 +1,47 @@
+library:
+    id: are_sea_units-v1
+    name: ARE SEA Units
+    description: Sea units originating from ARE.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: baynunah-corvette-uae
+      name: Baynunah-class Corvette
+      description: UAE coastal combatant for Gulf patrol, offshore infrastructure defense, and littoral strike.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Baynunah-class Corvette
+      short_name: Baynunah
+      nation_of_origin: ARE
+      operators:
+        - ARE
+      employed_by:
+        - ARE
+      service_entry_year: 2011
+      base_strength: 0.52
+      accuracy: 0.64
+      max_speed_mps: 15
+      cruise_speed_mps: 9.2
+      max_range_km: 4500
+      survivability: 0.38
+      detection_range_m: 150000
+      radar_cross_section_m2: 3200
+      fuel_capacity_liters: 260000
+      fuel_burn_rate_lph: 620
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: sam-vl-mica
+          max_qty: 16
+          initial_qty: 16
+        - weapon_id: asm-am39-exocet
+          max_qty: 8
+          initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []

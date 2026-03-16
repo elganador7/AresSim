@@ -1,0 +1,237 @@
+library:
+    id: irn_air_units-v1
+    name: IRN AIR Units
+    description: Air units originating from IRN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: arash2-strike-group
+      name: Arash-2 Strike Group
+      description: Long-range one-way attack drone grouping intended for mass strike and base-saturation missions.
+      domain: 2
+      form: 12
+      general_type: 32
+      specific_type: Arash-2 Strike Group
+      short_name: Arash-2
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2022
+      base_strength: 0.18
+      accuracy: 0.46
+      max_speed_mps: 60
+      cruise_speed_mps: 45
+      max_range_km: 1800
+      survivability: 0.04
+      detection_range_m: 16000
+      radar_cross_section_m2: 0.09
+      fuel_capacity_liters: 50
+      fuel_burn_rate_lph: 7
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gbu-32-jdam
+          max_qty: 20
+          initial_qty: 20
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: f14a-tomcat-iriaf
+      name: F-14A Tomcat (IRIAF)
+      description: Iran is the world's last operator of the F-14 Tomcat. Severely degraded by sanctions and lack of spares; estimated ~20-30 are airworthy. AWG-9 radar and AIM-54 Phoenix still theoretically operational.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: F-14A Tomcat (IRIAF)
+      short_name: ""
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 1976
+      base_strength: 0.5
+      accuracy: 0.58
+      max_speed_mps: 807
+      cruise_speed_mps: 265
+      max_range_km: 3200
+      survivability: 0.42
+      detection_range_m: 185000
+      radar_cross_section_m2: 20
+      fuel_capacity_liters: 9344
+      fuel_burn_rate_lph: 4800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 675
+          initial_qty: 675
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: mohajer6-uav-squadron
+      name: Mohajer-6 UAV Squadron
+      description: Iranian tactical UAV squadron for armed reconnaissance and localized strike support.
+      domain: 2
+      form: 12
+      general_type: 31
+      specific_type: Mohajer-6 UAV Squadron
+      short_name: Mohajer-6
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2018
+      base_strength: 0.24
+      accuracy: 0.4
+      max_speed_mps: 56
+      cruise_speed_mps: 40
+      max_range_km: 200
+      survivability: 0.12
+      detection_range_m: 60000
+      radar_cross_section_m2: 0.22
+      fuel_capacity_liters: 120
+      fuel_burn_rate_lph: 20
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-65-maverick
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: shahed-136
+      name: Shahed-136
+      description: Long-range one-way attack drone used for saturation strike against fixed targets.
+      domain: 2
+      form: 12
+      general_type: 32
+      specific_type: Shahed-136
+      short_name: Shahed
+      nation_of_origin: IRN
+      operators:
+        - IRN
+        - RUS
+      employed_by:
+        - IRN
+        - RUS
+      service_entry_year: 2021
+      base_strength: 0.16
+      accuracy: 0.52
+      max_speed_mps: 52
+      cruise_speed_mps: 40
+      max_range_km: 2000
+      survivability: 0.04
+      detection_range_m: 12000
+      radar_cross_section_m2: 0.08
+      fuel_capacity_liters: 45
+      fuel_burn_rate_lph: 6
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gbu-32-jdam
+          max_qty: 1
+          initial_qty: 1
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: shahed129-uav-squadron
+      name: Shahed-129 UAV Squadron
+      description: Iranian MALE UAV squadron for ISR, target acquisition, and limited precision strike.
+      domain: 2
+      form: 12
+      general_type: 31
+      specific_type: Shahed-129 UAV Squadron
+      short_name: Shahed-129
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2013
+      base_strength: 0.26
+      accuracy: 0.42
+      max_speed_mps: 55
+      cruise_speed_mps: 42
+      max_range_km: 1700
+      survivability: 0.16
+      detection_range_m: 90000
+      radar_cross_section_m2: 0.35
+      fuel_capacity_liters: 350
+      fuel_burn_rate_lph: 45
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-65-maverick
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: shahed136-strike-group
+      name: Shahed-136 Strike Group
+      description: Operational one-way attack drone grouping for saturation strikes against air defenses, air bases, and infrastructure.
+      domain: 2
+      form: 12
+      general_type: 32
+      specific_type: Shahed-136 Strike Group
+      short_name: Shahed Grp
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      service_entry_year: 2021
+      base_strength: 0.2
+      accuracy: 0.5
+      max_speed_mps: 52
+      cruise_speed_mps: 40
+      max_range_km: 2000
+      survivability: 0.04
+      detection_range_m: 18000
+      radar_cross_section_m2: 0.08
+      fuel_capacity_liters: 45
+      fuel_burn_rate_lph: 6
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: gbu-32-jdam
+          max_qty: 24
+          initial_qty: 24
+      default_weapon_configuration: ""
+      weapon_configurations: []

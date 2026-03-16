@@ -1,0 +1,47 @@
+library:
+    id: gbr_subsurface_units-v1
+    name: GBR Subsurface Units
+    description: Subsurface units originating from GBR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: astute-class-ssn
+      name: Astute-class SSN
+      description: Royal Navy nuclear attack submarine optimized for ASW, ISR, and Tomahawk strike.
+      domain: 4
+      form: 21
+      general_type: 50
+      specific_type: Astute-class Attack Submarine
+      short_name: Astute
+      nation_of_origin: GBR
+      operators:
+        - GBR
+      employed_by:
+        - GBR
+      service_entry_year: 2010
+      base_strength: 0.9
+      accuracy: 0.86
+      max_speed_mps: 15
+      cruise_speed_mps: 8
+      max_range_km: 999999
+      survivability: 0.82
+      detection_range_m: 210000
+      radar_cross_section_m2: 0.14
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: ssm-tomahawk
+          max_qty: 12
+          initial_qty: 12
+        - weapon_id: torp-mk48
+          max_qty: 12
+          initial_qty: 12
+      default_weapon_configuration: ""
+      weapon_configurations: []

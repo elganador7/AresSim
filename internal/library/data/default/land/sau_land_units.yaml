@@ -1,0 +1,151 @@
+library:
+    id: sau_land_units-v1
+    name: SAU Land Units
+    description: Land units originating from SAU.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: saudi-strategic-airbase
+      name: Saudi Strategic Air Base
+      description: Major Royal Saudi Air Force base used for coalition staging, strike generation, and air defense support.
+      domain: 1
+      form: 34
+      general_type: 93
+      specific_type: Strategic Air Base
+      short_name: Air Base
+      asset_class: airbase
+      target_class: runway
+      stationary: true
+      affiliation: military
+      nation_of_origin: SAU
+      operators: [SAU]
+      employed_by: [SAU]
+      service_entry_year: 1985
+      base_strength: 0.42
+      accuracy: 0.05
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.34
+      detection_range_m: 18000
+      radar_cross_section_m2: 38
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: saudi-oil-processing-hub
+      name: Saudi Oil Processing Hub
+      description: Strategic oil processing and export complex critical to national revenue and coalition energy security.
+      domain: 1
+      form: 34
+      general_type: 91
+      specific_type: Oil Processing Hub
+      short_name: Oil Hub
+      asset_class: oil_field
+      target_class: civilian_energy
+      stationary: true
+      affiliation: civilian
+      nation_of_origin: SAU
+      operators: [SAU]
+      employed_by: [SAU]
+      service_entry_year: 1980
+      base_strength: 0.18
+      accuracy: 0.02
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.18
+      detection_range_m: 800
+      radar_cross_section_m2: 74
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: saudi-desalination-complex
+      name: Saudi Desalination Complex
+      description: Large desalination and water-distribution complex supporting major population centers and industrial zones.
+      domain: 1
+      form: 34
+      general_type: 91
+      specific_type: Coastal Desalination Complex
+      short_name: Desal
+      asset_class: desalination_plant
+      target_class: civilian_water
+      stationary: true
+      affiliation: civilian
+      nation_of_origin: SAU
+      operators: [SAU]
+      employed_by: [SAU]
+      service_entry_year: 2005
+      base_strength: 0.16
+      accuracy: 0.01
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.18
+      detection_range_m: 500
+      radar_cross_section_m2: 42
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: saudi-east-coast-port
+      name: Saudi East Coast Port
+      description: Dual-use logistics and petroleum port supporting commerce, sealift, and military sustainment on the Gulf coast.
+      domain: 1
+      form: 34
+      general_type: 91
+      specific_type: East Coast Port Facility
+      short_name: Port
+      asset_class: port
+      target_class: soft_infrastructure
+      stationary: true
+      affiliation: dual_use
+      nation_of_origin: SAU
+      operators: [SAU]
+      employed_by: [SAU]
+      service_entry_year: 1980
+      base_strength: 0.22
+      accuracy: 0.02
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.2
+      detection_range_m: 1000
+      radar_cross_section_m2: 58
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

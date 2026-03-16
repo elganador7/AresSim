@@ -1,0 +1,52 @@
+library:
+    id: tur_air_units-v1
+    name: TUR AIR Units
+    description: Air units originating from TUR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: bayraktar-tb2
+      name: Bayraktar TB2
+      description: Tactical MALE UAV for ISR and lightweight strike missions.
+      domain: 2
+      form: 12
+      general_type: 31
+      specific_type: Bayraktar TB2
+      short_name: TB2
+      nation_of_origin: TUR
+      operators:
+        - TUR
+        - UKR
+        - POL
+        - ROU
+        - QAT
+      employed_by:
+        - TUR
+        - UKR
+        - POL
+        - ROU
+        - QAT
+      service_entry_year: 2014
+      base_strength: 0.28
+      accuracy: 0.48
+      max_speed_mps: 61
+      cruise_speed_mps: 36
+      max_range_km: 300
+      survivability: 0.18
+      detection_range_m: 60000
+      radar_cross_section_m2: 0.3
+      fuel_capacity_liters: 300
+      fuel_burn_rate_lph: 35
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-65-maverick
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []

@@ -1,0 +1,44 @@
+library:
+    id: omn_sea_units-v1
+    name: OMN SEA Units
+    description: Sea units originating from OMN.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: musandam-opv-oman
+      name: Musandam-class OPV
+      description: Omani patrol combatant for maritime security, escort, and Gulf of Oman presence missions.
+      domain: 3
+      form: 20
+      general_type: 45
+      specific_type: Musandam-class Offshore Patrol Vessel
+      short_name: Musandam
+      nation_of_origin: OMN
+      operators:
+        - OMN
+      employed_by:
+        - OMN
+      service_entry_year: 2016
+      base_strength: 0.42
+      accuracy: 0.54
+      max_speed_mps: 13.5
+      cruise_speed_mps: 8.4
+      max_range_km: 4500
+      survivability: 0.3
+      detection_range_m: 110000
+      radar_cross_section_m2: 2500
+      fuel_capacity_liters: 260000
+      fuel_burn_rate_lph: 620
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 1
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 1
+      recovery_capacity_per_interval: 1
+      sortie_interval_minutes: 30
+      default_loadout:
+        - weapon_id: asm-am39-exocet
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []

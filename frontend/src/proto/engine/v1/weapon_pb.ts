@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/weapon.proto.
  */
 export const file_engine_v1_weapon: GenFile = /*@__PURE__*/
-  fileDesc("ChZlbmdpbmUvdjEvd2VhcG9uLnByb3RvEgllbmdpbmUudjEi2wEKEFdlYXBvbkRlZmluaXRpb24SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRItCg5kb21haW5fdGFyZ2V0cxgEIAMoDjIVLmVuZ2luZS52MS5Vbml0RG9tYWluEhEKCXNwZWVkX21wcxgFIAEoAhIPCgdyYW5nZV9tGAYgASgCEhoKEnByb2JhYmlsaXR5X29mX2hpdBgHIAEoAhIpCghndWlkYW5jZRgIIAEoDjIXLmVuZ2luZS52MS5HdWlkYW5jZVR5cGUiRgoLV2VhcG9uU3RhdGUSEQoJd2VhcG9uX2lkGAEgASgJEhMKC2N1cnJlbnRfcXR5GAIgASgFEg8KB21heF9xdHkYAyABKAUqsQEKDEd1aWRhbmNlVHlwZRIYChRHVUlEQU5DRV9VTlNQRUNJRklFRBAAEhUKEUdVSURBTkNFX1VOR1VJREVEEAESEAoMR1VJREFOQ0VfR1BTEAISEgoOR1VJREFOQ0VfUkFEQVIQAxIPCgtHVUlEQU5DRV9JUhAEEhIKDkdVSURBTkNFX0xBU0VSEAUSEQoNR1VJREFOQ0VfV0lSRRAGEhIKDkdVSURBTkNFX1NPTkFSEAdCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common]);
+  fileDesc("ChZlbmdpbmUvdjEvd2VhcG9uLnByb3RvEgllbmdpbmUudjEijQIKEFdlYXBvbkRlZmluaXRpb24SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRItCg5kb21haW5fdGFyZ2V0cxgEIAMoDjIVLmVuZ2luZS52MS5Vbml0RG9tYWluEhEKCXNwZWVkX21wcxgFIAEoAhIPCgdyYW5nZV9tGAYgASgCEhoKEnByb2JhYmlsaXR5X29mX2hpdBgHIAEoAhIpCghndWlkYW5jZRgIIAEoDjIXLmVuZ2luZS52MS5HdWlkYW5jZVR5cGUSMAoLZWZmZWN0X3R5cGUYCSABKA4yGy5lbmdpbmUudjEuV2VhcG9uRWZmZWN0VHlwZSJGCgtXZWFwb25TdGF0ZRIRCgl3ZWFwb25faWQYASABKAkSEwoLY3VycmVudF9xdHkYAiABKAUSDwoHbWF4X3F0eRgDIAEoBSqxAQoMR3VpZGFuY2VUeXBlEhgKFEdVSURBTkNFX1VOU1BFQ0lGSUVEEAASFQoRR1VJREFOQ0VfVU5HVUlERUQQARIQCgxHVUlEQU5DRV9HUFMQAhISCg5HVUlEQU5DRV9SQURBUhADEg8KC0dVSURBTkNFX0lSEAQSEgoOR1VJREFOQ0VfTEFTRVIQBRIRCg1HVUlEQU5DRV9XSVJFEAYSEgoOR1VJREFOQ0VfU09OQVIQByrqAgoQV2VhcG9uRWZmZWN0VHlwZRIiCh5XRUFQT05fRUZGRUNUX1RZUEVfVU5TUEVDSUZJRUQQABIfChtXRUFQT05fRUZGRUNUX1RZUEVfQU5USV9BSVIQARIgChxXRUFQT05fRUZGRUNUX1RZUEVfQU5USV9TSElQEAISIQodV0VBUE9OX0VGRkVDVF9UWVBFX0FOVElfQVJNT1IQAxIiCh5XRUFQT05fRUZGRUNUX1RZUEVfTEFORF9TVFJJS0UQBBIbChdXRUFQT05fRUZGRUNUX1RZUEVfU0VBRBAFEicKI1dFQVBPTl9FRkZFQ1RfVFlQRV9CQUxMSVNUSUNfU1RSSUtFEAYSIgoeV0VBUE9OX0VGRkVDVF9UWVBFX0lOVEVSQ0VQVE9SEAcSHgoaV0VBUE9OX0VGRkVDVF9UWVBFX0dVTkZJUkUQCBIeChpXRUFQT05fRUZGRUNUX1RZUEVfVE9SUEVETxAJQitaKWdpdGh1Yi5jb20vYXJlc3NpbS9pbnRlcm5hbC9nZW4vZW5naW5lL3YxYgZwcm90bzM", [file_engine_v1_common]);
 
 /**
  * @generated from message engine.v1.WeaponDefinition
@@ -74,6 +74,11 @@ export type WeaponDefinition = Message<"engine.v1.WeaponDefinition"> & {
    * @generated from field: engine.v1.GuidanceType guidance = 8;
    */
   guidance: GuidanceType;
+
+  /**
+   * @generated from field: engine.v1.WeaponEffectType effect_type = 9;
+   */
+  effectType: WeaponEffectType;
 };
 
 /**
@@ -180,4 +185,65 @@ export enum GuidanceType {
  */
 export const GuidanceTypeSchema: GenEnum<GuidanceType> = /*@__PURE__*/
   enumDesc(file_engine_v1_weapon, 0);
+
+/**
+ * @generated from enum engine.v1.WeaponEffectType
+ */
+export enum WeaponEffectType {
+  /**
+   * @generated from enum value: WEAPON_EFFECT_TYPE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: WEAPON_EFFECT_TYPE_ANTI_AIR = 1;
+   */
+  ANTI_AIR = 1,
+
+  /**
+   * @generated from enum value: WEAPON_EFFECT_TYPE_ANTI_SHIP = 2;
+   */
+  ANTI_SHIP = 2,
+
+  /**
+   * @generated from enum value: WEAPON_EFFECT_TYPE_ANTI_ARMOR = 3;
+   */
+  ANTI_ARMOR = 3,
+
+  /**
+   * @generated from enum value: WEAPON_EFFECT_TYPE_LAND_STRIKE = 4;
+   */
+  LAND_STRIKE = 4,
+
+  /**
+   * @generated from enum value: WEAPON_EFFECT_TYPE_SEAD = 5;
+   */
+  SEAD = 5,
+
+  /**
+   * @generated from enum value: WEAPON_EFFECT_TYPE_BALLISTIC_STRIKE = 6;
+   */
+  BALLISTIC_STRIKE = 6,
+
+  /**
+   * @generated from enum value: WEAPON_EFFECT_TYPE_INTERCEPTOR = 7;
+   */
+  INTERCEPTOR = 7,
+
+  /**
+   * @generated from enum value: WEAPON_EFFECT_TYPE_GUNFIRE = 8;
+   */
+  GUNFIRE = 8,
+
+  /**
+   * @generated from enum value: WEAPON_EFFECT_TYPE_TORPEDO = 9;
+   */
+  TORPEDO = 9,
+}
+
+/**
+ * Describes the enum engine.v1.WeaponEffectType.
+ */
+export const WeaponEffectTypeSchema: GenEnum<WeaponEffectType> = /*@__PURE__*/
+  enumDesc(file_engine_v1_weapon, 1);
 

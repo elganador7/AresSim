@@ -1,0 +1,44 @@
+library:
+    id: prk_sea_units-v1
+    name: PRK SEA Units
+    description: Sea units originating from PRK.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: amnok-class-corvette
+      name: Amnok-class Corvette
+      description: Modern North Korean corvette intended to improve coastal anti-surface warfare and patrol capability.
+      domain: 3
+      form: 20
+      general_type: 44
+      specific_type: Amnok-class Corvette
+      short_name: Amnok
+      nation_of_origin: PRK
+      operators:
+        - PRK
+      employed_by:
+        - PRK
+      service_entry_year: 2023
+      base_strength: 0.34
+      accuracy: 0.4
+      max_speed_mps: 15
+      cruise_speed_mps: 8.5
+      max_range_km: 2500
+      survivability: 0.22
+      detection_range_m: 80000
+      radar_cross_section_m2: 3000
+      fuel_capacity_liters: 160000
+      fuel_burn_rate_lph: 350
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-abu-mahdi
+          max_qty: 4
+          initial_qty: 4
+      default_weapon_configuration: ""
+      weapon_configurations: []

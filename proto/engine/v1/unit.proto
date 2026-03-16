@@ -6,6 +6,44 @@ import "engine/v1/common.proto";  // Position, MoveOrder, UnitDomain, FormationP
 import "engine/v1/status.proto";
 import "engine/v1/weapon.proto";
 
+enum DamageState {
+  DAMAGE_STATE_UNSPECIFIED = 0;
+  DAMAGE_STATE_OPERATIONAL = 1;
+  DAMAGE_STATE_DAMAGED     = 2;
+  DAMAGE_STATE_MISSION_KILLED = 3;
+  DAMAGE_STATE_DESTROYED   = 4;
+}
+
+enum EngagementBehavior {
+  ENGAGEMENT_BEHAVIOR_UNSPECIFIED = 0;
+  ENGAGEMENT_BEHAVIOR_AUTO_ENGAGE = 1;
+  ENGAGEMENT_BEHAVIOR_SELF_DEFENSE_ONLY = 2;
+  ENGAGEMENT_BEHAVIOR_HOLD_FIRE   = 3;
+  ENGAGEMENT_BEHAVIOR_ASSIGNED_TARGETS_ONLY = 4;
+  ENGAGEMENT_BEHAVIOR_SHADOW_CONTACT = 5;
+  ENGAGEMENT_BEHAVIOR_WITHDRAW_ON_DETECT = 6;
+}
+
+enum AttackOrderType {
+  ATTACK_ORDER_TYPE_UNSPECIFIED = 0;
+  ATTACK_ORDER_TYPE_ATTACK_ASSIGNED_TARGET = 1;
+  ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT = 2;
+}
+
+enum DesiredEffect {
+  DESIRED_EFFECT_UNSPECIFIED = 0;
+  DESIRED_EFFECT_DAMAGE = 1;
+  DESIRED_EFFECT_MISSION_KILL = 2;
+  DESIRED_EFFECT_DESTROY = 3;
+}
+
+message AttackOrder {
+  AttackOrderType order_type = 1;
+  string target_unit_id = 2;
+  DesiredEffect desired_effect = 3;
+  float pkill_threshold = 4;
+}
+
 message Unit {
   // Identity
   string id           = 1; // UUID
@@ -13,6 +51,8 @@ message Unit {
   string full_name    = 3; // Full name e.g. "USS Arleigh Burke (DDG-51)"
   string side         = 4; // "Blue" | "Red" | "Neutral"
   string definition_id = 5; // References UnitDefinition.id slug
+  string team_id      = 6; // Owning team / nation, e.g. "ISR", "USA", "IRN"
+  string coalition_id = 7; // Friendly grouping used for combat / detection sharing
 
   // Geospatial
   Position position = 10;
@@ -35,4 +75,13 @@ message Unit {
   // Live ammunition state. Initialized from the unit definition's default
   // loadout on scenario load. Updated by the adjudicator each time a weapon fires.
   repeated WeaponState weapons = 21;
+
+  // Optional named mission loadout selected from the unit definition's
+  // authored weapon configurations, e.g. "air_superiority" or "anti_ship".
+  string loadout_configuration_id = 22;
+
+  DamageState damage_state = 23;
+  EngagementBehavior engagement_behavior = 24;
+  float engagement_pkill_threshold = 25;
+  AttackOrder attack_order = 26;
 }

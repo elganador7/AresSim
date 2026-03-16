@@ -1,0 +1,197 @@
+library:
+    id: gbr_air_units-v1
+    name: GBR AIR Units
+    description: Air units originating from GBR.
+    version: 1.0.0
+    author: AresSim Default Library
+definitions:
+    - id: eurofighter-typhoon-t1t2
+      name: Eurofighter Typhoon Tranche 1/2
+      description: Earlier Typhoon tranches with Captor-M pulse-Doppler radar. AMRAAM capable but lacks Meteor. In service with Germany, Spain, Austria, Italy, and others.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: Eurofighter Typhoon Tranche 1/2
+      short_name: ""
+      nation_of_origin: GBR
+      operators:
+        - GBR
+        - DEU
+        - ITA
+        - ESP
+        - AUT
+        - OMN
+        - SAU
+      employed_by:
+        - GBR
+        - DEU
+        - ITA
+        - ESP
+        - AUT
+        - OMN
+        - SAU
+      service_entry_year: 2003
+      base_strength: 0.82
+      accuracy: 0.85
+      max_speed_mps: 686
+      cruise_speed_mps: 515
+      max_range_km: 3790
+      survivability: 0.7
+      detection_range_m: 180000
+      radar_cross_section_m2: 1
+      fuel_capacity_liters: 4996
+      fuel_burn_rate_lph: 3500
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-aim120c
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-iris-t
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-mauser-bk27
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: eurofighter-typhoon-t3
+      name: Eurofighter Typhoon Tranche 3
+      description: 4.5th-generation twin-engine canard-delta multirole fighter. Operated by UK, Germany, Italy, Spain, Saudi Arabia, Qatar, Kuwait. Tranche 3 includes Captor-E AESA radar and Meteor integration.
+      domain: 2
+      form: 10
+      general_type: 10
+      specific_type: Eurofighter Typhoon Tranche 3
+      short_name: ""
+      nation_of_origin: GBR
+      operators:
+        - GBR
+        - DEU
+        - ITA
+        - ESP
+        - SAU
+        - QAT
+        - KWT
+      employed_by:
+        - GBR
+        - DEU
+        - ITA
+        - ESP
+        - SAU
+        - QAT
+        - KWT
+      service_entry_year: 2003
+      base_strength: 0.87
+      accuracy: 0.89
+      max_speed_mps: 686
+      cruise_speed_mps: 515
+      max_range_km: 3790
+      survivability: 0.72
+      detection_range_m: 250000
+      radar_cross_section_m2: 1
+      fuel_capacity_liters: 4996
+      fuel_burn_rate_lph: 3400
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: aam-meteor
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-iris-t
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-mauser-bk27
+          max_qty: 150
+          initial_qty: 150
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: tornado-gr4
+      name: Tornado GR4
+      description: Low-level strike aircraft used for interdiction and maritime attack missions.
+      domain: 2
+      form: 10
+      general_type: 12
+      specific_type: Panavia Tornado GR4
+      short_name: GR4
+      nation_of_origin: GBR
+      operators:
+        - GBR
+        - DEU
+        - ITA
+        - SAU
+      employed_by:
+        - GBR
+        - DEU
+        - ITA
+        - SAU
+      service_entry_year: 1998
+      base_strength: 0.71
+      accuracy: 0.8
+      max_speed_mps: 648
+      cruise_speed_mps: 250
+      max_range_km: 3890
+      survivability: 0.52
+      detection_range_m: 140000
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 8300
+      fuel_burn_rate_lph: 4200
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: asm-am39-exocet
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-iris-t
+          max_qty: 2
+          initial_qty: 2
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: super-lynx-300-oman
+      name: Super Lynx 300 (Oman)
+      description: Omani naval helicopter for maritime patrol, shipboard utility lift, and close-in surface surveillance around the Strait of Hormuz.
+      domain: 2
+      form: 11
+      general_type: 22
+      specific_type: Super Lynx 300 Naval Helicopter
+      short_name: Lynx
+      nation_of_origin: GBR
+      operators:
+        - OMN
+      employed_by:
+        - OMN
+      service_entry_year: 2004
+      base_strength: 0.34
+      accuracy: 0.2
+      max_speed_mps: 72
+      cruise_speed_mps: 61
+      max_range_km: 530
+      survivability: 0.24
+      detection_range_m: 18000
+      radar_cross_section_m2: 2.4
+      fuel_capacity_liters: 1100
+      fuel_burn_rate_lph: 340
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

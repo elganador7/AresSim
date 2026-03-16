@@ -14,7 +14,49 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/scenario.proto.
  */
 export const file_engine_v1_scenario: GenFile = /*@__PURE__*/
-  fileDesc("ChhlbmdpbmUvdjEvc2NlbmFyaW8ucHJvdG8SCWVuZ2luZS52MSKBAgoIU2NlbmFyaW8SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIWCg5jbGFzc2lmaWNhdGlvbhgEIAEoCRIOCgZhdXRob3IYBSABKAkSFwoPc3RhcnRfdGltZV91bml4GAYgASgBEg8KB3ZlcnNpb24YByABKAkSLwoIc2V0dGluZ3MYCCABKAsyHS5lbmdpbmUudjEuU2ltdWxhdGlvblNldHRpbmdzEiMKA21hcBgJIAEoCzIWLmVuZ2luZS52MS5NYXBTZXR0aW5ncxIeCgV1bml0cxgLIAMoCzIPLmVuZ2luZS52MS5Vbml0Ij4KElNpbXVsYXRpb25TZXR0aW5ncxIUCgx0aWNrX3JhdGVfaHoYASABKAISEgoKdGltZV9zY2FsZRgCIAEoAiJECgtNYXBTZXR0aW5ncxI1Cg9pbml0aWFsX3dlYXRoZXIYBCABKAsyHC5lbmdpbmUudjEuV2VhdGhlckNvbmRpdGlvbnMqdgoRQWRqdWRpY2F0aW9uTW9kZWwSGQoVQURKX01PREVMX1VOU1BFQ0lGSUVEEAASFQoRQURKX01PREVMX0RFRkFVTFQQARISCg5BREpfTU9ERUxfRkFTVBACEhsKF0FESl9NT0RFTF9ISUdIX0ZJREVMSVRZEANCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common, file_engine_v1_unit]);
+  fileDesc("ChhlbmdpbmUvdjEvc2NlbmFyaW8ucHJvdG8SCWVuZ2luZS52MSK+AQoTQ291bnRyeVJlbGF0aW9uc2hpcBIUCgxmcm9tX2NvdW50cnkYASABKAkSEgoKdG9fY291bnRyeRgCIAEoCRITCgtzaGFyZV9pbnRlbBgDIAEoCBIgChhhaXJzcGFjZV90cmFuc2l0X2FsbG93ZWQYBCABKAgSHwoXYWlyc3BhY2Vfc3RyaWtlX2FsbG93ZWQYBSABKAgSJQodZGVmZW5zaXZlX3Bvc2l0aW9uaW5nX2FsbG93ZWQYBiABKAgiuAIKCFNjZW5hcmlvEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSFgoOY2xhc3NpZmljYXRpb24YBCABKAkSDgoGYXV0aG9yGAUgASgJEhcKD3N0YXJ0X3RpbWVfdW5peBgGIAEoARIPCgd2ZXJzaW9uGAcgASgJEi8KCHNldHRpbmdzGAggASgLMh0uZW5naW5lLnYxLlNpbXVsYXRpb25TZXR0aW5ncxIjCgNtYXAYCSABKAsyFi5lbmdpbmUudjEuTWFwU2V0dGluZ3MSHgoFdW5pdHMYCyADKAsyDy5lbmdpbmUudjEuVW5pdBI1Cg1yZWxhdGlvbnNoaXBzGAwgAygLMh4uZW5naW5lLnYxLkNvdW50cnlSZWxhdGlvbnNoaXAiPgoSU2ltdWxhdGlvblNldHRpbmdzEhQKDHRpY2tfcmF0ZV9oehgBIAEoAhISCgp0aW1lX3NjYWxlGAIgASgCIkQKC01hcFNldHRpbmdzEjUKD2luaXRpYWxfd2VhdGhlchgEIAEoCzIcLmVuZ2luZS52MS5XZWF0aGVyQ29uZGl0aW9ucyp2ChFBZGp1ZGljYXRpb25Nb2RlbBIZChVBREpfTU9ERUxfVU5TUEVDSUZJRUQQABIVChFBREpfTU9ERUxfREVGQVVMVBABEhIKDkFESl9NT0RFTF9GQVNUEAISGwoXQURKX01PREVMX0hJR0hfRklERUxJVFkQA0IrWilnaXRodWIuY29tL2FyZXNzaW0vaW50ZXJuYWwvZ2VuL2VuZ2luZS92MWIGcHJvdG8z", [file_engine_v1_common, file_engine_v1_unit]);
+
+/**
+ * @generated from message engine.v1.CountryRelationship
+ */
+export type CountryRelationship = Message<"engine.v1.CountryRelationship"> & {
+  /**
+   * @generated from field: string from_country = 1;
+   */
+  fromCountry: string;
+
+  /**
+   * @generated from field: string to_country = 2;
+   */
+  toCountry: string;
+
+  /**
+   * @generated from field: bool share_intel = 3;
+   */
+  shareIntel: boolean;
+
+  /**
+   * @generated from field: bool airspace_transit_allowed = 4;
+   */
+  airspaceTransitAllowed: boolean;
+
+  /**
+   * @generated from field: bool airspace_strike_allowed = 5;
+   */
+  airspaceStrikeAllowed: boolean;
+
+  /**
+   * @generated from field: bool defensive_positioning_allowed = 6;
+   */
+  defensivePositioningAllowed: boolean;
+};
+
+/**
+ * Describes the message engine.v1.CountryRelationship.
+ * Use `create(CountryRelationshipSchema)` to create a new message.
+ */
+export const CountryRelationshipSchema: GenMessage<CountryRelationship> = /*@__PURE__*/
+  messageDesc(file_engine_v1_scenario, 0);
 
 /**
  * @generated from message engine.v1.Scenario
@@ -71,6 +113,11 @@ export type Scenario = Message<"engine.v1.Scenario"> & {
    * @generated from field: repeated engine.v1.Unit units = 11;
    */
   units: Unit[];
+
+  /**
+   * @generated from field: repeated engine.v1.CountryRelationship relationships = 12;
+   */
+  relationships: CountryRelationship[];
 };
 
 /**
@@ -78,7 +125,7 @@ export type Scenario = Message<"engine.v1.Scenario"> & {
  * Use `create(ScenarioSchema)` to create a new message.
  */
 export const ScenarioSchema: GenMessage<Scenario> = /*@__PURE__*/
-  messageDesc(file_engine_v1_scenario, 0);
+  messageDesc(file_engine_v1_scenario, 1);
 
 /**
  * @generated from message engine.v1.SimulationSettings
@@ -104,7 +151,7 @@ export type SimulationSettings = Message<"engine.v1.SimulationSettings"> & {
  * Use `create(SimulationSettingsSchema)` to create a new message.
  */
 export const SimulationSettingsSchema: GenMessage<SimulationSettings> = /*@__PURE__*/
-  messageDesc(file_engine_v1_scenario, 1);
+  messageDesc(file_engine_v1_scenario, 2);
 
 /**
  * @generated from message engine.v1.MapSettings
@@ -121,7 +168,7 @@ export type MapSettings = Message<"engine.v1.MapSettings"> & {
  * Use `create(MapSettingsSchema)` to create a new message.
  */
 export const MapSettingsSchema: GenMessage<MapSettings> = /*@__PURE__*/
-  messageDesc(file_engine_v1_scenario, 2);
+  messageDesc(file_engine_v1_scenario, 3);
 
 /**
  * @generated from enum engine.v1.AdjudicationModel
