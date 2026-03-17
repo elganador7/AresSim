@@ -246,6 +246,38 @@
   gap: 8px;
 }
 
+.relationship-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.relationship-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(4, auto);
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.relationship-label {
+  font-size: 11px;
+  color: #e5e7eb;
+}
+
+.relationship-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* ─── UNIT LIST ───────────────────────────────────────────────────────────────── */
 
 .unit-list {
@@ -282,9 +314,20 @@
 }
 
 .unit-list-name {
-  flex: 1;
+  flex: 1 1 110px;
   font-size: 12px;
   color: #e5e7eb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unit-list-order {
+  flex-shrink: 0;
+  max-width: 110px;
+  font-size: 9px;
+  color: #93c5fd;
+  letter-spacing: 0.04em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -492,14 +535,33 @@
   transition: border-color 0.12s, background 0.12s;
 }
 
+.palette-country-select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f3f4f6;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  transition: border-color 0.12s, background 0.12s;
+}
+
 .palette-search-input::placeholder {
   color: #6b7280;
 }
 
+.palette-country-select:focus,
 .palette-search-input:focus {
   outline: none;
   border-color: rgba(96, 165, 250, 0.6);
   background: rgba(255, 255, 255, 0.06);
+}
+
+.palette-country-select option {
+  background: #1a1d24;
+  color: #f3f4f6;
 }
 
 .palette-domain-block {
@@ -598,6 +660,7 @@
 .palette-echelon-item {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 7px;
   padding: 5px 12px 5px 12px;
   cursor: grab;
@@ -649,6 +712,41 @@
   font-size: 11px;
   color: #d1d5db;
   letter-spacing: 0.02em;
+  flex: 1 1 120px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palette-echelon-tag {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(96, 165, 250, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  color: #93c5fd;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.palette-echelon-country {
+  flex-shrink: 0;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.palette-echelon-meta {
+  margin-left: 50px;
+  width: calc(100% - 50px);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
 }
 
 /* ─── PALETTE DIVIDER ────────────────────────────────────────────────────────── */
@@ -668,6 +766,36 @@
   flex: 1;
   overflow: hidden;
   min-height: 0;
+}
+
+.selected-unit-panel {
+  flex-shrink: 0;
+  padding: 0 0 6px;
+}
+
+.selected-unit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #4b5563;
+  text-transform: uppercase;
+}
+
+.selected-unit-name {
+  color: #9ca3af;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.selected-unit-empty {
+  padding: 14px 12px;
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1.5;
 }
 
 .placed-units-header {
@@ -717,6 +845,32 @@
   border-radius: 3px;
   padding: 10px;
   margin: 2px 4px 6px;
+}
+
+.order-validation-note {
+  margin-top: 2px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.order-validation-note.good {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  color: #86efac;
+}
+
+.order-validation-note.poor {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  color: #fcd34d;
+}
+
+.order-validation-note.invalid {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  color: #fca5a5;
 }
 
 /* ─── DROP CONFIRM DIALOG ────────────────────────────────────────────────────── */

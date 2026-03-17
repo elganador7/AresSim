@@ -30,11 +30,15 @@ import {
   HorizontalOrigin,
   NearFarScalar,
   HeightReference,
+  CallbackProperty,
+  ColorMaterialProperty,
+  GeoJsonDataSource,
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { useEditorStore, type UnitDraft } from "../../store/editorStore";
 import type { DragPayload } from "./UnitPalette";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
+import { THEATER_BORDERS_GEOJSON } from "../../data/theaterBorders";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -76,6 +80,7 @@ export default function EditorGlobe({
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
+  const borderDataSourceRef = useRef<GeoJsonDataSource | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
   // Stable callback refs — updated every render, no need to remount Cesium
@@ -109,6 +114,30 @@ export default function EditorGlobe({
       selectionIndicator: false,
     });
     viewerRef.current = viewer;
+
+    GeoJsonDataSource.load(THEATER_BORDERS_GEOJSON as never, {
+      stroke: Color.fromCssColorString("#9eb0c2"),
+      fill: Color.fromCssColorString("#000000").withAlpha(0.01),
+      strokeWidth: 1.2,
+      clampToGround: true,
+    })
+      .then((dataSource) => {
+        borderDataSourceRef.current = dataSource;
+        viewer.dataSources.add(dataSource);
+        dataSource.entities.values.forEach((entity) => {
+          if (entity.polygon) {
+            entity.polygon.fill = new ConstantProperty(false);
+            entity.polygon.outline = new ConstantProperty(true);
+            entity.polygon.outlineColor = new ConstantProperty(Color.fromCssColorString("#90a3b8").withAlpha(0.5));
+            entity.polygon.outlineWidth = new ConstantProperty(1.1);
+          }
+          if (entity.polyline) {
+            entity.polyline.material = new ColorMaterialProperty(Color.fromCssColorString("#90a3b8").withAlpha(0.55));
+            entity.polyline.width = new ConstantProperty(1.1);
+          }
+        });
+      })
+      .catch(console.error);
 
     viewer.camera.setView({
       destination: Cartesian3.fromDegrees(25.8, 35.8, 2_000_000),
@@ -180,6 +209,10 @@ export default function EditorGlobe({
       container.removeEventListener("dragenter", handleDragEnter);
       container.removeEventListener("dragleave", handleDragLeave);
       container.removeEventListener("drop", handleDrop);
+      if (borderDataSourceRef.current) {
+        viewer.dataSources.remove(borderDataSourceRef.current, true);
+        borderDataSourceRef.current = null;
+      }
       viewer.destroy();
       viewerRef.current = null;
     };
@@ -222,6 +255,14 @@ export default function EditorGlobe({
               getUnitBillboardUrl(generalType, unit.side, shortName),
             );
           }
+          if (existing.polyline) {
+            const routePositions = [
+              Cartesian3.fromDegrees(unit.lon, unit.lat, unit.altMsl),
+              ...(unit.moveOrder?.waypoints ?? []).map((wp) => Cartesian3.fromDegrees(wp.lon, wp.lat, wp.altMsl)),
+            ];
+            existing.polyline.positions = new ConstantProperty(routePositions);
+            existing.polyline.show = new ConstantProperty(routePositions.length > 1);
+          }
         } else {
           viewer.entities.add({
             id: entityId,
@@ -239,6 +280,16 @@ export default function EditorGlobe({
               scaleByDistance: new NearFarScalar(1.5e5, 1.2, 8e6, 0.4),
               disableDepthTestDistance: Number.POSITIVE_INFINITY,
               heightReference: HeightReference.CLAMP_TO_GROUND,
+            },
+            polyline: {
+              positions: new CallbackProperty(() => [
+                Cartesian3.fromDegrees(unit.lon, unit.lat, unit.altMsl),
+                ...(unit.moveOrder?.waypoints ?? []).map((wp) => Cartesian3.fromDegrees(wp.lon, wp.lat, wp.altMsl)),
+              ], false),
+              width: 2.5,
+              material: Color.fromCssColorString(unit.side === "Red" ? "#ef4444" : unit.side === "Neutral" ? "#f59e0b" : "#60a5fa").withAlpha(0.9),
+              clampToGround: false,
+              show: (unit.moveOrder?.waypoints?.length ?? 0) > 0,
             },
             properties: { unitId: unit.id },
           });

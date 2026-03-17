@@ -13,6 +13,5 @@ This area is the main authoring surface for scenarios. Prefer keeping editor-spe
 
 ## Review Notes
 
-- `ScenarioEditor.tsx` now duplicates a large amount of command/tasking logic that also exists in `hud/UnitPanel.tsx`: attack-task fields, route mode controls, target validation, and order semantics. This is a DRY problem and is already making behavior changes land twice.
-- Editor-only concerns and live-scenario concerns are starting to drift. The next cleanup pass should extract shared tasking components and validation helpers so the editor and HUD cannot silently diverge on what an order means.
-- The file has become the catch-all for scenario metadata, placement, selection, tasking, relationship editing, and serialization. Further additions should be split into smaller panels before the component becomes harder to review than to modify.
+- Resolved in part: shared tasking constants and target-filtering rules now live in `utils/tasking.ts`, so the editor and live HUD are no longer carrying separate copies of the same order options and target-selection semantics.
+- Remaining cleanup: `ScenarioEditor.tsx` is still a catch-all for scenario metadata, placement, selection, tasking, relationship editing, and serialization. Further additions should be split into smaller panels before the component becomes harder to review than to modify.

@@ -58,17 +58,51 @@ const DOMAIN_COLORS: Record<number, string> = {
   1: "#4ade80", 2: "#94a3b8", 3: "#3b82f6", 4: "#818cf8",
 };
 
+const ASSET_CLASS_OPTIONS = [
+  "combat_unit",
+  "airbase",
+  "port",
+  "oil_field",
+  "pipeline_node",
+  "desalination_plant",
+  "power_plant",
+  "radar_site",
+  "c2_site",
+];
+
+const TARGET_CLASS_OPTIONS = [
+  "surface_warship",
+  "submarine",
+  "aircraft",
+  "sam_battery",
+  "armor",
+  "soft_infrastructure",
+  "hardened_infrastructure",
+  "runway",
+  "civilian_energy",
+  "civilian_water",
+];
+
+const AFFILIATION_OPTIONS = ["military", "civilian", "dual_use"];
+const EMPLOYMENT_ROLE_OPTIONS = ["offensive", "defensive", "dual_use"];
+
 // ─── BLANK DEF ────────────────────────────────────────────────────────────────
 
 function blankDef(): UnitDefinitionDraft {
   return {
     id: "", name: "", description: "",
     domain: 1, form: 30, generalType: 60, specificType: "", shortName: "",
-    nationOfOrigin: "", serviceEntryYear: 2000,
+    assetClass: "combat_unit", targetClass: "armor", employmentRole: "dual_use", stationary: false, affiliation: "military",
+    nationOfOrigin: "", operators: [], employedBy: [], serviceEntryYear: 2000,
     baseStrength: 0.8, combatRangeM: 1000, accuracy: 0.75,
     maxSpeedMps: 10, cruiseSpeedMps: 7, maxRangeKm: 500,
     survivability: 0.6, detectionRangeM: 5000, radarCrossSectionM2: 5,
     fuelCapacityLiters: 500, fuelBurnRateLph: 100,
+    embarkedFixedWingCapacity: 0, embarkedRotaryWingCapacity: 0, embarkedUavCapacity: 0,
+    embarkedSurfaceConnectorCapacity: 0, launchCapacityPerInterval: 0, recoveryCapacityPerInterval: 0,
+    sortieIntervalMinutes: 0,
+    defaultWeaponConfiguration: "",
+    weaponConfigurations: [],
   };
 }
 
@@ -76,15 +110,40 @@ function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
   const num = (k: string) => Number(r[k] ?? 0);
   const str = (k: string) => String(r[k] ?? "");
   const firstNonEmpty = (...values: string[]) => values.find((v) => v.trim().length > 0) ?? "";
+  const weaponConfigurations = Array.isArray(r["weapon_configurations"])
+    ? (r["weapon_configurations"] as Record<string, unknown>[]).map((cfg) => ({
+        id: String(cfg["id"] ?? ""),
+        name: String(cfg["name"] ?? ""),
+        description: String(cfg["description"] ?? ""),
+        loadout: Array.isArray(cfg["loadout"])
+          ? (cfg["loadout"] as Record<string, unknown>[]).map((slot) => ({
+              weaponId: String(slot["weapon_id"] ?? ""),
+              maxQty: Number(slot["max_qty"] ?? 0),
+              initialQty: Number(slot["initial_qty"] ?? 0),
+            }))
+          : [],
+      }))
+    : [];
   return {
     id: str("id"), name: str("name"), description: str("description"),
     domain: num("domain"), form: num("form"), generalType: num("general_type"),
-    specificType: str("specific_type"), shortName: firstNonEmpty(str("short_name"), str("specific_type"), str("name")), nationOfOrigin: str("nation_of_origin"),
+    specificType: str("specific_type"), shortName: firstNonEmpty(str("short_name"), str("specific_type"), str("name")),
+    assetClass: str("asset_class") || "combat_unit",
+    targetClass: str("target_class") || "soft_infrastructure",
+    employmentRole: str("employment_role") || "dual_use",
+    stationary: Boolean(r["stationary"]),
+    affiliation: str("affiliation") || "military",
+    nationOfOrigin: str("nation_of_origin"), operators: Array.isArray(r["operators"]) ? (r["operators"] as unknown[]).map(String) : [], employedBy: Array.isArray(r["employed_by"]) ? (r["employed_by"] as unknown[]).map(String) : (Array.isArray(r["operators"]) ? (r["operators"] as unknown[]).map(String) : []),
     serviceEntryYear: num("service_entry_year"),
     baseStrength: num("base_strength"), combatRangeM: num("combat_range_m"), accuracy: num("accuracy"),
     maxSpeedMps: num("max_speed_mps"), cruiseSpeedMps: num("cruise_speed_mps"), maxRangeKm: num("max_range_km"),
     survivability: num("survivability"), detectionRangeM: num("detection_range_m"), radarCrossSectionM2: num("radar_cross_section_m2"),
     fuelCapacityLiters: num("fuel_capacity_liters"), fuelBurnRateLph: num("fuel_burn_rate_lph"),
+    embarkedFixedWingCapacity: num("embarked_fixed_wing_capacity"), embarkedRotaryWingCapacity: num("embarked_rotary_wing_capacity"), embarkedUavCapacity: num("embarked_uav_capacity"),
+    embarkedSurfaceConnectorCapacity: num("embarked_surface_connector_capacity"), launchCapacityPerInterval: num("launch_capacity_per_interval"), recoveryCapacityPerInterval: num("recovery_capacity_per_interval"),
+    sortieIntervalMinutes: num("sortie_interval_minutes"),
+    defaultWeaponConfiguration: str("default_weapon_configuration"),
+    weaponConfigurations,
   };
 }
 
@@ -237,6 +296,56 @@ function DefinitionForm({
         </div>
 
         <div className="panel-section">
+          <div className="panel-section-header">Asset Semantics</div>
+          <div className="field">
+            <label className="field-label">Asset Class</label>
+            <select className="field-select" value={def.assetClass}
+              onChange={(e) => patch({ assetClass: e.target.value })}>
+              {ASSET_CLASS_OPTIONS.map((v) => (
+                <option key={v} value={v}>{v}</option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label className="field-label">Target Class</label>
+            <select className="field-select" value={def.targetClass}
+              onChange={(e) => patch({ targetClass: e.target.value })}>
+              {TARGET_CLASS_OPTIONS.map((v) => (
+                <option key={v} value={v}>{v}</option>
+              ))}
+            </select>
+          </div>
+          <div className="field-row">
+            <div className="field">
+              <label className="field-label">Employment Role</label>
+              <select className="field-select" value={def.employmentRole}
+                onChange={(e) => patch({ employmentRole: e.target.value })}>
+                {EMPLOYMENT_ROLE_OPTIONS.map((v) => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label className="field-label">Affiliation</label>
+              <select className="field-select" value={def.affiliation}
+                onChange={(e) => patch({ affiliation: e.target.value })}>
+                {AFFILIATION_OPTIONS.map((v) => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label className="field-label">Stationary</label>
+              <select className="field-select" value={def.stationary ? "true" : "false"}
+                onChange={(e) => patch({ stationary: e.target.value === "true" })}>
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="panel-section">
           <div className="panel-section-header">Combat</div>
           <div className="field-row">
             {numField("Base Strength (0–1)", "baseStrength", 0.01, 0)}
@@ -327,13 +436,33 @@ export default function UnitDefinitionManager({ onClose }: Props) {
     const payload = {
       id: def.id, name: def.name, description: def.description,
       domain: def.domain, form: def.form, general_type: def.generalType,
-      specific_type: def.specificType, short_name: def.shortName, nation_of_origin: def.nationOfOrigin,
+      specific_type: def.specificType, short_name: def.shortName,
+      asset_class: def.assetClass, target_class: def.targetClass, stationary: def.stationary, affiliation: def.affiliation,
+      nation_of_origin: def.nationOfOrigin, operators: def.operators, employed_by: def.employedBy,
       service_entry_year: def.serviceEntryYear,
       base_strength: def.baseStrength, combat_range_m: def.combatRangeM,
       accuracy: def.accuracy, max_speed_mps: def.maxSpeedMps,
       cruise_speed_mps: def.cruiseSpeedMps, max_range_km: def.maxRangeKm,
       survivability: def.survivability, detection_range_m: def.detectionRangeM, radar_cross_section_m2: def.radarCrossSectionM2,
       fuel_capacity_liters: def.fuelCapacityLiters, fuel_burn_rate_lph: def.fuelBurnRateLph,
+      embarked_fixed_wing_capacity: def.embarkedFixedWingCapacity,
+      embarked_rotary_wing_capacity: def.embarkedRotaryWingCapacity,
+      embarked_uav_capacity: def.embarkedUavCapacity,
+      embarked_surface_connector_capacity: def.embarkedSurfaceConnectorCapacity,
+      launch_capacity_per_interval: def.launchCapacityPerInterval,
+      recovery_capacity_per_interval: def.recoveryCapacityPerInterval,
+      sortie_interval_minutes: def.sortieIntervalMinutes,
+      default_weapon_configuration: def.defaultWeaponConfiguration,
+      weapon_configurations: def.weaponConfigurations.map((cfg) => ({
+        id: cfg.id,
+        name: cfg.name,
+        description: cfg.description,
+        loadout: cfg.loadout.map((slot) => ({
+          weapon_id: slot.weaponId,
+          max_qty: slot.maxQty,
+          initial_qty: slot.initialQty,
+        })),
+      })),
     };
     const res = await SaveUnitDefinition(JSON.stringify(payload));
     if (!res.success) throw new Error(res.error);

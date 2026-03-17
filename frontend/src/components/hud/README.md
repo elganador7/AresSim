@@ -11,5 +11,8 @@ These components should stay compositional and presentation-focused. Keep the au
 
 ## Review Notes
 
-- `UnitPanel.tsx` now owns significant workflow logic: target filtering, order editing, route editing, warning generation, and backend command orchestration. That is beyond a presentation panel and is why regressions like hook-order issues and form-reset behavior have already appeared here.
-- `TopBar.tsx` now mixes sim controls with a dense relationship-matrix editor. It works, but it is likely the wrong long-term home for that feature. Country relationships should probably move into their own panel before more flags and diplomacy controls are added.
+- Resolved in part: the live HUD now uses the shared `utils/tasking.ts` helpers instead of carrying its own copy of tasking constants and target-filtering rules.
+- Resolved in part: live map interaction now runs through a single command-mode object in the sim store instead of separate route-edit and target-pick flags spread across HUD and map code.
+- Remaining cleanup: `UnitPanel.tsx` still owns a lot of workflow orchestration and backend command plumbing. It is more stable now, but it should eventually lose more of that responsibility to smaller tasking components or store actions.
+- Resolved in part: the country-relationship matrix now lives in `RelationshipPanel.tsx` instead of being embedded directly inside `TopBar.tsx`, so sim controls and diplomacy/access controls are no longer coupled in one component.
+- Remaining cleanup: the relationship panel itself may still need its own route/state helpers if more diplomacy features are added, but the top-bar split is now in place.

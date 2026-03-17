@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { PauseSim, SetSimSpeed } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
 import { formatSimTime } from "../../utils/formatters";
+import RelationshipPanel from "./RelationshipPanel";
 
 const SPEED_PRESETS = [0.5, 1, 2, 5, 10, 30] as const;
 
@@ -17,6 +19,7 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
   const simSeconds = useSimStore((s) => s.simSeconds);
   const timeScale = useSimStore((s) => s.timeScale);
   const tickNumber = useSimStore((s) => s.tickNumber);
+  const [sharingOpen, setSharingOpen] = useState(false);
 
   const currentIdx = (() => {
     let best = 0;
@@ -92,10 +95,14 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
 
       <div className="top-bar-right">
         <span className="tick-label">T:{tickNumber}</span>
+        <button className="editor-btn" onClick={() => setSharingOpen((current) => !current)}>
+          SHARING
+        </button>
         <button className="editor-btn" onClick={onOpenEditor}>
           EDITOR
         </button>
       </div>
+      <RelationshipPanel open={sharingOpen} onClose={() => setSharingOpen(false)} />
     </div>
   );
 }

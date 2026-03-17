@@ -14,6 +14,7 @@ func makeMunition(id string, curLat, curLon, destLat, destLon, speedMps float64,
 		ID:            id,
 		WeaponID:      "test-weapon",
 		ShooterID:     "shooter",
+		TrackGroupID:  "Blue|shooter",
 		CurLat:        curLat,
 		CurLon:        curLon,
 		DestLat:       destLat,
@@ -84,7 +85,7 @@ func TestAdvanceMunitions_EmptyInput(t *testing.T) {
 
 func TestAdvanceMunitions_MultipleOneMayArrive(t *testing.T) {
 	near := makeMunition("near", 0, 0, 0.0009, 0, 1000, enginev1.UnitDomain_DOMAIN_LAND) // arrives
-	far  := makeMunition("far",  0, 0, 5.0,    0, 100,  enginev1.UnitDomain_DOMAIN_LAND)  // remains
+	far := makeMunition("far", 0, 0, 5.0, 0, 100, enginev1.UnitDomain_DOMAIN_LAND)       // remains
 	rem, arr := AdvanceMunitions([]*InFlightMunition{near, far}, 1.0, nil, nil)
 	if len(arr) != 1 || arr[0].ID != "near" {
 		t.Errorf("expected 'near' to arrive, got %v", arr)
@@ -101,15 +102,16 @@ func TestAdvanceMunitions_MultipleOneMayArrive(t *testing.T) {
 func makeTrackingMunition(guidance enginev1.GuidanceType) (*InFlightMunition, *enginev1.Unit) {
 	target := makeUnit("tgt", "Red", "def", 1.0, 0.0)
 	m := &InFlightMunition{
-		ID:          "m1",
-		WeaponID:    "test",
-		ShooterID:   "shooter",
-		ShooterSide: "Blue",
-		TargetID:    "tgt",
-		CurLat:      0, CurLon: 0,
-		DestLat:     1.0, DestLon: 0.0,
-		SpeedMps:    100,
-		Guidance:    guidance,
+		ID:           "m1",
+		WeaponID:     "test",
+		ShooterID:    "shooter",
+		ShooterSide:  "Blue",
+		TrackGroupID: "Blue|shooter",
+		TargetID:     "tgt",
+		CurLat:       0, CurLon: 0,
+		DestLat: 1.0, DestLon: 0.0,
+		SpeedMps: 100,
+		Guidance: guidance,
 	}
 	return m, target
 }
@@ -147,12 +149,15 @@ func TestAdvanceMunitions_GPS_DoesNotTrack(t *testing.T) {
 
 func TestAdvanceMunitions_Radar_TracksWhenLockHeld(t *testing.T) {
 	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_RADAR)
+	shooter := makeUnit("shooter", "Blue", "sensor", 0, 0)
 	target.Position.Lon = 1.0
-	units := []*enginev1.Unit{target}
-	// Blue side has detection on the target.
-	detections := DetectionSet{"Blue": []string{"tgt"}}
+	units := []*enginev1.Unit{shooter, target}
+	defs := map[string]DefStats{
+		"sensor": {DetectionRangeM: 500_000, Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"def":    {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+	}
 
-	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, detections)
+	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, defs)
 	if len(rem) == 0 {
 		t.Fatal("munition should still be in flight")
 	}
@@ -164,17 +169,44 @@ func TestAdvanceMunitions_Radar_TracksWhenLockHeld(t *testing.T) {
 func TestAdvanceMunitions_Radar_FixedPointWhenLockLost(t *testing.T) {
 	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_RADAR)
 	originalDestLon := m.DestLon
+	shooter := makeUnit("shooter", "Blue", "sensor", 0, 0)
 	target.Position.Lon = 1.0
-	units := []*enginev1.Unit{target}
-	// Blue side has NO detection on the target.
-	detections := DetectionSet{"Blue": {}}
+	units := []*enginev1.Unit{shooter, target}
+	defs := map[string]DefStats{
+		"sensor": {DetectionRangeM: 10_000, Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"def":    {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+	}
 
-	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, detections)
+	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, defs)
 	if len(rem) == 0 {
 		t.Fatal("munition should still be in flight")
 	}
 	if rem[0].DestLon != originalDestLon {
 		t.Errorf("radar munition should hold last known pos when lock lost: expected DestLon=%.4f, got %.4f", originalDestLon, rem[0].DestLon)
+	}
+}
+
+func TestAdvanceMunitions_Radar_TracksWhenSiblingSensorHoldsLock(t *testing.T) {
+	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_RADAR)
+	parent := makeUnit("battery", "Blue", "command", 0, 0)
+	shooter := makeChildUnit("shooter", "Blue", "launcher", "battery", 0, 0)
+	sensor := makeChildUnit("sensor", "Blue", "sensor", "battery", 0, 0)
+	m.TrackGroupID = "Blue|battery"
+	target.Position.Lon = 1.0
+	units := []*enginev1.Unit{parent, shooter, sensor, target}
+	defs := map[string]DefStats{
+		"command":  {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"launcher": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"sensor":   {DetectionRangeM: 500_000, Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"def":      {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+	}
+
+	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, defs)
+	if len(rem) == 0 {
+		t.Fatal("munition should still be in flight")
+	}
+	if rem[0].DestLon != 1.0 {
+		t.Errorf("radar munition should track from sibling sensor lock: expected DestLon=1.0, got %.4f", rem[0].DestLon)
 	}
 }
 
@@ -276,7 +308,7 @@ func TestDetectMunitions_BothSidesCanDetect(t *testing.T) {
 	// A land-targeting munition fired at a Red unit; both Blue and Red land platforms
 	// in range can detect it (e.g. the shooter can track their own missile if in range).
 	blue := makeUnit("blue", "Blue", "sensor", 0, 0)
-	red  := makeUnit("red",  "Red",  "sensor", 0, 0.02)
+	red := makeUnit("red", "Red", "sensor", 0, 0.02)
 	m := makeMunition("m1", 0, 0.01, 0.5, 0, 500, enginev1.UnitDomain_DOMAIN_LAND)
 	defs := map[string]DefStats{
 		"sensor": {DetectionRangeM: 50_000, Domain: enginev1.UnitDomain_DOMAIN_LAND},
@@ -284,9 +316,17 @@ func TestDetectMunitions_BothSidesCanDetect(t *testing.T) {
 
 	result := DetectMunitions([]*enginev1.Unit{blue, red}, defs, []*InFlightMunition{m})
 	blueDetects := false
-	for _, id := range result["Blue"] { if id == "m1" { blueDetects = true } }
-	redDetects  := false
-	for _, id := range result["Red"]  { if id == "m1" { redDetects  = true } }
+	for _, id := range result["Blue"] {
+		if id == "m1" {
+			blueDetects = true
+		}
+	}
+	redDetects := false
+	for _, id := range result["Red"] {
+		if id == "m1" {
+			redDetects = true
+		}
+	}
 
 	if !blueDetects {
 		t.Error("Blue should detect the munition")

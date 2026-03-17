@@ -76,4 +76,5 @@ message Waypoint {
 // are queued and visited in order.
 message MoveOrder {
   repeated Waypoint waypoints = 1;
+  bool auto_generated = 2;
 }

@@ -17,7 +17,7 @@ import { useCallback, useEffect, useState } from "react";
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import { ScenarioSchema } from "@proto/engine/v1/scenario_pb";
 import { UnitSchema } from "@proto/engine/v1/unit_pb";
-import { PositionSchema } from "@proto/engine/v1/common_pb";
+import { MoveOrderSchema, PositionSchema } from "@proto/engine/v1/common_pb";
 import { OperationalStatusSchema } from "@proto/engine/v1/status_pb";
 import {
   SaveScenario,
@@ -25,17 +25,25 @@ import {
   ListScenarios,
   GetScenario,
   DeleteScenario,
+  ListWeaponDefinitions,
 } from "../../../wailsjs/go/main/App";
 import {
   useEditorStore,
+  type CountryRelationshipDraft,
   type UnitDraft,
   type ScenarioDraft,
+  type UnitDefinitionDraft,
 } from "../../store/editorStore";
 import EditorGlobe from "./EditorGlobe";
 import UnitPalette, { type DragPayload } from "./UnitPalette";
 import DropConfirmDialog from "./DropConfirmDialog";
 import UnitDefinitionManager from "./UnitDefinitionManager";
 import "./editor.css";
+import { assessLoadoutAgainstTarget, type WeaponDefLite } from "../../utils/loadoutValidation";
+import { getCountriesAlongRoute, getCountriesAlongSegment, getCountryCodeForPoint } from "../../utils/theaterCountries";
+import { getRelationshipRule, normalizeCountryCode } from "../../utils/countryRelationships";
+import { EDITOR_COUNTRY_NAME_BY_CODE } from "../../data/editorCountries";
+import { ATTACK_ORDER_TYPES, DESIRED_EFFECTS, ENGAGEMENT_BEHAVIORS, filterValidEditorTargets } from "../../utils/tasking";
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -70,14 +78,46 @@ function draftToProtoB64(draft: ScenarioDraft): string {
         temperatureC: draft.temperatureC,
       },
     },
+    relationships: draft.relationships.map((rel) => ({
+      fromCountry: rel.fromCountry,
+      toCountry: rel.toCountry,
+      shareIntel: rel.shareIntel,
+      airspaceTransitAllowed: rel.airspaceTransitAllowed,
+      airspaceStrikeAllowed: rel.airspaceStrikeAllowed,
+      defensivePositioningAllowed: rel.defensivePositioningAllowed,
+    })),
     units: draft.units.map((u) =>
       create(UnitSchema, {
         id: u.id,
         displayName: u.displayName,
         fullName: u.fullName,
         side: u.side,
+        teamId: u.teamId,
+        coalitionId: u.coalitionId,
         definitionId: u.definitionId,
+        parentUnitId: u.parentUnitId,
+        loadoutConfigurationId: u.loadoutConfigurationId,
         natoSymbolSidc: u.natoSymbolSidc,
+        damageState: u.damageState,
+        engagementBehavior: u.engagementBehavior,
+        engagementPkillThreshold: u.engagementPkillThreshold,
+        attackOrder: u.attackOrder
+          ? {
+              orderType: u.attackOrder.orderType,
+              targetUnitId: u.attackOrder.targetUnitId,
+              desiredEffect: u.attackOrder.desiredEffect,
+              pkillThreshold: u.attackOrder.pkillThreshold,
+            }
+          : undefined,
+        moveOrder: u.moveOrder
+          ? create(MoveOrderSchema, {
+              waypoints: u.moveOrder.waypoints.map((wp) => ({
+                lat: wp.lat,
+                lon: wp.lon,
+                altMsl: wp.altMsl,
+              })),
+            })
+          : undefined,
         position: create(PositionSchema, {
           lat: u.lat,
           lon: u.lon,
@@ -98,6 +138,90 @@ function draftToProtoB64(draft: ScenarioDraft): string {
     ),
   });
   return bytesToBase64(toBinary(ScenarioSchema, scenario));
+}
+
+function formatCountry(code: string): string {
+  return EDITOR_COUNTRY_NAME_BY_CODE[code] ?? code;
+}
+
+function getUnitCountry(unit: UnitDraft): string {
+  return normalizeCountryCode(unit.teamId);
+}
+
+function validatePlacementAccess(
+  country: string,
+  def: UnitDefinitionDraft | undefined,
+  lat: number,
+  lon: number,
+  relationships: CountryRelationshipDraft[],
+): string {
+  const owner = normalizeCountryCode(country);
+  const host = getCountryCodeForPoint(lat, lon);
+  if (!owner || !host || owner === host || !def) {
+    return "";
+  }
+  const relationship = getRelationshipRule(relationships, owner, host);
+  const role = (def.employmentRole || "dual_use").trim().toLowerCase();
+  if (role === "defensive") {
+    if (!relationship.defensivePositioningAllowed) {
+      return `${formatCountry(owner)} cannot position defensive assets inside ${formatCountry(host)}.`;
+    }
+    return "";
+  }
+  if (!relationship.airspaceStrikeAllowed) {
+    return `${formatCountry(owner)} cannot base offensive-capable assets inside ${formatCountry(host)}.`;
+  }
+  return "";
+}
+
+function findTransitViolation(
+  ownerCountry: string,
+  start: { lat: number; lon: number },
+  end: { lat: number; lon: number },
+  relationships: CountryRelationshipDraft[],
+): string {
+  const owner = normalizeCountryCode(ownerCountry);
+  if (!owner) {
+    return "";
+  }
+  for (const country of getCountriesAlongSegment(start, end)) {
+    if (!country || country === owner) {
+      continue;
+    }
+    const relationship = getRelationshipRule(relationships, owner, country);
+    if (!relationship.airspaceTransitAllowed) {
+      return `${formatCountry(owner)} cannot transit ${formatCountry(country)} airspace.`;
+    }
+  }
+  return "";
+}
+
+function findStrikeViolation(
+  unit: UnitDraft,
+  target: UnitDraft | undefined,
+  relationships: CountryRelationshipDraft[],
+): string {
+  const owner = getUnitCountry(unit);
+  if (!owner || !target) {
+    return "";
+  }
+  const pathCountries = getCountriesAlongRoute(
+    { lat: unit.lat, lon: unit.lon },
+    [...(unit.moveOrder?.waypoints ?? []), { lat: target.lat, lon: target.lon }],
+  );
+  for (const country of pathCountries) {
+    if (!country || country === owner) {
+      continue;
+    }
+    const relationship = getRelationshipRule(relationships, owner, country);
+    if (!relationship.airspaceTransitAllowed) {
+      return `${formatCountry(owner)} cannot route the strike through ${formatCountry(country)} airspace.`;
+    }
+    if (!relationship.airspaceStrikeAllowed) {
+      return `${formatCountry(owner)} cannot conduct strike operations in ${formatCountry(country)} airspace.`;
+    }
+  }
+  return "";
 }
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -123,18 +247,73 @@ const WEATHER_STATES = [
 
 function InlineEditForm({
   unit,
+  units,
+  unitDefinitions,
+  weaponDefs,
+  availableLoadouts,
+  isRouteMode,
+  onToggleRouteMode,
   onSave,
   onCancel,
 }: {
   unit: UnitDraft;
+  units: UnitDraft[];
+  unitDefinitions: UnitDefinitionDraft[];
+  weaponDefs: Map<string, WeaponDefLite>;
+  availableLoadouts: { id: string; name: string }[];
+  isRouteMode: boolean;
+  onToggleRouteMode: () => void;
   onSave: (patch: Partial<UnitDraft>) => void;
   onCancel: () => void;
 }) {
   const [displayName, setDisplayName] = useState(unit.displayName);
   const [side, setSide] = useState<UnitDraft["side"]>(unit.side);
+  const [teamId, setTeamId] = useState(unit.teamId);
   const [heading, setHeading] = useState(unit.heading);
   const [speed, setSpeed] = useState(unit.speed);
   const [strength, setStrength] = useState(unit.combatEffectiveness);
+  const [loadoutConfigurationId, setLoadoutConfigurationId] = useState(unit.loadoutConfigurationId);
+  const [engagementBehavior, setEngagementBehavior] = useState(unit.engagementBehavior ?? 1);
+  const [engagementPkillThreshold, setEngagementPkillThreshold] = useState(unit.engagementPkillThreshold ?? 0.5);
+  const [attackOrderType, setAttackOrderType] = useState(unit.attackOrder?.orderType ?? 0);
+  const [targetUnitId, setTargetUnitId] = useState(unit.attackOrder?.targetUnitId ?? "");
+  const [desiredEffect, setDesiredEffect] = useState(unit.attackOrder?.desiredEffect ?? 3);
+  const [pkillThreshold, setPkillThreshold] = useState(unit.attackOrder?.pkillThreshold ?? 0.7);
+
+  const selectedConfiguration = availableLoadouts.length > 0
+    ? unitDefinitions
+        .find((candidate) => candidate.id === unit.definitionId)
+        ?.weaponConfigurations.find((cfg) => cfg.id === loadoutConfigurationId)
+    : undefined;
+  const loadedWeapons = (selectedConfiguration?.loadout ?? [])
+    .filter((slot) => slot.initialQty > 0 || slot.maxQty > 0)
+    .map((slot) => weaponDefs.get(slot.weaponId))
+    .filter((weapon): weapon is WeaponDefLite => Boolean(weapon));
+  const validTargets = filterValidEditorTargets(unit, units, loadedWeapons, unitDefinitions, side);
+  const targetUnit = validTargets.find((candidate) => candidate.id === targetUnitId);
+  const targetDef = unitDefinitions.find((candidate) => candidate.id === targetUnit?.definitionId);
+  const selectedDefinition = unitDefinitions.find((candidate) => candidate.id === unit.definitionId);
+  const countryOptions = Array.from(
+    new Set([
+      teamId,
+      selectedDefinition?.nationOfOrigin ?? "",
+      ...(selectedDefinition?.employedBy ?? []),
+      ...units.map((candidate) => candidate.teamId),
+    ].filter(Boolean)),
+  ).sort();
+  const loadoutAssessment =
+    attackOrderType !== 0 && targetUnitId
+      ? assessLoadoutAgainstTarget(selectedConfiguration, targetDef, weaponDefs, desiredEffect)
+      : { severity: "none" as const, message: "" };
+
+  useEffect(() => {
+    if (!targetUnitId) {
+      return;
+    }
+    if (!validTargets.some((candidate) => candidate.id === targetUnitId)) {
+      setTargetUnitId("");
+    }
+  }, [targetUnitId, validTargets]);
 
   return (
     <div className="inline-edit-form">
@@ -145,6 +324,21 @@ function InlineEditForm({
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
         />
+      </div>
+      <div className="field">
+        <label className="field-label">Country</label>
+        <select
+          className="field-select"
+          value={teamId}
+          onChange={(e) => setTeamId(e.target.value)}
+        >
+          <option value="">Select country…</option>
+          {countryOptions.map((code) => (
+            <option key={code} value={code}>
+              {formatCountry(code)}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="field">
         <label className="field-label">Side</label>
@@ -206,18 +400,139 @@ function InlineEditForm({
           onChange={(e) => setStrength(Number(e.target.value))}
         />
       </div>
+      {availableLoadouts.length > 0 && (
+        <div className="field">
+          <label className="field-label">Mission Loadout</label>
+          <select
+            className="field-select"
+            value={loadoutConfigurationId}
+            onChange={(e) => setLoadoutConfigurationId(e.target.value)}
+          >
+            {availableLoadouts.map((cfg) => (
+              <option key={cfg.id} value={cfg.id}>{cfg.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+      <div className="field">
+        <label className="field-label">Engagement Behavior</label>
+        <select
+          className="field-select"
+          value={engagementBehavior}
+          onChange={(e) => setEngagementBehavior(Number(e.target.value))}
+        >
+          {ENGAGEMENT_BEHAVIORS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </div>
+      <div className="field">
+        <label className="field-label">Autonomous Pkill Threshold</label>
+        <input
+          className="field-input"
+          type="number"
+          min={0.1}
+          max={0.99}
+          step={0.05}
+          value={engagementPkillThreshold}
+          onChange={(e) => setEngagementPkillThreshold(Number(e.target.value))}
+        />
+      </div>
+      <div className="field">
+        <label className="field-label">Attack Task</label>
+        <select
+          className="field-select"
+          value={attackOrderType}
+          onChange={(e) => setAttackOrderType(Number(e.target.value))}
+        >
+          {ATTACK_ORDER_TYPES.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </div>
+      {attackOrderType !== 0 && (
+        <>
+          <div className="field">
+            <label className="field-label">Assigned Target</label>
+            <select
+              className="field-select"
+              value={targetUnitId}
+              onChange={(e) => setTargetUnitId(e.target.value)}
+            >
+              <option value="">Select enemy unit…</option>
+              {validTargets.map((candidate) => (
+                <option key={candidate.id} value={candidate.id}>
+                  {candidate.displayName} · {candidate.side}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field-row">
+            <div className="field">
+              <label className="field-label">Desired Effect</label>
+              <select
+                className="field-select"
+                value={desiredEffect}
+                onChange={(e) => setDesiredEffect(Number(e.target.value))}
+              >
+                {DESIRED_EFFECTS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label className="field-label">Order Pkill Threshold</label>
+              <input
+                className="field-input"
+                type="number"
+                min={0.1}
+                max={0.99}
+                step={0.05}
+                value={pkillThreshold}
+                onChange={(e) => setPkillThreshold(Number(e.target.value))}
+              />
+            </div>
+          </div>
+          {loadoutAssessment.severity !== "none" && loadoutAssessment.message && (
+            <div className={`order-validation-note ${loadoutAssessment.severity}`}>
+              {loadoutAssessment.message}
+            </div>
+          )}
+        </>
+      )}
       <div className="field-row" style={{ marginTop: 8 }}>
+        <button className={`btn btn-sm${isRouteMode ? " btn-primary" : ""}`} onClick={onToggleRouteMode}>
+          {isRouteMode ? "Finish Route" : "Edit Route"}
+        </button>
+        <button className="btn btn-sm" onClick={() => onSave({ moveOrder: undefined })}>
+          Clear Route
+        </button>
         <button
           className="btn btn-success btn-sm"
+          disabled={loadoutAssessment.severity === "invalid"}
           onClick={() =>
             onSave({
               displayName,
               side,
+              teamId,
+              coalitionId: side,
+              loadoutConfigurationId,
+              engagementBehavior,
+              engagementPkillThreshold,
               heading,
               speed,
               combatEffectiveness: strength,
               personnelStrength: strength,
               equipmentStrength: strength,
+              attackOrder:
+                attackOrderType !== 0 && targetUnitId
+                  ? {
+                      orderType: attackOrderType,
+                      targetUnitId,
+                      desiredEffect,
+                      pkillThreshold,
+                    }
+                  : undefined,
             })
           }
         >
@@ -233,16 +548,17 @@ function InlineEditForm({
 
 // ─── PLACED UNITS LIST ────────────────────────────────────────────────────────
 
-function PlacedUnits() {
+function PlacedUnits({
+  routeEditUnitId,
+  onToggleRouteMode,
+}: {
+  routeEditUnitId: string | null;
+  onToggleRouteMode: (unitId: string) => void;
+}) {
   const units = useEditorStore((s) => s.draft.units);
   const selectedUnitId = useEditorStore((s) => s.selectedUnitId);
   const editingUnitId = useEditorStore((s) => s.editingUnitId);
-  const { selectUnit, setEditingUnit, updateUnit, deleteUnit } = useEditorStore();
-
-  const editingUnit =
-    editingUnitId && editingUnitId !== "new"
-      ? units.find((u) => u.id === editingUnitId)
-      : null;
+  const { selectUnit, setEditingUnit, deleteUnit } = useEditorStore();
 
   if (units.length === 0) {
     return (
@@ -258,12 +574,34 @@ function PlacedUnits() {
         <div key={u.id}>
           <div
             className={`unit-list-item${selectedUnitId === u.id ? " selected" : ""}`}
-            onClick={() => selectUnit(u.id)}
+            onClick={() => {
+              selectUnit(u.id);
+              setEditingUnit(u.id);
+            }}
           >
             <span className="unit-dot" style={{ background: SIDE_COLOR[u.side] }} />
             <span className="unit-list-name">{u.displayName}</span>
+            {u.attackOrder?.targetUnitId && (
+              <span className="unit-list-order">
+                ↦ {units.find((candidate) => candidate.id === u.attackOrder?.targetUnitId)?.displayName ?? "Target"}
+              </span>
+            )}
+            {u.moveOrder?.waypoints?.length ? (
+              <span className="unit-list-order">Route {u.moveOrder.waypoints.length}</span>
+            ) : null}
             <span className="unit-list-side">{u.side}</span>
             <span className="unit-list-actions">
+              <button
+                className={`btn btn-sm${routeEditUnitId === u.id ? " btn-primary" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  selectUnit(u.id);
+                  setEditingUnit(u.id);
+                  onToggleRouteMode(u.id);
+                }}
+              >
+                {routeEditUnitId === u.id ? "Routing" : "Route"}
+              </button>
               <button
                 className="btn btn-sm"
                 onClick={(e) => {
@@ -285,18 +623,85 @@ function PlacedUnits() {
               </button>
             </span>
           </div>
-          {editingUnit?.id === u.id && (
-            <InlineEditForm
-              unit={editingUnit}
-              onSave={(patch) => {
-                updateUnit(u.id, patch);
-                setEditingUnit(null);
-              }}
-              onCancel={() => setEditingUnit(null)}
-            />
-          )}
         </div>
       ))}
+    </div>
+  );
+}
+
+function SelectedUnitPanel({
+  routeEditUnitId,
+  onToggleRouteMode,
+  onSavePatch,
+}: {
+  routeEditUnitId: string | null;
+  onToggleRouteMode: (unitId: string) => void;
+  onSavePatch: (unit: UnitDraft, patch: Partial<UnitDraft>) => boolean;
+}) {
+  const units = useEditorStore((s) => s.draft.units);
+  const unitDefinitions = useEditorStore((s) => s.unitDefinitions);
+  const editingUnitId = useEditorStore((s) => s.editingUnitId);
+  const { updateUnit, setEditingUnit } = useEditorStore();
+  const editingUnit =
+    editingUnitId && editingUnitId !== "new"
+      ? units.find((u) => u.id === editingUnitId)
+      : null;
+  const [weaponDefs, setWeaponDefs] = useState<Map<string, WeaponDefLite>>(new Map());
+
+  useEffect(() => {
+    ListWeaponDefinitions()
+      .then((rows) => {
+        const next = new Map<string, WeaponDefLite>();
+        rows.forEach((row) => {
+          next.set(String(row.id ?? ""), {
+            id: String(row.id ?? ""),
+            domainTargets: Array.isArray(row.domain_targets) ? row.domain_targets.map(Number) : [],
+            effectType: Number(row.effect_type ?? 0),
+          });
+        });
+        setWeaponDefs(next);
+      })
+      .catch(console.error);
+  }, []);
+
+  if (!editingUnit) {
+    return (
+      <div className="selected-unit-empty">
+        Select a unit on the map or in the list to issue orders and edit routes.
+      </div>
+    );
+  }
+
+  return (
+    <div className="selected-unit-panel">
+      <div className="selected-unit-header">
+        Commands
+        <span className="selected-unit-name">{editingUnit.displayName}</span>
+      </div>
+      <InlineEditForm
+        unit={editingUnit}
+        units={units}
+        unitDefinitions={unitDefinitions}
+        weaponDefs={weaponDefs}
+        availableLoadouts={
+          unitDefinitions
+            .find((def) => def.id === editingUnit.definitionId)
+            ?.weaponConfigurations.map((cfg) => ({
+              id: cfg.id,
+              name: cfg.name || cfg.id,
+            })) ?? []
+        }
+        isRouteMode={routeEditUnitId === editingUnit.id}
+        onToggleRouteMode={() => onToggleRouteMode(editingUnit.id)}
+        onSave={(patch) => {
+          if (!onSavePatch(editingUnit, patch)) {
+            return;
+          }
+          updateUnit(editingUnit.id, patch);
+          setEditingUnit(editingUnit.id);
+        }}
+        onCancel={() => setEditingUnit(null)}
+      />
     </div>
   );
 }
@@ -306,9 +711,38 @@ function PlacedUnits() {
 function MetaPanel() {
   const draft = useEditorStore((s) => s.draft);
   const updateMeta = useEditorStore((s) => s.updateMeta);
+  const countries = Array.from(
+    new Set(draft.units.map((unit) => normalizeCountryCode(unit.teamId)).filter(Boolean)),
+  ).sort();
 
   const startDate = new Date(draft.startTimeUnix * 1000);
   const dateStr = startDate.toISOString().slice(0, 16);
+
+  const patchRelationship = (
+    fromCountry: string,
+    toCountry: string,
+    key: keyof CountryRelationshipDraft,
+    value: boolean,
+  ) => {
+    const next = [...draft.relationships];
+    const index = next.findIndex(
+      (rel) => normalizeCountryCode(rel.fromCountry) === fromCountry && normalizeCountryCode(rel.toCountry) === toCountry,
+    );
+    if (index >= 0) {
+      next[index] = { ...next[index], [key]: value };
+    } else {
+      next.push({
+        fromCountry,
+        toCountry,
+        shareIntel: false,
+        airspaceTransitAllowed: false,
+        airspaceStrikeAllowed: false,
+        defensivePositioningAllowed: false,
+        [key]: value,
+      });
+    }
+    updateMeta({ relationships: next });
+  };
 
   return (
     <div className="panel-scroll">
@@ -438,6 +872,66 @@ function MetaPanel() {
           />
         </div>
       </div>
+
+      <div className="panel-section">
+        <div className="panel-section-header">Country Relationships</div>
+        {countries.length < 2 ? (
+          <div className="selected-unit-empty">
+            Add units from at least two countries to configure access and intel sharing.
+          </div>
+        ) : (
+          <div className="relationship-grid">
+            {countries.flatMap((fromCountry) =>
+              countries
+                .filter((toCountry) => toCountry !== fromCountry)
+                .map((toCountry) => {
+                  const relationship = getRelationshipRule(draft.relationships, fromCountry, toCountry);
+                  return (
+                    <div key={`${fromCountry}-${toCountry}`} className="relationship-row">
+                      <div className="relationship-label">
+                        {formatCountry(fromCountry)} → {formatCountry(toCountry)}
+                      </div>
+                      <label className="relationship-toggle">
+                        <input
+                          type="checkbox"
+                          checked={relationship.shareIntel}
+                          onChange={(e) => patchRelationship(fromCountry, toCountry, "shareIntel", e.target.checked)}
+                        />
+                        Intel
+                      </label>
+                      <label className="relationship-toggle">
+                        <input
+                          type="checkbox"
+                          checked={relationship.airspaceTransitAllowed}
+                          onChange={(e) => patchRelationship(fromCountry, toCountry, "airspaceTransitAllowed", e.target.checked)}
+                        />
+                        Transit
+                      </label>
+                      <label className="relationship-toggle">
+                        <input
+                          type="checkbox"
+                          checked={relationship.airspaceStrikeAllowed}
+                          onChange={(e) => patchRelationship(fromCountry, toCountry, "airspaceStrikeAllowed", e.target.checked)}
+                        />
+                        Strike
+                      </label>
+                      <label className="relationship-toggle">
+                        <input
+                          type="checkbox"
+                          checked={relationship.defensivePositioningAllowed}
+                          onChange={(e) =>
+                            patchRelationship(fromCountry, toCountry, "defensivePositioningAllowed", e.target.checked)
+                          }
+                        />
+                        Defensive
+                      </label>
+                    </div>
+                  );
+                }),
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -532,11 +1026,14 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
   const draft = useEditorStore((s) => s.draft);
   const isDirty = useEditorStore((s) => s.isDirty);
   const editingUnitId = useEditorStore((s) => s.editingUnitId);
+  const selectedUnitId = useEditorStore((s) => s.selectedUnitId);
   const pendingDrop = useEditorStore((s) => s.pendingDrop);
   const {
     newDraft,
     loadDraft,
     addUnit,
+    updateUnit,
+    selectUnit,
     setEditingUnit,
     setPendingPosition,
     setPendingDrop,
@@ -547,11 +1044,41 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
   const [showDefManager, setShowDefManager] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
   const [saving, setSaving] = useState(false);
+  const [routeEditUnitId, setRouteEditUnitId] = useState<string | null>(null);
+  const unitDefinitions = useEditorStore((s) => s.unitDefinitions);
 
   const flash = (msg: string) => {
     setStatusMsg(msg);
     setTimeout(() => setStatusMsg(""), 3000);
   };
+
+  const validateUnitPatch = useCallback(
+    (unit: UnitDraft, patch: Partial<UnitDraft>) => {
+      const nextUnit = { ...unit, ...patch };
+      const definition = unitDefinitions.find((def) => def.id === nextUnit.definitionId);
+      const placementViolation = validatePlacementAccess(
+        nextUnit.teamId,
+        definition,
+        nextUnit.lat,
+        nextUnit.lon,
+        draft.relationships,
+      );
+      if (placementViolation) {
+        flash(placementViolation);
+        return false;
+      }
+      if (nextUnit.attackOrder?.targetUnitId) {
+        const target = draft.units.find((candidate) => candidate.id === nextUnit.attackOrder?.targetUnitId);
+        const strikeViolation = findStrikeViolation(nextUnit, target, draft.relationships);
+        if (strikeViolation) {
+          flash(strikeViolation);
+          return false;
+        }
+      }
+      return true;
+    },
+    [draft.relationships, draft.units, unitDefinitions],
+  );
 
   // ── Toolbar actions ────────────────────────────────────────────────────────
 
@@ -619,13 +1146,45 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
         visibilityKm: scen.map?.initialWeather?.visibilityKm ?? 40,
         windSpeedMps: scen.map?.initialWeather?.windSpeedMps ?? 5,
         temperatureC: scen.map?.initialWeather?.temperatureC ?? 20,
+        relationships: scen.relationships.map((rel) => ({
+          fromCountry: rel.fromCountry,
+          toCountry: rel.toCountry,
+          shareIntel: rel.shareIntel,
+          airspaceTransitAllowed: rel.airspaceTransitAllowed,
+          airspaceStrikeAllowed: rel.airspaceStrikeAllowed,
+          defensivePositioningAllowed: rel.defensivePositioningAllowed,
+        })),
         units: scen.units.map((u) => ({
           id: u.id,
           displayName: u.displayName,
           fullName: u.fullName,
           side: (u.side as UnitDraft["side"]) || "Blue",
+          teamId: u.teamId || "",
+          coalitionId: u.coalitionId || ((u.side as UnitDraft["side"]) || "Blue"),
           definitionId: u.definitionId,
+          parentUnitId: u.parentUnitId || undefined,
+          loadoutConfigurationId: u.loadoutConfigurationId,
           natoSymbolSidc: u.natoSymbolSidc,
+          damageState: u.damageState ?? 1,
+          engagementBehavior: u.engagementBehavior ?? 1,
+          engagementPkillThreshold: u.engagementPkillThreshold ?? 0.5,
+          attackOrder: u.attackOrder
+            ? {
+                orderType: u.attackOrder.orderType,
+                targetUnitId: u.attackOrder.targetUnitId,
+                desiredEffect: u.attackOrder.desiredEffect,
+                pkillThreshold: u.attackOrder.pkillThreshold,
+              }
+            : undefined,
+          moveOrder: u.moveOrder?.waypoints?.length
+            ? {
+                waypoints: u.moveOrder.waypoints.map((wp) => ({
+                  lat: wp.lat,
+                  lon: wp.lon,
+                  altMsl: wp.altMsl,
+                })),
+              }
+            : undefined,
           lat: u.position?.lat ?? 0,
           lon: u.position?.lon ?? 0,
           altMsl: u.position?.altMsl ?? 0,
@@ -649,15 +1208,47 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
 
   const handleMapClick = useCallback(
     (lat: number, lon: number) => {
+      if (routeEditUnitId) {
+        const unit = draft.units.find((candidate) => candidate.id === routeEditUnitId);
+        if (!unit) {
+          setRouteEditUnitId(null);
+          return;
+        }
+        const start = unit.moveOrder?.waypoints?.length
+          ? unit.moveOrder.waypoints[unit.moveOrder.waypoints.length - 1]
+          : { lat: unit.lat, lon: unit.lon };
+        const transitViolation = findTransitViolation(unit.teamId, start, { lat, lon }, draft.relationships);
+        if (transitViolation) {
+          flash(transitViolation);
+          return;
+        }
+        const nextWaypoints = [...(unit.moveOrder?.waypoints ?? []), { lat, lon, altMsl: unit.altMsl }];
+        updateUnit(routeEditUnitId, { moveOrder: { waypoints: nextWaypoints } });
+        selectUnit(routeEditUnitId);
+        setEditingUnit(routeEditUnitId);
+        flash(`Waypoint ${nextWaypoints.length} added to ${unit.displayName}`);
+        return;
+      }
       setPendingPosition({ lat, lon });
       setEditingUnit("new");
     },
-    [setPendingPosition, setEditingUnit],
+    [draft.relationships, draft.units, routeEditUnitId, selectUnit, setPendingPosition, setEditingUnit, updateUnit],
   );
 
   const handleUnitClick = useCallback((unitId: string) => {
     useEditorStore.getState().selectUnit(unitId);
+    useEditorStore.getState().setEditingUnit(unitId);
   }, []);
+
+  const toggleRouteMode = useCallback((unitId: string) => {
+    setRouteEditUnitId((current) => (current === unitId ? null : unitId));
+  }, []);
+
+  useEffect(() => {
+    if (routeEditUnitId && routeEditUnitId !== selectedUnitId) {
+      setRouteEditUnitId(null);
+    }
+  }, [routeEditUnitId, selectedUnitId]);
 
   const handleUnitDrop = useCallback(
     (lat: number, lon: number, payload: DragPayload) => {
@@ -702,12 +1293,18 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
         <div className="editor-panel editor-panel-right">
           <UnitPalette />
           <div className="palette-divider" />
+          <SelectedUnitPanel
+            routeEditUnitId={routeEditUnitId}
+            onToggleRouteMode={toggleRouteMode}
+            onSavePatch={validateUnitPatch}
+          />
+          <div className="palette-divider" />
           <div className="placed-units-section">
             <div className="placed-units-header">
               Placed Units
               <span className="placed-units-count">{draft.units.length}</span>
             </div>
-            <PlacedUnits />
+            <PlacedUnits routeEditUnitId={routeEditUnitId} onToggleRouteMode={toggleRouteMode} />
           </div>
         </div>
       </div>
@@ -720,6 +1317,11 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
         <span className="status-item">
           ID: <span className="status-value">{draft.id.slice(0, 8)}…</span>
         </span>
+        {routeEditUnitId && (
+          <span className="status-item">
+            Route Mode: <span className="status-value">Click the map to add waypoints</span>
+          </span>
+        )}
         {statusMsg && <span className="status-value" style={{ color: "#22c55e" }}>{statusMsg}</span>}
       </div>
 
@@ -728,6 +1330,18 @@ export default function ScenarioEditor({ onExit, onPlay }: ScenarioEditorProps) 
         <DropConfirmDialog
           drop={pendingDrop}
           onConfirm={(unit) => {
+            const definition = unitDefinitions.find((def) => def.id === unit.definitionId);
+            const violation = validatePlacementAccess(
+              unit.teamId,
+              definition,
+              unit.lat,
+              unit.lon,
+              draft.relationships,
+            );
+            if (violation) {
+              flash(violation);
+              return;
+            }
             addUnit(unit);
             setPendingDrop(null);
           }}

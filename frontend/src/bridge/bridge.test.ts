@@ -19,6 +19,7 @@ function makeProtoUnit(overrides: Record<string, unknown> = {}) {
     side: "Blue",
     natoSymbolSidc: "SFGPUCI----D",
     definitionId: "def-1",
+    damageState: 1,
     parentUnitId: "",
     position: { lat: 10, lon: 20, altMsl: 500, heading: 90, speed: 15 },
     status: {
@@ -57,6 +58,7 @@ describe("protoUnitToStore", () => {
     expect(u.displayName).toBe("Alpha");
     expect(u.fullName).toBe("1st Battalion Alpha");
     expect(u.side).toBe("Blue");
+    expect(u.damageState).toBe(1);
   });
 
   it("maps NATO symbol SIDC to natoPendingSymbol", () => {
