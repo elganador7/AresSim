@@ -6,7 +6,8 @@
  */
 
 import { useRef, useEffect, useState } from "react";
-import { blankUnit, type PendingDrop, type UnitDraft } from "../../store/editorStore";
+import { blankUnit, type PendingDrop, type UnitDraft, useEditorStore } from "../../store/editorStore";
+import { EDITOR_COUNTRY_NAME_BY_CODE } from "../../data/editorCountries";
 
 const SIDE_COLOR: Record<string, string> = {
   Blue: "#3b82f6",
@@ -21,11 +22,17 @@ interface Props {
 }
 
 export default function DropConfirmDialog({ drop, onConfirm, onCancel }: Props) {
+  const selectedCountryCode = useEditorStore((s) => s.selectedCountryCode);
   const [designator, setDesignator] = useState(() => {
     const base = (drop.shortName || drop.label).toUpperCase().replace(/\s+/g, "-");
     return `${base}-1`;
   });
   const [side, setSide] = useState<"Blue" | "Red" | "Neutral">("Blue");
+  const countryOptions = Array.from(new Set([selectedCountryCode, ...drop.employedBy, drop.nationOfOrigin].filter(Boolean)));
+  const [teamId, setTeamId] = useState(() => countryOptions[0] ?? "");
+  const [loadoutConfigurationId, setLoadoutConfigurationId] = useState(
+    drop.defaultWeaponConfiguration || drop.weaponConfigurations[0]?.id || "",
+  );
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -38,7 +45,10 @@ export default function DropConfirmDialog({ drop, onConfirm, onCancel }: Props) 
       ...blankUnit(drop.lat, drop.lon),
       displayName: designator.trim() || drop.label,
       side,
+      teamId,
+      coalitionId: side,
       definitionId: drop.definitionId,
+      loadoutConfigurationId,
       lat: drop.lat,
       lon: drop.lon,
     };
@@ -74,6 +84,22 @@ export default function DropConfirmDialog({ drop, onConfirm, onCancel }: Props) 
           </div>
 
           <div className="field">
+            <label className="field-label">Country</label>
+            <select
+              className="field-select"
+              value={teamId}
+              onChange={(e) => setTeamId(e.target.value)}
+            >
+              <option value="">Select country…</option>
+              {countryOptions.map((code) => (
+                <option key={code} value={code}>
+                  {EDITOR_COUNTRY_NAME_BY_CODE[code] ?? code}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="field">
             <label className="field-label">Side</label>
             <div className="drop-side-tabs">
               {(["Blue", "Red", "Neutral"] as const).map((s) => (
@@ -97,6 +123,23 @@ export default function DropConfirmDialog({ drop, onConfirm, onCancel }: Props) 
               ))}
             </div>
           </div>
+
+          {drop.weaponConfigurations.length > 0 && (
+            <div className="field">
+              <label className="field-label">Mission Loadout</label>
+              <select
+                className="field-select"
+                value={loadoutConfigurationId}
+                onChange={(e) => setLoadoutConfigurationId(e.target.value)}
+              >
+                {drop.weaponConfigurations.map((cfg) => (
+                  <option key={cfg.id} value={cfg.id}>
+                    {cfg.name || cfg.id}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         <div className="drop-dialog-footer">

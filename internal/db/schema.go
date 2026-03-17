@@ -12,7 +12,7 @@ import (
 // this constant, the database is wiped and rebuilt from scratch. This is
 // acceptable for a single-player desktop application where the database is
 // purely derived state (the authoritative record lives in scenario files).
-const schemaVersion = 9
+const schemaVersion = 16
 
 // SchemaVersion returns the current schema version for logging.
 func SchemaVersion() int { return schemaVersion }
@@ -131,6 +131,10 @@ var schemaStatements = []string{
 
 	// C2 hierarchy
 	`DEFINE FIELD IF NOT EXISTS parent_unit_id    ON unit TYPE option<string>`,
+	`DEFINE FIELD IF NOT EXISTS damage_state      ON unit TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS engagement_behavior ON unit TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS engagement_pkill_threshold ON unit TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS attack_order      ON unit TYPE option<object>`,
 
 	// Indexes
 	`DEFINE INDEX IF NOT EXISTS idx_unit_side     ON unit FIELDS side`,
@@ -150,7 +154,15 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS general_type       ON unit_definition TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS specific_type      ON unit_definition TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS short_name         ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS asset_class        ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS target_class       ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS stationary         ON unit_definition TYPE bool`,
+	`DEFINE FIELD IF NOT EXISTS affiliation        ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS employment_role    ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS definition_source  ON unit_definition TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS nation_of_origin   ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS operators          ON unit_definition TYPE array<string>`,
+	`DEFINE FIELD IF NOT EXISTS employed_by        ON unit_definition TYPE array<string>`,
 	`DEFINE FIELD IF NOT EXISTS service_entry_year ON unit_definition TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS base_strength      ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS accuracy           ON unit_definition TYPE float`,
@@ -162,6 +174,15 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS radar_cross_section_m2 ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS fuel_capacity_liters ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS fuel_burn_rate_lph ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS embarked_fixed_wing_capacity ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS embarked_rotary_wing_capacity ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS embarked_uav_capacity ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS embarked_surface_connector_capacity ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS launch_capacity_per_interval ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS recovery_capacity_per_interval ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS sortie_interval_minutes ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS default_weapon_configuration ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS weapon_configurations ON unit_definition TYPE array<object>`,
 
 	`DEFINE INDEX IF NOT EXISTS idx_unitdef_domain ON unit_definition FIELDS domain`,
 
@@ -212,6 +233,8 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS speed_mps          ON weapon_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS range_m            ON weapon_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS probability_of_hit ON weapon_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS guidance           ON weapon_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS effect_type        ON weapon_definition TYPE int`,
 
 	`DEFINE INDEX IF NOT EXISTS idx_weapondef_name ON weapon_definition FIELDS name`,
 }

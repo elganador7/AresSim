@@ -10,3 +10,8 @@ This folder contains the scenario editor workflow.
 - `editor.css`: editor-specific styling.
 
 This area is the main authoring surface for scenarios. Prefer keeping editor-specific behavior here rather than leaking it into the live-sim HUD.
+
+## Review Notes
+
+- Resolved in part: shared tasking constants and target-filtering rules now live in `utils/tasking.ts`, so the editor and live HUD are no longer carrying separate copies of the same order options and target-selection semantics.
+- Remaining cleanup: `ScenarioEditor.tsx` is still a catch-all for scenario metadata, placement, selection, tasking, relationship editing, and serialization. Further additions should be split into smaller panels before the component becomes harder to review than to modify.

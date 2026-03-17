@@ -21,6 +21,8 @@ func weaponDefinitionRecord(wd *enginev1.WeaponDefinition) map[string]any {
 		"speed_mps":          float64(wd.SpeedMps),
 		"range_m":            float64(wd.RangeM),
 		"probability_of_hit": float64(wd.ProbabilityOfHit),
+		"guidance":           int(wd.Guidance),
+		"effect_type":        int(wd.EffectType),
 	}
 }
 
@@ -32,6 +34,8 @@ func weaponDefinitionFromRow(row map[string]any) *enginev1.WeaponDefinition {
 		SpeedMps:         float32(toFloat64(row["speed_mps"])),
 		RangeM:           float32(toFloat64(row["range_m"])),
 		ProbabilityOfHit: float32(toFloat64(row["probability_of_hit"])),
+		Guidance:         enginev1.GuidanceType(int32(toFloat64(row["guidance"]))),
+		EffectType:       enginev1.WeaponEffectType(int32(toFloat64(row["effect_type"]))),
 	}
 	if targets, ok := row["domain_targets"].([]any); ok {
 		for _, item := range targets {

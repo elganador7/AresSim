@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log/slog"
+	"slices"
 	"regexp"
 	"strings"
 
@@ -78,6 +79,34 @@ func stripTablePrefix(id string) string {
 		return id[idx+1:]
 	}
 	return id
+}
+
+func sortDefinitionRecords(defsByID map[string]map[string]any) []map[string]any {
+	rows := make([]map[string]any, 0, len(defsByID))
+	for _, row := range defsByID {
+		rows = append(rows, row)
+	}
+	slices.SortFunc(rows, func(a, b map[string]any) int {
+		if diff := cmpFloat64(toFloat64(a["domain"]), toFloat64(b["domain"])); diff != 0 {
+			return diff
+		}
+		if diff := cmpFloat64(toFloat64(a["general_type"]), toFloat64(b["general_type"])); diff != 0 {
+			return diff
+		}
+		return strings.Compare(toString(a["name"]), toString(b["name"]))
+	})
+	return rows
+}
+
+func cmpFloat64(a, b float64) int {
+	switch {
+	case a < b:
+		return -1
+	case a > b:
+		return 1
+	default:
+		return 0
+	}
 }
 
 // scenarioRecord builds the SurrealDB map for a Scenario proto.

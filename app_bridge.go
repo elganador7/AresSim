@@ -142,14 +142,43 @@ func (a *App) listWeaponDefsProto() []*enginev1.WeaponDefinition {
 
 // ListUnitDefinitions returns all unit definitions for the palette/editor.
 func (a *App) ListUnitDefinitions() ([]map[string]any, error) {
-	if a.unitDefRepo == nil {
-		return nil, fmt.Errorf("database not ready")
+	defsByID := make(map[string]map[string]any, len(a.libDefsCache))
+
+	for id, def := range a.libDefsCache {
+		rec := def.ToRecord()
+		rec["id"] = id
+		defsByID[id] = rec
 	}
+
+	if a.unitDefRepo == nil {
+		if len(defsByID) == 0 {
+			return nil, fmt.Errorf("database not ready")
+		}
+		return sortDefinitionRecords(defsByID), nil
+	}
+
 	rows, err := a.unitDefRepo.List(a.ctx)
 	if err != nil {
-		return nil, err
+		if len(defsByID) == 0 {
+			return nil, err
+		}
+		slog.Warn("ListUnitDefinitions: db list failed; falling back to library cache", "err", err)
+		return sortDefinitionRecords(defsByID), nil
 	}
-	return normalizeRecordIDs(rows), nil
+
+	for _, row := range normalizeRecordIDs(rows) {
+		id := toString(row["id"])
+		if id == "" {
+			continue
+		}
+		source := toString(row["definition_source"])
+		if source == "" && defsByID[id] == nil {
+			continue
+		}
+		defsByID[id] = row
+	}
+
+	return sortDefinitionRecords(defsByID), nil
 }
 
 // SaveUnitDefinition persists a unit definition from a JSON map.
@@ -164,6 +193,36 @@ func (a *App) SaveUnitDefinition(jsonStr string) BridgeResult {
 	}
 	if toString(rec["short_name"]) == "" {
 		rec["short_name"] = inferUnitShortName(toString(rec["name"]), toString(rec["specific_type"]))
+	}
+	if toString(rec["asset_class"]) == "" {
+		rec["asset_class"] = "combat_unit"
+	}
+	if toString(rec["target_class"]) == "" {
+		rec["target_class"] = "soft_infrastructure"
+	}
+	if _, ok := rec["stationary"]; !ok {
+		rec["stationary"] = int(toFloat64(rec["form"])) == 34
+	}
+	if toString(rec["affiliation"]) == "" {
+		rec["affiliation"] = "military"
+	}
+	if toString(rec["employment_role"]) == "" {
+		rec["employment_role"] = "dual_use"
+	}
+	if _, ok := rec["operators"]; !ok {
+		if origin := toString(rec["nation_of_origin"]); origin != "" {
+			rec["operators"] = []string{origin}
+		}
+	}
+	if _, ok := rec["employed_by"]; !ok {
+		if operators, ok := rec["operators"]; ok {
+			rec["employed_by"] = operators
+		} else if origin := toString(rec["nation_of_origin"]); origin != "" {
+			rec["employed_by"] = []string{origin}
+		}
+	}
+	if toString(rec["definition_source"]) == "" {
+		rec["definition_source"] = "editor"
 	}
 	if a.unitDefRepo == nil {
 		return failMsg("database not ready")

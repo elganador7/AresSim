@@ -15,7 +15,11 @@ export interface UnitDraft {
   displayName: string;
   fullName: string;
   side: "Blue" | "Red" | "Neutral";
+  teamId: string;
+  coalitionId: string;
   definitionId: string;
+  parentUnitId?: string;
+  loadoutConfigurationId: string;
   natoSymbolSidc: string;
   lat: number;
   lon: number;
@@ -29,6 +33,35 @@ export interface UnitDraft {
   fuelLevelLiters: number;
   morale: number;
   fatigue: number;
+  damageState: number;
+  engagementBehavior: number;
+  engagementPkillThreshold: number;
+  attackOrder?: {
+    orderType: number;
+    targetUnitId: string;
+    desiredEffect: number;
+    pkillThreshold: number;
+  };
+  moveOrder?: {
+    waypoints: {
+      lat: number;
+      lon: number;
+      altMsl: number;
+    }[];
+  };
+}
+
+export interface WeaponConfigSlotDraft {
+  weaponId: string;
+  maxQty: number;
+  initialQty: number;
+}
+
+export interface WeaponConfigurationDraft {
+  id: string;
+  name: string;
+  description: string;
+  loadout: WeaponConfigSlotDraft[];
 }
 
 export interface ScenarioDraft {
@@ -47,6 +80,16 @@ export interface ScenarioDraft {
   windSpeedMps: number;
   temperatureC: number;
   units: UnitDraft[];
+  relationships: CountryRelationshipDraft[];
+}
+
+export interface CountryRelationshipDraft {
+  fromCountry: string;
+  toCountry: string;
+  shareIntel: boolean;
+  airspaceTransitAllowed: boolean;
+  airspaceStrikeAllowed: boolean;
+  defensivePositioningAllowed: boolean;
 }
 
 export interface PendingDrop {
@@ -57,6 +100,11 @@ export interface PendingDrop {
   label: string;
   shortName: string;
   domainColor: string;
+  defaultWeaponConfiguration: string;
+  weaponConfigurations: WeaponConfigurationDraft[];
+  nationOfOrigin: string;
+  employedBy: string[];
+  employmentRole: string;
 }
 
 export interface UnitDefinitionDraft {
@@ -68,7 +116,14 @@ export interface UnitDefinitionDraft {
   generalType: number;
   specificType: string;
   shortName: string;
+  assetClass: string;
+  targetClass: string;
+  employmentRole: string;
+  stationary: boolean;
+  affiliation: string;
   nationOfOrigin: string;
+  operators: string[];
+  employedBy: string[];
   serviceEntryYear: number;
   baseStrength: number;
   combatRangeM: number;
@@ -81,6 +136,15 @@ export interface UnitDefinitionDraft {
   radarCrossSectionM2: number;
   fuelCapacityLiters: number;
   fuelBurnRateLph: number;
+  embarkedFixedWingCapacity: number;
+  embarkedRotaryWingCapacity: number;
+  embarkedUavCapacity: number;
+  embarkedSurfaceConnectorCapacity: number;
+  launchCapacityPerInterval: number;
+  recoveryCapacityPerInterval: number;
+  sortieIntervalMinutes: number;
+  defaultWeaponConfiguration: string;
+  weaponConfigurations: WeaponConfigurationDraft[];
 }
 
 interface EditorState {
@@ -94,6 +158,7 @@ interface EditorState {
   /** Position set by clicking the globe — auto-fills lat/lon in unit form */
   pendingPosition: { lat: number; lon: number } | null;
   unitDefinitions: UnitDefinitionDraft[];
+  selectedCountryCode: string;
 
   // Actions
   newDraft: () => void;
@@ -110,6 +175,7 @@ interface EditorState {
   loadUnitDefinitions: (defs: UnitDefinitionDraft[]) => void;
   upsertUnitDefinition: (def: UnitDefinitionDraft) => void;
   removeUnitDefinition: (id: string) => void;
+  setSelectedCountryCode: (code: string) => void;
 }
 
 // ─── DEFAULT VALUES ────────────────────────────────────────────────────────────
@@ -130,6 +196,7 @@ function blankDraft(): ScenarioDraft {
     windSpeedMps: 5,
     temperatureC: 20,
     units: [],
+    relationships: [],
   };
 }
 
@@ -139,7 +206,11 @@ export function blankUnit(lat = 35.0, lon = 25.0): UnitDraft {
     displayName: "UNIT-1",
     fullName: "",
     side: "Blue",
+    teamId: "",
+    coalitionId: "Blue",
     definitionId: "",
+    parentUnitId: undefined,
+    loadoutConfigurationId: "",
     natoSymbolSidc: "",
     lat,
     lon,
@@ -152,6 +223,11 @@ export function blankUnit(lat = 35.0, lon = 25.0): UnitDraft {
     fuelLevelLiters: 10000,
     morale: 1.0,
     fatigue: 0.0,
+    damageState: 1,
+    engagementBehavior: 1,
+    engagementPkillThreshold: 0.5,
+    attackOrder: undefined,
+    moveOrder: undefined,
   };
 }
 
@@ -165,6 +241,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   pendingDrop: null,
   pendingPosition: null,
   unitDefinitions: [],
+  selectedCountryCode: "",
 
   newDraft: () =>
     set({
@@ -203,7 +280,12 @@ export const useEditorStore = create<EditorState>((set) => ({
     set((s) => ({
       draft: {
         ...s.draft,
-        units: s.draft.units.filter((u) => u.id !== id),
+        units: s.draft.units
+          .filter((u) => u.id !== id)
+          .map((u) => ({
+            ...u,
+            attackOrder: u.attackOrder?.targetUnitId === id ? undefined : u.attackOrder,
+          })),
       },
       isDirty: true,
       selectedUnitId: s.selectedUnitId === id ? null : s.selectedUnitId,
@@ -232,4 +314,6 @@ export const useEditorStore = create<EditorState>((set) => ({
     }),
   removeUnitDefinition: (id) =>
     set((s) => ({ unitDefinitions: s.unitDefinitions.filter((d) => d.id !== id) })),
+
+  setSelectedCountryCode: (code) => set({ selectedCountryCode: code }),
 }));

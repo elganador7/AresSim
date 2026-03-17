@@ -11,7 +11,7 @@ import type { Unit } from "./simStore";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-function makeUnit(id: string, side: "Blue" | "Red" | "Neutral" = "Blue"): Unit {
+function makeUnit(id: string, side = "Blue"): Unit {
   return {
     id,
     displayName: `Unit-${id}`,
@@ -19,6 +19,7 @@ function makeUnit(id: string, side: "Blue" | "Red" | "Neutral" = "Blue"): Unit {
     side,
     natoPendingSymbol: "",
     definitionId: "def-1",
+    damageState: 1,
     position: { lat: 0, lon: 0, altMsl: 0, heading: 0, speed: 0 },
     status: {
       personnelStrength: 100,
@@ -45,9 +46,13 @@ function resetStore() {
     tickNumber: 0,
     units: new Map(),
     weaponDefs: new Map(),
+    munitions: new Map(),
+    explosions: new Map(),
+    munitionDetections: new Map(),
     activeView: "debug",
     detections: new Map(),
     selectedUnitId: null,
+    mapCommandMode: { type: "none", unitId: null },
     eventLog: [],
   });
 }
@@ -77,6 +82,17 @@ describe("loadSnapshot", () => {
     const s = useSimStore.getState();
     expect(s.simSeconds).toBe(0);
     expect(s.tickNumber).toBe(0);
+  });
+
+  it("clears transient selection and command mode", () => {
+    useSimStore.setState({
+      selectedUnitId: "u1",
+      mapCommandMode: { type: "route", unitId: "u1" },
+    });
+    useSimStore.getState().loadSnapshot([makeUnit("new")], "S");
+    const s = useSimStore.getState();
+    expect(s.selectedUnitId).toBeNull();
+    expect(s.mapCommandMode).toEqual({ type: "none", unitId: null });
   });
 
   it("clears eventLog", () => {
@@ -266,13 +282,13 @@ describe("selectUnit", () => {
 describe("setActiveView", () => {
   beforeEach(resetStore);
 
-  it("switches to blue view", () => {
-    useSimStore.getState().setActiveView("blue");
-    expect(useSimStore.getState().activeView).toBe("blue");
+  it("switches to a nation view", () => {
+    useSimStore.getState().setActiveView("ISR");
+    expect(useSimStore.getState().activeView).toBe("ISR");
   });
 
   it("switches back to debug view", () => {
-    useSimStore.getState().setActiveView("red");
+    useSimStore.getState().setActiveView("IRN");
     useSimStore.getState().setActiveView("debug");
     expect(useSimStore.getState().activeView).toBe("debug");
   });

@@ -87,9 +87,10 @@ func (a *App) startup(ctx context.Context) {
 func (a *App) seedDefaults(ctx context.Context, cfg db.Config) {
 	slog.Info("seeding defaults")
 
-	def := scenario.Default()
-	if err := a.scenRepo.Save(ctx, def.Id, scenarioRecord(def)); err != nil {
-		slog.Warn("seed default scenario", "err", err)
+	for _, scen := range scenario.Builtins() {
+		if err := a.scenRepo.Save(ctx, scen.Id, scenarioRecord(scen)); err != nil {
+			slog.Warn("seed built-in scenario", "id", scen.Id, "name", scen.Name, "err", err)
+		}
 	}
 
 	userLibDir := filepath.Join(cfg.DataDir, "libraries")

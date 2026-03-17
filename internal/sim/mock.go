@@ -35,7 +35,7 @@ const (
 // reportSeconds is called after each tick with the new accumulated sim time so
 // the caller can persist it across pause/resume cycles.
 // Returns when ctx is cancelled.
-func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, startSeconds float64, getScale func() float64, reportSeconds func(float64), emit EmitFn) {
+func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, relationshipRules func() RelationshipRules, startSeconds float64, getScale func() float64, reportSeconds func(float64), emit EmitFn) {
 	ticker := time.NewTicker(tickInterval)
 	defer ticker.Stop()
 
@@ -54,6 +54,15 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 			simSeconds += timeScale
 			reportSeconds(simSeconds)
 
+			// ── Behavior reactions ────────────────────────────────────────
+			reactionDeltas := processBehaviorTick(units, defs, weapons)
+			if len(reactionDeltas) > 0 {
+				emit("batch_update", &enginev1.BatchUnitUpdate{
+					Deltas:  reactionDeltas,
+					SimTime: &enginev1.SimTime{SecondsElapsed: simSeconds, TickNumber: tick},
+				})
+			}
+
 			// ── Movement ──────────────────────────────────────────────────
 			deltas := processTick(units, defs, timeScale)
 			emit("batch_update", &enginev1.BatchUnitUpdate{
@@ -63,6 +72,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 
 			// ── Adjudication ──────────────────────────────────────────────
 			adj := AdjudicateTick(units, defs, weapons, inFlight)
+			trackGroups := resolveTrackGroupIDs(units)
 
 			// Emit a weapon-state delta for every unit that fired this tick
 			// so the frontend can update ammo counters in real time.
@@ -96,13 +106,16 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 							ID:             NextMunitionID(),
 							WeaponID:       shot.WeaponID,
 							ShooterID:      shot.Shooter.Id,
-							ShooterSide:    shot.Shooter.Side,
+							ShooterSide:    unitCoalitionID(shot.Shooter),
+							TrackGroupID:   trackGroups[shot.Shooter.Id],
 							TargetID:       shot.Target.Id,
 							HitProbability: shot.HitProbability,
 							CurLat:         shot.Shooter.GetPosition().GetLat(),
 							CurLon:         shot.Shooter.GetPosition().GetLon(),
+							CurAltMsl:      shot.Shooter.GetPosition().GetAltMsl(),
 							DestLat:        shot.Target.GetPosition().GetLat(),
 							DestLon:        shot.Target.GetPosition().GetLon(),
+							DestAltMsl:     shot.Target.GetPosition().GetAltMsl(),
 							SpeedMps:       ws.SpeedMps,
 							TargetDomains:  ws.DomainTargets,
 							Guidance:       ws.Guidance,
@@ -114,14 +127,17 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 			// ── Sensor detection (unit-to-unit) ───────────────────────────
 			// Run before AdvanceMunitions so radar-guided munitions can check
 			// whether the shooter still holds a detection on their target.
-			detections := SensorTick(units, defs)
+			baseDetections := SensorTick(units, defs)
+			rules := relationshipRules()
+			detections := ApplyIntelSharing(baseDetections, rules)
+			detectionContacts := BuildDetectionContacts(baseDetections, rules)
 
 			// ── Move in-flight munitions ───────────────────────────────────
 			var arrived []*InFlightMunition
-			inFlight, arrived = AdvanceMunitions(inFlight, timeScale, units, detections)
+			inFlight, arrived = AdvanceMunitions(inFlight, timeScale, units, defs)
 
 			// ── Resolve kills for munitions that arrived this tick ─────────
-			kills := ResolveArrivals(arrived, units, rng)
+			hits := ResolveArrivals(arrived, units, defs, weapons, rng)
 
 			// ── Munition detection (post-advance positions) ────────────────
 			munitionDets := DetectMunitions(units, defs, inFlight)
@@ -135,10 +151,20 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 				activeSides[side] = true
 			}
 			for side := range activeSides {
+				contacts := detectionContacts[side]
+				protoContacts := make([]*enginev1.DetectionContact, 0, len(contacts))
+				for _, contact := range contacts {
+					protoContacts = append(protoContacts, &enginev1.DetectionContact{
+						UnitId:     contact.UnitID,
+						SourceTeam: contact.SourceTeam,
+						Shared:     contact.Shared,
+					})
+				}
 				emit("detection_update", &enginev1.DetectionUpdate{
 					DetectingSide:       side,
 					DetectedUnitIds:     detections[side],
 					DetectedMunitionIds: munitionDets[side],
+					UnitContacts:        protoContacts,
 				})
 			}
 
@@ -149,7 +175,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 					Id:        m.ID,
 					WeaponId:  m.WeaponID,
 					ShooterId: m.ShooterID,
-					Position:  &enginev1.Position{Lat: m.CurLat, Lon: m.CurLon},
+					Position:  &enginev1.Position{Lat: m.CurLat, Lon: m.CurLon, AltMsl: m.CurAltMsl},
 				}
 			}
 			emit("munition_update", &enginev1.MunitionUpdate{
@@ -157,30 +183,40 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 				SimTime:   &enginev1.SimTime{SecondsElapsed: simSeconds, TickNumber: tick},
 			})
 
-			// ── Emit kill events for arrived munitions ─────────────────────
-			for _, k := range kills {
-				attackerID := ""
-				if k.Attacker != nil {
-					attackerID = k.Attacker.Id
-				}
-				emit("unit_destroyed", &enginev1.UnitDestroyedEvent{
-					UnitId:     k.Victim.Id,
-					Cause:      "combat",
-					AttackerId: attackerID,
-					SimTime:    &enginev1.SimTime{SecondsElapsed: simSeconds, TickNumber: tick},
+			// ── Emit damage/destruction results for arrived munitions ──────
+			for _, hit := range hits {
+				emit("batch_update", &enginev1.BatchUnitUpdate{
+					Deltas: []*enginev1.UnitDelta{{
+						UnitId:      hit.Victim.Id,
+						Status:      hit.Victim.Status,
+						DamageState: hit.Victim.DamageState,
+					}},
 				})
 
-				var narrative string
-				if k.Attacker != nil {
-					narrative = fmt.Sprintf("%s destroyed %s", k.Attacker.DisplayName, k.Victim.DisplayName)
-				} else {
-					narrative = fmt.Sprintf("%s was destroyed in a mutual engagement", k.Victim.DisplayName)
+				attackerID := ""
+				if hit.Attacker != nil {
+					attackerID = hit.Attacker.Id
 				}
-				side := k.Victim.Side
-				unitID := k.Victim.Id
-				if k.Attacker != nil {
-					side = k.Attacker.Side
-					unitID = k.Attacker.Id
+				if hit.Destroyed {
+					emit("unit_destroyed", &enginev1.UnitDestroyedEvent{
+						UnitId:     hit.Victim.Id,
+						Cause:      "combat",
+						AttackerId: attackerID,
+						SimTime:    &enginev1.SimTime{SecondsElapsed: simSeconds, TickNumber: tick},
+					})
+				}
+
+				var narrative string
+				if hit.Attacker != nil {
+					narrative = fmt.Sprintf("%s %s %s", hit.Attacker.DisplayName, describeImpact(hit.Outcome), hit.Victim.DisplayName)
+				} else {
+					narrative = fmt.Sprintf("%s was %s in a mutual engagement", hit.Victim.DisplayName, describeImpact(hit.Outcome))
+				}
+				side := unitTeamID(hit.Victim)
+				unitID := hit.Victim.Id
+				if hit.Attacker != nil {
+					side = unitTeamID(hit.Attacker)
+					unitID = hit.Attacker.Id
 				}
 				emit("narrative", &enginev1.NarrativeEvent{
 					Text:     narrative,
@@ -193,6 +229,129 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 	}
 }
 
+func processBehaviorTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats) []*enginev1.UnitDelta {
+	tracks := buildTrackPicture(units, defs)
+	unitByID := make(map[string]*enginev1.Unit, len(units))
+	for _, u := range units {
+		unitByID[u.Id] = u
+	}
+
+	deltas := make([]*enginev1.UnitDelta, 0)
+	for _, u := range units {
+		if !unitCanOperate(u) || !unitCanMove(u, defs) {
+			continue
+		}
+
+		if hasExplicitAttackOrder(u) {
+			target := unitByID[u.GetAttackOrder().GetTargetUnitId()]
+			waypoint := computeAttackWaypoint(u, target, defs, weapons)
+			if waypoint != nil {
+				if attackRouteNeedsUpdate(u, waypoint) {
+					order := &enginev1.MoveOrder{
+						Waypoints:     []*enginev1.Waypoint{waypoint},
+						AutoGenerated: true,
+					}
+					u.MoveOrder = order
+					deltas = append(deltas, &enginev1.UnitDelta{
+						UnitId:    u.Id,
+						MoveOrder: order,
+					})
+				}
+				continue
+			}
+		}
+
+		if hasExplicitMoveOrder(u) || hasExplicitAttackOrder(u) {
+			continue
+		}
+
+		target := nearestTrackedEnemy(u, tracks, unitByID)
+		if target == nil {
+			continue
+		}
+
+		var waypoint *enginev1.Waypoint
+		switch u.GetEngagementBehavior() {
+		case enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_SHADOW_CONTACT:
+			waypoint = &enginev1.Waypoint{
+				Lat:    target.GetPosition().GetLat(),
+				Lon:    target.GetPosition().GetLon(),
+				AltMsl: target.GetPosition().GetAltMsl(),
+			}
+		case enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_WITHDRAW_ON_DETECT:
+			waypoint = computeWithdrawWaypoint(u, target, defs[u.DefinitionId])
+		default:
+			continue
+		}
+		if waypoint == nil {
+			continue
+		}
+
+		order := &enginev1.MoveOrder{Waypoints: []*enginev1.Waypoint{waypoint}}
+		u.MoveOrder = order
+		deltas = append(deltas, &enginev1.UnitDelta{
+			UnitId:    u.Id,
+			MoveOrder: order,
+		})
+	}
+	return deltas
+}
+
+func ComputeAttackWaypointForOrder(shooter, target *enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats) *enginev1.Waypoint {
+	if shooter == nil || target == nil || shooter.GetPosition() == nil || target.GetPosition() == nil {
+		return nil
+	}
+	targetDef, ok := defs[target.DefinitionId]
+	if !ok {
+		return nil
+	}
+	_, weapon, hasWeapon := selectBestWeapon(shooter, targetDef.Domain, weapons)
+	if !hasWeapon || weapon.RangeM <= 0 {
+		return nil
+	}
+	dist := haversineM(
+		shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(),
+		target.GetPosition().GetLat(), target.GetPosition().GetLon(),
+	)
+	desiredStandOff := weapon.RangeM * 0.85
+	if desiredStandOff <= 0 {
+		return nil
+	}
+	if dist <= desiredStandOff {
+		return nil
+	}
+	moveDist := dist - desiredStandOff
+	brng := bearingRad(
+		shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(),
+		target.GetPosition().GetLat(), target.GetPosition().GetLon(),
+	)
+	lat, lon := movePoint(shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(), brng, moveDist)
+	return &enginev1.Waypoint{
+		Lat:    lat,
+		Lon:    lon,
+		AltMsl: shooter.GetPosition().GetAltMsl(),
+	}
+}
+
+func computeAttackWaypoint(shooter, target *enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats) *enginev1.Waypoint {
+	return ComputeAttackWaypointForOrder(shooter, target, defs, weapons)
+}
+
+func attackRouteNeedsUpdate(unit *enginev1.Unit, waypoint *enginev1.Waypoint) bool {
+	order := unit.GetMoveOrder()
+	if order == nil || len(order.GetWaypoints()) == 0 {
+		return true
+	}
+	if !order.GetAutoGenerated() {
+		return false
+	}
+	if len(order.GetWaypoints()) != 1 {
+		return true
+	}
+	current := order.GetWaypoints()[0]
+	return haversineM(current.GetLat(), current.GetLon(), waypoint.GetLat(), waypoint.GetLon()) > 5_000
+}
+
 // processTick advances all active units with move orders by one tick and
 // returns a UnitDelta for every unit that changed position or order state.
 // timeScale multiplies how many sim-seconds of movement occur per real second.
@@ -200,7 +359,7 @@ func processTick(units []*enginev1.Unit, defs map[string]DefStats, timeScale flo
 	deltas := make([]*enginev1.UnitDelta, 0, len(units))
 
 	for _, u := range units {
-		if !unitIsActive(u) {
+		if !unitCanOperate(u) {
 			continue // skip destroyed units
 		}
 		order := u.GetMoveOrder()
@@ -248,10 +407,13 @@ func processTick(units []*enginev1.Unit, defs map[string]DefStats, timeScale flo
 		var newOrder *enginev1.MoveOrder
 		if len(remainingWaypoints) > 0 {
 			newSpeed = cruiseSpeed
-			newOrder = &enginev1.MoveOrder{Waypoints: remainingWaypoints}
+			newOrder = &enginev1.MoveOrder{
+				Waypoints:     remainingWaypoints,
+				AutoGenerated: order.GetAutoGenerated(),
+			}
 		} else {
 			newSpeed = 0
-			newOrder = &enginev1.MoveOrder{} // empty = cleared on frontend
+			newOrder = &enginev1.MoveOrder{AutoGenerated: order.GetAutoGenerated()} // empty = cleared on frontend
 		}
 
 		// Mutate in-memory unit state so RequestSync stays accurate.
@@ -272,6 +434,70 @@ func processTick(units []*enginev1.Unit, defs map[string]DefStats, timeScale flo
 	}
 
 	return deltas
+}
+
+func hasExplicitMoveOrder(u *enginev1.Unit) bool {
+	order := u.GetMoveOrder()
+	return order != nil && len(order.Waypoints) > 0
+}
+
+func hasExplicitAttackOrder(u *enginev1.Unit) bool {
+	order := u.GetAttackOrder()
+	return order != nil &&
+		order.GetOrderType() != enginev1.AttackOrderType_ATTACK_ORDER_TYPE_UNSPECIFIED &&
+		order.GetTargetUnitId() != ""
+}
+
+func unitCanMove(u *enginev1.Unit, defs map[string]DefStats) bool {
+	if u.GetPosition() == nil {
+		return false
+	}
+	return defs[u.DefinitionId].CruiseSpeedMps > 0
+}
+
+func nearestTrackedEnemy(unit *enginev1.Unit, tracks trackPicture, unitByID map[string]*enginev1.Unit) *enginev1.Unit {
+	groupID := tracks.GroupForUnit[unit.Id]
+	if groupID == "" {
+		return nil
+	}
+	targets := tracks.ByGroup[groupID]
+	var nearest *enginev1.Unit
+	bestDist := math.MaxFloat64
+	for targetID := range targets {
+		target := unitByID[targetID]
+		if target == nil || !unitIsAlive(target) || !unitsAreHostile(unit, target) {
+			continue
+		}
+		dist := haversineM(
+			unit.GetPosition().GetLat(), unit.GetPosition().GetLon(),
+			target.GetPosition().GetLat(), target.GetPosition().GetLon(),
+		)
+		if dist < bestDist {
+			bestDist = dist
+			nearest = target
+		}
+	}
+	return nearest
+}
+
+func computeWithdrawWaypoint(unit, threat *enginev1.Unit, def DefStats) *enginev1.Waypoint {
+	if unit.GetPosition() == nil || threat.GetPosition() == nil {
+		return nil
+	}
+	distance := def.DetectionRangeM * 0.75
+	if distance < 20_000 {
+		distance = 20_000
+	}
+	if distance > 150_000 {
+		distance = 150_000
+	}
+	brng := bearingRad(threat.GetPosition().GetLat(), threat.GetPosition().GetLon(), unit.GetPosition().GetLat(), unit.GetPosition().GetLon())
+	lat, lon := movePoint(unit.GetPosition().GetLat(), unit.GetPosition().GetLon(), brng, distance)
+	return &enginev1.Waypoint{
+		Lat:    lat,
+		Lon:    lon,
+		AltMsl: unit.GetPosition().GetAltMsl(),
+	}
 }
 
 // ─── GEO MATH ─────────────────────────────────────────────────────────────────

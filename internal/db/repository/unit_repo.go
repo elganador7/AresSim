@@ -60,7 +60,9 @@ func (r *UnitRepo) UpsertBatch(ctx context.Context, units []UnitRecord) error {
 			return fmt.Errorf("unit record at index %d missing valid RecordID", i)
 		}
 		paramKey := fmt.Sprintf("u%d", i)
+		idKey := fmt.Sprintf("id%d", i)
 		params[paramKey] = u
+		params[idKey] = rid.ID
 
 		// Remove the id from the data payload — the UPSERT target is the rid.
 		data := make(UnitRecord, len(u))
@@ -70,7 +72,7 @@ func (r *UnitRepo) UpsertBatch(ctx context.Context, units []UnitRecord) error {
 			}
 		}
 		params[paramKey] = data
-		query += fmt.Sprintf("UPSERT unit:%s MERGE $%s;\n", rid.ID, paramKey)
+		query += fmt.Sprintf("UPSERT type::thing('unit', $%s) MERGE $%s;\n", idKey, paramKey)
 	}
 	query += "COMMIT TRANSACTION;"
 

@@ -13,8 +13,8 @@
  *
  * Fog-of-war:
  *   "debug" view  — all units visible
- *   "blue"  view  — Blue units always; others only if detected (future)
- *   "red"   view  — Red  units always; others only if detected (future)
+ *   nation view   — own-team units always; all other units only if detected
+ *                   or explicitly shared into that team's picture
  */
 
 import { useEffect, useRef } from "react";
@@ -29,132 +29,61 @@ import {
   VerticalOrigin,
   HorizontalOrigin,
   NearFarScalar,
-  HeightReference,
   Entity,
   EllipseGraphics,
   ConstantProperty,
   ColorMaterialProperty,
   PolylineDashMaterialProperty,
+  GeoJsonDataSource,
   ScreenSpaceEventType,
   Math as CesiumMath,
   Cartographic,
+  LabelStyle,
+  HeightReference,
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import { useSimStore, Unit, Munition, WeaponDef } from "../store/simStore";
-import { ListUnitDefinitions, MoveUnit } from "../../wailsjs/go/main/App";
+import { useSimStore, Unit, Munition, ExplosionFx } from "../store/simStore";
+import { AppendMoveWaypoint, ListUnitDefinitions, MoveUnit, UpdateMoveWaypoint } from "../../wailsjs/go/main/App";
+import { THEATER_BORDERS_GEOJSON } from "../data/theaterBorders";
 import { getUnitBillboardUrl } from "../utils/unitBillboard";
-
-// ─── TYPES ────────────────────────────────────────────────────────────────────
-
-type ActiveView = "debug" | "blue" | "red";
-
-interface DefInfo {
-  generalType: number;
-  detectionRangeM: number;
-  shortName: string;
-}
-
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-
-const ROUTE_COLOR: Record<string, Color> = {
-  Blue:    Color.fromCssColorString("#60a5fa"),
-  Red:     Color.fromCssColorString("#f87171"),
-  Neutral: Color.fromCssColorString("#fcd34d"),
-};
-
-type Detections = Map<string, Set<string>>;
-type MunitionDetections = Map<string, Set<string>>;
-
-const MUNITION_ENTITY_PREFIX = "mun_";
-const SENSOR_COLOR = Color.fromCssColorString("#0f9fb8");
-
-/**
- * Returns the longest weapon range (metres) among weapons with ammo remaining.
- * Returns 0 if the unit has no weapons or all are depleted.
- */
-function maxWeaponRangeM(unit: Unit, weaponDefs: Map<string, WeaponDef>): number {
-  let best = 0;
-  for (const ws of unit.weapons) {
-    if (ws.currentQty <= 0) continue;
-    const def = weaponDefs.get(ws.weaponId);
-    if (def && def.rangeM > best) best = def.rangeM;
-  }
-  return best;
-}
-
-/**
- * Returns true if the munition should be shown in the given view.
- * In debug mode all munitions are visible. In blue/red mode only munitions
- * detected by that side's sensors are shown.
- */
-function isMunitionVisible(
-  munition: Munition,
-  view: ActiveView,
-  munitionDetections: MunitionDetections,
-): boolean {
-  if (view === "debug") return true;
-  return munitionDetections.get(view === "blue" ? "Blue" : "Red")?.has(munition.id) ?? false;
-}
-
-/**
- * Returns true if the unit should be shown in the given view.
- * Own-side units are always visible. Enemy units are visible only if
- * detected by at least one sensor on the viewing side.
- */
-function isVisible(unit: Unit, view: ActiveView, detections: Detections): boolean {
-  if (view === "debug") return true;
-  if (view === "blue") {
-    return unit.side === "Blue" || (detections.get("Blue")?.has(unit.id) ?? false);
-  }
-  if (view === "red") {
-    return unit.side === "Red" || (detections.get("Red")?.has(unit.id) ?? false);
-  }
-  return false;
-}
-
-/**
- * Returns true if this unit is a sensor track (detected enemy) rather than
- * an own-side unit in the current view. Tracks get a different visual style.
- */
-function isTrack(unit: Unit, view: ActiveView): boolean {
-  if (view === "debug") return false;
-  return view === "blue" ? unit.side !== "Blue" : unit.side !== "Red";
-}
-
-/** Returns true if the active view is allowed to issue move orders to a unit. */
-function canMove(unit: Unit, view: ActiveView): boolean {
-  if (view === "debug") return true;
-  if (view === "blue")  return unit.side === "Blue";
-  if (view === "red")   return unit.side === "Red";
-  return false;
-}
-
-function makeEntity(unit: Unit, generalType: number, shortName: string): Entity {
-  return new Entity({
-    id: unit.id,
-    position: Cartesian3.fromDegrees(unit.position.lon, unit.position.lat, unit.position.altMsl),
-    show: true,
-    billboard: {
-      image: getUnitBillboardUrl(generalType, unit.side, shortName),
-      width: 62,
-      height: 62,
-      verticalOrigin: VerticalOrigin.CENTER,
-      horizontalOrigin: HorizontalOrigin.CENTER,
-      scaleByDistance: new NearFarScalar(1.5e5, 1.2, 8e6, 0.4),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      heightReference: HeightReference.CLAMP_TO_GROUND,
-    },
-  });
-}
-
-// Munitions are rendered as small bright orange points.
-const MUNITION_COLOR = Color.fromCssColorString("#f97316"); // tailwind orange-500
+import {
+  type ActiveView,
+  type DefInfo,
+  type Detections,
+  type MunitionDetections,
+  BLOCKED_ROUTE_COLOR,
+  EXPLOSION_ENTITY_PREFIX,
+  IMPACT_COLOR,
+  KILL_COLOR,
+  MUNITION_COLOR,
+  MUNITION_ENTITY_PREFIX,
+  ROUTE_COLOR,
+  SENSOR_COLOR,
+  STRIKE_PATH_COLOR,
+  TRACK_LINK_PREFIX,
+  canMove,
+  ensureBridgeSuccess,
+  getExplosionBillboard,
+  isMunitionVisible,
+  isTrack,
+  isVisible,
+  makeUnitEntity,
+  maxWeaponRangeM,
+  routeSegmentBlocked,
+  strikeSegmentBlocked,
+  teamForUnit,
+  updateMapCursor,
+} from "./cesium/helpers";
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 
 export default function CesiumGlobe() {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef    = useRef<Viewer | null>(null);
+  const borderDataSourceRef = useRef<GeoJsonDataSource | null>(null);
+  const mapCommandMode = useSimStore((s) => s.mapCommandMode);
+  const draggingWaypointRef = useRef<{ unitId: string; waypointIndex: number } | null>(null);
+  const suppressClickRef = useRef(false);
   // definitionId → { generalType, combatRangeM }, populated from DB on mount
   const defInfoRef   = useRef<Record<string, DefInfo>>({});
 
@@ -188,16 +117,143 @@ export default function CesiumGlobe() {
     viewer.scene.backgroundColor = Color.fromCssColorString("#0f1115");
     viewerRef.current = viewer;
 
+    GeoJsonDataSource.load(THEATER_BORDERS_GEOJSON as never, {
+      stroke: Color.fromCssColorString("#9eb0c2"),
+      fill: Color.fromCssColorString("#000000").withAlpha(0.01),
+      strokeWidth: 1.2,
+      clampToGround: true,
+    })
+      .then((dataSource) => {
+        borderDataSourceRef.current = dataSource;
+        viewer.dataSources.add(dataSource);
+        dataSource.entities.values.forEach((entity) => {
+          if (entity.polygon) {
+            entity.polygon.fill = new ConstantProperty(false);
+            entity.polygon.outline = new ConstantProperty(true);
+            entity.polygon.outlineColor = new ConstantProperty(Color.fromCssColorString("#90a3b8").withAlpha(0.5));
+            entity.polygon.outlineWidth = new ConstantProperty(1.1);
+          }
+          if (entity.polyline) {
+            entity.polyline.material = new ColorMaterialProperty(Color.fromCssColorString("#90a3b8").withAlpha(0.55));
+            entity.polyline.width = new ConstantProperty(1.1);
+          }
+        });
+      })
+      .catch(console.error);
+
     // Initial camera — Eastern Mediterranean.
     viewer.camera.flyTo({
       destination: Cartesian3.fromDegrees(25.8, 35.8, 1_200_000),
       duration: 0,
     });
 
+    const pickLatLon = (position: Cartesian2): { lat: number; lon: number } | null => {
+      const ray = viewer.camera.getPickRay(position);
+      if (!ray) return null;
+      const pos = viewer.scene.globe.pick(ray, viewer.scene);
+      if (!pos) return null;
+      const carto = Cartographic.fromCartesian(pos);
+      return {
+        lat: CesiumMath.toDegrees(carto.latitude),
+        lon: CesiumMath.toDegrees(carto.longitude),
+      };
+    };
+
+    const previewDraggedWaypoint = (unitID: string, waypointIndex: number, lat: number, lon: number) => {
+      const waypointEntity = viewer.entities.getById(`${unitID}_wp_${waypointIndex}`);
+      if (waypointEntity) {
+        (waypointEntity.position as unknown as { setValue: (p: Cartesian3) => void })
+          .setValue(Cartesian3.fromDegrees(lon, lat));
+      }
+
+      const unit = useSimStore.getState().units.get(unitID);
+      if (!unit?.moveOrder) return;
+      const positions: Cartesian3[] = [
+        Cartesian3.fromDegrees(unit.position.lon, unit.position.lat),
+        ...unit.moveOrder.waypoints.map((wp, idx) =>
+          idx === waypointIndex
+            ? Cartesian3.fromDegrees(lon, lat)
+            : Cartesian3.fromDegrees(wp.lon, wp.lat),
+        ),
+      ];
+      const routeEntity = viewer.entities.getById(`${unitID}_route`);
+      if (routeEntity?.polyline) {
+        (routeEntity.polyline.positions as unknown as { setValue: (p: Cartesian3[]) => void }).setValue(positions);
+      }
+      const destEntity = viewer.entities.getById(`${unitID}_dest`);
+      if (destEntity && waypointIndex === unit.moveOrder.waypoints.length - 1) {
+        (destEntity.position as unknown as { setValue: (p: Cartesian3) => void })
+          .setValue(Cartesian3.fromDegrees(lon, lat));
+      }
+    };
+
+    viewer.screenSpaceEventHandler.setInputAction(
+      (evt: { position: Cartesian2 }) => {
+        const { mapCommandMode } = useSimStore.getState();
+        if (mapCommandMode.type !== "route" || !mapCommandMode.unitId) return;
+        const picked = viewer.scene.pick(evt.position);
+        if (!(picked?.id instanceof Entity)) return;
+        const pickedEntity = picked.id as Entity;
+        const waypointUnitId = pickedEntity.properties?.waypointUnitId?.getValue?.();
+        const waypointIndex = pickedEntity.properties?.waypointIndex?.getValue?.();
+        if (typeof waypointUnitId === "string" && typeof waypointIndex === "number" && waypointUnitId === mapCommandMode.unitId) {
+          draggingWaypointRef.current = { unitId: waypointUnitId, waypointIndex };
+          suppressClickRef.current = true;
+          viewer.scene.screenSpaceCameraController.enableRotate = false;
+        }
+      },
+      ScreenSpaceEventType.LEFT_DOWN,
+    );
+
+    viewer.screenSpaceEventHandler.setInputAction(
+      (evt: { endPosition: Cartesian2 }) => {
+        const drag = draggingWaypointRef.current;
+        if (!drag) return;
+        const next = pickLatLon(evt.endPosition);
+        if (!next) return;
+        previewDraggedWaypoint(drag.unitId, drag.waypointIndex, next.lat, next.lon);
+      },
+      ScreenSpaceEventType.MOUSE_MOVE,
+    );
+
+    viewer.screenSpaceEventHandler.setInputAction(
+      (evt: { position: Cartesian2 }) => {
+        const drag = draggingWaypointRef.current;
+        if (!drag) return;
+        const next = pickLatLon(evt.position);
+        draggingWaypointRef.current = null;
+        viewer.scene.screenSpaceCameraController.enableRotate = true;
+        if (!next) return;
+        previewDraggedWaypoint(drag.unitId, drag.waypointIndex, next.lat, next.lon);
+        UpdateMoveWaypoint(drag.unitId, drag.waypointIndex, next.lat, next.lon)
+          .then(ensureBridgeSuccess)
+          .catch((error) => {
+            console.error(error);
+            alert(error instanceof Error ? error.message : String(error));
+          });
+      },
+      ScreenSpaceEventType.LEFT_UP,
+    );
+
     // ── Click handler ──────────────────────────────────────────────────────
     viewer.screenSpaceEventHandler.setInputAction(
       (evt: { position: Cartesian2 }) => {
-        const { units, selectedUnitId, activeView, selectUnit } =
+        if (suppressClickRef.current) {
+          suppressClickRef.current = false;
+          return;
+        }
+        if (draggingWaypointRef.current) {
+          return;
+        }
+        const {
+          units,
+          selectedUnitId,
+          mapCommandMode,
+          activeView,
+          selectUnit,
+          startRouteEdit,
+          clearMapCommandMode,
+        } =
           useSimStore.getState();
 
         // Check for entity click first.
@@ -205,7 +261,28 @@ export default function CesiumGlobe() {
         if (picked?.id instanceof Entity) {
           const clickedId = (picked.id as Entity).id;
           if (units.has(clickedId)) {
-            selectUnit(selectedUnitId === clickedId ? null : clickedId);
+            if (mapCommandMode.type === "target_pick" && mapCommandMode.unitId && selectedUnitId) {
+              const shooter = units.get(mapCommandMode.unitId);
+              const clickedUnit = units.get(clickedId);
+              if (shooter && clickedUnit && shooter.id !== clickedUnit.id && shooter.side !== clickedUnit.side) {
+                selectUnit(mapCommandMode.unitId);
+                clearMapCommandMode();
+                window.dispatchEvent(new CustomEvent("sim:target-picked", {
+                  detail: {
+                    shooterId: mapCommandMode.unitId,
+                    targetUnitId: clickedId,
+                  },
+                }));
+                return;
+              }
+            }
+            const clickedUnit = units.get(clickedId);
+            const nextSelectedId = selectedUnitId === clickedId ? null : clickedId;
+            selectUnit(nextSelectedId);
+            clearMapCommandMode();
+            if (nextSelectedId && clickedUnit && canMove(clickedUnit, activeView, defInfoRef.current)) {
+              startRouteEdit(nextSelectedId);
+            }
             return;
           }
         }
@@ -213,18 +290,36 @@ export default function CesiumGlobe() {
         // Terrain click → move selected unit if the view permits.
         if (!selectedUnitId) return;
         const unit = units.get(selectedUnitId);
-        if (!unit || !canMove(unit, activeView)) return;
+        if (!unit || !canMove(unit, activeView, defInfoRef.current)) return;
 
-        const ray = viewer.camera.getPickRay(evt.position);
-        if (!ray) return;
-        const pos = viewer.scene.globe.pick(ray, viewer.scene);
-        if (!pos) return;
-        const carto = Cartographic.fromCartesian(pos);
-        const lat = CesiumMath.toDegrees(carto.latitude);
-        const lon = CesiumMath.toDegrees(carto.longitude);
+        const next = pickLatLon(evt.position);
+        if (!next) return;
+        const { lat, lon } = next;
 
-        MoveUnit(selectedUnitId, lat, lon).catch(console.error);
-        selectUnit(null);
+        if (mapCommandMode.type === "route" && mapCommandMode.unitId === selectedUnitId) {
+          AppendMoveWaypoint(selectedUnitId, lat, lon)
+            .then(ensureBridgeSuccess)
+            .catch((error) => {
+              console.error(error);
+              alert(error instanceof Error ? error.message : String(error));
+            });
+          return;
+        }
+
+        if (mapCommandMode.type === "target_pick" && mapCommandMode.unitId === selectedUnitId) {
+          clearMapCommandMode();
+          return;
+        }
+
+        MoveUnit(selectedUnitId, lat, lon)
+          .then(ensureBridgeSuccess)
+          .then(() => {
+            selectUnit(null);
+          })
+          .catch((error) => {
+            console.error(error);
+            alert(error instanceof Error ? error.message : String(error));
+          });
       },
       ScreenSpaceEventType.LEFT_CLICK,
     );
@@ -240,6 +335,9 @@ export default function CesiumGlobe() {
       const destId   = `${unit.id}_dest`;
       const rangeId  = `${unit.id}_range`;
       const sensorId = `${unit.id}_sensor`;
+      const waypointPrefix = `${unit.id}_wp_`;
+      const routeSegmentPrefix = `${unit.id}_route_seg_`;
+      const strikeSegmentPrefix = `${unit.id}_strike_seg_`;
 
       if (!unit.status.isActive) {
         viewer.entities.removeById(unit.id);
@@ -247,11 +345,19 @@ export default function CesiumGlobe() {
         viewer.entities.removeById(destId);
         viewer.entities.removeById(rangeId);
         viewer.entities.removeById(sensorId);
+        Array.from(viewer.entities.values)
+          .map((entity) => entity.id as string)
+          .filter((id) => id.startsWith(routeSegmentPrefix))
+          .forEach((id) => viewer.entities.removeById(id));
+        Array.from(viewer.entities.values)
+          .map((entity) => entity.id as string)
+          .filter((id) => id.startsWith(strikeSegmentPrefix))
+          .forEach((id) => viewer.entities.removeById(id));
         return;
       }
 
-      const visible    = isVisible(unit, view, detections);
-      const track      = isTrack(unit, view);
+      const visible    = isVisible(unit, view, detections, defInfoRef.current);
+      const track      = isTrack(unit, view, defInfoRef.current);
       // Tracks: dimmer billboard + no route/dest arrows (we don't know their orders)
       const trackAlpha = track ? 0.55 : 1.0;
       const pos = Cartesian3.fromDegrees(
@@ -274,7 +380,7 @@ export default function CesiumGlobe() {
         }
       } else {
         const def = defInfoRef.current[unit.definitionId];
-        const entity = makeEntity(unit, def?.generalType ?? 0, def?.shortName ?? unit.displayName);
+        const entity = makeUnitEntity(unit, def?.generalType ?? 0, def?.shortName ?? unit.displayName);
         entity.show = visible;
         viewer.entities.add(entity);
         // Apply initial track alpha after adding.
@@ -291,6 +397,10 @@ export default function CesiumGlobe() {
           Cartesian3.fromDegrees(unit.position.lon, unit.position.lat),
           ...order.waypoints.map((wp) => Cartesian3.fromDegrees(wp.lon, wp.lat)),
         ];
+        const points = [
+          { lat: unit.position.lat, lon: unit.position.lon },
+          ...order.waypoints.map((wp) => ({ lat: wp.lat, lon: wp.lon })),
+        ];
         const last = order.waypoints[order.waypoints.length - 1];
         const destPos = Cartesian3.fromDegrees(last.lon, last.lat);
 
@@ -305,8 +415,34 @@ export default function CesiumGlobe() {
             show: visible,
             polyline: {
               positions: new ConstantProperty(positions),
-              width: 2,
-              material: new PolylineDashMaterialProperty({ color: routeColor, dashLength: 16 }),
+              width: 1,
+              material: new PolylineDashMaterialProperty({ color: routeColor.withAlpha(0.12), dashLength: 16 }),
+              clampToGround: false,
+            },
+          }));
+        }
+
+        Array.from(viewer.entities.values)
+          .map((entity) => entity.id as string)
+          .filter((id) => id.startsWith(routeSegmentPrefix))
+          .forEach((id) => viewer.entities.removeById(id));
+
+        for (let idx = 0; idx < points.length - 1; idx += 1) {
+          const start = points[idx];
+          const end = points[idx + 1];
+          const blocked = routeSegmentBlocked(unit, start, end);
+          viewer.entities.add(new Entity({
+            id: `${routeSegmentPrefix}${idx}`,
+            show: visible,
+            polyline: {
+              positions: new ConstantProperty([
+                Cartesian3.fromDegrees(start.lon, start.lat),
+                Cartesian3.fromDegrees(end.lon, end.lat),
+              ]),
+              width: blocked ? 2.5 : 2,
+              material: blocked
+                ? new PolylineDashMaterialProperty({ color: BLOCKED_ROUTE_COLOR.withAlpha(0.65), dashLength: 14 })
+                : new PolylineDashMaterialProperty({ color: routeColor.withAlpha(0.75), dashLength: 16 }),
               clampToGround: false,
             },
           }));
@@ -331,9 +467,89 @@ export default function CesiumGlobe() {
             },
           }));
         }
+
+        Array.from(viewer.entities.values)
+          .map((entity) => entity.id as string)
+          .filter((id) => id.startsWith(waypointPrefix))
+          .forEach((id) => viewer.entities.removeById(id));
+
+        if (isSelected) {
+          order.waypoints.forEach((wp, idx) => {
+            viewer.entities.add(new Entity({
+              id: `${waypointPrefix}${idx}`,
+              show: visible,
+              position: Cartesian3.fromDegrees(wp.lon, wp.lat),
+              point: {
+                pixelSize: 14,
+                color: routeColor.withAlpha(0.95),
+                outlineColor: Color.WHITE,
+                outlineWidth: 2,
+                disableDepthTestDistance: Number.POSITIVE_INFINITY,
+              },
+              label: {
+                text: `${idx + 1}`,
+                fillColor: Color.WHITE,
+                outlineColor: Color.BLACK,
+                outlineWidth: 2,
+                style: LabelStyle.FILL_AND_OUTLINE,
+                font: "12px sans-serif",
+                pixelOffset: new Cartesian2(0, -18),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY,
+              },
+              properties: {
+                waypointUnitId: unit.id,
+                waypointIndex: idx,
+              },
+            }));
+          });
+        }
       } else {
         viewer.entities.removeById(routeId);
         viewer.entities.removeById(destId);
+        Array.from(viewer.entities.values)
+          .map((entity) => entity.id as string)
+          .filter((id) => id.startsWith(routeSegmentPrefix))
+          .forEach((id) => viewer.entities.removeById(id));
+        Array.from(viewer.entities.values)
+          .map((entity) => entity.id as string)
+          .filter((id) => id.startsWith(waypointPrefix))
+          .forEach((id) => viewer.entities.removeById(id));
+      }
+
+      Array.from(viewer.entities.values)
+        .map((entity) => entity.id as string)
+        .filter((id) => id.startsWith(strikeSegmentPrefix))
+        .forEach((id) => viewer.entities.removeById(id));
+
+      if (isSelected && visible && !track && unit.attackOrder?.targetUnitId) {
+        const target = useSimStore.getState().units.get(unit.attackOrder.targetUnitId);
+        if (target && isVisible(target, view, detections, defInfoRef.current)) {
+          const pathPoints = [
+            { lat: unit.position.lat, lon: unit.position.lon },
+            ...(unit.moveOrder?.waypoints ?? []).map((wp) => ({ lat: wp.lat, lon: wp.lon })),
+            { lat: target.position.lat, lon: target.position.lon },
+          ];
+          for (let idx = 0; idx < pathPoints.length - 1; idx += 1) {
+            const start = pathPoints[idx];
+            const end = pathPoints[idx + 1];
+            const blocked = strikeSegmentBlocked(unit, start, end);
+            viewer.entities.add(new Entity({
+              id: `${strikeSegmentPrefix}${idx}`,
+              show: true,
+              polyline: {
+                positions: new ConstantProperty([
+                  Cartesian3.fromDegrees(start.lon, start.lat),
+                  Cartesian3.fromDegrees(end.lon, end.lat),
+                ]),
+                width: blocked ? 3 : 2,
+                material: blocked
+                  ? new PolylineDashMaterialProperty({ color: BLOCKED_ROUTE_COLOR.withAlpha(0.78), dashLength: 10 })
+                  : new PolylineDashMaterialProperty({ color: STRIKE_PATH_COLOR.withAlpha(0.45), dashLength: 12 }),
+                clampToGround: false,
+              },
+            }));
+          }
+        }
       }
 
       // Weapon range ring — shown only when this unit is selected and visible.
@@ -420,10 +636,64 @@ export default function CesiumGlobe() {
           !id.endsWith("_dest") &&
           !id.endsWith("_range") &&
           !id.endsWith("_sensor") &&
+          !id.includes("_route_seg_") &&
+          !id.includes("_strike_seg_") &&
           !id.startsWith(MUNITION_ENTITY_PREFIX) && // managed by syncMunitions
+          !id.startsWith(EXPLOSION_ENTITY_PREFIX) && // managed by syncExplosions
           !storeIds.has(id),
         )
         .forEach((id) => viewer.entities.removeById(id));
+    };
+
+    const syncTrackLinks = (
+      units: Map<string, Unit>,
+      selectedId: string | null,
+      view: ActiveView,
+      detections: Detections,
+      detectionContacts: Map<string, Map<string, { unitId: string; sourceTeam: string; shared: boolean }>>,
+    ) => {
+      Array.from(viewer.entities.values)
+        .map((entity) => entity.id as string)
+        .filter((id) => id.startsWith(TRACK_LINK_PREFIX))
+        .forEach((id) => viewer.entities.removeById(id));
+
+      if (!selectedId || view === "debug") {
+        return;
+      }
+      const selectedUnit = units.get(selectedId);
+      if (!selectedUnit || teamForUnit(selectedUnit, defInfoRef.current) !== view) {
+        return;
+      }
+      const visibleTracks = detections.get(view);
+      if (!visibleTracks || visibleTracks.size === 0) {
+        return;
+      }
+      const contactMeta = detectionContacts.get(view) ?? new Map();
+      for (const targetId of visibleTracks) {
+        const target = units.get(targetId);
+        if (!target) {
+          continue;
+        }
+        const meta = contactMeta.get(targetId);
+        const shared = !!meta?.shared;
+        viewer.entities.add(new Entity({
+          id: `${TRACK_LINK_PREFIX}${selectedId}_${targetId}`,
+          polyline: {
+            positions: new ConstantProperty([
+              Cartesian3.fromDegrees(selectedUnit.position.lon, selectedUnit.position.lat, selectedUnit.position.altMsl),
+              Cartesian3.fromDegrees(target.position.lon, target.position.lat, target.position.altMsl),
+            ]),
+            width: shared ? 1 : 1.25,
+            material: shared
+              ? new PolylineDashMaterialProperty({
+                  color: Color.fromCssColorString("#cbd5e1").withAlpha(0.12),
+                  dashLength: 10,
+                })
+              : new ColorMaterialProperty(Color.fromCssColorString("#e2e8f0").withAlpha(0.16)),
+            clampToGround: false,
+          },
+        }));
+      }
     };
 
     // ── Sync a single in-flight munition entity ────────────────────────────
@@ -434,7 +704,7 @@ export default function CesiumGlobe() {
     ) => {
       const entityId = `${MUNITION_ENTITY_PREFIX}${munition.id}`;
       const visible = isMunitionVisible(munition, view, munitionDetections);
-      const pos = Cartesian3.fromDegrees(munition.lon, munition.lat, 100);
+      const pos = Cartesian3.fromDegrees(munition.lon, munition.lat, munition.altMsl);
 
       const existing = viewer.entities.getById(entityId);
       if (existing) {
@@ -473,33 +743,79 @@ export default function CesiumGlobe() {
         .forEach((id) => viewer.entities.removeById(id));
     };
 
+    const syncExplosion = (explosion: ExplosionFx) => {
+      const entityId = `${EXPLOSION_ENTITY_PREFIX}${explosion.id}`;
+      const pos = Cartesian3.fromDegrees(explosion.lon, explosion.lat, explosion.altMsl);
+      const pixelSize = explosion.kind === "kill" ? 16 : 10;
+      const color = explosion.kind === "kill" ? KILL_COLOR : IMPACT_COLOR;
+      const existing = viewer.entities.getById(entityId);
+      if (existing) {
+        (existing.position as unknown as { setValue: (p: Cartesian3) => void }).setValue(pos);
+        existing.show = true;
+        if (existing.billboard) {
+          existing.billboard.image = new ConstantProperty(getExplosionBillboard(explosion.kind));
+        }
+        if (existing.point) {
+          existing.point.pixelSize = new ConstantProperty(pixelSize);
+          existing.point.color = new ConstantProperty(color.withAlpha(0.95));
+        }
+      } else {
+        viewer.entities.add(new Entity({
+          id: entityId,
+          show: true,
+          position: pos,
+          billboard: {
+            image: getExplosionBillboard(explosion.kind),
+            width: explosion.kind === "kill" ? 58 : 42,
+            height: explosion.kind === "kill" ? 58 : 42,
+            verticalOrigin: VerticalOrigin.CENTER,
+            horizontalOrigin: HorizontalOrigin.CENTER,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            scaleByDistance: new NearFarScalar(2e5, 1.0, 8e6, 0.5),
+          },
+          point: {
+            pixelSize,
+            color: color.withAlpha(0.95),
+            outlineColor: Color.WHITE.withAlpha(0.85),
+            outlineWidth: 1,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+        }));
+      }
+    };
+
+    const syncExplosions = (explosions: Map<string, ExplosionFx>) => {
+      explosions.forEach((explosion) => syncExplosion(explosion));
+      const liveIds = new Set(
+        Array.from(explosions.keys()).map((id) => `${EXPLOSION_ENTITY_PREFIX}${id}`),
+      );
+      Array.from(viewer.entities.values)
+        .map((e) => e.id as string)
+        .filter((id) => id.startsWith(EXPLOSION_ENTITY_PREFIX) && !liveIds.has(id))
+        .forEach((id) => viewer.entities.removeById(id));
+    };
+
     // ── Reapply fog-of-war when view or detections change ──────────────────
     const applyView = (units: Map<string, Unit>, view: ActiveView, detections: Detections) => {
       units.forEach((unit) => {
-        const visible = isVisible(unit, view, detections);
+        const visible = isVisible(unit, view, detections, defInfoRef.current);
         const e = viewer.entities.getById(unit.id);
         if (e) e.show = visible;
         const r = viewer.entities.getById(`${unit.id}_route`);
         if (r) r.show = visible;
+        Array.from(viewer.entities.values)
+          .filter((entity) => String(entity.id).startsWith(`${unit.id}_route_seg_`))
+          .forEach((entity) => { entity.show = visible; });
         const d = viewer.entities.getById(`${unit.id}_dest`);
         if (d) d.show = visible;
+        Array.from(viewer.entities.values)
+          .filter((entity) => String(entity.id).startsWith(`${unit.id}_wp_`))
+          .forEach((entity) => { entity.show = visible; });
         const rng = viewer.entities.getById(`${unit.id}_range`);
         if (rng) rng.show = visible;
         const sen = viewer.entities.getById(`${unit.id}_sensor`);
         if (sen) sen.show = visible;
       });
-    };
-
-    // ── Update cursor based on selection ──────────────────────────────────
-    const updateCursor = (
-      units: Map<string, Unit>,
-      selectedId: string | null,
-      view: ActiveView,
-    ) => {
-      if (!containerRef.current) return;
-      const unit = selectedId ? units.get(selectedId) : null;
-      const moveable = unit ? canMove(unit, view) : false;
-      containerRef.current.style.cursor = moveable ? "crosshair" : "default";
     };
 
     // ── Load definition info, then initial render ──────────────────────────
@@ -514,6 +830,9 @@ export default function CesiumGlobe() {
             generalType:    Number(r["general_type"]),
             detectionRangeM: Number(r["detection_range_m"]) || 0,
             shortName,
+            teamCode: Array.isArray(r["employed_by"]) && r["employed_by"].length > 0
+              ? String(r["employed_by"][0]).trim().toUpperCase()
+              : String(r["nation_of_origin"] ?? "").trim().toUpperCase(),
           };
         });
         defInfoRef.current = map;
@@ -524,10 +843,12 @@ export default function CesiumGlobe() {
 
     // Initial render with whatever is already in the store.
     const { units: initUnits, activeView: initView, selectedUnitId: initSel,
-            detections: initDet, munitions: initMun,
+            detections: initDet, detectionContacts: initContactMeta, munitions: initMun, explosions: initExplosions,
             munitionDetections: initMunDet } = useSimStore.getState();
     syncUnits(initUnits, initView, initSel, initDet);
+    syncTrackLinks(initUnits, initSel, initView, initDet, initContactMeta);
     syncMunitions(initMun, initView, initMunDet);
+    syncExplosions(initExplosions);
 
     // ── Store subscriptions (imperatively driven, no React re-renders) ─────
     const unsub = useSimStore.subscribe((state, prev) => {
@@ -535,36 +856,52 @@ export default function CesiumGlobe() {
       const viewChanged            = state.activeView         !== prev.activeView;
       const selectionChanged       = state.selectedUnitId     !== prev.selectedUnitId;
       const detectionsChanged      = state.detections         !== prev.detections;
+      const detectionMetaChanged   = state.detectionContacts  !== prev.detectionContacts;
+      const relationshipsChanged   = state.relationships      !== prev.relationships;
       const munitionsChanged       = state.munitions          !== prev.munitions;
+      const explosionsChanged      = state.explosions         !== prev.explosions;
       const munitionDetectChanged  = state.munitionDetections !== prev.munitionDetections;
 
       if (unitsChanged) {
         syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
+        syncTrackLinks(state.units, state.selectedUnitId, state.activeView, state.detections, state.detectionContacts);
+        syncExplosions(state.explosions);
         return; // syncUnits covers everything
       }
       if (viewChanged) {
         // View change affects all units and munitions — full passes required.
         syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
+        syncTrackLinks(state.units, state.selectedUnitId, state.activeView, state.detections, state.detectionContacts);
         syncMunitions(state.munitions, state.activeView, state.munitionDetections);
         return;
       }
-      if (detectionsChanged) {
+      if (relationshipsChanged) {
+        syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
+        syncTrackLinks(state.units, state.selectedUnitId, state.activeView, state.detections, state.detectionContacts);
+        return;
+      }
+      if (detectionsChanged || detectionMetaChanged) {
         // Sensor tick fires every real second. Instead of a full syncUnits pass
         // over all units, only re-sync units whose visibility or track-status
         // actually changed. At 100+ units this avoids rebuilding every entity.
         state.units.forEach((unit) => {
-          const wasVisible = isVisible(unit, state.activeView, prev.detections);
-          const nowVisible = isVisible(unit, state.activeView, state.detections);
-          const wasTrack   = isTrack(unit, prev.activeView);
-          const nowTrack   = isTrack(unit, state.activeView);
+          const wasVisible = isVisible(unit, state.activeView, prev.detections, defInfoRef.current);
+          const nowVisible = isVisible(unit, state.activeView, state.detections, defInfoRef.current);
+          const wasTrack   = isTrack(unit, prev.activeView, defInfoRef.current);
+          const nowTrack   = isTrack(unit, state.activeView, defInfoRef.current);
           if (wasVisible !== nowVisible || wasTrack !== nowTrack) {
             syncUnit(unit, state.activeView, state.selectedUnitId, state.detections);
           }
         });
+        syncTrackLinks(state.units, state.selectedUnitId, state.activeView, state.detections, state.detectionContacts);
         return;
       }
       if (munitionsChanged) {
         syncMunitions(state.munitions, state.activeView, state.munitionDetections);
+        return;
+      }
+      if (explosionsChanged) {
+        syncExplosions(state.explosions);
         return;
       }
       if (munitionDetectChanged) {
@@ -584,12 +921,17 @@ export default function CesiumGlobe() {
           const unit = state.units.get(id);
           if (unit) syncUnit(unit, state.activeView, state.selectedUnitId, state.detections);
         });
-        updateCursor(state.units, state.selectedUnitId, state.activeView);
+        syncTrackLinks(state.units, state.selectedUnitId, state.activeView, state.detections, state.detectionContacts);
+        updateMapCursor(containerRef.current, state.mapCommandMode, state.units, state.selectedUnitId, state.activeView, defInfoRef.current);
       }
     });
 
     return () => {
       unsub();
+      if (borderDataSourceRef.current) {
+        viewer.dataSources.remove(borderDataSourceRef.current, true);
+        borderDataSourceRef.current = null;
+      }
       if (!viewer.isDestroyed()) viewer.destroy();
       viewerRef.current = null;
     };
@@ -598,7 +940,11 @@ export default function CesiumGlobe() {
   return (
     <div
       ref={containerRef}
-      style={{ position: "absolute", inset: 0 }}
+      style={{
+        position: "absolute",
+        inset: 0,
+        cursor: mapCommandMode.type === "target_pick" ? "crosshair" : mapCommandMode.type === "route" ? "copy" : "default",
+      }}
     />
   );
 }

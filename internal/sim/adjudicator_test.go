@@ -21,6 +21,12 @@ func makeUnit(id, side, defID string, lat, lon float64) *enginev1.Unit {
 	}
 }
 
+func makeChildUnit(id, side, defID, parentID string, lat, lon float64) *enginev1.Unit {
+	u := makeUnit(id, side, defID, lat, lon)
+	u.ParentUnitId = parentID
+	return u
+}
+
 func makeDef(detectionRangeM, baseStrength float64) DefStats {
 	return DefStats{
 		CruiseSpeedMps:  10,
@@ -42,6 +48,12 @@ const alwaysMiss = constRng(1.0)
 func makeWeaponCatalog(id string, rangeM, prob float64, domains ...enginev1.UnitDomain) map[string]WeaponStats {
 	return map[string]WeaponStats{
 		id: {RangeM: rangeM, ProbabilityOfHit: prob, DomainTargets: domains},
+	}
+}
+
+func makeWeaponCatalogWithEffect(id string, rangeM, prob float64, effectType enginev1.WeaponEffectType, domains ...enginev1.UnitDomain) map[string]WeaponStats {
+	return map[string]WeaponStats{
+		id: {RangeM: rangeM, ProbabilityOfHit: prob, DomainTargets: domains, EffectType: effectType},
 	}
 }
 
@@ -68,6 +80,7 @@ func repeatInFlight(targetID string, hitProbability float64, count int) []*InFli
 func munitionFromShot(shot FiredShot) *InFlightMunition {
 	return &InFlightMunition{
 		ID:             NextMunitionID(),
+		WeaponID:       shot.WeaponID,
 		ShooterID:      shot.Shooter.Id,
 		TargetID:       shot.Target.Id,
 		HitProbability: shot.HitProbability,
@@ -203,7 +216,7 @@ func TestAdjudicateTick_FriendlyFire_NoShots(t *testing.T) {
 	addWeapons(a, "gun", 5)
 	addWeapons(b, "gun", 5)
 	defs := map[string]DefStats{
-		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000},
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
@@ -218,7 +231,7 @@ func TestAdjudicateTick_OutOfRange_NoShots(t *testing.T) {
 	b := makeUnit("b", "Red", "def", 0, 1.8) // ~200 km at equator
 	addWeapons(a, "gun", 5)
 	defs := map[string]DefStats{
-		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000},
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
@@ -233,7 +246,7 @@ func TestAdjudicateTick_InRange_ShotFired(t *testing.T) {
 	b := makeUnit("b", "Red", "def-b", 0, 0.01) // ~1.1 km
 	addWeapons(a, "gun", 5)
 	defs := map[string]DefStats{
-		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000},
 		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
@@ -255,7 +268,7 @@ func TestAdjudicateTick_ShotHasHitProbability(t *testing.T) {
 	b := makeUnit("b", "Red", "def-b", 0, 0.01)
 	addWeapons(a, "gun", 5)
 	defs := map[string]DefStats{
-		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000},
 		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
@@ -274,7 +287,7 @@ func TestAdjudicateTick_AmmoDecremented(t *testing.T) {
 	b := makeUnit("b", "Red", "def-b", 0, 0.01)
 	addWeapons(a, "gun", 5)
 	defs := map[string]DefStats{
-		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000},
 		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
@@ -324,7 +337,7 @@ func TestAdjudicateTick_BothInRange_BothShoot(t *testing.T) {
 	addWeapons(a, "gun", 5)
 	addWeapons(b, "gun", 5)
 	defs := map[string]DefStats{
-		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000},
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
@@ -342,7 +355,7 @@ func TestAdjudicateTick_EachUnitFiresOnce(t *testing.T) {
 	r3 := makeUnit("r3", "Red", "short", 0, 0.03)
 	addWeapons(blue, "missile", 10)
 	defs := map[string]DefStats{
-		"long":  {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"long":  {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 500_000},
 		"short": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
 	}
 	catalog := makeWeaponCatalog("missile", 500_000, 0.9, enginev1.UnitDomain_DOMAIN_AIR)
@@ -365,7 +378,7 @@ func TestAdjudicateTick_DestroyedUnit_NoShots(t *testing.T) {
 	b := makeUnit("b", "Red", "def", 0, 0)
 	addWeapons(b, "gun", 5)
 	defs := map[string]DefStats{
-		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000},
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
@@ -401,7 +414,7 @@ func TestAdjudicateTick_LowPkillInsideEnemySensors_Fires(t *testing.T) {
 	b := makeUnit("b", "Red", "def-b", 0, 0.01)
 	addWeapons(a, "missile", 5)
 	defs := map[string]DefStats{
-		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 0},
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 50_000},
 		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 5_000},
 	}
 	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
@@ -423,7 +436,7 @@ func TestAdjudicateTick_EnemySensorRangeUsesTargetRCS(t *testing.T) {
 	b := makeUnit("b", "Red", "def-b", 0, 0.036) // ~4 km
 	addWeapons(a, "gun", 5)
 	defs := map[string]DefStats{
-		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 0.01},
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 50_000, RadarCrossSectionM2: 0.01},
 		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 10_000},
 	}
 	catalog := makeWeaponCatalog("gun", 10_000, 0.2, enginev1.UnitDomain_DOMAIN_AIR)
@@ -433,7 +446,7 @@ func TestAdjudicateTick_EnemySensorRangeUsesTargetRCS(t *testing.T) {
 		t.Fatalf("expected no shot when stealth target stays outside adjusted sensor range, got %d", len(adj.Shots))
 	}
 
-	defs["def-a"] = DefStats{Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 16}
+	defs["def-a"] = DefStats{Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 50_000, RadarCrossSectionM2: 16}
 	adj = AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected one shot when large-RCS target is inside adjusted sensor range, got %d", len(adj.Shots))
@@ -445,7 +458,7 @@ func TestAdjudicateTick_SalvoSizedToThreshold(t *testing.T) {
 	b := makeUnit("b", "Red", "def-b", 0, 0.01)
 	addWeapons(a, "missile", 10)
 	defs := map[string]DefStats{
-		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 50_000},
 		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
 	}
 	catalog := makeWeaponCatalog("missile", 50_000, 0.6, enginev1.UnitDomain_DOMAIN_AIR)
@@ -467,7 +480,7 @@ func TestAdjudicateTick_InFlightRoundsReduceNewSalvo(t *testing.T) {
 	b := makeUnit("b", "Red", "def-b", 0, 0.01)
 	addWeapons(a, "missile", 10)
 	defs := map[string]DefStats{
-		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 50_000},
 		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 5_000},
 	}
 	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
@@ -487,7 +500,7 @@ func TestAdjudicateTick_EnoughInFlight_NoAdditionalShot(t *testing.T) {
 	b := makeUnit("b", "Red", "def-b", 0, 0.01)
 	addWeapons(a, "missile", 10)
 	defs := map[string]DefStats{
-		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"def-a": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 50_000},
 		"def-b": {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 5_000},
 	}
 	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
@@ -502,12 +515,194 @@ func TestAdjudicateTick_EnoughInFlight_NoAdditionalShot(t *testing.T) {
 	}
 }
 
+func TestAdjudicateTick_ConnectedSensorAllowsLauncherToFire(t *testing.T) {
+	parent := makeUnit("battery", "Blue", "command", 0, 0)
+	radar := makeChildUnit("radar", "Blue", "sensor", "battery", 0, 0)
+	launcher := makeChildUnit("launcher", "Blue", "launcher", "battery", 0, 0.02)
+	target := makeUnit("red", "Red", "target", 0, 0.03)
+	addWeapons(launcher, "sam", 4)
+	defs := map[string]DefStats{
+		"command":  {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"sensor":   {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000},
+		"launcher": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"target":   {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+	}
+	catalog := makeWeaponCatalog("sam", 50_000, 0.8, enginev1.UnitDomain_DOMAIN_AIR)
+
+	adj := AdjudicateTick([]*enginev1.Unit{parent, radar, launcher, target}, defs, catalog, nil)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected connected launcher to fire off shared track, got %d shots", len(adj.Shots))
+	}
+	if adj.Shots[0].Shooter.Id != launcher.Id {
+		t.Fatalf("expected launcher to fire, got shooter %s", adj.Shots[0].Shooter.Id)
+	}
+}
+
+func TestAdjudicateTick_UnconnectedLauncherCannotFireWithoutTrack(t *testing.T) {
+	radar := makeUnit("radar", "Blue", "sensor", 0, 0)
+	launcher := makeUnit("launcher", "Blue", "launcher", 0, 0.02)
+	target := makeUnit("red", "Red", "target", 0, 0.03)
+	addWeapons(launcher, "sam", 4)
+	defs := map[string]DefStats{
+		"sensor":   {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000},
+		"launcher": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"target":   {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+	}
+	catalog := makeWeaponCatalog("sam", 50_000, 0.8, enginev1.UnitDomain_DOMAIN_AIR)
+
+	adj := AdjudicateTick([]*enginev1.Unit{radar, launcher, target}, defs, catalog, nil)
+	if len(adj.Shots) != 0 {
+		t.Fatalf("expected unconnected launcher to hold fire without a shared track, got %d shots", len(adj.Shots))
+	}
+}
+
+func TestAdjudicateTick_AttackOrderOverridesAutonomousTargetChoice(t *testing.T) {
+	shooter := makeUnit("shooter", "Blue", "air", 0, 0)
+	nearTarget := makeUnit("near", "Red", "ground", 0, 0.05)
+	orderedTarget := makeUnit("ordered", "Red", "ground", 0, 0.2)
+	addWeapons(shooter, "strike", 6)
+	shooter.AttackOrder = &enginev1.AttackOrder{
+		OrderType:      enginev1.AttackOrderType_ATTACK_ORDER_TYPE_ATTACK_ASSIGNED_TARGET,
+		TargetUnitId:   orderedTarget.Id,
+		DesiredEffect:  enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY,
+		PkillThreshold: 0.7,
+	}
+	defs := map[string]DefStats{
+		"air":    {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 100_000, TargetClass: "aircraft"},
+		"ground": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 10_000, TargetClass: "soft_infrastructure"},
+	}
+	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.9, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, nearTarget, orderedTarget}, defs, catalog, nil)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected 1 ordered shot, got %d", len(adj.Shots))
+	}
+	if adj.Shots[0].Target.Id != orderedTarget.Id {
+		t.Fatalf("expected assigned target to be engaged, got %s", adj.Shots[0].Target.Id)
+	}
+}
+
+func TestAdjudicateTick_StrikeUntilEffect_HoldsOnceSatisfied(t *testing.T) {
+	shooter := makeUnit("shooter", "Blue", "air", 0, 0)
+	target := makeUnit("target", "Red", "airbase", 0, 0.1)
+	addWeapons(shooter, "strike", 6)
+	shooter.AttackOrder = &enginev1.AttackOrder{
+		OrderType:      enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT,
+		TargetUnitId:   target.Id,
+		DesiredEffect:  enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL,
+		PkillThreshold: 0.7,
+	}
+	target.DamageState = enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED
+	defs := map[string]DefStats{
+		"air":     {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 100_000, TargetClass: "aircraft"},
+		"airbase": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 10_000, TargetClass: "runway"},
+	}
+	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.9, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	if len(adj.Shots) != 0 {
+		t.Fatalf("expected no shots once desired effect is already met, got %d", len(adj.Shots))
+	}
+}
+
+func TestAdjudicateTick_HoldFire_PreventsAutonomousEngagement(t *testing.T) {
+	shooter := makeUnit("shooter", "Blue", "air", 0, 0)
+	target := makeUnit("target", "Red", "ground", 0, 0.05)
+	shooter.EngagementBehavior = enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_HOLD_FIRE
+	addWeapons(shooter, "strike", 6)
+	defs := map[string]DefStats{
+		"air":    {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 100_000, TargetClass: "aircraft"},
+		"ground": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 10_000, TargetClass: "soft_infrastructure"},
+	}
+	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.9, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	if len(adj.Shots) != 0 {
+		t.Fatalf("expected hold-fire unit not to engage autonomously, got %d shots", len(adj.Shots))
+	}
+}
+
+func TestAdjudicateTick_AssignedTargetsOnly_HoldsWithoutOrder(t *testing.T) {
+	shooter := makeUnit("shooter", "Blue", "air", 0, 0)
+	target := makeUnit("target", "Red", "ground", 0, 0.05)
+	shooter.EngagementBehavior = enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_ASSIGNED_TARGETS_ONLY
+	addWeapons(shooter, "strike", 6)
+	defs := map[string]DefStats{
+		"air":    {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 100_000, TargetClass: "aircraft"},
+		"ground": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 10_000, TargetClass: "soft_infrastructure"},
+	}
+	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.9, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	if len(adj.Shots) != 0 {
+		t.Fatalf("expected assigned-targets-only unit to hold without orders, got %d shots", len(adj.Shots))
+	}
+}
+
+func TestAdjudicateTick_SelfDefenseOnly_FiresWhenDetected(t *testing.T) {
+	shooter := makeUnit("shooter", "Blue", "air", 0, 0)
+	target := makeUnit("target", "Red", "ground", 0, 0.095)
+	shooter.EngagementBehavior = enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_SELF_DEFENSE_ONLY
+	addWeapons(shooter, "strike", 20)
+	defs := map[string]DefStats{
+		"air":    {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 20_000, TargetClass: "aircraft"},
+		"ground": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 12_000, TargetClass: "soft_infrastructure"},
+	}
+	catalog := makeWeaponCatalogWithEffect("strike", 20_000, 0.2, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected self-defense unit to fire when detected, got %d shots", len(adj.Shots))
+	}
+}
+
+func TestAdjudicateTick_AutoEngage_UsesConfiguredThreshold(t *testing.T) {
+	shooter := makeUnit("shooter", "Blue", "air", 0, 0)
+	target := makeUnit("target", "Red", "ground", 0, 0.05)
+	shooter.EngagementBehavior = enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_AUTO_ENGAGE
+	shooter.EngagementPkillThreshold = 0.8
+	addWeapons(shooter, "strike", 6)
+	defs := map[string]DefStats{
+		"air":    {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 100_000, TargetClass: "aircraft"},
+		"ground": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 1_000, TargetClass: "soft_infrastructure"},
+	}
+	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.6, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	if len(adj.Shots) != 0 {
+		t.Fatalf("expected high pkill threshold to suppress engagement, got %d shots", len(adj.Shots))
+	}
+}
+
+func TestAdjudicateTick_AssignedTargetsOnly_AllowsManualOrder(t *testing.T) {
+	shooter := makeUnit("shooter", "Blue", "air", 0, 0)
+	target := makeUnit("target", "Red", "ground", 0, 0.05)
+	shooter.EngagementBehavior = enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_ASSIGNED_TARGETS_ONLY
+	shooter.AttackOrder = &enginev1.AttackOrder{
+		OrderType:      enginev1.AttackOrderType_ATTACK_ORDER_TYPE_ATTACK_ASSIGNED_TARGET,
+		TargetUnitId:   target.Id,
+		DesiredEffect:  enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY,
+		PkillThreshold: 0.7,
+	}
+	addWeapons(shooter, "strike", 6)
+	defs := map[string]DefStats{
+		"air":    {Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 100_000, TargetClass: "aircraft"},
+		"ground": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 10_000, TargetClass: "soft_infrastructure"},
+	}
+	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.9, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
+
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected manual order to override assigned-targets-only hold, got %d shots", len(adj.Shots))
+	}
+}
+
 // ─── ResolveArrivals ──────────────────────────────────────────────────────────
 
-func TestResolveArrivals_EmptyArrived_NoKills(t *testing.T) {
-	kills := ResolveArrivals(nil, nil, alwaysHit)
-	if len(kills) != 0 {
-		t.Errorf("expected 0 kills with no arrived munitions, got %d", len(kills))
+func TestResolveArrivals_EmptyArrived_NoHits(t *testing.T) {
+	hits := ResolveArrivals(nil, nil, nil, nil, alwaysHit)
+	if len(hits) != 0 {
+		t.Errorf("expected 0 hits with no arrived munitions, got %d", len(hits))
 	}
 }
 
@@ -516,9 +711,9 @@ func TestResolveArrivals_AlwaysHit_Kill(t *testing.T) {
 	b := makeUnit("b", "Red", "def", 0, 0.01)
 	addWeapons(a, "gun", 5)
 	defs := map[string]DefStats{
-		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000, TargetClass: "armor"},
 	}
-	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+	catalog := makeWeaponCatalogWithEffect("gun", 50_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_ARMOR, enginev1.UnitDomain_DOMAIN_LAND)
 
 	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	if len(adj.Shots) != 1 {
@@ -526,12 +721,12 @@ func TestResolveArrivals_AlwaysHit_Kill(t *testing.T) {
 	}
 
 	arrived := []*InFlightMunition{munitionFromShot(adj.Shots[0])}
-	kills := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, alwaysHit)
-	if len(kills) != 1 {
-		t.Fatalf("expected 1 kill on arrival with alwaysHit, got %d", len(kills))
+	hits := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, defs, catalog, alwaysHit)
+	if len(hits) != 1 {
+		t.Fatalf("expected 1 hit on arrival with alwaysHit, got %d", len(hits))
 	}
-	if kills[0].Victim.Id != "b" {
-		t.Errorf("expected victim b, got %s", kills[0].Victim.Id)
+	if hits[0].Victim.Id != "b" {
+		t.Errorf("expected victim b, got %s", hits[0].Victim.Id)
 	}
 	if !unitIsActive(a) {
 		t.Error("attacker a should still be active")
@@ -546,15 +741,15 @@ func TestResolveArrivals_AlwaysMiss_NoKill(t *testing.T) {
 	b := makeUnit("b", "Red", "def", 0, 0.01)
 	addWeapons(a, "gun", 5)
 	defs := map[string]DefStats{
-		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000, TargetClass: "armor"},
 	}
-	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+	catalog := makeWeaponCatalogWithEffect("gun", 50_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_ARMOR, enginev1.UnitDomain_DOMAIN_LAND)
 
 	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	arrived := []*InFlightMunition{munitionFromShot(adj.Shots[0])}
-	kills := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, alwaysMiss)
-	if len(kills) != 0 {
-		t.Errorf("expected 0 kills on miss, got %d", len(kills))
+	hits := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, defs, catalog, alwaysMiss)
+	if len(hits) != 0 {
+		t.Errorf("expected 0 hits on miss, got %d", len(hits))
 	}
 	if !unitIsActive(b) {
 		t.Error("b should still be active after miss")
@@ -567,11 +762,13 @@ func TestResolveArrivals_DeadTarget_Skipped(t *testing.T) {
 	killUnit(b) // already destroyed before munition arrives
 
 	mun := &InFlightMunition{
-		ID: NextMunitionID(), ShooterID: a.Id, TargetID: b.Id, HitProbability: 1.0,
+		ID: NextMunitionID(), WeaponID: "gun", ShooterID: a.Id, TargetID: b.Id, HitProbability: 1.0,
 	}
-	kills := ResolveArrivals([]*InFlightMunition{mun}, []*enginev1.Unit{a, b}, alwaysHit)
-	if len(kills) != 0 {
-		t.Errorf("already-dead target should not generate a kill, got %d", len(kills))
+	hits := ResolveArrivals([]*InFlightMunition{mun}, []*enginev1.Unit{a, b}, map[string]DefStats{
+		"def": {TargetClass: "armor"},
+	}, makeWeaponCatalogWithEffect("gun", 50_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_ARMOR, enginev1.UnitDomain_DOMAIN_LAND), alwaysHit)
+	if len(hits) != 0 {
+		t.Errorf("already-dead target should not generate a hit, got %d", len(hits))
 	}
 }
 
@@ -580,18 +777,18 @@ func TestResolveArrivals_AttackerLookup(t *testing.T) {
 	b := makeUnit("b", "Red", "def", 0, 0.01)
 	addWeapons(a, "gun", 5)
 	defs := map[string]DefStats{
-		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000, TargetClass: "armor"},
 	}
-	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+	catalog := makeWeaponCatalogWithEffect("gun", 50_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_ARMOR, enginev1.UnitDomain_DOMAIN_LAND)
 
 	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	arrived := []*InFlightMunition{munitionFromShot(adj.Shots[0])}
-	kills := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, alwaysHit)
-	if len(kills) != 1 {
-		t.Fatalf("expected 1 kill, got %d", len(kills))
+	hits := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, defs, catalog, alwaysHit)
+	if len(hits) != 1 {
+		t.Fatalf("expected 1 hit, got %d", len(hits))
 	}
-	if kills[0].Attacker == nil || kills[0].Attacker.Id != "a" {
-		t.Errorf("expected attacker a, got %v", kills[0].Attacker)
+	if hits[0].Attacker == nil || hits[0].Attacker.Id != "a" {
+		t.Errorf("expected attacker a, got %v", hits[0].Attacker)
 	}
 }
 
@@ -602,18 +799,67 @@ func TestResolveArrivals_MultipleMunitions(t *testing.T) {
 	addWeapons(a, "gun", 5)
 	addWeapons(b, "gun", 5)
 	defs := map[string]DefStats{
-		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"def": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 50_000, TargetClass: "armor"},
 	}
-	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
+	catalog := makeWeaponCatalogWithEffect("gun", 50_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_ARMOR, enginev1.UnitDomain_DOMAIN_LAND)
 
 	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
 	var arrived []*InFlightMunition
 	for _, s := range adj.Shots {
 		arrived = append(arrived, munitionFromShot(s))
 	}
-	kills := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, alwaysHit)
-	if len(kills) != 2 {
-		t.Errorf("expected 2 kills (both die), got %d", len(kills))
+	hits := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, defs, catalog, alwaysHit)
+	if len(hits) != 2 {
+		t.Errorf("expected 2 hits (both die), got %d", len(hits))
+	}
+}
+
+func TestResolveArrivals_LandStrikeAgainstRunway_MissionKill(t *testing.T) {
+	attacker := makeUnit("a", "Blue", "shooter", 0, 0)
+	target := makeUnit("b", "Red", "airbase", 0, 0.01)
+	defs := map[string]DefStats{
+		"shooter": {Domain: enginev1.UnitDomain_DOMAIN_AIR, TargetClass: "aircraft"},
+		"airbase": {Domain: enginev1.UnitDomain_DOMAIN_LAND, TargetClass: "runway"},
+	}
+	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
+
+	hits := ResolveArrivals([]*InFlightMunition{{
+		ID:             NextMunitionID(),
+		WeaponID:       "strike",
+		ShooterID:      attacker.Id,
+		TargetID:       target.Id,
+		HitProbability: 1.0,
+	}}, []*enginev1.Unit{attacker, target}, defs, catalog, alwaysHit)
+
+	if len(hits) != 1 {
+		t.Fatalf("expected 1 hit, got %d", len(hits))
+	}
+	if target.DamageState != enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED {
+		t.Fatalf("expected runway target to be mission-killed, got %v", target.DamageState)
+	}
+	if !unitIsActive(target) {
+		t.Fatal("runway target should remain present after mission kill")
+	}
+}
+
+func TestResolveArrivals_AntiShipSecondHit_DestroysTarget(t *testing.T) {
+	attacker := makeUnit("a", "Blue", "ship", 0, 0)
+	target := makeUnit("b", "Red", "ship", 0, 0.01)
+	defs := map[string]DefStats{
+		"ship": {Domain: enginev1.UnitDomain_DOMAIN_SEA, TargetClass: "surface_warship"},
+	}
+	catalog := makeWeaponCatalogWithEffect("asm", 100_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_SHIP, enginev1.UnitDomain_DOMAIN_SEA)
+	arrived := []*InFlightMunition{
+		{ID: NextMunitionID(), WeaponID: "asm", ShooterID: attacker.Id, TargetID: target.Id, HitProbability: 1.0},
+		{ID: NextMunitionID(), WeaponID: "asm", ShooterID: attacker.Id, TargetID: target.Id, HitProbability: 1.0},
+	}
+
+	hits := ResolveArrivals(arrived, []*enginev1.Unit{attacker, target}, defs, catalog, alwaysHit)
+	if len(hits) != 2 {
+		t.Fatalf("expected 2 hits, got %d", len(hits))
+	}
+	if unitIsActive(target) {
+		t.Fatal("expected second anti-ship hit to destroy target")
 	}
 }
 

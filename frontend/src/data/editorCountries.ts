@@ -1,0 +1,61 @@
+export interface EditorCountryOption {
+  code: string;
+  name: string;
+}
+
+// Based on SIPRI's April 2025 release for 2024 military spending leaders,
+// plus a small set of major conflict-zone states.
+export const EDITOR_COUNTRIES: EditorCountryOption[] = [
+  { code: "USA", name: "United States" },
+  { code: "CHN", name: "China" },
+  { code: "RUS", name: "Russia" },
+  { code: "DEU", name: "Germany" },
+  { code: "IND", name: "India" },
+  { code: "GBR", name: "United Kingdom" },
+  { code: "SAU", name: "Saudi Arabia" },
+  { code: "UKR", name: "Ukraine" },
+  { code: "FRA", name: "France" },
+  { code: "JPN", name: "Japan" },
+  { code: "KOR", name: "South Korea" },
+  { code: "ISR", name: "Israel" },
+  { code: "POL", name: "Poland" },
+  { code: "ITA", name: "Italy" },
+  { code: "AUS", name: "Australia" },
+  { code: "CAN", name: "Canada" },
+  { code: "TUR", name: "Turkey" },
+  { code: "ESP", name: "Spain" },
+  { code: "NLD", name: "Netherlands" },
+  { code: "QAT", name: "Qatar" },
+  { code: "BRA", name: "Brazil" },
+  { code: "DZA", name: "Algeria" },
+  { code: "TWN", name: "Taiwan" },
+  { code: "SGP", name: "Singapore" },
+  { code: "SWE", name: "Sweden" },
+  { code: "COL", name: "Colombia" },
+  { code: "CHE", name: "Switzerland" },
+  { code: "NOR", name: "Norway" },
+  { code: "IRQ", name: "Iraq" },
+  { code: "DNK", name: "Denmark" },
+  { code: "KWT", name: "Kuwait" },
+  { code: "GRC", name: "Greece" },
+  { code: "IRN", name: "Iran" },
+  { code: "FIN", name: "Finland" },
+  { code: "BEL", name: "Belgium" },
+  { code: "ARE", name: "United Arab Emirates" },
+  { code: "PRT", name: "Portugal" },
+  { code: "IDN", name: "Indonesia" },
+  { code: "CZE", name: "Czechia" },
+  { code: "CHL", name: "Chile" },
+  { code: "PRK", name: "North Korea" },
+  { code: "EGY", name: "Egypt" },
+  { code: "PAK", name: "Pakistan" },
+  { code: "AZE", name: "Azerbaijan" },
+  { code: "ARM", name: "Armenia" },
+  { code: "SYR", name: "Syria" },
+  { code: "JOR", name: "Jordan" },
+  { code: "MMR", name: "Myanmar" },
+];
+
+export const EDITOR_COUNTRY_NAME_BY_CODE = Object.fromEntries(
+  EDITOR_COUNTRIES.map((country) => [country.code, country.name]),
+) as Record<string, string>;
