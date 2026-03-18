@@ -100,11 +100,20 @@ export interface CountryRelationship {
   airspaceTransitAllowed: boolean;
   airspaceStrikeAllowed: boolean;
   defensivePositioningAllowed: boolean;
+  maritimeTransitAllowed: boolean;
+  maritimeStrikeAllowed: boolean;
 }
 
 export interface MapCommandMode {
   type: "none" | "route" | "target_pick";
   unitId: string | null;
+}
+
+export interface PathViolationPreview {
+  blocked: boolean;
+  country?: string;
+  legIndex?: number;
+  reason?: string;
 }
 
 export interface Unit {
@@ -179,6 +188,8 @@ export interface SimStore {
   // ── Selection ────────────────────────────────────────────────────────────
   selectedUnitId: string | null;
   mapCommandMode: MapCommandMode;
+  selectedRoutePreview: PathViolationPreview | null;
+  selectedStrikePreview: PathViolationPreview | null;
 
   // ── Event log ────────────────────────────────────────────────────────────
   // Capped at 200 entries; oldest dropped when full.
@@ -202,6 +213,8 @@ export interface SimStore {
   startRouteEdit: (id: string | null) => void;
   startTargetPick: (id: string | null) => void;
   clearMapCommandMode: () => void;
+  setSelectedRoutePreview: (preview: PathViolationPreview | null) => void;
+  setSelectedStrikePreview: (preview: PathViolationPreview | null) => void;
   setActiveView: (view: string) => void;
   setDetections: (side: string, ids: string[], contacts?: DetectionContact[]) => void;
 }
@@ -234,6 +247,8 @@ export const useSimStore = create<SimStore>((set) => ({
   detectionContacts: new Map(),
   selectedUnitId: null,
   mapCommandMode: { type: "none", unitId: null },
+  selectedRoutePreview: null,
+  selectedStrikePreview: null,
   eventLog: [],
 
   loadSnapshot: (units, scenarioName, weaponDefs, relationships) =>
@@ -249,6 +264,8 @@ export const useSimStore = create<SimStore>((set) => ({
       units: new Map(units.map((u) => [u.id, u])),
       selectedUnitId: null,
       mapCommandMode: { type: "none", unitId: null },
+      selectedRoutePreview: null,
+      selectedStrikePreview: null,
       munitions: new Map(),
       explosions: new Map(),
       detections: new Map(),
@@ -313,6 +330,8 @@ export const useSimStore = create<SimStore>((set) => ({
   startRouteEdit: (unitId) => set({ mapCommandMode: unitId ? { type: "route", unitId } : { type: "none", unitId: null } }),
   startTargetPick: (unitId) => set({ mapCommandMode: unitId ? { type: "target_pick", unitId } : { type: "none", unitId: null } }),
   clearMapCommandMode: () => set({ mapCommandMode: { type: "none", unitId: null } }),
+  setSelectedRoutePreview: (selectedRoutePreview) => set({ selectedRoutePreview }),
+  setSelectedStrikePreview: (selectedStrikePreview) => set({ selectedStrikePreview }),
   setActiveView: (activeView) => set({ activeView }),
 
   setDetections: (side, ids, contacts = []) =>

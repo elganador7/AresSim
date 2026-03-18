@@ -90,6 +90,8 @@ export interface CountryRelationshipDraft {
   airspaceTransitAllowed: boolean;
   airspaceStrikeAllowed: boolean;
   defensivePositioningAllowed: boolean;
+  maritimeTransitAllowed: boolean;
+  maritimeStrikeAllowed: boolean;
 }
 
 export interface PendingDrop {

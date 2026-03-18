@@ -38,7 +38,7 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 import { useEditorStore, type UnitDraft } from "../../store/editorStore";
 import type { DragPayload } from "./UnitPalette";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
-import { THEATER_BORDERS_GEOJSON } from "../../data/theaterBorders";
+import { loadTheaterOverlays, removeTheaterOverlays } from "../cesium/overlays";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -81,6 +81,7 @@ export default function EditorGlobe({
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const borderDataSourceRef = useRef<GeoJsonDataSource | null>(null);
+  const maritimeDataSourceRef = useRef<GeoJsonDataSource | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
   // Stable callback refs — updated every render, no need to remount Cesium
@@ -115,27 +116,10 @@ export default function EditorGlobe({
     });
     viewerRef.current = viewer;
 
-    GeoJsonDataSource.load(THEATER_BORDERS_GEOJSON as never, {
-      stroke: Color.fromCssColorString("#9eb0c2"),
-      fill: Color.fromCssColorString("#000000").withAlpha(0.01),
-      strokeWidth: 1.2,
-      clampToGround: true,
-    })
-      .then((dataSource) => {
-        borderDataSourceRef.current = dataSource;
-        viewer.dataSources.add(dataSource);
-        dataSource.entities.values.forEach((entity) => {
-          if (entity.polygon) {
-            entity.polygon.fill = new ConstantProperty(false);
-            entity.polygon.outline = new ConstantProperty(true);
-            entity.polygon.outlineColor = new ConstantProperty(Color.fromCssColorString("#90a3b8").withAlpha(0.5));
-            entity.polygon.outlineWidth = new ConstantProperty(1.1);
-          }
-          if (entity.polyline) {
-            entity.polyline.material = new ColorMaterialProperty(Color.fromCssColorString("#90a3b8").withAlpha(0.55));
-            entity.polyline.width = new ConstantProperty(1.1);
-          }
-        });
+    loadTheaterOverlays(viewer)
+      .then(({ borderDataSource, maritimeDataSource }) => {
+        borderDataSourceRef.current = borderDataSource;
+        maritimeDataSourceRef.current = maritimeDataSource;
       })
       .catch(console.error);
 
@@ -209,10 +193,12 @@ export default function EditorGlobe({
       container.removeEventListener("dragenter", handleDragEnter);
       container.removeEventListener("dragleave", handleDragLeave);
       container.removeEventListener("drop", handleDrop);
-      if (borderDataSourceRef.current) {
-        viewer.dataSources.remove(borderDataSourceRef.current, true);
-        borderDataSourceRef.current = null;
-      }
+      removeTheaterOverlays(viewer, {
+        borderDataSource: borderDataSourceRef.current,
+        maritimeDataSource: maritimeDataSourceRef.current,
+      });
+      borderDataSourceRef.current = null;
+      maritimeDataSourceRef.current = null;
       viewer.destroy();
       viewerRef.current = null;
     };

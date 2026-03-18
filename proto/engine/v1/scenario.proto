@@ -12,6 +12,8 @@ message CountryRelationship {
   bool airspace_transit_allowed = 4;
   bool airspace_strike_allowed = 5;
   bool defensive_positioning_allowed = 6;
+  bool maritime_transit_allowed = 7;
+  bool maritime_strike_allowed = 8;
 }
 
 message Scenario {

@@ -26,6 +26,20 @@ export function MoveUnit(arg1:string,arg2:number,arg3:number):Promise<main.Bridg
 
 export function PauseSim(arg1:boolean):Promise<main.BridgeResult>;
 
+export function PreviewCurrentRelationships():Promise<Array<main.EffectiveRelationshipPreview>>;
+
+export function PreviewCurrentStrikePath(arg1:string):Promise<main.PathViolationPreview>;
+
+export function PreviewCurrentTransitPath(arg1:string):Promise<main.PathViolationPreview>;
+
+export function PreviewDraftPlacement(arg1:string,arg2:boolean,arg3:string,arg4:string,arg5:string,arg6:number,arg7:number):Promise<main.PathViolationPreview>;
+
+export function PreviewDraftRelationships(arg1:string,arg2:string,arg3:string):Promise<Array<main.EffectiveRelationshipPreview>>;
+
+export function PreviewDraftStrikePath(arg1:string,arg2:boolean,arg3:string,arg4:string,arg5:string):Promise<main.PathViolationPreview>;
+
+export function PreviewDraftTransitPath(arg1:string,arg2:boolean,arg3:string,arg4:string,arg5:string):Promise<main.PathViolationPreview>;
+
 export function RemoveMoveWaypoint(arg1:string,arg2:number):Promise<main.BridgeResult>;
 
 export function RequestSync():Promise<main.BridgeResult>;
@@ -34,7 +48,7 @@ export function SaveScenario(arg1:string):Promise<main.BridgeResult>;
 
 export function SaveUnitDefinition(arg1:string):Promise<main.BridgeResult>;
 
-export function SetCountryRelationship(arg1:string,arg2:string,arg3:boolean,arg4:boolean,arg5:boolean,arg6:boolean):Promise<main.BridgeResult>;
+export function SetCountryRelationship(arg1:string,arg2:string,arg3:boolean,arg4:boolean,arg5:boolean,arg6:boolean,arg7:boolean,arg8:boolean):Promise<main.BridgeResult>;
 
 export function SetIntelSharing(arg1:string,arg2:string,arg3:boolean):Promise<main.BridgeResult>;
 

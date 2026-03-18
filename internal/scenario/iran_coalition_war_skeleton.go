@@ -33,6 +33,7 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 				CloudCeilingM: 6000,
 			},
 		},
+		Relationships: iranWarDayOneRelationships(),
 		Units: []*enginev1.Unit{
 			// Israel: homeland air defense, long-range strike, ISR, and maritime screen.
 			scenarioUnit("isr-f35i-nevatim", "Adir 101", "F-35I Adir 101st Squadron", "Blue", "f35i-adir", 31.21, 35.01, 0, 270, 0),
@@ -83,6 +84,37 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			scenarioUnit("irn-jamaran-bushehr", "Jamaran", "Jamaran Frigate - Bushehr Patrol", "Red", "jamaran-frigate", 28.75, 50.55, 0, 140, 10),
 			scenarioUnit("irn-ghadir-sub", "Ghadir Sub", "Ghadir Midget Submarine - Strait Ambush Line", "Red", "ghadir-midget-submarine", 26.45, 56.30, -20, 90, 4),
 		},
+	}
+}
+
+func iranWarDayOneRelationships() []*enginev1.CountryRelationship {
+	return []*enginev1.CountryRelationship{
+		relationship("USA", "ISR", true, true, true, true, true, true),
+		relationship("ISR", "USA", true, true, true, true, true, true),
+
+		// Day-one Gulf posture: host countries support transit and defensive
+		// presence for U.S. forces, but do not openly grant strike access.
+		relationship("USA", "BHR", false, true, false, true, true, false),
+		relationship("BHR", "USA", false, true, false, true, true, false),
+		relationship("USA", "QAT", false, true, false, true, true, false),
+		relationship("QAT", "USA", false, true, false, true, true, false),
+		relationship("USA", "ARE", false, true, false, true, true, false),
+		relationship("ARE", "USA", false, true, false, true, true, false),
+		relationship("USA", "SAU", false, true, false, true, true, false),
+		relationship("SAU", "USA", false, true, false, true, true, false),
+	}
+}
+
+func relationship(from, to string, shareIntel, transit, strike, defensive, maritimeTransit, maritimeStrike bool) *enginev1.CountryRelationship {
+	return &enginev1.CountryRelationship{
+		FromCountry:                 from,
+		ToCountry:                   to,
+		ShareIntel:                  shareIntel,
+		AirspaceTransitAllowed:      transit,
+		AirspaceStrikeAllowed:       strike,
+		DefensivePositioningAllowed: defensive,
+		MaritimeTransitAllowed:      maritimeTransit,
+		MaritimeStrikeAllowed:       maritimeStrike,
 	}
 }
 

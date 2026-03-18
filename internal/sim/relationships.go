@@ -11,6 +11,8 @@ type CountryRelationshipRule struct {
 	AirspaceTransitAllowed     bool
 	AirspaceStrikeAllowed      bool
 	DefensivePositioningAllowed bool
+	MaritimeTransitAllowed     bool
+	MaritimeStrikeAllowed      bool
 }
 
 type RelationshipRules map[string]map[string]CountryRelationshipRule
@@ -19,6 +21,24 @@ type DetectionContactInfo struct {
 	UnitID     string
 	SourceTeam string
 	Shared     bool
+}
+
+func BuildCountryCoalitions(units []*enginev1.Unit) map[string]string {
+	coalitions := make(map[string]string)
+	for _, unit := range units {
+		if unit == nil {
+			continue
+		}
+		country := CountryDisplayCode(unit.GetTeamId())
+		coalition := strings.TrimSpace(strings.ToUpper(unit.GetCoalitionId()))
+		if country == "" || coalition == "" {
+			continue
+		}
+		if _, exists := coalitions[country]; !exists {
+			coalitions[country] = coalition
+		}
+	}
+	return coalitions
 }
 
 func BuildRelationshipRules(relationships []*enginev1.CountryRelationship) RelationshipRules {
@@ -40,6 +60,8 @@ func BuildRelationshipRules(relationships []*enginev1.CountryRelationship) Relat
 			AirspaceTransitAllowed:      rel.GetAirspaceTransitAllowed(),
 			AirspaceStrikeAllowed:       rel.GetAirspaceStrikeAllowed(),
 			DefensivePositioningAllowed: rel.GetDefensivePositioningAllowed(),
+			MaritimeTransitAllowed:      rel.GetMaritimeTransitAllowed(),
+			MaritimeStrikeAllowed:       rel.GetMaritimeStrikeAllowed(),
 		}
 	}
 	return rules
@@ -132,6 +154,10 @@ func BuildDetectionContacts(base DetectionSet, rules RelationshipRules) map[stri
 }
 
 func GetRelationshipRule(rules RelationshipRules, from, to string) CountryRelationshipRule {
+	return GetRelationshipRuleWithCoalitions(rules, nil, from, to)
+}
+
+func GetRelationshipRuleWithCoalitions(rules RelationshipRules, countryCoalitions map[string]string, from, to string) CountryRelationshipRule {
 	from = strings.TrimSpace(strings.ToUpper(from))
 	to = strings.TrimSpace(strings.ToUpper(to))
 	if from == "" || to == "" || from == to {
@@ -140,11 +166,27 @@ func GetRelationshipRule(rules RelationshipRules, from, to string) CountryRelati
 			AirspaceTransitAllowed:      true,
 			AirspaceStrikeAllowed:       true,
 			DefensivePositioningAllowed: true,
+			MaritimeTransitAllowed:      true,
+			MaritimeStrikeAllowed:       true,
 		}
 	}
 	if recipients, ok := rules[from]; ok {
 		if rule, ok := recipients[to]; ok {
 			return rule
+		}
+	}
+	if countryCoalitions != nil {
+		fromCoalition := strings.TrimSpace(strings.ToUpper(countryCoalitions[from]))
+		toCoalition := strings.TrimSpace(strings.ToUpper(countryCoalitions[to]))
+		if fromCoalition != "" && toCoalition != "" && fromCoalition != toCoalition {
+			return CountryRelationshipRule{
+				ShareIntel:                  false,
+				AirspaceTransitAllowed:      true,
+				AirspaceStrikeAllowed:       true,
+				DefensivePositioningAllowed: false,
+				MaritimeTransitAllowed:      true,
+				MaritimeStrikeAllowed:       true,
+			}
 		}
 	}
 	return CountryRelationshipRule{}

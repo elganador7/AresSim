@@ -50,6 +50,34 @@ export function PauseSim(arg1) {
   return window['go']['main']['App']['PauseSim'](arg1);
 }
 
+export function PreviewCurrentRelationships() {
+  return window['go']['main']['App']['PreviewCurrentRelationships']();
+}
+
+export function PreviewCurrentStrikePath(arg1) {
+  return window['go']['main']['App']['PreviewCurrentStrikePath'](arg1);
+}
+
+export function PreviewCurrentTransitPath(arg1) {
+  return window['go']['main']['App']['PreviewCurrentTransitPath'](arg1);
+}
+
+export function PreviewDraftPlacement(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
+  return window['go']['main']['App']['PreviewDraftPlacement'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+}
+
+export function PreviewDraftRelationships(arg1, arg2, arg3) {
+  return window['go']['main']['App']['PreviewDraftRelationships'](arg1, arg2, arg3);
+}
+
+export function PreviewDraftStrikePath(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['PreviewDraftStrikePath'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function PreviewDraftTransitPath(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['PreviewDraftTransitPath'](arg1, arg2, arg3, arg4, arg5);
+}
+
 export function RemoveMoveWaypoint(arg1, arg2) {
   return window['go']['main']['App']['RemoveMoveWaypoint'](arg1, arg2);
 }
@@ -66,8 +94,8 @@ export function SaveUnitDefinition(arg1) {
   return window['go']['main']['App']['SaveUnitDefinition'](arg1);
 }
 
-export function SetCountryRelationship(arg1, arg2, arg3, arg4, arg5, arg6) {
-  return window['go']['main']['App']['SetCountryRelationship'](arg1, arg2, arg3, arg4, arg5, arg6);
+export function SetCountryRelationship(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) {
+  return window['go']['main']['App']['SetCountryRelationship'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
 
 export function SetIntelSharing(arg1, arg2, arg3) {

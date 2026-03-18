@@ -7,12 +7,11 @@ import {
   SetUnitAttackOrder,
   SetUnitEngagement,
 } from "../../../wailsjs/go/main/App";
-import { useSimStore, type WeaponDef } from "../../store/simStore";
+import { useSimStore, type PathViolationPreview, type WeaponDef } from "../../store/simStore";
 import { formatDist, formatETA } from "../../utils/formatters";
 import { haversineM } from "../../utils/geo";
 import { type UnitDefinitionTargetLite } from "../../utils/loadoutValidation";
 import { inferUnitTeamCode } from "../../utils/unitTeams";
-import { explainBlockedStrikePath, explainBlockedTransitPath } from "../../utils/countryRelationships";
 import { ATTACK_ORDER_TYPES, DESIRED_EFFECTS, ENGAGEMENT_BEHAVIORS, filterValidLiveTargets } from "../../utils/tasking";
 
 type UnitDefinitionPanelMeta = UnitDefinitionTargetLite & { teamCode?: string };
@@ -41,8 +40,11 @@ export default function UnitPanel() {
   const units = useSimStore((s) => s.units);
   const weaponDefs = useSimStore((s) => s.weaponDefs);
   const activeView = useSimStore((s) => s.activeView);
-  const relationships = useSimStore((s) => s.relationships);
   const selectUnit = useSimStore((s) => s.selectUnit);
+  const routePreview = useSimStore((s) => s.selectedRoutePreview);
+  const strikePreview = useSimStore((s) => s.selectedStrikePreview);
+  const setRoutePreview = useSimStore((s) => s.setSelectedRoutePreview);
+  const setStrikePreview = useSimStore((s) => s.setSelectedStrikePreview);
   const mapCommandMode = useSimStore((s) => s.mapCommandMode);
   const startRouteEdit = useSimStore((s) => s.startRouteEdit);
   const startTargetPick = useSimStore((s) => s.startTargetPick);
@@ -66,31 +68,8 @@ export default function UnitPanel() {
     }
     return filterValidLiveTargets(unit, units, weaponDefs as Map<string, WeaponDef>, definitionMap);
   }, [definitionMap, unit, units, weaponDefs]);
-  const routeWarning = useMemo(() => {
-    if (!unit?.teamId || !unit.moveOrder || unit.moveOrder.waypoints.length === 0) {
-      return null;
-    }
-    const points = [
-      { lat: unit.position.lat, lon: unit.position.lon },
-      ...unit.moveOrder.waypoints.map((waypoint) => ({ lat: waypoint.lat, lon: waypoint.lon })),
-    ];
-    return explainBlockedTransitPath(relationships, unit.teamId, points);
-  }, [relationships, unit]);
-  const strikeWarning = useMemo(() => {
-    if (!unit?.teamId || !unit.attackOrder?.targetUnitId) {
-      return null;
-    }
-    const target = units.get(unit.attackOrder.targetUnitId);
-    if (!target) {
-      return "Assigned target is no longer available.";
-    }
-    const points = [
-      { lat: unit.position.lat, lon: unit.position.lon },
-      ...(unit.moveOrder?.waypoints ?? []).map((waypoint) => ({ lat: waypoint.lat, lon: waypoint.lon })),
-      { lat: target.position.lat, lon: target.position.lon },
-    ];
-    return explainBlockedStrikePath(relationships, unit.teamId, points);
-  }, [relationships, unit, units]);
+  const routeWarning = routePreview?.blocked ? (routePreview.reason ?? "Transit blocked.") : null;
+  const strikeWarning = strikePreview?.blocked ? (strikePreview.reason ?? "Strike blocked.") : null;
 
   const [engagementBehavior, setEngagementBehavior] = useState(unit?.engagementBehavior ?? 1);
   const [engagementPkillThreshold, setEngagementPkillThreshold] = useState(unit?.engagementPkillThreshold ?? 0.5);
@@ -165,6 +144,54 @@ export default function UnitPanel() {
       setTargetUnitId("");
     }
   }, [targetUnitId, validTargets]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!unit?.id || !unit.moveOrder || unit.moveOrder.waypoints.length === 0) {
+      setRoutePreview(null);
+      return;
+    }
+    ((window as any).go?.main?.App?.PreviewCurrentTransitPath?.(unit.id) as Promise<PathViolationPreview | null> | undefined)
+      ?.then((preview) => {
+        if (cancelled) {
+          return;
+        }
+        setRoutePreview(preview ?? null);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          console.error(error);
+          setRoutePreview(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [setRoutePreview, unit?.id, unit?.moveOrder]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!unit?.id || !unit.attackOrder?.targetUnitId) {
+      setStrikePreview(null);
+      return;
+    }
+    ((window as any).go?.main?.App?.PreviewCurrentStrikePath?.(unit.id) as Promise<PathViolationPreview | null> | undefined)
+      ?.then((preview) => {
+        if (cancelled) {
+          return;
+        }
+        setStrikePreview(preview ?? null);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          console.error(error);
+          setStrikePreview(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [setStrikePreview, unit?.id, unit?.attackOrder, unit?.moveOrder]);
 
   const saveCommands = async () => {
     if (!unit) return;

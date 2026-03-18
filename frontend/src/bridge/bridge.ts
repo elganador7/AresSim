@@ -245,6 +245,8 @@ export function initBridge(): void {
       airspaceTransitAllowed: rel.airspaceTransitAllowed,
       airspaceStrikeAllowed: rel.airspaceStrikeAllowed,
       defensivePositioningAllowed: rel.defensivePositioningAllowed,
+      maritimeTransitAllowed: rel.maritimeTransitAllowed,
+      maritimeStrikeAllowed: rel.maritimeStrikeAllowed,
     }));
     store.loadSnapshot(units, snap.scenarioName, weaponDefs, relationships);
     if (snap.simTime) {

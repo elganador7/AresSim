@@ -1,5 +1,3 @@
-import { getCountriesAlongSegment } from "./theaterCountries";
-
 export interface CountryRelationshipLike {
   fromCountry: string;
   toCountry: string;
@@ -7,6 +5,8 @@ export interface CountryRelationshipLike {
   airspaceTransitAllowed: boolean;
   airspaceStrikeAllowed: boolean;
   defensivePositioningAllowed: boolean;
+  maritimeTransitAllowed: boolean;
+  maritimeStrikeAllowed: boolean;
 }
 
 export interface RelationshipRule {
@@ -14,12 +14,11 @@ export interface RelationshipRule {
   airspaceTransitAllowed: boolean;
   airspaceStrikeAllowed: boolean;
   defensivePositioningAllowed: boolean;
+  maritimeTransitAllowed: boolean;
+  maritimeStrikeAllowed: boolean;
 }
 
-export interface GeoPointLike {
-  lat: number;
-  lon: number;
-}
+export type CountryCoalitionMap = Record<string, string>;
 
 export function normalizeCountryCode(code: string): string {
   return code.trim().toUpperCase();
@@ -29,6 +28,7 @@ export function getRelationshipRule(
   relationships: CountryRelationshipLike[],
   fromCountry: string,
   toCountry: string,
+  countryCoalitions?: CountryCoalitionMap,
 ): RelationshipRule {
   const from = normalizeCountryCode(fromCountry);
   const to = normalizeCountryCode(toCountry);
@@ -38,6 +38,8 @@ export function getRelationshipRule(
       airspaceTransitAllowed: true,
       airspaceStrikeAllowed: true,
       defensivePositioningAllowed: true,
+      maritimeTransitAllowed: true,
+      maritimeStrikeAllowed: true,
     };
   }
   const direct = relationships.find(
@@ -49,6 +51,20 @@ export function getRelationshipRule(
       airspaceTransitAllowed: !!direct.airspaceTransitAllowed,
       airspaceStrikeAllowed: !!direct.airspaceStrikeAllowed,
       defensivePositioningAllowed: !!direct.defensivePositioningAllowed,
+      maritimeTransitAllowed: !!direct.maritimeTransitAllowed,
+      maritimeStrikeAllowed: !!direct.maritimeStrikeAllowed,
+    };
+  }
+  const fromCoalition = normalizeCountryCode(countryCoalitions?.[from] ?? "");
+  const toCoalition = normalizeCountryCode(countryCoalitions?.[to] ?? "");
+  if (fromCoalition && toCoalition && fromCoalition !== toCoalition) {
+    return {
+      shareIntel: false,
+      airspaceTransitAllowed: true,
+      airspaceStrikeAllowed: true,
+      defensivePositioningAllowed: false,
+      maritimeTransitAllowed: true,
+      maritimeStrikeAllowed: true,
     };
   }
   return {
@@ -56,56 +72,46 @@ export function getRelationshipRule(
     airspaceTransitAllowed: false,
     airspaceStrikeAllowed: false,
     defensivePositioningAllowed: false,
+    maritimeTransitAllowed: false,
+    maritimeStrikeAllowed: false,
   };
 }
 
-function findBlockedCountryAlongPath(
-  relationships: CountryRelationshipLike[],
-  fromCountry: string,
-  points: GeoPointLike[],
-  mode: "transit" | "strike",
-): { country: string; legIndex: number } | null {
-  const owner = normalizeCountryCode(fromCountry);
-  if (!owner || points.length < 2) {
-    return null;
+export function buildCountryCoalitionMap<T extends { teamId?: string; coalitionId?: string }>(
+  units: Iterable<T>,
+): CountryCoalitionMap {
+  const result: CountryCoalitionMap = {};
+  for (const unit of units) {
+    const country = normalizeCountryCode(unit.teamId ?? "");
+    const coalition = normalizeCountryCode(unit.coalitionId ?? "");
+    if (!country || !coalition || result[country]) {
+      continue;
+    }
+    result[country] = coalition;
   }
-  for (let idx = 0; idx < points.length - 1; idx += 1) {
-    for (const country of getCountriesAlongSegment(points[idx], points[idx + 1])) {
-      if (!country || country === owner) {
-        continue;
-      }
-      const relationship = getRelationshipRule(relationships, owner, country);
-      const blocked = mode === "strike"
-        ? !relationship.airspaceStrikeAllowed
-        : !relationship.airspaceTransitAllowed;
-      if (blocked) {
-        return { country, legIndex: idx + 1 };
-      }
+  return result;
+}
+
+export function collectRelationshipCountries<T extends { teamId?: string }>(
+  units: Iterable<T>,
+  relationships: CountryRelationshipLike[],
+): string[] {
+  const result = new Set<string>();
+  for (const unit of units) {
+    const code = normalizeCountryCode(unit.teamId ?? "");
+    if (code) {
+      result.add(code);
     }
   }
-  return null;
-}
-
-export function explainBlockedTransitPath(
-  relationships: CountryRelationshipLike[],
-  fromCountry: string,
-  points: GeoPointLike[],
-): string | null {
-  const blocked = findBlockedCountryAlongPath(relationships, fromCountry, points, "transit");
-  if (!blocked) {
-    return null;
+  for (const relationship of relationships) {
+    const from = normalizeCountryCode(relationship.fromCountry);
+    const to = normalizeCountryCode(relationship.toCountry);
+    if (from) {
+      result.add(from);
+    }
+    if (to) {
+      result.add(to);
+    }
   }
-  return `Transit blocked by ${blocked.country} airspace on leg ${blocked.legIndex}.`;
-}
-
-export function explainBlockedStrikePath(
-  relationships: CountryRelationshipLike[],
-  fromCountry: string,
-  points: GeoPointLike[],
-): string | null {
-  const blocked = findBlockedCountryAlongPath(relationships, fromCountry, points, "strike");
-  if (!blocked) {
-    return null;
-  }
-  return `Strike blocked by ${blocked.country} airspace on leg ${blocked.legIndex}.`;
+  return Array.from(result).sort();
 }

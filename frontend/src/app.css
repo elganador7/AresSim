@@ -226,6 +226,33 @@ body,
   color: #d1d5db;
 }
 
+.sharing-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.sharing-pair-header {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #f3f4f6;
+  text-transform: uppercase;
+}
+
+.sharing-row-grouped {
+  border: none;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.sharing-row-readonly {
+  opacity: 0.72;
+}
+
 .sharing-label {
   color: #d1d5db;
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"math"
 	"strings"
@@ -318,7 +317,7 @@ func (a *App) MoveUnit(unitID string, lat, lon float64) BridgeResult {
 			slog.Warn("MoveUnit: target coordinates out of range", "id", unitID, "lat", lat, "lon", lon)
 			return failMsg("target coordinates out of range")
 		}
-		if err := a.validateTransit(unitCountryCode(u), oldPos.GetLat(), oldPos.GetLon(), lat, lon); err != nil {
+		if err := a.validateTransit(unitCountryCode(u), defs[u.DefinitionId].Domain, oldPos.GetLat(), oldPos.GetLon(), lat, lon); err != nil {
 			return failMsg(err.Error())
 		}
 
@@ -408,7 +407,7 @@ func (a *App) AppendMoveWaypoint(unitID string, lat, lon float64) BridgeResult {
 			last := current.GetWaypoints()[len(current.GetWaypoints())-1]
 			startLat, startLon = last.GetLat(), last.GetLon()
 		}
-		if err := a.validateTransit(unitCountryCode(u), startLat, startLon, lat, lon); err != nil {
+		if err := a.validateTransit(unitCountryCode(u), defs[u.DefinitionId].Domain, startLat, startLon, lat, lon); err != nil {
 			return failMsg(err.Error())
 		}
 		wp := &enginev1.Waypoint{Lat: lat, Lon: lon, AltMsl: pos.GetAltMsl()}
@@ -509,12 +508,12 @@ func (a *App) UpdateMoveWaypoint(unitID string, waypointIndex int, lat, lon floa
 			prev := order.Waypoints[waypointIndex-1]
 			startLat, startLon = prev.GetLat(), prev.GetLon()
 		}
-		if err := a.validateTransit(unitCountryCode(u), startLat, startLon, lat, lon); err != nil {
+		if err := a.validateTransit(unitCountryCode(u), a.getCachedDefs()[u.DefinitionId].Domain, startLat, startLon, lat, lon); err != nil {
 			return failMsg(err.Error())
 		}
 		if waypointIndex < len(order.Waypoints)-1 {
 			next := order.Waypoints[waypointIndex+1]
-			if err := a.validateTransit(unitCountryCode(u), lat, lon, next.GetLat(), next.GetLon()); err != nil {
+			if err := a.validateTransit(unitCountryCode(u), a.getCachedDefs()[u.DefinitionId].Domain, lat, lon, next.GetLat(), next.GetLon()); err != nil {
 				return failMsg(err.Error())
 			}
 		}
@@ -652,6 +651,8 @@ func (a *App) getOrCreateRelationship(fromCountry, toCountry string) (*enginev1.
 			AirspaceTransitAllowed:     false,
 			AirspaceStrikeAllowed:      false,
 			DefensivePositioningAllowed: false,
+			MaritimeTransitAllowed:     false,
+			MaritimeStrikeAllowed:      false,
 		}
 		a.currentScenario.Relationships = append(a.currentScenario.Relationships, rel)
 	}
@@ -667,6 +668,8 @@ func (a *App) SetCountryRelationship(
 	airspaceTransitAllowed bool,
 	airspaceStrikeAllowed bool,
 	defensivePositioningAllowed bool,
+	maritimeTransitAllowed bool,
+	maritimeStrikeAllowed bool,
 ) BridgeResult {
 	rel, result := a.getOrCreateRelationship(fromCountry, toCountry)
 	if !result.Success || rel == nil {
@@ -676,6 +679,8 @@ func (a *App) SetCountryRelationship(
 	rel.AirspaceTransitAllowed = airspaceTransitAllowed
 	rel.AirspaceStrikeAllowed = airspaceStrikeAllowed
 	rel.DefensivePositioningAllowed = defensivePositioningAllowed
+	rel.MaritimeTransitAllowed = maritimeTransitAllowed
+	rel.MaritimeStrikeAllowed = maritimeStrikeAllowed
 	if a.scenRepo != nil {
 		if err := a.scenRepo.Save(a.ctx, a.currentScenario.Id, scenarioRecord(a.currentScenario)); err != nil {
 			slog.Warn("save scenario relationship update", "err", err)
@@ -823,55 +828,13 @@ func (a *App) relationshipRules() sim.RelationshipRules {
 	return sim.BuildRelationshipRules(a.currentScenario.GetRelationships())
 }
 
+func (a *App) countryCoalitions() map[string]string {
+	if a.currentScenario == nil {
+		return nil
+	}
+	return sim.BuildCountryCoalitions(a.currentScenario.GetUnits())
+}
+
 func unitCountryCode(u *enginev1.Unit) string {
 	return sim.CountryDisplayCode(u.GetTeamId())
-}
-
-func (a *App) validateTransit(ownerCountry string, startLat, startLon, endLat, endLon float64) error {
-	ownerCountry = sim.CountryDisplayCode(ownerCountry)
-	if ownerCountry == "" {
-		return nil
-	}
-	rules := a.relationshipRules()
-	for _, country := range sim.CountriesAlongSegment(startLat, startLon, endLat, endLon) {
-		if country == "" || country == ownerCountry {
-			continue
-		}
-		rule := sim.GetRelationshipRule(rules, ownerCountry, country)
-		if !rule.AirspaceTransitAllowed {
-			return fmt.Errorf("%s cannot transit %s airspace", ownerCountry, country)
-		}
-	}
-	return nil
-}
-
-func (a *App) validateStrike(shooter, target *enginev1.Unit) error {
-	if shooter == nil || target == nil {
-		return nil
-	}
-	ownerCountry := unitCountryCode(shooter)
-	if ownerCountry == "" {
-		return nil
-	}
-	rules := a.relationshipRules()
-	points := [][2]float64{{shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon()}}
-	for _, wp := range shooter.GetMoveOrder().GetWaypoints() {
-		points = append(points, [2]float64{wp.GetLat(), wp.GetLon()})
-	}
-	points = append(points, [2]float64{target.GetPosition().GetLat(), target.GetPosition().GetLon()})
-	for i := 0; i < len(points)-1; i++ {
-		for _, country := range sim.CountriesAlongSegment(points[i][0], points[i][1], points[i+1][0], points[i+1][1]) {
-			if country == "" || country == ownerCountry {
-				continue
-			}
-			rule := sim.GetRelationshipRule(rules, ownerCountry, country)
-			if !rule.AirspaceTransitAllowed {
-				return fmt.Errorf("%s cannot transit %s airspace", ownerCountry, country)
-			}
-			if !rule.AirspaceStrikeAllowed {
-				return fmt.Errorf("%s cannot conduct strike operations in %s airspace", ownerCountry, country)
-			}
-		}
-	}
-	return nil
 }

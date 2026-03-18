@@ -13,8 +13,6 @@ import type { ExplosionFx, Munition, Unit, WeaponDef } from "../../store/simStor
 import { useSimStore } from "../../store/simStore";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
 import { inferUnitTeamCode } from "../../utils/unitTeams";
-import { getCountriesAlongSegment } from "../../utils/theaterCountries";
-import { getRelationshipRule } from "../../utils/countryRelationships";
 
 export type ActiveView = string;
 
@@ -108,50 +106,6 @@ export function isTrack(unit: Unit, view: ActiveView, defInfo: Record<string, De
 export function canMove(unit: Unit, view: ActiveView, defInfo: Record<string, DefInfo>): boolean {
   if (view === "debug") return true;
   return teamForUnit(unit, defInfo) === view;
-}
-
-export function routeSegmentBlocked(
-  unit: Unit,
-  start: { lat: number; lon: number },
-  end: { lat: number; lon: number },
-): boolean {
-  const ownerCountry = unit.teamId?.trim().toUpperCase();
-  if (!ownerCountry) {
-    return false;
-  }
-  const { relationships } = useSimStore.getState();
-  for (const country of getCountriesAlongSegment(start, end)) {
-    if (!country || country === ownerCountry) {
-      continue;
-    }
-    const relationship = getRelationshipRule(relationships, ownerCountry, country);
-    if (!relationship.airspaceTransitAllowed) {
-      return true;
-    }
-  }
-  return false;
-}
-
-export function strikeSegmentBlocked(
-  unit: Unit,
-  start: { lat: number; lon: number },
-  end: { lat: number; lon: number },
-): boolean {
-  const ownerCountry = unit.teamId?.trim().toUpperCase();
-  if (!ownerCountry) {
-    return false;
-  }
-  const { relationships } = useSimStore.getState();
-  for (const country of getCountriesAlongSegment(start, end)) {
-    if (!country || country === ownerCountry) {
-      continue;
-    }
-    const relationship = getRelationshipRule(relationships, ownerCountry, country);
-    if (!relationship.airspaceStrikeAllowed) {
-      return true;
-    }
-  }
-  return false;
 }
 
 export function makeUnitEntity(unit: Unit, generalType: number, shortName: string): Entity {
