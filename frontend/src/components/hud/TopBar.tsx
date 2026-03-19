@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { PauseSim, SetHumanControlledTeam, SetSimSpeed } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
 import { formatSimTime } from "../../utils/formatters";
+import ObjectivePanel from "./ObjectivePanel";
 import RelationshipPanel from "./RelationshipPanel";
 
 const SPEED_PRESETS = [0.5, 1, 2, 5, 10, 30] as const;
@@ -33,6 +34,7 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
   const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
   const setHumanControlledTeam = useSimStore((s) => s.setHumanControlledTeam);
   const [sharingOpen, setSharingOpen] = useState(false);
+  const [briefingOpen, setBriefingOpen] = useState(false);
   const controllableTeams = useMemo(() => {
     const present = new Set<string>();
     units.forEach((unit) => {
@@ -156,6 +158,9 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
             </select>
           </label>
         )}
+        <button className="editor-btn" onClick={() => setBriefingOpen((current) => !current)}>
+          BRIEFING
+        </button>
         <button className="editor-btn" onClick={() => setSharingOpen((current) => !current)}>
           SHARING
         </button>
@@ -163,6 +168,7 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
           EDITOR
         </button>
       </div>
+      <ObjectivePanel open={briefingOpen} onClose={() => setBriefingOpen(false)} />
       <RelationshipPanel open={sharingOpen} onClose={() => setSharingOpen(false)} />
     </div>
   );

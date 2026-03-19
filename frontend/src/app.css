@@ -235,6 +235,11 @@ body,
   box-shadow: 0 18px 36px rgba(0, 0, 0, 0.3);
 }
 
+.objective-panel {
+  right: 352px;
+  width: 360px;
+}
+
 .sharing-panel-header {
   display: flex;
   align-items: center;
@@ -322,6 +327,100 @@ body,
 .sharing-empty {
   font-size: 11px;
   color: #9ca3af;
+}
+
+.objective-empty,
+.objective-summary,
+.objective-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.objective-team {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #93c5fd;
+  text-transform: uppercase;
+}
+
+.objective-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f9fafb;
+}
+
+.objective-copy {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.objective-costs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.objective-cost-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.objective-cost-chip span {
+  font-size: 10px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.objective-cost-chip strong {
+  font-size: 13px;
+  color: #f9fafb;
+}
+
+.objective-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.objective-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f3f4f6;
+}
+
+.objective-card-progress {
+  font-size: 10px;
+  font-weight: 700;
+  color: #93c5fd;
+  letter-spacing: 0.08em;
+}
+
+.objective-progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.objective-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #38bdf8, #f59e0b);
 }
 
 /* ─── VIEW SWITCHER ────────────────────────────────────────────────────────── */
