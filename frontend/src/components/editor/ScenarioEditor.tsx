@@ -58,26 +58,26 @@ function LoadModal({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <span>Open Scenario</span>
-          <button className="btn btn-sm" onClick={onClose}>✕</button>
+          <button className="modal-close" onClick={onClose}>✕</button>
         </div>
         {busy ? (
           <div className="modal-empty">Loading…</div>
         ) : items.length === 0 ? (
           <div className="modal-empty">No saved scenarios</div>
         ) : (
-          <div className="modal-list">
+          <div className="modal-body">
             {items.map((row) => {
               const id = String(row.id ?? "");
               const name = String(row.name ?? "Untitled");
               const author = String(row.author ?? "");
               return (
-                <div key={id} className="modal-list-item">
-                  <div className="modal-list-main">
-                    <div className="modal-list-title">{name}</div>
-                    <div className="modal-list-subtitle">{author || "Unknown author"}</div>
+                <div key={id} className="modal-scenario-item">
+                  <div>
+                    <div className="modal-scenario-name">{name}</div>
+                    <div className="modal-scenario-meta">{author || "Unknown author"}</div>
                   </div>
                   <div className="modal-list-actions">
                     <button className="btn btn-sm btn-primary" onClick={() => onSelect(id)}>Open</button>
@@ -302,6 +302,7 @@ export default function ScenarioEditor({
           teamId: u.teamId || "",
           coalitionId: u.coalitionId || ((u.side as UnitDraft["side"]) || "Blue"),
           definitionId: u.definitionId,
+          hostBaseId: u.hostBaseId || undefined,
           parentUnitId: u.parentUnitId || undefined,
           loadoutConfigurationId: u.loadoutConfigurationId,
           natoSymbolSidc: u.natoSymbolSidc,
@@ -313,6 +314,12 @@ export default function ScenarioEditor({
             targetUnitId: u.attackOrder.targetUnitId,
             desiredEffect: u.attackOrder.desiredEffect,
             pkillThreshold: u.attackOrder.pkillThreshold,
+          } : undefined,
+          nextSortieReadySeconds: u.nextSortieReadySeconds ?? 0,
+          baseOps: u.baseOps ? {
+            state: u.baseOps.state,
+            nextLaunchAvailableSeconds: u.baseOps.nextLaunchAvailableSeconds,
+            nextRecoveryAvailableSeconds: u.baseOps.nextRecoveryAvailableSeconds,
           } : undefined,
           moveOrder: u.moveOrder?.waypoints?.length ? {
             waypoints: u.moveOrder.waypoints.map((wp) => ({

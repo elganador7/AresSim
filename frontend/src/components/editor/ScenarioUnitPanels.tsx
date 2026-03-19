@@ -39,6 +39,7 @@ function InlineEditForm({
   const [displayName, setDisplayName] = useState(unit.displayName);
   const [side, setSide] = useState<UnitDraft["side"]>(unit.side);
   const [teamId, setTeamId] = useState(unit.teamId);
+  const [hostBaseId, setHostBaseId] = useState(unit.hostBaseId ?? "");
   const [heading, setHeading] = useState(unit.heading);
   const [speed, setSpeed] = useState(unit.speed);
   const [strength, setStrength] = useState(unit.combatEffectiveness);
@@ -63,6 +64,17 @@ function InlineEditForm({
   const targetUnit = validTargets.find((candidate) => candidate.id === targetUnitId);
   const targetDef = unitDefinitions.find((candidate) => candidate.id === targetUnit?.definitionId);
   const selectedDefinition = unitDefinitions.find((candidate) => candidate.id === unit.definitionId);
+  const hostBaseOptions = units.filter((candidate) => {
+    if (candidate.id === unit.id) {
+      return false;
+    }
+    if (candidate.side !== side) {
+      return false;
+    }
+    const candidateDefinition = unitDefinitions.find((definition) => definition.id === candidate.definitionId);
+    return candidateDefinition?.assetClass === "airbase";
+  });
+  const canAssignHostBase = selectedDefinition?.domain === 2;
   const countryOptions = Array.from(
     new Set([
       teamId,
@@ -85,6 +97,15 @@ function InlineEditForm({
     }
   }, [targetUnitId, validTargets]);
 
+  useEffect(() => {
+    if (!hostBaseId) {
+      return;
+    }
+    if (!hostBaseOptions.some((candidate) => candidate.id === hostBaseId)) {
+      setHostBaseId("");
+    }
+  }, [hostBaseId, hostBaseOptions]);
+
   return (
     <div className="inline-edit-form">
       <div className="field">
@@ -100,6 +121,19 @@ function InlineEditForm({
           ))}
         </select>
       </div>
+      {canAssignHostBase && (
+        <div className="field">
+          <label className="field-label">Host Base</label>
+          <select className="field-select" value={hostBaseId} onChange={(e) => setHostBaseId(e.target.value)}>
+            <option value="">None assigned</option>
+            {hostBaseOptions.map((candidate) => (
+              <option key={candidate.id} value={candidate.id}>
+                {candidate.displayName}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="field">
         <label className="field-label">Side</label>
         <div className="drop-side-tabs">
@@ -209,6 +243,7 @@ function InlineEditForm({
             side,
             teamId,
             coalitionId: side,
+            hostBaseId: hostBaseId || undefined,
             loadoutConfigurationId,
             engagementBehavior,
             engagementPkillThreshold,

@@ -16,7 +16,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/unit.proto.
  */
 export const file_engine_v1_unit: GenFile = /*@__PURE__*/
-  fileDesc("ChRlbmdpbmUvdjEvdW5pdC5wcm90bxIJZW5naW5lLnYxIqABCgtBdHRhY2tPcmRlchIuCgpvcmRlcl90eXBlGAEgASgOMhouZW5naW5lLnYxLkF0dGFja09yZGVyVHlwZRIWCg50YXJnZXRfdW5pdF9pZBgCIAEoCRIwCg5kZXNpcmVkX2VmZmVjdBgDIAEoDjIYLmVuZ2luZS52MS5EZXNpcmVkRWZmZWN0EhcKD3BraWxsX3RocmVzaG9sZBgEIAEoAiLtBAoEVW5pdBIKCgJpZBgBIAEoCRIUCgxkaXNwbGF5X25hbWUYAiABKAkSEQoJZnVsbF9uYW1lGAMgASgJEgwKBHNpZGUYBCABKAkSFQoNZGVmaW5pdGlvbl9pZBgFIAEoCRIPCgd0ZWFtX2lkGAYgASgJEhQKDGNvYWxpdGlvbl9pZBgHIAEoCRIlCghwb3NpdGlvbhgKIAEoCzITLmVuZ2luZS52MS5Qb3NpdGlvbhIsCgZzdGF0dXMYDCABKAsyHC5lbmdpbmUudjEuT3BlcmF0aW9uYWxTdGF0dXMSFgoOcGFyZW50X3VuaXRfaWQYDiABKAkSLAoHcG9zdHVyZRgRIAEoDjIbLmVuZ2luZS52MS5Gb3JtYXRpb25Qb3N0dXJlEhgKEG5hdG9fc3ltYm9sX3NpZGMYEiABKAkSKAoKbW92ZV9vcmRlchgUIAEoCzIULmVuZ2luZS52MS5Nb3ZlT3JkZXISJwoHd2VhcG9ucxgVIAMoCzIWLmVuZ2luZS52MS5XZWFwb25TdGF0ZRIgChhsb2Fkb3V0X2NvbmZpZ3VyYXRpb25faWQYFiABKAkSLAoMZGFtYWdlX3N0YXRlGBcgASgOMhYuZW5naW5lLnYxLkRhbWFnZVN0YXRlEjoKE2VuZ2FnZW1lbnRfYmVoYXZpb3IYGCABKA4yHS5lbmdpbmUudjEuRW5nYWdlbWVudEJlaGF2aW9yEiIKGmVuZ2FnZW1lbnRfcGtpbGxfdGhyZXNob2xkGBkgASgCEiwKDGF0dGFja19vcmRlchgaIAEoCzIWLmVuZ2luZS52MS5BdHRhY2tPcmRlciqgAQoLRGFtYWdlU3RhdGUSHAoYREFNQUdFX1NUQVRFX1VOU1BFQ0lGSUVEEAASHAoYREFNQUdFX1NUQVRFX09QRVJBVElPTkFMEAESGAoUREFNQUdFX1NUQVRFX0RBTUFHRUQQAhIfChtEQU1BR0VfU1RBVEVfTUlTU0lPTl9LSUxMRUQQAxIaChZEQU1BR0VfU1RBVEVfREVTVFJPWUVEEAQqrwIKEkVuZ2FnZW1lbnRCZWhhdmlvchIjCh9FTkdBR0VNRU5UX0JFSEFWSU9SX1VOU1BFQ0lGSUVEEAASIwofRU5HQUdFTUVOVF9CRUhBVklPUl9BVVRPX0VOR0FHRRABEikKJUVOR0FHRU1FTlRfQkVIQVZJT1JfU0VMRl9ERUZFTlNFX09OTFkQAhIhCh1FTkdBR0VNRU5UX0JFSEFWSU9SX0hPTERfRklSRRADEi0KKUVOR0FHRU1FTlRfQkVIQVZJT1JfQVNTSUdORURfVEFSR0VUU19PTkxZEAQSJgoiRU5HQUdFTUVOVF9CRUhBVklPUl9TSEFET1dfQ09OVEFDVBAFEioKJkVOR0FHRU1FTlRfQkVIQVZJT1JfV0lUSERSQVdfT05fREVURUNUEAYqjQEKD0F0dGFja09yZGVyVHlwZRIhCh1BVFRBQ0tfT1JERVJfVFlQRV9VTlNQRUNJRklFRBAAEiwKKEFUVEFDS19PUkRFUl9UWVBFX0FUVEFDS19BU1NJR05FRF9UQVJHRVQQARIpCiVBVFRBQ0tfT1JERVJfVFlQRV9TVFJJS0VfVU5USUxfRUZGRUNUEAIqhwEKDURlc2lyZWRFZmZlY3QSHgoaREVTSVJFRF9FRkZFQ1RfVU5TUEVDSUZJRUQQABIZChVERVNJUkVEX0VGRkVDVF9EQU1BR0UQARIfChtERVNJUkVEX0VGRkVDVF9NSVNTSU9OX0tJTEwQAhIaChZERVNJUkVEX0VGRkVDVF9ERVNUUk9ZEANCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common, file_engine_v1_status, file_engine_v1_weapon]);
+  fileDesc("ChRlbmdpbmUvdjEvdW5pdC5wcm90bxIJZW5naW5lLnYxIqABCgtBdHRhY2tPcmRlchIuCgpvcmRlcl90eXBlGAEgASgOMhouZW5naW5lLnYxLkF0dGFja09yZGVyVHlwZRIWCg50YXJnZXRfdW5pdF9pZBgCIAEoCRIwCg5kZXNpcmVkX2VmZmVjdBgDIAEoDjIYLmVuZ2luZS52MS5EZXNpcmVkRWZmZWN0EhcKD3BraWxsX3RocmVzaG9sZBgEIAEoAiKSAQoMQmFzZU9wc1N0YXRlEjIKBXN0YXRlGAEgASgOMiMuZW5naW5lLnYxLkZhY2lsaXR5T3BlcmF0aW9uYWxTdGF0ZRIlCh1uZXh0X2xhdW5jaF9hdmFpbGFibGVfc2Vjb25kcxgCIAEoARInCh9uZXh0X3JlY292ZXJ5X2F2YWlsYWJsZV9zZWNvbmRzGAMgASgBItEFCgRVbml0EgoKAmlkGAEgASgJEhQKDGRpc3BsYXlfbmFtZRgCIAEoCRIRCglmdWxsX25hbWUYAyABKAkSDAoEc2lkZRgEIAEoCRIVCg1kZWZpbml0aW9uX2lkGAUgASgJEg8KB3RlYW1faWQYBiABKAkSFAoMY29hbGl0aW9uX2lkGAcgASgJEiUKCHBvc2l0aW9uGAogASgLMhMuZW5naW5lLnYxLlBvc2l0aW9uEiwKBnN0YXR1cxgMIAEoCzIcLmVuZ2luZS52MS5PcGVyYXRpb25hbFN0YXR1cxIWCg5wYXJlbnRfdW5pdF9pZBgOIAEoCRIsCgdwb3N0dXJlGBEgASgOMhsuZW5naW5lLnYxLkZvcm1hdGlvblBvc3R1cmUSGAoQbmF0b19zeW1ib2xfc2lkYxgSIAEoCRIoCgptb3ZlX29yZGVyGBQgASgLMhQuZW5naW5lLnYxLk1vdmVPcmRlchInCgd3ZWFwb25zGBUgAygLMhYuZW5naW5lLnYxLldlYXBvblN0YXRlEiAKGGxvYWRvdXRfY29uZmlndXJhdGlvbl9pZBgWIAEoCRIsCgxkYW1hZ2Vfc3RhdGUYFyABKA4yFi5lbmdpbmUudjEuRGFtYWdlU3RhdGUSOgoTZW5nYWdlbWVudF9iZWhhdmlvchgYIAEoDjIdLmVuZ2luZS52MS5FbmdhZ2VtZW50QmVoYXZpb3ISIgoaZW5nYWdlbWVudF9wa2lsbF90aHJlc2hvbGQYGSABKAISLAoMYXR0YWNrX29yZGVyGBogASgLMhYuZW5naW5lLnYxLkF0dGFja09yZGVyEhQKDGhvc3RfYmFzZV9pZBgbIAEoCRIhChluZXh0X3NvcnRpZV9yZWFkeV9zZWNvbmRzGBwgASgBEikKCGJhc2Vfb3BzGB0gASgLMhcuZW5naW5lLnYxLkJhc2VPcHNTdGF0ZSqgAQoLRGFtYWdlU3RhdGUSHAoYREFNQUdFX1NUQVRFX1VOU1BFQ0lGSUVEEAASHAoYREFNQUdFX1NUQVRFX09QRVJBVElPTkFMEAESGAoUREFNQUdFX1NUQVRFX0RBTUFHRUQQAhIfChtEQU1BR0VfU1RBVEVfTUlTU0lPTl9LSUxMRUQQAxIaChZEQU1BR0VfU1RBVEVfREVTVFJPWUVEEAQqrwIKEkVuZ2FnZW1lbnRCZWhhdmlvchIjCh9FTkdBR0VNRU5UX0JFSEFWSU9SX1VOU1BFQ0lGSUVEEAASIwofRU5HQUdFTUVOVF9CRUhBVklPUl9BVVRPX0VOR0FHRRABEikKJUVOR0FHRU1FTlRfQkVIQVZJT1JfU0VMRl9ERUZFTlNFX09OTFkQAhIhCh1FTkdBR0VNRU5UX0JFSEFWSU9SX0hPTERfRklSRRADEi0KKUVOR0FHRU1FTlRfQkVIQVZJT1JfQVNTSUdORURfVEFSR0VUU19PTkxZEAQSJgoiRU5HQUdFTUVOVF9CRUhBVklPUl9TSEFET1dfQ09OVEFDVBAFEioKJkVOR0FHRU1FTlRfQkVIQVZJT1JfV0lUSERSQVdfT05fREVURUNUEAYqjQEKD0F0dGFja09yZGVyVHlwZRIhCh1BVFRBQ0tfT1JERVJfVFlQRV9VTlNQRUNJRklFRBAAEiwKKEFUVEFDS19PUkRFUl9UWVBFX0FUVEFDS19BU1NJR05FRF9UQVJHRVQQARIpCiVBVFRBQ0tfT1JERVJfVFlQRV9TVFJJS0VfVU5USUxfRUZGRUNUEAIqhwEKDURlc2lyZWRFZmZlY3QSHgoaREVTSVJFRF9FRkZFQ1RfVU5TUEVDSUZJRUQQABIZChVERVNJUkVEX0VGRkVDVF9EQU1BR0UQARIfChtERVNJUkVEX0VGRkVDVF9NSVNTSU9OX0tJTEwQAhIaChZERVNJUkVEX0VGRkVDVF9ERVNUUk9ZEAMqvQEKGEZhY2lsaXR5T3BlcmF0aW9uYWxTdGF0ZRIqCiZGQUNJTElUWV9PUEVSQVRJT05BTF9TVEFURV9VTlNQRUNJRklFRBAAEiUKIUZBQ0lMSVRZX09QRVJBVElPTkFMX1NUQVRFX1VTQUJMRRABEicKI0ZBQ0lMSVRZX09QRVJBVElPTkFMX1NUQVRFX0RFR1JBREVEEAISJQohRkFDSUxJVFlfT1BFUkFUSU9OQUxfU1RBVEVfQ0xPU0VEEANCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common, file_engine_v1_status, file_engine_v1_weapon]);
 
 /**
  * @generated from message engine.v1.AttackOrder
@@ -49,6 +49,33 @@ export type AttackOrder = Message<"engine.v1.AttackOrder"> & {
  */
 export const AttackOrderSchema: GenMessage<AttackOrder> = /*@__PURE__*/
   messageDesc(file_engine_v1_unit, 0);
+
+/**
+ * @generated from message engine.v1.BaseOpsState
+ */
+export type BaseOpsState = Message<"engine.v1.BaseOpsState"> & {
+  /**
+   * @generated from field: engine.v1.FacilityOperationalState state = 1;
+   */
+  state: FacilityOperationalState;
+
+  /**
+   * @generated from field: double next_launch_available_seconds = 2;
+   */
+  nextLaunchAvailableSeconds: number;
+
+  /**
+   * @generated from field: double next_recovery_available_seconds = 3;
+   */
+  nextRecoveryAvailableSeconds: number;
+};
+
+/**
+ * Describes the message engine.v1.BaseOpsState.
+ * Use `create(BaseOpsStateSchema)` to create a new message.
+ */
+export const BaseOpsStateSchema: GenMessage<BaseOpsState> = /*@__PURE__*/
+  messageDesc(file_engine_v1_unit, 1);
 
 /**
  * @generated from message engine.v1.Unit
@@ -182,6 +209,21 @@ export type Unit = Message<"engine.v1.Unit"> & {
    * @generated from field: engine.v1.AttackOrder attack_order = 26;
    */
   attackOrder?: AttackOrder;
+
+  /**
+   * @generated from field: string host_base_id = 27;
+   */
+  hostBaseId: string;
+
+  /**
+   * @generated from field: double next_sortie_ready_seconds = 28;
+   */
+  nextSortieReadySeconds: number;
+
+  /**
+   * @generated from field: engine.v1.BaseOpsState base_ops = 29;
+   */
+  baseOps?: BaseOpsState;
 };
 
 /**
@@ -189,7 +231,7 @@ export type Unit = Message<"engine.v1.Unit"> & {
  * Use `create(UnitSchema)` to create a new message.
  */
 export const UnitSchema: GenMessage<Unit> = /*@__PURE__*/
-  messageDesc(file_engine_v1_unit, 1);
+  messageDesc(file_engine_v1_unit, 2);
 
 /**
  * @generated from enum engine.v1.DamageState
@@ -329,4 +371,35 @@ export enum DesiredEffect {
  */
 export const DesiredEffectSchema: GenEnum<DesiredEffect> = /*@__PURE__*/
   enumDesc(file_engine_v1_unit, 3);
+
+/**
+ * @generated from enum engine.v1.FacilityOperationalState
+ */
+export enum FacilityOperationalState {
+  /**
+   * @generated from enum value: FACILITY_OPERATIONAL_STATE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: FACILITY_OPERATIONAL_STATE_USABLE = 1;
+   */
+  USABLE = 1,
+
+  /**
+   * @generated from enum value: FACILITY_OPERATIONAL_STATE_DEGRADED = 2;
+   */
+  DEGRADED = 2,
+
+  /**
+   * @generated from enum value: FACILITY_OPERATIONAL_STATE_CLOSED = 3;
+   */
+  CLOSED = 3,
+}
+
+/**
+ * Describes the enum engine.v1.FacilityOperationalState.
+ */
+export const FacilityOperationalStateSchema: GenEnum<FacilityOperationalState> = /*@__PURE__*/
+  enumDesc(file_engine_v1_unit, 4);
 

@@ -35,9 +35,9 @@ definitions:
       embarked_rotary_wing_capacity: 0
       embarked_uav_capacity: 0
       embarked_surface_connector_capacity: 0
-      launch_capacity_per_interval: 0
-      recovery_capacity_per_interval: 0
-      sortie_interval_minutes: 0
+      launch_capacity_per_interval: 6
+      recovery_capacity_per_interval: 6
+      sortie_interval_minutes: 120
       default_loadout: []
       default_weapon_configuration: ""
       weapon_configurations: []

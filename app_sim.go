@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"math"
 	"strings"
@@ -144,6 +145,10 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 	}
 
 	a.currentScenario = scen
+	defs := a.getCachedDefs()
+	for _, u := range scen.Units {
+		ensureUnitOpsState(u, defs[u.DefinitionId])
+	}
 
 	unitDefs, _ := a.unitDefRepo.List(a.ctx)
 	generalTypeByDefID := make(map[string]int32, len(unitDefs))
@@ -205,7 +210,7 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 	go sim.MockLoop(
 		simCtx,
 		scen.Units,
-		a.getCachedDefs(),
+		defs,
 		a.buildWeaponCatalog(),
 		a.relationshipRules,
 		0,
@@ -214,6 +219,83 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 		a.makeEmitFn(),
 	)
 	slog.Info("scenario loaded", "name", scen.Name, "units", len(scen.Units))
+}
+
+func ensureUnitOpsState(u *enginev1.Unit, def sim.DefStats) {
+	if u == nil {
+		return
+	}
+	if u.BaseOps == nil && def.AssetClass == "airbase" {
+		u.BaseOps = &enginev1.BaseOpsState{
+			State: enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_USABLE,
+		}
+	}
+	if u.NextSortieReadySeconds < 0 {
+		u.NextSortieReadySeconds = 0
+	}
+}
+
+func shouldInitiateLaunch(u *enginev1.Unit, def sim.DefStats) bool {
+	if u == nil {
+		return false
+	}
+	if def.Domain != enginev1.UnitDomain_DOMAIN_AIR {
+		return false
+	}
+	pos := u.GetPosition()
+	return pos != nil && pos.GetAltMsl() <= 0
+}
+
+func findScenarioUnit(units []*enginev1.Unit, id string) *enginev1.Unit {
+	for _, u := range units {
+		if u.GetId() == id {
+			return u
+		}
+	}
+	return nil
+}
+
+func (a *App) validateAndConsumeLaunch(u *enginev1.Unit, def sim.DefStats) error {
+	if u == nil || a.currentScenario == nil {
+		return nil
+	}
+	if !shouldInitiateLaunch(u, def) {
+		return nil
+	}
+	hostBaseID := strings.TrimSpace(u.GetHostBaseId())
+	if hostBaseID == "" {
+		return fmt.Errorf("%s has no host base assigned", u.GetDisplayName())
+	}
+	base := findScenarioUnit(a.currentScenario.GetUnits(), hostBaseID)
+	if base == nil {
+		return fmt.Errorf("host base %s not found", hostBaseID)
+	}
+	baseDef := a.getCachedDefs()[base.GetDefinitionId()]
+	if base.GetBaseOps() == nil {
+		return fmt.Errorf("host base %s has no operational state", base.GetDisplayName())
+	}
+	if base.GetBaseOps().GetState() == enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_CLOSED {
+		return fmt.Errorf("%s is closed", base.GetDisplayName())
+	}
+	simSeconds := a.getSimSeconds()
+	if u.GetNextSortieReadySeconds() > simSeconds {
+		return fmt.Errorf("%s is not sortie-ready until T+%.0fs", u.GetDisplayName(), u.GetNextSortieReadySeconds())
+	}
+	if base.GetBaseOps().GetNextLaunchAvailableSeconds() > simSeconds {
+		return fmt.Errorf("%s launch window unavailable until T+%.0fs", base.GetDisplayName(), base.GetBaseOps().GetNextLaunchAvailableSeconds())
+	}
+	spacingSeconds := 0.0
+	if baseDef.LaunchCapacityPerInterval > 0 {
+		spacingSeconds = 900.0 / float64(baseDef.LaunchCapacityPerInterval)
+	}
+	if spacingSeconds <= 0 {
+		spacingSeconds = 60
+	}
+	if base.GetBaseOps().GetState() == enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_DEGRADED {
+		spacingSeconds *= 2
+	}
+	base.BaseOps.NextLaunchAvailableSeconds = simSeconds + spacingSeconds
+	return nil
 }
 
 func selectWeaponConfiguration(def library.Definition, preferredID string) (string, []library.LoadoutSlot) {
@@ -320,6 +402,9 @@ func (a *App) MoveUnit(unitID string, lat, lon float64) BridgeResult {
 		if err := a.validateTransit(unitCountryCode(u), defs[u.DefinitionId].Domain, oldPos.GetLat(), oldPos.GetLon(), lat, lon); err != nil {
 			return failMsg(err.Error())
 		}
+		if err := a.validateAndConsumeLaunch(u, defs[u.DefinitionId]); err != nil {
+			return failMsg(err.Error())
+		}
 
 		cruiseSpeed := defs[u.DefinitionId].CruiseSpeedMps
 		if cruiseSpeed <= 0 {
@@ -409,6 +494,11 @@ func (a *App) AppendMoveWaypoint(unitID string, lat, lon float64) BridgeResult {
 		}
 		if err := a.validateTransit(unitCountryCode(u), defs[u.DefinitionId].Domain, startLat, startLon, lat, lon); err != nil {
 			return failMsg(err.Error())
+		}
+		if (u.GetMoveOrder() == nil || len(u.GetMoveOrder().GetWaypoints()) == 0) && shouldInitiateLaunch(u, defs[u.DefinitionId]) {
+			if err := a.validateAndConsumeLaunch(u, defs[u.DefinitionId]); err != nil {
+				return failMsg(err.Error())
+			}
 		}
 		wp := &enginev1.Waypoint{Lat: lat, Lon: lon, AltMsl: pos.GetAltMsl()}
 		var newOrder *enginev1.MoveOrder
@@ -554,6 +644,7 @@ func (a *App) SetUnitAttackOrder(unitID string, orderType int32, targetUnitID st
 	if a.currentScenario == nil {
 		return failMsg("no scenario loaded")
 	}
+	defs := a.getCachedDefs()
 	var shooter *enginev1.Unit
 	var target *enginev1.Unit
 	for _, u := range a.currentScenario.Units {
@@ -580,6 +671,11 @@ func (a *App) SetUnitAttackOrder(unitID string, orderType int32, targetUnitID st
 		}
 		if err := a.validateStrike(shooter, target); err != nil {
 			return failMsg(err.Error())
+		}
+		if current := u.GetMoveOrder(); current == nil || len(current.GetWaypoints()) == 0 {
+			if err := a.validateAndConsumeLaunch(u, defs[u.DefinitionId]); err != nil {
+				return failMsg(err.Error())
+			}
 		}
 		u.AttackOrder = &enginev1.AttackOrder{
 			OrderType:      enginev1.AttackOrderType(orderType),
@@ -646,13 +742,13 @@ func (a *App) getOrCreateRelationship(fromCountry, toCountry string) (*enginev1.
 	}
 	if rel == nil {
 		rel = &enginev1.CountryRelationship{
-			FromCountry:                fromCountry,
-			ToCountry:                  toCountry,
-			AirspaceTransitAllowed:     false,
-			AirspaceStrikeAllowed:      false,
+			FromCountry:                 fromCountry,
+			ToCountry:                   toCountry,
+			AirspaceTransitAllowed:      false,
+			AirspaceStrikeAllowed:       false,
 			DefensivePositioningAllowed: false,
-			MaritimeTransitAllowed:     false,
-			MaritimeStrikeAllowed:      false,
+			MaritimeTransitAllowed:      false,
+			MaritimeStrikeAllowed:       false,
 		}
 		a.currentScenario.Relationships = append(a.currentScenario.Relationships, rel)
 	}
@@ -700,12 +796,16 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 			rcs = defaultRadarCrossSectionM2(domain, generalType)
 		}
 		defs[id] = sim.DefStats{
-			CruiseSpeedMps:      float64(def.CruiseSpeedMps),
-			BaseStrength:        float64(def.BaseStrength),
-			DetectionRangeM:     float64(def.DetectionRangeM),
-			RadarCrossSectionM2: rcs,
-			Domain:              domain,
-			TargetClass:         strings.TrimSpace(def.TargetClass),
+			CruiseSpeedMps:              float64(def.CruiseSpeedMps),
+			BaseStrength:                float64(def.BaseStrength),
+			DetectionRangeM:             float64(def.DetectionRangeM),
+			RadarCrossSectionM2:         rcs,
+			Domain:                      domain,
+			TargetClass:                 strings.TrimSpace(def.TargetClass),
+			AssetClass:                  strings.TrimSpace(def.AssetClass),
+			LaunchCapacityPerInterval:   def.LaunchCapacityPerInterval,
+			RecoveryCapacityPerInterval: def.RecoveryCapacityPerInterval,
+			SortieIntervalMinutes:       def.SortieIntervalMinutes,
 		}
 	}
 
@@ -726,12 +826,16 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 			rcs = defaultRadarCrossSectionM2(domain, generalType)
 		}
 		defs[id] = sim.DefStats{
-			CruiseSpeedMps:      toFloat64(row["cruise_speed_mps"]),
-			BaseStrength:        toFloat64(row["base_strength"]),
-			DetectionRangeM:     toFloat64(row["detection_range_m"]),
-			RadarCrossSectionM2: rcs,
-			Domain:              domain,
-			TargetClass:         toString(row["target_class"]),
+			CruiseSpeedMps:              toFloat64(row["cruise_speed_mps"]),
+			BaseStrength:                toFloat64(row["base_strength"]),
+			DetectionRangeM:             toFloat64(row["detection_range_m"]),
+			RadarCrossSectionM2:         rcs,
+			Domain:                      domain,
+			TargetClass:                 toString(row["target_class"]),
+			AssetClass:                  toString(row["asset_class"]),
+			LaunchCapacityPerInterval:   int(toFloat64(row["launch_capacity_per_interval"])),
+			RecoveryCapacityPerInterval: int(toFloat64(row["recovery_capacity_per_interval"])),
+			SortieIntervalMinutes:       int(toFloat64(row["sortie_interval_minutes"])),
 		}
 	}
 	return defs

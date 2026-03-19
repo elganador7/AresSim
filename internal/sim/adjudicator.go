@@ -15,6 +15,10 @@ type DefStats struct {
 	RadarCrossSectionM2 float64
 	Domain              enginev1.UnitDomain // physical domain of this platform
 	TargetClass         string
+	AssetClass          string
+	LaunchCapacityPerInterval   int
+	RecoveryCapacityPerInterval int
+	SortieIntervalMinutes       int
 }
 
 // WeaponStats holds the per-weapon catalog data needed for engagement resolution

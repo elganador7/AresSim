@@ -57,6 +57,7 @@ export function draftToProtoB64(draft: ScenarioDraft): string {
         teamId: u.teamId,
         coalitionId: u.coalitionId,
         definitionId: u.definitionId,
+        hostBaseId: u.hostBaseId,
         parentUnitId: u.parentUnitId,
         loadoutConfigurationId: u.loadoutConfigurationId,
         natoSymbolSidc: u.natoSymbolSidc,
@@ -69,6 +70,14 @@ export function draftToProtoB64(draft: ScenarioDraft): string {
               targetUnitId: u.attackOrder.targetUnitId,
               desiredEffect: u.attackOrder.desiredEffect,
               pkillThreshold: u.attackOrder.pkillThreshold,
+            }
+          : undefined,
+        nextSortieReadySeconds: u.nextSortieReadySeconds ?? 0,
+        baseOps: u.baseOps
+          ? {
+              state: u.baseOps.state,
+              nextLaunchAvailableSeconds: u.baseOps.nextLaunchAvailableSeconds,
+              nextRecoveryAvailableSeconds: u.baseOps.nextRecoveryAvailableSeconds,
             }
           : undefined,
         moveOrder: u.moveOrder

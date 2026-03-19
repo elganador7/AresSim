@@ -125,8 +125,15 @@ export interface Unit {
   coalitionId?: string;
   natoPendingSymbol: string;  // NATO APP-6D SIDC code
   definitionId: string;
+  hostBaseId?: string;
   loadoutConfigurationId?: string;
   damageState: number;
+  nextSortieReadySeconds?: number;
+  baseOps?: {
+    state: number;
+    nextLaunchAvailableSeconds: number;
+    nextRecoveryAvailableSeconds: number;
+  };
   engagementBehavior?: number;
   engagementPkillThreshold?: number;
   attackOrder?: {

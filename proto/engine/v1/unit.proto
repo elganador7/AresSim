@@ -37,11 +37,24 @@ enum DesiredEffect {
   DESIRED_EFFECT_DESTROY = 3;
 }
 
+enum FacilityOperationalState {
+  FACILITY_OPERATIONAL_STATE_UNSPECIFIED = 0;
+  FACILITY_OPERATIONAL_STATE_USABLE = 1;
+  FACILITY_OPERATIONAL_STATE_DEGRADED = 2;
+  FACILITY_OPERATIONAL_STATE_CLOSED = 3;
+}
+
 message AttackOrder {
   AttackOrderType order_type = 1;
   string target_unit_id = 2;
   DesiredEffect desired_effect = 3;
   float pkill_threshold = 4;
+}
+
+message BaseOpsState {
+  FacilityOperationalState state = 1;
+  double next_launch_available_seconds = 2;
+  double next_recovery_available_seconds = 3;
 }
 
 message Unit {
@@ -84,4 +97,7 @@ message Unit {
   EngagementBehavior engagement_behavior = 24;
   float engagement_pkill_threshold = 25;
   AttackOrder attack_order = 26;
+  string host_base_id = 27;
+  double next_sortie_ready_seconds = 28;
+  BaseOpsState base_ops = 29;
 }

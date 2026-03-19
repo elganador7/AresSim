@@ -464,6 +464,12 @@
   margin-top: 2px;
 }
 
+.modal-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .modal-empty {
   padding: 32px;
   text-align: center;

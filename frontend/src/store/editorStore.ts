@@ -18,6 +18,7 @@ export interface UnitDraft {
   teamId: string;
   coalitionId: string;
   definitionId: string;
+  hostBaseId?: string;
   parentUnitId?: string;
   loadoutConfigurationId: string;
   natoSymbolSidc: string;
@@ -41,6 +42,12 @@ export interface UnitDraft {
     targetUnitId: string;
     desiredEffect: number;
     pkillThreshold: number;
+  };
+  nextSortieReadySeconds?: number;
+  baseOps?: {
+    state: number;
+    nextLaunchAvailableSeconds: number;
+    nextRecoveryAvailableSeconds: number;
   };
   moveOrder?: {
     waypoints: {
@@ -211,6 +218,7 @@ export function blankUnit(lat = 35.0, lon = 25.0): UnitDraft {
     teamId: "",
     coalitionId: "Blue",
     definitionId: "",
+    hostBaseId: undefined,
     parentUnitId: undefined,
     loadoutConfigurationId: "",
     natoSymbolSidc: "",
@@ -229,6 +237,8 @@ export function blankUnit(lat = 35.0, lon = 25.0): UnitDraft {
     engagementBehavior: 1,
     engagementPkillThreshold: 0.5,
     attackOrder: undefined,
+    nextSortieReadySeconds: 0,
+    baseOps: undefined,
     moveOrder: undefined,
   };
 }

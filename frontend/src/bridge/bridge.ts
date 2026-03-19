@@ -120,8 +120,17 @@ export function protoUnitToStore(u: ProtoUnit): Unit {
     coalitionId: u.coalitionId || undefined,
     natoPendingSymbol: u.natoSymbolSidc,
     definitionId: u.definitionId,
+    hostBaseId: u.hostBaseId || undefined,
     loadoutConfigurationId: u.loadoutConfigurationId || undefined,
     damageState: u.damageState || 1,
+    nextSortieReadySeconds: u.nextSortieReadySeconds || 0,
+    baseOps: u.baseOps
+      ? {
+          state: u.baseOps.state,
+          nextLaunchAvailableSeconds: u.baseOps.nextLaunchAvailableSeconds,
+          nextRecoveryAvailableSeconds: u.baseOps.nextRecoveryAvailableSeconds,
+        }
+      : undefined,
     engagementBehavior: u.engagementBehavior || 1,
     engagementPkillThreshold: u.engagementPkillThreshold || 0.5,
     attackOrder: u.attackOrder
