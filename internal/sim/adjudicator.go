@@ -5,17 +5,18 @@ import (
 	"strings"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
+	"github.com/aressim/internal/geo"
 )
 
 // DefStats holds the per-definition values the sim loop needs each tick.
 type DefStats struct {
-	CruiseSpeedMps      float64
-	BaseStrength        float64
-	DetectionRangeM     float64
-	RadarCrossSectionM2 float64
-	Domain              enginev1.UnitDomain // physical domain of this platform
-	TargetClass         string
-	AssetClass          string
+	CruiseSpeedMps              float64
+	BaseStrength                float64
+	DetectionRangeM             float64
+	RadarCrossSectionM2         float64
+	Domain                      enginev1.UnitDomain // physical domain of this platform
+	TargetClass                 string
+	AssetClass                  string
 	LaunchCapacityPerInterval   int
 	RecoveryCapacityPerInterval int
 	SortieIntervalMinutes       int
@@ -96,6 +97,42 @@ func unitsAreHostile(a, b *enginev1.Unit) bool {
 	return aCoalition != bCoalition
 }
 
+func isUnauthorizedOverflight(defender, intruder *enginev1.Unit, defs map[string]DefStats, rules RelationshipRules) bool {
+	if defender == nil || intruder == nil {
+		return false
+	}
+	if unitTeamID(defender) == "" || unitTeamID(defender) == unitTeamID(intruder) {
+		return false
+	}
+	intruderDef := defs[intruder.DefinitionId]
+	if intruderDef.Domain != enginev1.UnitDomain_DOMAIN_AIR {
+		return false
+	}
+	if intruder.GetPosition() == nil || intruder.GetPosition().GetAltMsl() <= 100 {
+		return false
+	}
+	ctx := geo.LookupPoint(geo.Point{
+		Lat: intruder.GetPosition().GetLat(),
+		Lon: intruder.GetPosition().GetLon(),
+	})
+	defenderCountry := unitTeamID(defender)
+	if geo.CountryCode(ctx.AirspaceOwner) != defenderCountry {
+		return false
+	}
+	rule := GetRelationshipRule(rules, unitTeamID(intruder), defenderCountry)
+	return !rule.AirspaceTransitAllowed
+}
+
+func canPerformSovereignAirDefense(unit *enginev1.Unit, def DefStats) bool {
+	if unit == nil {
+		return false
+	}
+	if def.Domain != enginev1.UnitDomain_DOMAIN_AIR {
+		return true
+	}
+	return unit.GetPosition() != nil && unit.GetPosition().GetAltMsl() > 100
+}
+
 // AdjudicateTick checks all pairs of enemy active units and fires a salvo for
 // each unit that meets the engagement criteria. Each unit fires at most one
 // salvo per tick (at its highest-priority target).
@@ -109,11 +146,11 @@ func unitsAreHostile(a, b *enginev1.Unit) bool {
 // kill probability of all munitions (in-flight + new salvo) exceeds 70 %.
 // Already in-flight munitions targeting the same unit are counted, so platforms
 // do not keep firing after enough rounds are already on the way.
-func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, inFlight []*InFlightMunition) AdjudicateResult {
+func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, inFlight []*InFlightMunition, rules RelationshipRules) AdjudicateResult {
 	firedThisTick := make(map[string]bool)
 	orderedUnits := make(map[string]bool)
 	var result AdjudicateResult
-	tracks := buildTrackPicture(units, defs)
+	tracks := buildTrackPicture(units, defs, rules)
 	unitByID := make(map[string]*enginev1.Unit, len(units))
 	for _, u := range units {
 		unitByID[u.Id] = u
@@ -164,10 +201,6 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons ma
 			if !unitCanOperate(b) {
 				continue
 			}
-			if !unitsAreHostile(a, b) {
-				continue
-			}
-
 			dist := haversineM(
 				a.GetPosition().GetLat(), a.GetPosition().GetLon(),
 				b.GetPosition().GetLat(), b.GetPosition().GetLon(),
@@ -181,9 +214,11 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons ma
 
 			aHasTrack := tracks.unitHasTrack(a.Id, b.Id)
 			bHasTrack := tracks.unitHasTrack(b.Id, a.Id)
+			aCanEngageB := unitsAreHostile(a, b) || (isUnauthorizedOverflight(a, b, defs, rules) && canPerformSovereignAirDefense(a, defA))
+			bCanEngageA := unitsAreHostile(a, b) || (isUnauthorizedOverflight(b, a, defs, rules) && canPerformSovereignAirDefense(b, defB))
 
-			aInRange := hasWeapA && aHasTrack && dist <= wA.RangeM && !firedThisTick[a.Id] && !orderedUnits[a.Id]
-			bInRange := hasWeapB && bHasTrack && dist <= wB.RangeM && !firedThisTick[b.Id] && !orderedUnits[b.Id]
+			aInRange := aCanEngageB && hasWeapA && aHasTrack && dist <= wA.RangeM && !firedThisTick[a.Id] && !orderedUnits[a.Id]
+			bInRange := bCanEngageA && hasWeapB && bHasTrack && dist <= wB.RangeM && !firedThisTick[b.Id] && !orderedUnits[b.Id]
 
 			if !aInRange && !bInRange {
 				continue
@@ -564,11 +599,11 @@ func decrementAmmo(shooter *enginev1.Unit, weaponID string, amount int32) {
 type DetectionSet map[string][]string
 
 // SensorTick scans all operational units and builds the current detection picture.
-func SensorTick(units []*enginev1.Unit, defs map[string]DefStats) DetectionSet {
-	return buildTrackPicture(units, defs).BySide
+func SensorTick(units []*enginev1.Unit, defs map[string]DefStats, rules RelationshipRules) DetectionSet {
+	return buildTrackPicture(units, defs, rules).BySide
 }
 
-func buildTrackPicture(units []*enginev1.Unit, defs map[string]DefStats) trackPicture {
+func buildTrackPicture(units []*enginev1.Unit, defs map[string]DefStats, rules RelationshipRules) trackPicture {
 	groupForUnit := resolveTrackGroupIDs(units)
 	bySide := make(map[string]map[string]bool)
 	byGroup := make(detectionIndex)
@@ -597,7 +632,10 @@ func buildTrackPicture(units []*enginev1.Unit, defs map[string]DefStats) trackPi
 		}
 		groupID := groupForUnit[detector.Id]
 		for _, target := range units {
-			if !unitIsAlive(target) || !unitsAreHostile(detector, target) {
+			if !unitIsAlive(target) {
+				continue
+			}
+			if !unitsAreHostile(detector, target) && !isUnauthorizedOverflight(detector, target, defs, rules) {
 				continue
 			}
 			dist := haversineM(

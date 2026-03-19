@@ -204,7 +204,7 @@ func TestEffectiveDetectionRangeM_LargeTargetExtendsRange(t *testing.T) {
 // ─── AdjudicateTick ───────────────────────────────────────────────────────────
 
 func TestAdjudicateTick_NoUnits_NoShots(t *testing.T) {
-	adj := AdjudicateTick(nil, nil, nil, nil)
+	adj := AdjudicateTick(nil, nil, nil, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Errorf("expected 0 shots with no units, got %d", len(adj.Shots))
 	}
@@ -220,7 +220,7 @@ func TestAdjudicateTick_FriendlyFire_NoShots(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Errorf("friendly fire: expected 0 shots, got %d", len(adj.Shots))
 	}
@@ -235,7 +235,7 @@ func TestAdjudicateTick_OutOfRange_NoShots(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Errorf("out-of-range: expected 0 shots, got %d", len(adj.Shots))
 	}
@@ -251,7 +251,7 @@ func TestAdjudicateTick_InRange_ShotFired(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected 1 shot, got %d", len(adj.Shots))
 	}
@@ -273,7 +273,7 @@ func TestAdjudicateTick_ShotHasHitProbability(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected 1 shot, got %d", len(adj.Shots))
 	}
@@ -292,7 +292,7 @@ func TestAdjudicateTick_AmmoDecremented(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if a.Weapons[0].CurrentQty != 4 {
 		t.Errorf("expected ammo to decrement to 4, got %d", a.Weapons[0].CurrentQty)
 	}
@@ -309,7 +309,7 @@ func TestAdjudicateTick_OutOfAmmo_NoShots(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Errorf("depleted units should fire 0 shots, got %d", len(adj.Shots))
 	}
@@ -325,7 +325,7 @@ func TestAdjudicateTick_WrongDomain_NoShots(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("land-gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Errorf("wrong-domain weapon: expected 0 shots, got %d", len(adj.Shots))
 	}
@@ -341,7 +341,7 @@ func TestAdjudicateTick_BothInRange_BothShoot(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 2 {
 		t.Errorf("expected 2 shots (both fire), got %d", len(adj.Shots))
 	}
@@ -360,7 +360,7 @@ func TestAdjudicateTick_EachUnitFiresOnce(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("missile", 500_000, 0.9, enginev1.UnitDomain_DOMAIN_AIR)
 
-	adj := AdjudicateTick([]*enginev1.Unit{blue, r1, r2, r3}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{blue, r1, r2, r3}, defs, catalog, nil, nil)
 	blueShots := 0
 	for _, s := range adj.Shots {
 		if s.Shooter.Id == "blue" {
@@ -382,7 +382,7 @@ func TestAdjudicateTick_DestroyedUnit_NoShots(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 50_000, 1.0, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	for _, s := range adj.Shots {
 		if s.Shooter.Id == "a" {
 			t.Error("destroyed unit should not fire")
@@ -400,7 +400,7 @@ func TestAdjudicateTick_LowPkillOutsideSensors_HoldsFire(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Fatalf("expected no shots when pkill <= 50%% outside sensors, got %d", len(adj.Shots))
 	}
@@ -419,7 +419,7 @@ func TestAdjudicateTick_LowPkillInsideEnemySensors_Fires(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected one firing decision when already detected, got %d", len(adj.Shots))
 	}
@@ -441,13 +441,13 @@ func TestAdjudicateTick_EnemySensorRangeUsesTargetRCS(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("gun", 10_000, 0.2, enginev1.UnitDomain_DOMAIN_AIR)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Fatalf("expected no shot when stealth target stays outside adjusted sensor range, got %d", len(adj.Shots))
 	}
 
 	defs["def-a"] = DefStats{Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 50_000, RadarCrossSectionM2: 16}
-	adj = AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj = AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected one shot when large-RCS target is inside adjusted sensor range, got %d", len(adj.Shots))
 	}
@@ -463,7 +463,7 @@ func TestAdjudicateTick_SalvoSizedToThreshold(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("missile", 50_000, 0.6, enginev1.UnitDomain_DOMAIN_AIR)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected one shot record, got %d", len(adj.Shots))
 	}
@@ -486,7 +486,7 @@ func TestAdjudicateTick_InFlightRoundsReduceNewSalvo(t *testing.T) {
 	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
 	inFlight := repeatInFlight("b", 0.4, 2)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, inFlight)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, inFlight, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected one shot record, got %d", len(adj.Shots))
 	}
@@ -506,7 +506,7 @@ func TestAdjudicateTick_EnoughInFlight_NoAdditionalShot(t *testing.T) {
 	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
 	inFlight := repeatInFlight("b", 0.4, 3)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, inFlight)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, inFlight, nil)
 	if len(adj.Shots) != 0 {
 		t.Fatalf("expected no new shot once in-flight salvo already exceeds 70%% pkill, got %d", len(adj.Shots))
 	}
@@ -529,7 +529,7 @@ func TestAdjudicateTick_ConnectedSensorAllowsLauncherToFire(t *testing.T) {
 	}
 	catalog := makeWeaponCatalog("sam", 50_000, 0.8, enginev1.UnitDomain_DOMAIN_AIR)
 
-	adj := AdjudicateTick([]*enginev1.Unit{parent, radar, launcher, target}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{parent, radar, launcher, target}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected connected launcher to fire off shared track, got %d shots", len(adj.Shots))
 	}
@@ -550,7 +550,7 @@ func TestAdjudicateTick_UnconnectedLauncherCannotFireWithoutTrack(t *testing.T) 
 	}
 	catalog := makeWeaponCatalog("sam", 50_000, 0.8, enginev1.UnitDomain_DOMAIN_AIR)
 
-	adj := AdjudicateTick([]*enginev1.Unit{radar, launcher, target}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{radar, launcher, target}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Fatalf("expected unconnected launcher to hold fire without a shared track, got %d shots", len(adj.Shots))
 	}
@@ -573,7 +573,7 @@ func TestAdjudicateTick_AttackOrderOverridesAutonomousTargetChoice(t *testing.T)
 	}
 	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.9, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{shooter, nearTarget, orderedTarget}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, nearTarget, orderedTarget}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected 1 ordered shot, got %d", len(adj.Shots))
 	}
@@ -599,7 +599,7 @@ func TestAdjudicateTick_StrikeUntilEffect_HoldsOnceSatisfied(t *testing.T) {
 	}
 	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.9, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Fatalf("expected no shots once desired effect is already met, got %d", len(adj.Shots))
 	}
@@ -616,7 +616,7 @@ func TestAdjudicateTick_HoldFire_PreventsAutonomousEngagement(t *testing.T) {
 	}
 	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.9, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Fatalf("expected hold-fire unit not to engage autonomously, got %d shots", len(adj.Shots))
 	}
@@ -633,7 +633,7 @@ func TestAdjudicateTick_AssignedTargetsOnly_HoldsWithoutOrder(t *testing.T) {
 	}
 	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.9, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Fatalf("expected assigned-targets-only unit to hold without orders, got %d shots", len(adj.Shots))
 	}
@@ -650,7 +650,7 @@ func TestAdjudicateTick_SelfDefenseOnly_FiresWhenDetected(t *testing.T) {
 	}
 	catalog := makeWeaponCatalogWithEffect("strike", 20_000, 0.2, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected self-defense unit to fire when detected, got %d shots", len(adj.Shots))
 	}
@@ -668,7 +668,7 @@ func TestAdjudicateTick_AutoEngage_UsesConfiguredThreshold(t *testing.T) {
 	}
 	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.6, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 0 {
 		t.Fatalf("expected high pkill threshold to suppress engagement, got %d shots", len(adj.Shots))
 	}
@@ -691,7 +691,7 @@ func TestAdjudicateTick_AssignedTargetsOnly_AllowsManualOrder(t *testing.T) {
 	}
 	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.9, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected manual order to override assigned-targets-only hold, got %d shots", len(adj.Shots))
 	}
@@ -715,7 +715,7 @@ func TestResolveArrivals_AlwaysHit_Kill(t *testing.T) {
 	}
 	catalog := makeWeaponCatalogWithEffect("gun", 50_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_ARMOR, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	if len(adj.Shots) != 1 {
 		t.Fatalf("setup: expected 1 shot, got %d", len(adj.Shots))
 	}
@@ -745,7 +745,7 @@ func TestResolveArrivals_AlwaysMiss_NoKill(t *testing.T) {
 	}
 	catalog := makeWeaponCatalogWithEffect("gun", 50_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_ARMOR, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	arrived := []*InFlightMunition{munitionFromShot(adj.Shots[0])}
 	hits := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, defs, catalog, alwaysMiss)
 	if len(hits) != 0 {
@@ -781,7 +781,7 @@ func TestResolveArrivals_AttackerLookup(t *testing.T) {
 	}
 	catalog := makeWeaponCatalogWithEffect("gun", 50_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_ARMOR, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	arrived := []*InFlightMunition{munitionFromShot(adj.Shots[0])}
 	hits := ResolveArrivals(arrived, []*enginev1.Unit{a, b}, defs, catalog, alwaysHit)
 	if len(hits) != 1 {
@@ -803,7 +803,7 @@ func TestResolveArrivals_MultipleMunitions(t *testing.T) {
 	}
 	catalog := makeWeaponCatalogWithEffect("gun", 50_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_ARMOR, enginev1.UnitDomain_DOMAIN_LAND)
 
-	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil)
+	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil)
 	var arrived []*InFlightMunition
 	for _, s := range adj.Shots {
 		arrived = append(arrived, munitionFromShot(s))
@@ -866,7 +866,7 @@ func TestResolveArrivals_AntiShipSecondHit_DestroysTarget(t *testing.T) {
 // ─── SensorTick ───────────────────────────────────────────────────────────────
 
 func TestSensorTick_NoUnits(t *testing.T) {
-	result := SensorTick(nil, nil)
+	result := SensorTick(nil, nil, nil)
 	if len(result) != 0 {
 		t.Errorf("expected empty DetectionSet with no units, got %v", result)
 	}
@@ -880,7 +880,7 @@ func TestSensorTick_InRange_Detected(t *testing.T) {
 		"no_sensor": makeDef(0, 0),
 	}
 
-	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
+	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
 	ids, ok := result["Blue"]
 	if !ok {
 		t.Fatal("Blue side should have a detection entry")
@@ -904,7 +904,7 @@ func TestSensorTick_OutOfRange_NotDetected(t *testing.T) {
 		"no_sensor": makeDef(0, 0),
 	}
 
-	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
+	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
 	ids := result["Blue"]
 	for _, id := range ids {
 		if id == "red" {
@@ -918,7 +918,7 @@ func TestSensorTick_FriendlyNotDetected(t *testing.T) {
 	b2 := makeUnit("b2", "Blue", "sensor", 0, 0)
 	defs := map[string]DefStats{"sensor": makeDef(100_000, 0)}
 
-	result := SensorTick([]*enginev1.Unit{b1, b2}, defs)
+	result := SensorTick([]*enginev1.Unit{b1, b2}, defs, nil)
 	for _, id := range result["Blue"] {
 		if id == "b1" || id == "b2" {
 			t.Errorf("friendly unit %s should not appear in Blue detections", id)
@@ -935,7 +935,7 @@ func TestSensorTick_DestroyedUnitSkipped(t *testing.T) {
 		"no_sensor": makeDef(0, 0),
 	}
 
-	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
+	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
 	for _, id := range result["Blue"] {
 		if id == "red" {
 			t.Error("destroyed unit should not be detected")
@@ -953,7 +953,7 @@ func TestSensorTick_EmptySliceForSideWithNoContacts(t *testing.T) {
 		"no_sensor": makeDef(0, 0),
 	}
 
-	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
+	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
 	if _, ok := result["Blue"]; !ok {
 		t.Error("Blue should have an entry even with zero contacts (to clear stale state)")
 	}
@@ -967,7 +967,7 @@ func TestSensorTick_BothSidesDetectEachOther(t *testing.T) {
 	red := makeUnit("red", "Red", "sensor", 0, 0.05) // ~5.5 km
 	defs := map[string]DefStats{"sensor": makeDef(10_000, 0)}
 
-	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
+	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
 
 	foundRed := false
 	for _, id := range result["Blue"] {
@@ -998,7 +998,7 @@ func TestSensorTick_StealthTargetCanAvoidDetection(t *testing.T) {
 		"def-red":  {Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 0.01},
 	}
 
-	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
+	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
 	if len(result["Blue"]) != 0 {
 		t.Fatalf("expected stealth target to remain undetected, got %v", result["Blue"])
 	}
@@ -1012,8 +1012,94 @@ func TestSensorTick_LargeTargetDetectedEarlier(t *testing.T) {
 		"def-red":  {Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 16},
 	}
 
-	result := SensorTick([]*enginev1.Unit{blue, red}, defs)
+	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
 	if len(result["Blue"]) != 1 || result["Blue"][0] != "red" {
 		t.Fatalf("expected large-RCS target to be detected, got %v", result["Blue"])
+	}
+}
+
+func TestSensorTick_DetectsUnauthorizedOverflight(t *testing.T) {
+	defender := makeUnit("qat-sam", "Blue", "sam", 25.12, 51.31)
+	defender.TeamId = "QAT"
+	defender.CoalitionId = "Blue"
+	intruder := makeUnit("isr-f35", "Blue", "fighter", 25.13, 51.31)
+	intruder.TeamId = "ISR"
+	intruder.CoalitionId = "Blue"
+	intruder.Position.AltMsl = 5000
+
+	defs := map[string]DefStats{
+		"sam":     {DetectionRangeM: 100_000, Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"fighter": {Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 1},
+	}
+	rules := BuildRelationshipRules([]*enginev1.CountryRelationship{{
+		FromCountry:            "ISR",
+		ToCountry:              "QAT",
+		AirspaceTransitAllowed: false,
+	}})
+
+	result := SensorTick([]*enginev1.Unit{defender, intruder}, defs, rules)
+	if len(result["QAT"]) != 1 || result["QAT"][0] != "isr-f35" {
+		t.Fatalf("expected QAT to detect unauthorized overflight, got %v", result["QAT"])
+	}
+}
+
+func TestAdjudicateTick_EngagesUnauthorizedOverflight(t *testing.T) {
+	defender := makeUnit("qat-sam", "Blue", "sam", 25.12, 51.31)
+	defender.TeamId = "QAT"
+	defender.CoalitionId = "Blue"
+	defender.EngagementBehavior = enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_AUTO_ENGAGE
+	addWeapons(defender, "sam-shot", 2)
+
+	intruder := makeUnit("isr-f35", "Blue", "fighter", 25.13, 51.31)
+	intruder.TeamId = "ISR"
+	intruder.CoalitionId = "Blue"
+	intruder.Position.AltMsl = 5000
+
+	defs := map[string]DefStats{
+		"sam":     {DetectionRangeM: 100_000, Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"fighter": {Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 1},
+	}
+	catalog := makeWeaponCatalog("sam-shot", 100_000, 1.0, enginev1.UnitDomain_DOMAIN_AIR)
+	rules := BuildRelationshipRules([]*enginev1.CountryRelationship{{
+		FromCountry:            "ISR",
+		ToCountry:              "QAT",
+		AirspaceTransitAllowed: false,
+	}})
+
+	adj := AdjudicateTick([]*enginev1.Unit{defender, intruder}, defs, catalog, nil, rules)
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected sovereign air-defense shot, got %d", len(adj.Shots))
+	}
+	if adj.Shots[0].Shooter.Id != "qat-sam" || adj.Shots[0].Target.Id != "isr-f35" {
+		t.Fatalf("unexpected sovereign defense shot: %+v", adj.Shots[0])
+	}
+}
+
+func TestAdjudicateTick_GroundedFighterDoesNotEngageUnauthorizedOverflight(t *testing.T) {
+	defender := makeUnit("qat-f16", "Blue", "fighter", 25.12, 51.31)
+	defender.TeamId = "QAT"
+	defender.CoalitionId = "Blue"
+	defender.EngagementBehavior = enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_AUTO_ENGAGE
+	addWeapons(defender, "aam", 2)
+	defender.Position.AltMsl = 0
+
+	intruder := makeUnit("isr-f35", "Blue", "fighter", 25.13, 51.31)
+	intruder.TeamId = "ISR"
+	intruder.CoalitionId = "Blue"
+	intruder.Position.AltMsl = 5000
+
+	defs := map[string]DefStats{
+		"fighter": {DetectionRangeM: 100_000, Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 1},
+	}
+	catalog := makeWeaponCatalog("aam", 100_000, 1.0, enginev1.UnitDomain_DOMAIN_AIR)
+	rules := BuildRelationshipRules([]*enginev1.CountryRelationship{{
+		FromCountry:            "ISR",
+		ToCountry:              "QAT",
+		AirspaceTransitAllowed: false,
+	}})
+
+	adj := AdjudicateTick([]*enginev1.Unit{defender, intruder}, defs, catalog, nil, rules)
+	if len(adj.Shots) != 0 {
+		t.Fatalf("expected grounded fighter to hold fire on unauthorized overflight, got %d shots", len(adj.Shots))
 	}
 }

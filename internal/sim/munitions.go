@@ -5,6 +5,7 @@ import (
 	"sync/atomic"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
+	"github.com/aressim/internal/geo"
 )
 
 // InFlightMunition represents a weapon in transit between a shooter and a
@@ -35,6 +36,12 @@ type InFlightMunition struct {
 	Guidance       enginev1.GuidanceType
 }
 
+type InterceptShot struct {
+	Defender *enginev1.Unit
+	Munition *InFlightMunition
+	WeaponID string
+}
+
 var munitionSeq atomic.Int64
 
 // NextMunitionID returns a unique, compact ID for a new in-flight munition.
@@ -62,7 +69,7 @@ func AdvanceMunitions(
 		return
 	}
 
-	tracks := buildTrackPicture(units, defs)
+	tracks := buildTrackPicture(units, defs, nil)
 
 	// Build O(1) lookup helpers only when there are tracking munitions.
 	unitByID := make(map[string]*enginev1.Unit, len(units))
@@ -183,4 +190,85 @@ func DetectMunitions(units []*enginev1.Unit, defs map[string]DefStats, munitions
 		result[side] = list
 	}
 	return result
+}
+
+func InterceptMunitionsTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, munitions []*InFlightMunition, detections map[string][]string, rng Rng) (remaining []*InFlightMunition, shots []InterceptShot) {
+	if len(munitions) == 0 {
+		return munitions, nil
+	}
+	unitByID := make(map[string]*enginev1.Unit, len(units))
+	for _, u := range units {
+		unitByID[u.GetId()] = u
+	}
+	detectedBySide := make(map[string]map[string]bool, len(detections))
+	for side, ids := range detections {
+		detectedBySide[side] = make(map[string]bool, len(ids))
+		for _, id := range ids {
+			detectedBySide[side][id] = true
+		}
+	}
+
+	for _, m := range munitions {
+		intercepted := false
+		target := unitByID[m.TargetID]
+		for _, defender := range units {
+			if !unitCanOperate(defender) {
+				continue
+			}
+			side := unitTeamID(defender)
+			if side == "" {
+				continue
+			}
+			if !canPerformSovereignAirDefense(defender, defs[defender.DefinitionId]) {
+				continue
+			}
+			if side == unitTeamID(unitByID[m.ShooterID]) {
+				continue
+			}
+			if !detectedBySide[side][m.ID] {
+				continue
+			}
+			if !munitionThreatensSide(side, m, target) {
+				continue
+			}
+			weaponID, weapon, ok := selectBestWeapon(defender, enginev1.UnitDomain_DOMAIN_AIR, weapons)
+			if !ok {
+				continue
+			}
+			dist := haversineM(defender.GetPosition().GetLat(), defender.GetPosition().GetLon(), m.CurLat, m.CurLon)
+			if dist > weapon.RangeM {
+				continue
+			}
+			salvo := capAtAmmo(defender, weaponID, 1)
+			if salvo <= 0 {
+				continue
+			}
+			decrementAmmo(defender, weaponID, salvo)
+			shots = append(shots, InterceptShot{
+				Defender: defender,
+				Munition: m,
+				WeaponID: weaponID,
+			})
+			prob := rangeDegradedPoh(weapon.ProbabilityOfHit, dist, weapon.RangeM)
+			if rng.Float64() < prob {
+				intercepted = true
+			}
+			break
+		}
+		if !intercepted {
+			remaining = append(remaining, m)
+		}
+	}
+	return remaining, shots
+}
+
+func munitionThreatensSide(side string, m *InFlightMunition, target *enginev1.Unit) bool {
+	if side == "" || m == nil {
+		return false
+	}
+	if target != nil && unitTeamID(target) == side {
+		return true
+	}
+	ctx := geo.LookupPoint(geo.Point{Lat: m.CurLat, Lon: m.CurLon, AltMsl: m.CurAltMsl})
+	return geo.CountryCode(ctx.AirspaceOwner) == side
 }

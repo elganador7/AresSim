@@ -349,3 +349,45 @@ func TestNextMunitionID_Unique(t *testing.T) {
 		}
 	}
 }
+
+func TestInterceptMunitionsTick_InterceptsThreatToSide(t *testing.T) {
+	defender := makeUnit("qat-sam", "Blue", "sam", 25.12, 51.31)
+	defender.TeamId = "QAT"
+	addWeapons(defender, "sam-shot", 2)
+	target := makeUnit("qat-base", "Blue", "base", 25.12, 51.31)
+	target.TeamId = "QAT"
+	m := &InFlightMunition{
+		ID:            "m1",
+		WeaponID:      "raid",
+		ShooterID:     "irn-launcher",
+		ShooterSide:   "Red",
+		TargetID:      "qat-base",
+		CurLat:        25.20,
+		CurLon:        51.31,
+		CurAltMsl:     1500,
+		TargetDomains: []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	defs := map[string]DefStats{
+		"sam":  {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"base": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	weapons := makeWeaponCatalog("sam-shot", 100_000, 1.0, enginev1.UnitDomain_DOMAIN_AIR)
+
+	remaining, shots := InterceptMunitionsTick(
+		[]*enginev1.Unit{defender, target},
+		defs,
+		weapons,
+		[]*InFlightMunition{m},
+		map[string][]string{"QAT": {"m1"}},
+		alwaysHit,
+	)
+	if len(remaining) != 0 {
+		t.Fatalf("expected munition to be intercepted, got %d remaining", len(remaining))
+	}
+	if len(shots) != 1 || shots[0].Defender.Id != "qat-sam" {
+		t.Fatalf("expected one interceptor shot from qat-sam, got %+v", shots)
+	}
+	if defender.Weapons[0].CurrentQty != 1 {
+		t.Fatalf("expected interceptor ammo to decrement, got %d", defender.Weapons[0].CurrentQty)
+	}
+}
