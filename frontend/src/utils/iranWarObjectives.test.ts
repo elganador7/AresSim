@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWarCostSummary, computeIranWarObjectiveProgress, getIranWarObjectiveSet } from "./iranWarObjectives";
+import { buildWarCostSummary, computeIranWarObjectiveProgress, getIranWarKeyTargetStatuses, getIranWarObjectiveSet, getIranWarOpeningWaveStatus } from "./iranWarObjectives";
 import type { TeamScore, Unit } from "../store/simStore";
 
 function makeUnit(id: string, teamId: string, coalitionId: string): Unit {
@@ -86,6 +86,38 @@ describe("iran war objectives", () => {
       completed: 2,
       total: objective.unitIds.length,
       label: `2/${objective.unitIds.length}`,
+    });
+  });
+
+  it("reports opening wave shooters as launched when they have active strike tasking", () => {
+    const units = new Map<string, Unit>([
+      ["usa-f35a-al-udeid", {
+        ...makeUnit("usa-f35a-al-udeid", "USA", "BLUE"),
+        attackOrder: {
+          orderType: 2,
+          targetUnitId: "irn-khordad-bushehr",
+          desiredEffect: 2,
+          pkillThreshold: 0.7,
+        },
+      }],
+    ]);
+    expect(getIranWarOpeningWaveStatus("USA", units)[0]?.status).toBe("launched");
+  });
+
+  it("surfaces key target health for briefing cards", () => {
+    const units = new Map<string, Unit>([
+      ["qat-airbase-al-udeid", {
+        ...makeUnit("qat-airbase-al-udeid", "QAT", "BLUE"),
+        baseOps: { state: 3, nextLaunchAvailableSeconds: 0, nextRecoveryAvailableSeconds: 0 },
+      }],
+      ["irn-qiam-central", makeUnit("irn-qiam-central", "IRN", "RED")],
+      ["irn-kheibar-west", makeUnit("irn-kheibar-west", "IRN", "RED")],
+      ["uae-airbase-al-dhafra", makeUnit("uae-airbase-al-dhafra", "ARE", "BLUE")],
+    ]);
+    expect(getIranWarKeyTargetStatuses("USA", units)[0]).toMatchObject({
+      unitId: "qat-airbase-al-udeid",
+      status: "Closed",
+      severity: "bad",
     });
   });
 });

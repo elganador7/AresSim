@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useSimStore } from "../../store/simStore";
-import { buildWarCostSummary, computeIranWarObjectiveProgress, getIranWarObjectiveSet, isIranWarScenario } from "../../utils/iranWarObjectives";
+import { buildWarCostSummary, computeIranWarObjectiveProgress, getIranWarKeyTargetStatuses, getIranWarObjectiveSet, getIranWarOpeningWaveStatus, isIranWarScenario } from "../../utils/iranWarObjectives";
 
 function formatUsdCompact(value: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -30,6 +30,14 @@ export default function ObjectivePanel({
   const warCost = useMemo(
     () => buildWarCostSummary(humanControlledTeam, units, scores),
     [humanControlledTeam, scores, units],
+  );
+  const openingWave = useMemo(
+    () => getIranWarOpeningWaveStatus(humanControlledTeam, units),
+    [humanControlledTeam, units],
+  );
+  const keyTargets = useMemo(
+    () => getIranWarKeyTargetStatuses(humanControlledTeam, units),
+    [humanControlledTeam, units],
   );
 
   if (!open) {
@@ -71,6 +79,35 @@ export default function ObjectivePanel({
                 <strong>{formatUsdCompact(warCost.enemyLossUsd)}</strong>
               </div>
             </div>
+            {openingWave.length > 0 && (
+              <div className="objective-summary">
+                <div className="objective-title">Opening Wave</div>
+                <div className="objective-opening-list">
+                  {openingWave.map((item) => (
+                    <div key={item.shooterId} className="objective-opening-row">
+                      <div>
+                        <strong>{item.shooterLabel}</strong>
+                        <span>{item.targetLabel}</span>
+                      </div>
+                      <span className={`objective-status-chip objective-status-${item.status}`}>{item.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {keyTargets.length > 0 && (
+              <div className="objective-summary">
+                <div className="objective-title">Key Targets</div>
+                <div className="objective-key-grid">
+                  {keyTargets.map((item) => (
+                    <div key={item.unitId} className="objective-key-card">
+                      <span>{item.label}</span>
+                      <strong className={`objective-key-${item.severity}`}>{item.status}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {objectiveSet.objectives.map((objective) => {
               const progress = computeIranWarObjectiveProgress(objective, units);
               const percent = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;

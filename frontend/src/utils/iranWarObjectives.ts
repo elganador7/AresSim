@@ -22,6 +22,24 @@ export interface IranWarObjectiveProgress {
   label: string;
 }
 
+export interface IranWarOpeningWaveItem {
+  shooterId: string;
+  shooterLabel: string;
+  targetId: string;
+  targetLabel: string;
+}
+
+export interface IranWarOpeningWaveStatus extends IranWarOpeningWaveItem {
+  status: "ready" | "launched" | "spent" | "lost";
+}
+
+export interface IranWarKeyTargetStatus {
+  unitId: string;
+  label: string;
+  status: string;
+  severity: "good" | "warning" | "bad";
+}
+
 const IRAN_MISSILE_FORCE = [
   "irn-qiam-central",
   "irn-kheibar-west",
@@ -56,6 +74,69 @@ const IRANIAN_BASES = [
   "irn-airbase-tehran",
   "irn-airbase-bandar-abbas",
 ];
+
+const OPENING_WAVE_BY_TEAM: Record<string, IranWarOpeningWaveItem[]> = {
+  USA: [
+    {
+      shooterId: "usa-f35a-al-udeid",
+      shooterLabel: "F-35A Al Udeid",
+      targetId: "irn-khordad-bushehr",
+      targetLabel: "Bushehr 3rd Khordad",
+    },
+    {
+      shooterId: "usa-f15e-al-dhafra",
+      shooterLabel: "F-15E Al Dhafra",
+      targetId: "irn-paveh-south",
+      targetLabel: "Southern Paveh Regiment",
+    },
+    {
+      shooterId: "usa-b1b-diego-garcia",
+      shooterLabel: "B-1B Diego Garcia",
+      targetId: "irn-kheibar-west",
+      targetLabel: "Western Kheibar Brigade",
+    },
+  ],
+  ISR: [
+    {
+      shooterId: "isr-f35i-nevatim",
+      shooterLabel: "F-35I Nevatim",
+      targetId: "irn-s300-tehran",
+      targetLabel: "Tehran S-300",
+    },
+    {
+      shooterId: "isr-f15i-hatzor",
+      shooterLabel: "F-15I Hatzor",
+      targetId: "irn-qiam-central",
+      targetLabel: "Central Qiam Brigade",
+    },
+    {
+      shooterId: "isr-f16i-ramon",
+      shooterLabel: "F-16I Ramon",
+      targetId: "irn-bavar-esfahan",
+      targetLabel: "Esfahan Bavar-373",
+    },
+  ],
+  IRN: [
+    {
+      shooterId: "irn-qiam-central",
+      shooterLabel: "Central Qiam Brigade",
+      targetId: "isr-airbase-nevatim",
+      targetLabel: "Nevatim AB",
+    },
+    {
+      shooterId: "irn-kheibar-west",
+      shooterLabel: "Western Kheibar Brigade",
+      targetId: "qat-airbase-al-udeid",
+      targetLabel: "Al Udeid AB",
+    },
+    {
+      shooterId: "irn-paveh-south",
+      shooterLabel: "Southern Paveh Regiment",
+      targetId: "uae-airbase-al-dhafra",
+      targetLabel: "Al Dhafra AB",
+    },
+  ],
+};
 
 export function isIranWarScenario(name: string): boolean {
   return name.trim().toUpperCase().includes("IRAN WAR 2026");
@@ -215,6 +296,88 @@ export function computeIranWarObjectiveProgress(objective: IranWarObjective, uni
     total: objective.unitIds.length,
     label: `${completed}/${objective.unitIds.length}`,
   };
+}
+
+function openingWaveStatusForUnit(unit: Unit | undefined): IranWarOpeningWaveStatus["status"] {
+  if (!unit || unit.status.isActive === false || unit.damageState >= 4) {
+    return "lost";
+  }
+  if (unit.attackOrder?.targetUnitId || (unit.moveOrder?.waypoints.length ?? 0) > 0 || unit.position.altMsl > 100) {
+    return "launched";
+  }
+  const hasSpentMagazine = unit.weapons.length > 0 && unit.weapons.every((weapon) => weapon.currentQty < weapon.maxQty);
+  if (hasSpentMagazine || (unit.nextStrikeReadySeconds ?? 0) > 0) {
+    return "spent";
+  }
+  return "ready";
+}
+
+export function getIranWarOpeningWaveStatus(teamId: string, units: Map<string, Unit>): IranWarOpeningWaveStatus[] {
+  const items = OPENING_WAVE_BY_TEAM[teamId.trim().toUpperCase()] ?? [];
+  return items.map((item) => ({
+    ...item,
+    status: openingWaveStatusForUnit(units.get(item.shooterId)),
+  }));
+}
+
+function describeKeyTarget(unit: Unit | undefined): Pick<IranWarKeyTargetStatus, "status" | "severity"> {
+  if (!unit || unit.status.isActive === false || unit.damageState >= 4) {
+    return { status: "Destroyed", severity: "bad" };
+  }
+  if (unit.baseOps) {
+    if (unit.baseOps.state === 1) {
+      return { status: "Usable", severity: "good" };
+    }
+    if (unit.baseOps.state === 2) {
+      return { status: "Degraded", severity: "warning" };
+    }
+    return { status: "Closed", severity: "bad" };
+  }
+  if (unit.damageState >= 3) {
+    return { status: "Mission Killed", severity: "bad" };
+  }
+  if (unit.damageState >= 2) {
+    return { status: "Damaged", severity: "warning" };
+  }
+  return { status: "Operational", severity: "good" };
+}
+
+export function getIranWarKeyTargetStatuses(teamId: string, units: Map<string, Unit>): IranWarKeyTargetStatus[] {
+  const team = teamId.trim().toUpperCase();
+  let keys: { unitId: string; label: string }[] = [];
+  switch (team) {
+    case "USA":
+      keys = [
+        { unitId: "qat-airbase-al-udeid", label: "Al Udeid AB" },
+        { unitId: "uae-airbase-al-dhafra", label: "Al Dhafra AB" },
+        { unitId: "irn-qiam-central", label: "Qiam Brigade" },
+        { unitId: "irn-kheibar-west", label: "Kheibar Brigade" },
+      ];
+      break;
+    case "ISR":
+      keys = [
+        { unitId: "isr-airbase-nevatim", label: "Nevatim AB" },
+        { unitId: "isr-arrow3-palmachim", label: "Arrow-3 Palmachim" },
+        { unitId: "irn-s300-tehran", label: "Tehran S-300" },
+        { unitId: "irn-qiam-central", label: "Qiam Brigade" },
+      ];
+      break;
+    case "IRN":
+      keys = [
+        { unitId: "irn-airbase-tehran", label: "Tehran AB" },
+        { unitId: "irn-kheibar-west", label: "Kheibar Brigade" },
+        { unitId: "isr-airbase-nevatim", label: "Nevatim AB" },
+        { unitId: "qat-airbase-al-udeid", label: "Al Udeid AB" },
+      ];
+      break;
+    default:
+      keys = [];
+  }
+  return keys.map((key) => ({
+    unitId: key.unitId,
+    label: key.label,
+    ...describeKeyTarget(units.get(key.unitId)),
+  }));
 }
 
 export function buildWarCostSummary(playerTeam: string, units: Map<string, Unit>, scores: TeamScore[]): { ownLossUsd: number; enemyLossUsd: number } {

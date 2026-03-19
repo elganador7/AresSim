@@ -389,6 +389,94 @@ body,
   color: #f9fafb;
 }
 
+.objective-opening-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.objective-opening-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.objective-opening-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.objective-opening-row span {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.objective-status-chip {
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.objective-status-ready {
+  background: rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+}
+
+.objective-status-launched {
+  background: rgba(56, 189, 248, 0.18);
+  color: #bae6fd;
+}
+
+.objective-status-spent {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fcd34d;
+}
+
+.objective-status-lost {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+}
+
+.objective-key-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.objective-key-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.objective-key-card span {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.objective-key-good {
+  color: #86efac;
+}
+
+.objective-key-warning {
+  color: #fcd34d;
+}
+
+.objective-key-bad {
+  color: #fca5a5;
+}
+
 .objective-card-header {
   display: flex;
   align-items: baseline;
