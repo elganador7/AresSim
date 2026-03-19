@@ -146,7 +146,7 @@ func canPerformSovereignAirDefense(unit *enginev1.Unit, def DefStats) bool {
 // kill probability of all munitions (in-flight + new salvo) exceeds 70 %.
 // Already in-flight munitions targeting the same unit are counted, so platforms
 // do not keep firing after enough rounds are already on the way.
-func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, inFlight []*InFlightMunition, rules RelationshipRules) AdjudicateResult {
+func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, inFlight []*InFlightMunition, rules RelationshipRules, simSeconds float64) AdjudicateResult {
 	firedThisTick := make(map[string]bool)
 	orderedUnits := make(map[string]bool)
 	var result AdjudicateResult
@@ -184,6 +184,7 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons ma
 			order.GetPkillThreshold(),
 			order.GetDesiredEffect(),
 			order.GetOrderType() == enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT,
+			simSeconds,
 			&result,
 		) {
 			continue
@@ -217,8 +218,8 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons ma
 			aCanEngageB := unitsAreHostile(a, b) || (isUnauthorizedOverflight(a, b, defs, rules) && canPerformSovereignAirDefense(a, defA))
 			bCanEngageA := unitsAreHostile(a, b) || (isUnauthorizedOverflight(b, a, defs, rules) && canPerformSovereignAirDefense(b, defB))
 
-			aInRange := aCanEngageB && hasWeapA && aHasTrack && dist <= wA.RangeM && !firedThisTick[a.Id] && !orderedUnits[a.Id]
-			bInRange := bCanEngageA && hasWeapB && bHasTrack && dist <= wB.RangeM && !firedThisTick[b.Id] && !orderedUnits[b.Id]
+			aInRange := aCanEngageB && hasWeapA && aHasTrack && dist <= wA.RangeM && !firedThisTick[a.Id] && !orderedUnits[a.Id] && unitReadyToStrike(a, wA, simSeconds)
+			bInRange := bCanEngageA && hasWeapB && bHasTrack && dist <= wB.RangeM && !firedThisTick[b.Id] && !orderedUnits[b.Id] && unitReadyToStrike(b, wB, simSeconds)
 
 			if !aInRange && !bInRange {
 				continue
@@ -233,6 +234,7 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons ma
 					salvo = capAtAmmo(a, wIDA, salvo)
 					if salvo > 0 {
 						decrementAmmo(a, wIDA, salvo)
+						applyStrikeCooldown(a, wA, simSeconds)
 						result.Shots = append(result.Shots, FiredShot{
 							Shooter:        a,
 							Target:         b,
@@ -254,6 +256,7 @@ func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons ma
 					salvo = capAtAmmo(b, wIDB, salvo)
 					if salvo > 0 {
 						decrementAmmo(b, wIDB, salvo)
+						applyStrikeCooldown(b, wB, simSeconds)
 						result.Shots = append(result.Shots, FiredShot{
 							Shooter:        b,
 							Target:         a,
@@ -284,6 +287,7 @@ func tryFireAtTarget(
 	pkillThreshold float32,
 	desiredEffect enginev1.DesiredEffect,
 	requireDesiredEffect bool,
+	simSeconds float64,
 	result *AdjudicateResult,
 ) bool {
 	if firedThisTick[shooter.Id] || shooter == nil || target == nil {
@@ -292,7 +296,13 @@ func tryFireAtTarget(
 	targetDef := defs[target.DefinitionId]
 	shooterDef := defs[shooter.DefinitionId]
 	weaponID, weapon, hasWeapon := selectBestWeapon(shooter, targetDef.Domain, weapons)
-	if !hasWeapon || !tracks.unitHasTrack(shooter.Id, target.Id) {
+	if !hasWeapon {
+		return false
+	}
+	if !tracks.unitHasTrack(shooter.Id, target.Id) && !canExecutePreplannedStrategicStrike(shooter, target, targetDef, weapon) {
+		return false
+	}
+	if !unitReadyToStrike(shooter, weapon, simSeconds) {
 		return false
 	}
 	dist := haversineM(
@@ -325,6 +335,7 @@ func tryFireAtTarget(
 		return false
 	}
 	decrementAmmo(shooter, weaponID, salvo)
+	applyStrikeCooldown(shooter, weapon, simSeconds)
 	result.Shots = append(result.Shots, FiredShot{
 		Shooter:        shooter,
 		Target:         target,
@@ -334,6 +345,68 @@ func tryFireAtTarget(
 	})
 	firedThisTick[shooter.Id] = true
 	return true
+}
+
+func unitReadyToStrike(unit *enginev1.Unit, weapon WeaponStats, simSeconds float64) bool {
+	if unit == nil || !weaponUsesStrikeCadence(unit, weapon) {
+		return true
+	}
+	return unit.GetNextStrikeReadySeconds() <= simSeconds
+}
+
+func canExecutePreplannedStrategicStrike(shooter, target *enginev1.Unit, targetDef DefStats, weapon WeaponStats) bool {
+	if shooter == nil || target == nil {
+		return false
+	}
+	if !weaponUsesStrikeCadence(shooter, weapon) {
+		return false
+	}
+	if !isFixedStrategicTarget(target, targetDef) {
+		return false
+	}
+	return true
+}
+
+func weaponUsesStrikeCadence(unit *enginev1.Unit, weapon WeaponStats) bool {
+	if unit == nil || unit.GetPosition() == nil {
+		return false
+	}
+	if weapon.EffectType != enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_BALLISTIC_STRIKE &&
+		weapon.EffectType != enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE {
+		return false
+	}
+	if weapon.RangeM < 100_000 {
+		return false
+	}
+	return unit.GetPosition().GetAltMsl() <= 0
+}
+
+func isFixedStrategicTarget(target *enginev1.Unit, def DefStats) bool {
+	if target == nil {
+		return false
+	}
+	if def.AssetClass == "airbase" || def.AssetClass == "port" {
+		return true
+	}
+	if def.TargetClass == "runway" ||
+		def.TargetClass == "hardened_infrastructure" ||
+		def.TargetClass == "soft_infrastructure" ||
+		def.TargetClass == "civilian_energy" ||
+		def.TargetClass == "civilian_water" {
+		return true
+	}
+	return false
+}
+
+func applyStrikeCooldown(unit *enginev1.Unit, weapon WeaponStats, simSeconds float64) {
+	if unit == nil || !weaponUsesStrikeCadence(unit, weapon) {
+		return
+	}
+	cooldown := 3600.0
+	if currentDamageState(unit) == enginev1.DamageState_DAMAGE_STATE_DAMAGED {
+		cooldown = 7200.0
+	}
+	unit.NextStrikeReadySeconds = simSeconds + cooldown
 }
 
 func shouldAutonomouslyEngage(unit *enginev1.Unit, prob float64, detectedByTarget bool) bool {

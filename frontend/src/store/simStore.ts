@@ -129,6 +129,7 @@ export interface Unit {
   loadoutConfigurationId?: string;
   damageState: number;
   nextSortieReadySeconds?: number;
+  nextStrikeReadySeconds?: number;
   baseOps?: {
     state: number;
     nextLaunchAvailableSeconds: number;

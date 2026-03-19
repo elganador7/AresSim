@@ -59,6 +59,7 @@ message UnitDelta {
   DamageState         damage_state = 7; // present if damage state changed
   double              next_sortie_ready_seconds = 8;
   BaseOpsState        base_ops = 9;
+  double              next_strike_ready_seconds = 10;
 }
 
 // ── Unit lifecycle ────────────────────────────────────────────────────────────

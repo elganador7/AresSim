@@ -100,4 +100,5 @@ message Unit {
   string host_base_id = 27;
   double next_sortie_ready_seconds = 28;
   BaseOpsState base_ops = 29;
+  double next_strike_ready_seconds = 30;
 }

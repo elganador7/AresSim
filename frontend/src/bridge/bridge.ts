@@ -124,6 +124,7 @@ export function protoUnitToStore(u: ProtoUnit): Unit {
     loadoutConfigurationId: u.loadoutConfigurationId || undefined,
     damageState: u.damageState || 1,
     nextSortieReadySeconds: u.nextSortieReadySeconds || 0,
+    nextStrikeReadySeconds: u.nextStrikeReadySeconds || 0,
     baseOps: u.baseOps
       ? {
           state: u.baseOps.state,
@@ -193,6 +194,9 @@ function applyDelta(delta: UnitDelta): void {
   }
   if (delta.nextSortieReadySeconds !== 0) {
     patch.nextSortieReadySeconds = delta.nextSortieReadySeconds;
+  }
+  if (delta.nextStrikeReadySeconds !== 0) {
+    patch.nextStrikeReadySeconds = delta.nextStrikeReadySeconds;
   }
   if (delta.baseOps) {
     patch.baseOps = {

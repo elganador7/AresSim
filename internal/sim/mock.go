@@ -73,7 +73,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 			rules := relationshipRules()
 
 			// ── Adjudication ──────────────────────────────────────────────
-			adj := AdjudicateTick(units, defs, weapons, inFlight, rules)
+			adj := AdjudicateTick(units, defs, weapons, inFlight, rules, simSeconds)
 			trackGroups := resolveTrackGroupIDs(units)
 
 			// Emit a weapon-state delta for every unit that fired this tick
@@ -92,8 +92,9 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 					}
 					emit("batch_update", &enginev1.BatchUnitUpdate{
 						Deltas: []*enginev1.UnitDelta{{
-							UnitId:  shot.Shooter.Id,
-							Weapons: states,
+							UnitId:                 shot.Shooter.Id,
+							Weapons:                states,
+							NextStrikeReadySeconds: shot.Shooter.GetNextStrikeReadySeconds(),
 						}},
 					})
 				}
