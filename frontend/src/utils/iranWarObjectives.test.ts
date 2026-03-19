@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWarCostSummary, computeIranWarObjectiveProgress, getIranWarKeyTargetStatuses, getIranWarObjectiveSet, getIranWarOpeningWaveStatus } from "./iranWarObjectives";
+import { buildWarCostSummary, computeIranWarObjectiveProgress, getIranWarAirbaseConstraints, getIranWarGroundedAircraft, getIranWarKeyTargetStatuses, getIranWarObjectiveSet, getIranWarOpeningWaveStatus, getIranWarScoreboard, getIranWarStrikeForceSummary, getIranWarStrikeUnitStatuses } from "./iranWarObjectives";
 import type { TeamScore, Unit } from "../store/simStore";
 
 function makeUnit(id: string, teamId: string, coalitionId: string): Unit {
@@ -119,5 +119,99 @@ describe("iran war objectives", () => {
       status: "Closed",
       severity: "bad",
     });
+  });
+
+  it("summarizes strike-force readiness and bottlenecks", () => {
+    const units = new Map<string, Unit>([
+      ["irn-qiam-central", {
+        ...makeUnit("irn-qiam-central", "IRN", "RED"),
+        weapons: [{ weaponId: "w1", currentQty: 2, maxQty: 2 }],
+      }],
+      ["irn-kheibar-west", {
+        ...makeUnit("irn-kheibar-west", "IRN", "RED"),
+        weapons: [{ weaponId: "w1", currentQty: 1, maxQty: 2 }],
+        nextStrikeReadySeconds: 300,
+      }],
+      ["irn-paveh-south", {
+        ...makeUnit("irn-paveh-south", "IRN", "RED"),
+        weapons: [{ weaponId: "w1", currentQty: 0, maxQty: 2 }],
+      }],
+      ["irn-airbase-tehran", {
+        ...makeUnit("irn-airbase-tehran", "IRN", "RED"),
+        baseOps: { state: 1, nextLaunchAvailableSeconds: 0, nextRecoveryAvailableSeconds: 0 },
+      }],
+      ["irn-airbase-bandar-abbas", {
+        ...makeUnit("irn-airbase-bandar-abbas", "IRN", "RED"),
+        baseOps: { state: 2, nextLaunchAvailableSeconds: 120, nextRecoveryAvailableSeconds: 0 },
+      }],
+      ["usa-target", {
+        ...makeUnit("usa-target", "USA", "BLUE"),
+        damageState: 3,
+      }],
+    ]);
+    expect(getIranWarStrikeForceSummary("IRN", units)).toEqual({
+      ready: 1,
+      delayed: 1,
+      spentOrLost: 1,
+    });
+    expect(getIranWarScoreboard("IRN", units)[1]).toMatchObject({
+      label: "Airbase Bottlenecks",
+      value: "1 constrained",
+      severity: "warning",
+    });
+  });
+
+  it("counts only hostile strike units in enemy suppression", () => {
+    const units = new Map<string, Unit>([
+      ["usa-airbase-diego-garcia", makeUnit("usa-airbase-diego-garcia", "USA", "BLUE")],
+      ["irn-qiam-central", { ...makeUnit("irn-qiam-central", "IRN", "RED"), damageState: 3 }],
+      ["isr-strike", makeUnit("isr-strike", "ISR", "BLUE")],
+    ]);
+    expect(getIranWarScoreboard("USA", units)[3]).toMatchObject({
+      label: "Enemy Suppressed",
+      value: "1/1",
+      severity: "good",
+    });
+  });
+
+  it("lists grounded aircraft, constrained airbases, and strike-unit status", () => {
+    const units = new Map<string, Unit>([
+      ["qat-airbase-al-udeid", {
+        ...makeUnit("qat-airbase-al-udeid", "QAT", "BLUE"),
+        displayName: "Al Udeid AB",
+        baseOps: { state: 2, nextLaunchAvailableSeconds: 120, nextRecoveryAvailableSeconds: 0 },
+      }],
+      ["usa-f35a-al-udeid", {
+        ...makeUnit("usa-f35a-al-udeid", "USA", "BLUE"),
+        displayName: "F-35A Al Udeid",
+        hostBaseId: "qat-airbase-al-udeid",
+        nextSortieReadySeconds: 200,
+      }],
+      ["irn-qiam-central", {
+        ...makeUnit("irn-qiam-central", "IRN", "RED"),
+        displayName: "Qiam Brigade",
+        weapons: [{ weaponId: "w1", currentQty: 0, maxQty: 2 }],
+      }],
+      ["irn-kheibar-west", {
+        ...makeUnit("irn-kheibar-west", "IRN", "RED"),
+        displayName: "Kheibar Brigade",
+        weapons: [{ weaponId: "w1", currentQty: 1, maxQty: 2 }],
+        nextStrikeReadySeconds: 60,
+      }],
+    ]);
+    expect(getIranWarGroundedAircraft("USA", units)[0]).toMatchObject({
+      unitId: "usa-f35a-al-udeid",
+      status: "Grounded: Base Degraded",
+      severity: "warning",
+    });
+    expect(getIranWarAirbaseConstraints("QAT", units)[0]).toMatchObject({
+      unitId: "qat-airbase-al-udeid",
+      status: "Degraded",
+      severity: "warning",
+    });
+    expect(getIranWarStrikeUnitStatuses("IRN", units)).toEqual([
+      expect.objectContaining({ unitId: "irn-qiam-central", status: "Out of Shots", severity: "bad" }),
+      expect.objectContaining({ unitId: "irn-kheibar-west", status: "Delayed", severity: "warning" }),
+    ]);
   });
 });

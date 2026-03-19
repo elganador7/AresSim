@@ -40,6 +40,25 @@ export interface IranWarKeyTargetStatus {
   severity: "good" | "warning" | "bad";
 }
 
+export interface IranWarScoreboardItem {
+  label: string;
+  value: string;
+  severity: "good" | "warning" | "bad";
+}
+
+export interface IranWarStrikeForceSummary {
+  ready: number;
+  delayed: number;
+  spentOrLost: number;
+}
+
+export interface IranWarAirOpsStatus {
+  unitId: string;
+  label: string;
+  status: string;
+  severity: "good" | "warning" | "bad";
+}
+
 const IRAN_MISSILE_FORCE = [
   "irn-qiam-central",
   "irn-kheibar-west",
@@ -378,6 +397,237 @@ export function getIranWarKeyTargetStatuses(teamId: string, units: Map<string, U
     label: key.label,
     ...describeKeyTarget(units.get(key.unitId)),
   }));
+}
+
+function isTrackedAirbase(unitId: string): boolean {
+  return COALITION_AIRBASES.includes(unitId) || IRANIAN_BASES.includes(unitId);
+}
+
+function isTrackedStrikeUnit(unitId: string): boolean {
+  return IRAN_MISSILE_FORCE.includes(unitId);
+}
+
+export function getIranWarStrikeForceSummary(teamId: string, units: Map<string, Unit>): IranWarStrikeForceSummary {
+  let ready = 0;
+  let delayed = 0;
+  let spentOrLost = 0;
+  units.forEach((unit) => {
+    if (unit.teamId?.trim().toUpperCase() !== teamId.trim().toUpperCase()) {
+      return;
+    }
+    if (!isTrackedStrikeUnit(unit.id)) {
+      return;
+    }
+    if (unit.status.isActive === false || unit.damageState >= 4) {
+      spentOrLost++;
+      return;
+    }
+    const totalWeapons = unit.weapons.reduce((sum, weapon) => sum + weapon.currentQty, 0);
+    if (totalWeapons <= 0) {
+      spentOrLost++;
+      return;
+    }
+    if ((unit.nextStrikeReadySeconds ?? 0) > 0 || unit.damageState >= 2) {
+      delayed++;
+      return;
+    }
+    ready++;
+  });
+  return { ready, delayed, spentOrLost };
+}
+
+function evaluateAirbaseBottleneck(unit: Unit | undefined): "good" | "warning" | "bad" {
+  if (!unit || unit.status.isActive === false || unit.damageState >= 4) {
+    return "bad";
+  }
+  if (!unit.baseOps) {
+    return unit.damageState >= 2 ? "warning" : "good";
+  }
+  if (unit.baseOps.state !== 1) {
+    return unit.baseOps.state === 2 ? "warning" : "bad";
+  }
+  if ((unit.baseOps.nextLaunchAvailableSeconds ?? 0) > 0 || (unit.baseOps.nextRecoveryAvailableSeconds ?? 0) > 0) {
+    return "warning";
+  }
+  return "good";
+}
+
+function severityLabel(severity: "good" | "warning" | "bad"): string {
+  switch (severity) {
+    case "good":
+      return "Stable";
+    case "warning":
+      return "Constrained";
+    case "bad":
+      return "Critical";
+  }
+}
+
+export function getIranWarScoreboard(teamId: string, units: Map<string, Unit>): IranWarScoreboardItem[] {
+  const team = teamId.trim().toUpperCase();
+  const ownCoalition = Array.from(units.values()).find((unit) => unit.teamId?.trim().toUpperCase() === team)?.coalitionId?.trim().toUpperCase() ?? "";
+  const ownAirbases = Array.from(units.values()).filter((unit) => unit.teamId?.trim().toUpperCase() === team && isTrackedAirbase(unit.id));
+  const usableAirbases = ownAirbases.filter((unit) => unit.baseOps?.state === 1).length;
+  const constrainedAirbases = ownAirbases.filter((unit) => evaluateAirbaseBottleneck(unit) !== "good").length;
+  const strikeForce = getIranWarStrikeForceSummary(team, units);
+
+  let enemyMissileSuppression = 0;
+  const enemyStrikeUnits = Array.from(units.values()).filter((unit) => {
+    if (!isTrackedStrikeUnit(unit.id)) {
+      return false;
+    }
+    const otherCoalition = unit.coalitionId?.trim().toUpperCase() ?? "";
+    return ownCoalition !== "" && otherCoalition !== "" && otherCoalition !== ownCoalition;
+  });
+  if (enemyStrikeUnits.length > 0) {
+    enemyMissileSuppression = enemyStrikeUnits.filter((unit) => unit.damageState >= 3 || unit.status.isActive === false).length;
+  }
+
+  return [
+    {
+      label: "Usable Airbases",
+      value: `${usableAirbases}/${ownAirbases.length || 0}`,
+      severity: usableAirbases === ownAirbases.length ? "good" : usableAirbases > 0 ? "warning" : "bad",
+    },
+    {
+      label: "Airbase Bottlenecks",
+      value: constrainedAirbases === 0 ? "None" : `${constrainedAirbases} constrained`,
+      severity: constrainedAirbases === 0 ? "good" : constrainedAirbases < ownAirbases.length ? "warning" : "bad",
+    },
+    {
+      label: "Strike Force",
+      value: `${strikeForce.ready} ready / ${strikeForce.delayed} delayed`,
+      severity: strikeForce.ready > 0 ? (strikeForce.delayed > 0 ? "warning" : "good") : "bad",
+    },
+    {
+      label: "Enemy Suppressed",
+      value: `${enemyMissileSuppression}/${enemyStrikeUnits.length || 0}`,
+      severity: enemyStrikeUnits.length === 0 ? "good" : enemyMissileSuppression === 0 ? "bad" : enemyMissileSuppression < enemyStrikeUnits.length ? "warning" : "good",
+    },
+  ];
+}
+
+function isOwnAirUnit(team: string, unit: Unit): boolean {
+  return unit.teamId?.trim().toUpperCase() === team && unit.hostBaseId !== undefined;
+}
+
+function isGrounded(unit: Unit): boolean {
+  return unit.position.altMsl <= 100;
+}
+
+function findUnit(units: Map<string, Unit>, unitId: string | undefined): Unit | undefined {
+  return unitId ? units.get(unitId) : undefined;
+}
+
+function describeGrounding(unit: Unit, hostBase: Unit | undefined): Pick<IranWarAirOpsStatus, "status" | "severity"> | null {
+  if (!isGrounded(unit) || unit.status.isActive === false) {
+    return null;
+  }
+  if (hostBase?.baseOps?.state === 3) {
+    return { status: "Grounded: Host Base Closed", severity: "bad" };
+  }
+  if (hostBase?.baseOps?.state === 2) {
+    return { status: "Grounded: Base Degraded", severity: "warning" };
+  }
+  if ((unit.nextSortieReadySeconds ?? 0) > 0) {
+    return { status: "Grounded: Turnaround Delay", severity: "warning" };
+  }
+  if ((hostBase?.baseOps?.nextLaunchAvailableSeconds ?? 0) > 0) {
+    return { status: "Grounded: Launch Queue", severity: "warning" };
+  }
+  return null;
+}
+
+export function getIranWarGroundedAircraft(teamId: string, units: Map<string, Unit>): IranWarAirOpsStatus[] {
+  const team = teamId.trim().toUpperCase();
+  return Array.from(units.values())
+    .filter((unit) => isOwnAirUnit(team, unit))
+    .map((unit): IranWarAirOpsStatus | null => {
+      const hostBase = findUnit(units, unit.hostBaseId);
+      const state = describeGrounding(unit, hostBase);
+      if (!state) {
+        return null;
+      }
+      return {
+        unitId: unit.id,
+        label: unit.displayName,
+        ...state,
+      };
+    })
+    .filter((item): item is IranWarAirOpsStatus => item !== null)
+    .slice(0, 6);
+}
+
+export function getIranWarAirbaseConstraints(teamId: string, units: Map<string, Unit>): IranWarAirOpsStatus[] {
+  const team = teamId.trim().toUpperCase();
+  return Array.from(units.values())
+    .filter((unit) => unit.teamId?.trim().toUpperCase() === team && isTrackedAirbase(unit.id))
+    .map((unit): IranWarAirOpsStatus | null => {
+      if (unit.status.isActive === false || unit.damageState >= 4) {
+        return {
+          unitId: unit.id,
+          label: unit.displayName,
+          status: "Destroyed",
+          severity: "bad",
+        };
+      }
+      if (unit.baseOps?.state === 3) {
+        return {
+          unitId: unit.id,
+          label: unit.displayName,
+          status: "Closed",
+          severity: "bad",
+        };
+      }
+      if (unit.baseOps?.state === 2) {
+        return {
+          unitId: unit.id,
+          label: unit.displayName,
+          status: "Degraded",
+          severity: "warning",
+        };
+      }
+      if ((unit.baseOps?.nextLaunchAvailableSeconds ?? 0) > 0 || (unit.baseOps?.nextRecoveryAvailableSeconds ?? 0) > 0) {
+        return {
+          unitId: unit.id,
+          label: unit.displayName,
+          status: "Queueing",
+          severity: "warning",
+        };
+      }
+      return null;
+    })
+    .filter((item): item is IranWarAirOpsStatus => item !== null)
+    .slice(0, 6);
+}
+
+function describeStrikeUnit(unit: Unit | undefined): Pick<IranWarAirOpsStatus, "status" | "severity"> {
+  if (!unit || unit.status.isActive === false || unit.damageState >= 4) {
+    return { status: "Destroyed", severity: "bad" };
+  }
+  const totalWeapons = unit.weapons.reduce((sum, weapon) => sum + weapon.currentQty, 0);
+  if (totalWeapons <= 0) {
+    return { status: "Out of Shots", severity: "bad" };
+  }
+  if (unit.damageState >= 2) {
+    return { status: "Damaged", severity: "warning" };
+  }
+  if ((unit.nextStrikeReadySeconds ?? 0) > 0) {
+    return { status: "Delayed", severity: "warning" };
+  }
+  return { status: "Ready", severity: "good" };
+}
+
+export function getIranWarStrikeUnitStatuses(teamId: string, units: Map<string, Unit>): IranWarAirOpsStatus[] {
+  const team = teamId.trim().toUpperCase();
+  return Array.from(units.values())
+    .filter((unit) => unit.teamId?.trim().toUpperCase() === team && isTrackedStrikeUnit(unit.id))
+    .map((unit) => ({
+      unitId: unit.id,
+      label: unit.displayName,
+      ...describeStrikeUnit(unit),
+    }))
+    .slice(0, 6);
 }
 
 export function buildWarCostSummary(playerTeam: string, units: Map<string, Unit>, scores: TeamScore[]): { ownLossUsd: number; enemyLossUsd: number } {

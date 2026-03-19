@@ -465,6 +465,41 @@ body,
   color: #94a3b8;
 }
 
+.objective-subsection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.objective-subtitle {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #cbd5e1;
+  text-transform: uppercase;
+}
+
+.objective-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.objective-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.objective-status-row span {
+  font-size: 11px;
+  color: #e5e7eb;
+}
+
 .objective-key-good {
   color: #86efac;
 }

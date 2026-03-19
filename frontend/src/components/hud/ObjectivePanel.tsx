@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useSimStore } from "../../store/simStore";
-import { buildWarCostSummary, computeIranWarObjectiveProgress, getIranWarKeyTargetStatuses, getIranWarObjectiveSet, getIranWarOpeningWaveStatus, isIranWarScenario } from "../../utils/iranWarObjectives";
+import { buildWarCostSummary, computeIranWarObjectiveProgress, getIranWarAirbaseConstraints, getIranWarGroundedAircraft, getIranWarKeyTargetStatuses, getIranWarObjectiveSet, getIranWarOpeningWaveStatus, getIranWarScoreboard, getIranWarStrikeForceSummary, getIranWarStrikeUnitStatuses, isIranWarScenario } from "../../utils/iranWarObjectives";
 
 function formatUsdCompact(value: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -37,6 +37,26 @@ export default function ObjectivePanel({
   );
   const keyTargets = useMemo(
     () => getIranWarKeyTargetStatuses(humanControlledTeam, units),
+    [humanControlledTeam, units],
+  );
+  const scoreboard = useMemo(
+    () => getIranWarScoreboard(humanControlledTeam, units),
+    [humanControlledTeam, units],
+  );
+  const strikeForce = useMemo(
+    () => getIranWarStrikeForceSummary(humanControlledTeam, units),
+    [humanControlledTeam, units],
+  );
+  const groundedAircraft = useMemo(
+    () => getIranWarGroundedAircraft(humanControlledTeam, units),
+    [humanControlledTeam, units],
+  );
+  const airbaseConstraints = useMemo(
+    () => getIranWarAirbaseConstraints(humanControlledTeam, units),
+    [humanControlledTeam, units],
+  );
+  const strikeUnitStatuses = useMemo(
+    () => getIranWarStrikeUnitStatuses(humanControlledTeam, units),
     [humanControlledTeam, units],
   );
 
@@ -79,6 +99,20 @@ export default function ObjectivePanel({
                 <strong>{formatUsdCompact(warCost.enemyLossUsd)}</strong>
               </div>
             </div>
+            <div className="objective-summary">
+              <div className="objective-title">First 24h Scoreboard</div>
+              <div className="objective-key-grid">
+                {scoreboard.map((item) => (
+                  <div key={item.label} className="objective-key-card">
+                    <span>{item.label}</span>
+                    <strong className={`objective-key-${item.severity}`}>{item.value}</strong>
+                  </div>
+                ))}
+              </div>
+              <div className="objective-copy">
+                Strike-capable force: {strikeForce.ready} ready, {strikeForce.delayed} delayed, {strikeForce.spentOrLost} spent or lost.
+              </div>
+            </div>
             {openingWave.length > 0 && (
               <div className="objective-summary">
                 <div className="objective-title">Opening Wave</div>
@@ -106,6 +140,50 @@ export default function ObjectivePanel({
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+            {(groundedAircraft.length > 0 || airbaseConstraints.length > 0 || strikeUnitStatuses.length > 0) && (
+              <div className="objective-summary">
+                <div className="objective-title">Operational Pressure</div>
+                {groundedAircraft.length > 0 && (
+                  <div className="objective-subsection">
+                    <div className="objective-subtitle">Grounded Aircraft</div>
+                    <div className="objective-status-list">
+                      {groundedAircraft.map((item) => (
+                        <div key={item.unitId} className="objective-status-row">
+                          <span>{item.label}</span>
+                          <strong className={`objective-key-${item.severity}`}>{item.status}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {airbaseConstraints.length > 0 && (
+                  <div className="objective-subsection">
+                    <div className="objective-subtitle">Airbase Constraints</div>
+                    <div className="objective-status-list">
+                      {airbaseConstraints.map((item) => (
+                        <div key={item.unitId} className="objective-status-row">
+                          <span>{item.label}</span>
+                          <strong className={`objective-key-${item.severity}`}>{item.status}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {strikeUnitStatuses.length > 0 && (
+                  <div className="objective-subsection">
+                    <div className="objective-subtitle">Strike Units</div>
+                    <div className="objective-status-list">
+                      {strikeUnitStatuses.map((item) => (
+                        <div key={item.unitId} className="objective-status-row">
+                          <span>{item.label}</span>
+                          <strong className={`objective-key-${item.severity}`}>{item.status}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             {objectiveSet.objectives.map((objective) => {
