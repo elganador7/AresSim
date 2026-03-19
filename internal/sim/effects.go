@@ -108,8 +108,10 @@ func applyHitToUnit(target *enginev1.Unit, outcome impactOutcome) (destroyed boo
 		return false, previous
 	case outcomeLightDamage:
 		setOperationalFractions(target, 0.88, 0.9, 0.82)
+		degradeFacilityOps(target)
 		if previous == enginev1.DamageState_DAMAGE_STATE_DAMAGED {
 			setDamageState(target, enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED)
+			closeFacilityOps(target)
 			return false, previous
 		}
 		if previous == enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED {
@@ -119,8 +121,10 @@ func applyHitToUnit(target *enginev1.Unit, outcome impactOutcome) (destroyed boo
 		return false, previous
 	case outcomeMobilityKill, outcomeFirepowerLoss:
 		setOperationalFractions(target, 0.72, 0.78, 0.55)
+		degradeFacilityOps(target)
 		if previous == enginev1.DamageState_DAMAGE_STATE_DAMAGED {
 			setDamageState(target, enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED)
+			closeFacilityOps(target)
 			return false, previous
 		}
 		if previous == enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED {
@@ -135,8 +139,10 @@ func applyHitToUnit(target *enginev1.Unit, outcome impactOutcome) (destroyed boo
 			return true, previous
 		}
 		setDamageState(target, enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED)
+		closeFacilityOps(target)
 		return false, previous
 	case outcomeCatastrophicKill:
+		closeFacilityOps(target)
 		killUnit(target)
 		return true, previous
 	default:
@@ -155,6 +161,22 @@ func setDamageState(u *enginev1.Unit, state enginev1.DamageState) {
 	if u != nil {
 		u.DamageState = state
 	}
+}
+
+func degradeFacilityOps(u *enginev1.Unit) {
+	if u == nil || u.GetBaseOps() == nil {
+		return
+	}
+	if u.GetBaseOps().GetState() == enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_USABLE {
+		u.BaseOps.State = enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_DEGRADED
+	}
+}
+
+func closeFacilityOps(u *enginev1.Unit) {
+	if u == nil || u.GetBaseOps() == nil {
+		return
+	}
+	u.BaseOps.State = enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_CLOSED
 }
 
 func setOperationalFractions(u *enginev1.Unit, personnel, equipment, combat float32) {

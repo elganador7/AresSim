@@ -103,6 +103,50 @@ func TestValidateAndConsumeLaunchAdvancesBaseWindow(t *testing.T) {
 	if got != want {
 		t.Fatalf("expected launch window %v, got %v", want, got)
 	}
+	if got := app.currentScenario.Units[1].GetNextSortieReadySeconds(); got != 5520 {
+		t.Fatalf("expected sortie ready time 5520, got %v", got)
+	}
+}
+
+func TestValidateAndConsumeLaunch_DegradedBaseSlowsLaunchAndSortieWindows(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.setSimSeconds(300)
+	app.defsCache = map[string]sim.DefStats{
+		"airbase": {AssetClass: "airbase", LaunchCapacityPerInterval: 4},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Units: []*enginev1.Unit{
+			{
+				Id:           "base-1",
+				DisplayName:  "Base One",
+				DefinitionId: "airbase",
+				BaseOps: &enginev1.BaseOpsState{
+					State: enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_DEGRADED,
+				},
+			},
+			{
+				Id:           "ac-1",
+				DisplayName:  "Shooter",
+				DefinitionId: "fighter",
+				HostBaseId:   "base-1",
+				Position:     &enginev1.Position{},
+			},
+		},
+	}
+
+	err := app.validateAndConsumeLaunch(app.currentScenario.Units[1], sim.DefStats{
+		Domain:               enginev1.UnitDomain_DOMAIN_AIR,
+		SortieIntervalMinutes: 60,
+	})
+	if err != nil {
+		t.Fatalf("unexpected launch validation failure: %v", err)
+	}
+	if got := app.currentScenario.Units[0].GetBaseOps().GetNextLaunchAvailableSeconds(); got != 750 {
+		t.Fatalf("expected degraded launch window 750, got %v", got)
+	}
+	if got := app.currentScenario.Units[1].GetNextSortieReadySeconds(); got != 7500 {
+		t.Fatalf("expected degraded sortie ready time 7500, got %v", got)
+	}
 }
 
 func TestApplyOpeningLoadoutSelections(t *testing.T) {

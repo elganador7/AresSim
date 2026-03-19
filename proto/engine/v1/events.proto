@@ -57,6 +57,8 @@ message UnitDelta {
   // weapons present when one or more weapon states changed (e.g. ammo decremented).
   repeated WeaponState weapons    = 6;
   DamageState         damage_state = 7; // present if damage state changed
+  double              next_sortie_ready_seconds = 8;
+  BaseOpsState        base_ops = 9;
 }
 
 // ── Unit lifecycle ────────────────────────────────────────────────────────────

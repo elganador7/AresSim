@@ -191,6 +191,16 @@ function applyDelta(delta: UnitDelta): void {
   if (delta.damageState !== 0) {
     patch.damageState = delta.damageState;
   }
+  if (delta.nextSortieReadySeconds !== 0) {
+    patch.nextSortieReadySeconds = delta.nextSortieReadySeconds;
+  }
+  if (delta.baseOps) {
+    patch.baseOps = {
+      state: delta.baseOps.state,
+      nextLaunchAvailableSeconds: delta.baseOps.nextLaunchAvailableSeconds,
+      nextRecoveryAvailableSeconds: delta.baseOps.nextRecoveryAvailableSeconds,
+    };
+  }
   // moveOrder present in delta = update (empty waypoints = clear order)
   if (delta.moveOrder !== undefined) {
     patch.moveOrder = delta.moveOrder.waypoints.length > 0

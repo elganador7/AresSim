@@ -207,9 +207,11 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 			for _, hit := range hits {
 				emit("batch_update", &enginev1.BatchUnitUpdate{
 					Deltas: []*enginev1.UnitDelta{{
-						UnitId:      hit.Victim.Id,
-						Status:      hit.Victim.Status,
-						DamageState: hit.Victim.DamageState,
+						UnitId:                 hit.Victim.Id,
+						Status:                 hit.Victim.Status,
+						DamageState:            hit.Victim.DamageState,
+						BaseOps:                hit.Victim.GetBaseOps(),
+						NextSortieReadySeconds: hit.Victim.GetNextSortieReadySeconds(),
 					}},
 				})
 

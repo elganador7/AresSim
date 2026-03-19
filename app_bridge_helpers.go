@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"log/slog"
@@ -143,6 +144,9 @@ func decodeScenarioB64(b64 string) (*enginev1.Scenario, error) {
 
 // emitProtoEvent marshals a proto message and emits it to the frontend.
 func (a *App) emitProtoEvent(eventName string, msg proto.Message) {
+	if a == nil || a.ctx == nil || a.ctx == context.Background() || a.ctx == context.TODO() {
+		return
+	}
 	data, err := proto.Marshal(msg)
 	if err != nil {
 		slog.Error("proto marshal for event", "event", eventName, "err", err)

@@ -817,6 +817,9 @@ func TestResolveArrivals_MultipleMunitions(t *testing.T) {
 func TestResolveArrivals_LandStrikeAgainstRunway_MissionKill(t *testing.T) {
 	attacker := makeUnit("a", "Blue", "shooter", 0, 0)
 	target := makeUnit("b", "Red", "airbase", 0, 0.01)
+	target.BaseOps = &enginev1.BaseOpsState{
+		State: enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_USABLE,
+	}
 	defs := map[string]DefStats{
 		"shooter": {Domain: enginev1.UnitDomain_DOMAIN_AIR, TargetClass: "aircraft"},
 		"airbase": {Domain: enginev1.UnitDomain_DOMAIN_LAND, TargetClass: "runway"},
@@ -837,8 +840,42 @@ func TestResolveArrivals_LandStrikeAgainstRunway_MissionKill(t *testing.T) {
 	if target.DamageState != enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED {
 		t.Fatalf("expected runway target to be mission-killed, got %v", target.DamageState)
 	}
+	if target.GetBaseOps().GetState() != enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_CLOSED {
+		t.Fatalf("expected runway hit to close airbase operations, got %v", target.GetBaseOps().GetState())
+	}
 	if !unitIsActive(target) {
 		t.Fatal("runway target should remain present after mission kill")
+	}
+}
+
+func TestResolveArrivals_LightDamageDegradesAirbaseOps(t *testing.T) {
+	attacker := makeUnit("a", "Blue", "shooter", 0, 0)
+	target := makeUnit("b", "Red", "airbase", 0, 0.01)
+	target.BaseOps = &enginev1.BaseOpsState{
+		State: enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_USABLE,
+	}
+	defs := map[string]DefStats{
+		"shooter": {Domain: enginev1.UnitDomain_DOMAIN_AIR, TargetClass: "aircraft"},
+		"airbase": {Domain: enginev1.UnitDomain_DOMAIN_LAND, TargetClass: "soft_infrastructure"},
+	}
+	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
+
+	hits := ResolveArrivals([]*InFlightMunition{{
+		ID:             NextMunitionID(),
+		WeaponID:       "strike",
+		ShooterID:      attacker.Id,
+		TargetID:       target.Id,
+		HitProbability: 1.0,
+	}}, []*enginev1.Unit{attacker, target}, defs, catalog, alwaysHit)
+
+	if len(hits) != 1 {
+		t.Fatalf("expected 1 hit, got %d", len(hits))
+	}
+	if target.DamageState != enginev1.DamageState_DAMAGE_STATE_DAMAGED {
+		t.Fatalf("expected airbase target to be damaged, got %v", target.DamageState)
+	}
+	if target.GetBaseOps().GetState() != enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_DEGRADED {
+		t.Fatalf("expected light damage to degrade airbase operations, got %v", target.GetBaseOps().GetState())
 	}
 }
 
