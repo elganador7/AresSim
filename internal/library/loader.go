@@ -71,6 +71,7 @@ type Definition struct {
 	Stationary                       bool                  `yaml:"stationary"`
 	Affiliation                      string                `yaml:"affiliation"`
 	EmploymentRole                   string                `yaml:"employment_role"`
+	AuthorizedPersonnel              int                   `yaml:"authorized_personnel"`
 	NationOfOrigin                   string                `yaml:"nation_of_origin"`
 	Operators                        []string              `yaml:"operators"`
 	EmployedBy                       []string              `yaml:"employed_by"`
@@ -92,6 +93,9 @@ type Definition struct {
 	LaunchCapacityPerInterval        int                   `yaml:"launch_capacity_per_interval"`
 	RecoveryCapacityPerInterval      int                   `yaml:"recovery_capacity_per_interval"`
 	SortieIntervalMinutes            int                   `yaml:"sortie_interval_minutes"`
+	ReplacementCostUSD               float64               `yaml:"replacement_cost_usd"`
+	StrategicValueUSD                float64               `yaml:"strategic_value_usd"`
+	EconomicValueUSD                 float64               `yaml:"economic_value_usd"`
 	DefaultLoadout                   []LoadoutSlot         `yaml:"default_loadout"`
 	DefaultWeaponConfiguration       string                `yaml:"default_weapon_configuration"`
 	WeaponConfigurations             []WeaponConfiguration `yaml:"weapon_configurations"`
@@ -119,6 +123,22 @@ func (d Definition) ToRecord() map[string]any {
 	affiliation := normalizeAffiliation(d.Affiliation, assetClass)
 	employmentRole := normalizeEmploymentRole(d.EmploymentRole, assetClass, d.GeneralType)
 	stationary := normalizeStationary(d.Stationary, d.Form, assetClass)
+	replacementCost := d.ReplacementCostUSD
+	if replacementCost <= 0 {
+		replacementCost = DefaultReplacementCostUSD(assetClass, d.Domain, d.GeneralType)
+	}
+	strategicValue := d.StrategicValueUSD
+	if strategicValue <= 0 {
+		strategicValue = DefaultStrategicValueUSD(assetClass, targetClass, d.Domain, d.GeneralType, employmentRole)
+	}
+	economicValue := d.EconomicValueUSD
+	if economicValue <= 0 {
+		economicValue = DefaultEconomicValueUSD(assetClass, affiliation)
+	}
+	authorizedPersonnel := d.AuthorizedPersonnel
+	if authorizedPersonnel <= 0 {
+		authorizedPersonnel = DefaultAuthorizedPersonnel(assetClass, d.Domain, d.GeneralType)
+	}
 	return map[string]any{
 		"name":                                d.Name,
 		"description":                         d.Description,
@@ -132,6 +152,7 @@ func (d Definition) ToRecord() map[string]any {
 		"stationary":                          stationary,
 		"affiliation":                         affiliation,
 		"employment_role":                     employmentRole,
+		"authorized_personnel":                authorizedPersonnel,
 		"definition_source":                   "library",
 		"nation_of_origin":                    d.NationOfOrigin,
 		"operators":                           operators,
@@ -154,6 +175,9 @@ func (d Definition) ToRecord() map[string]any {
 		"launch_capacity_per_interval":        d.LaunchCapacityPerInterval,
 		"recovery_capacity_per_interval":      d.RecoveryCapacityPerInterval,
 		"sortie_interval_minutes":             d.SortieIntervalMinutes,
+		"replacement_cost_usd":                replacementCost,
+		"strategic_value_usd":                 strategicValue,
+		"economic_value_usd":                  economicValue,
 		"default_weapon_configuration":        defaultConfigID,
 		"weapon_configurations":               configs,
 	}

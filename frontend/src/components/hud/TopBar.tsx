@@ -13,12 +13,22 @@ const stateColor: Record<string, string> = {
   ended: "#ef4444",
 };
 
+function formatUsdCompact(value: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
 export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
   const scenarioName = useSimStore((s) => s.scenarioName);
   const scenarioState = useSimStore((s) => s.scenarioState);
   const simSeconds = useSimStore((s) => s.simSeconds);
   const timeScale = useSimStore((s) => s.timeScale);
   const tickNumber = useSimStore((s) => s.tickNumber);
+  const scores = useSimStore((s) => s.scores);
   const [sharingOpen, setSharingOpen] = useState(false);
 
   const currentIdx = (() => {
@@ -57,6 +67,16 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
         >
           {scenarioState.toUpperCase()}
         </span>
+        {scores.length > 0 && (
+          <div className="score-strip">
+            {scores.slice(0, 4).map((score) => (
+              <div className="score-chip" key={score.teamId} title={`Human ${formatUsdCompact(score.humanLossUsd)} · Replacement ${formatUsdCompact(score.replacementLossUsd)} · Strategic ${formatUsdCompact(score.strategicLossUsd)} · Economic ${formatUsdCompact(score.economicLossUsd)}`}>
+                <span className="score-team">{score.teamId}</span>
+                <span className="score-value">{formatUsdCompact(score.totalLossUsd)}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="top-bar-center">

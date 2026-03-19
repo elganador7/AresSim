@@ -14,6 +14,10 @@ type DefStats struct {
 	BaseStrength                float64
 	DetectionRangeM             float64
 	RadarCrossSectionM2         float64
+	AuthorizedPersonnel         int
+	ReplacementCostUSD          float64
+	StrategicValueUSD           float64
+	EconomicValueUSD            float64
 	Domain                      enginev1.UnitDomain // physical domain of this platform
 	TargetClass                 string
 	AssetClass                  string

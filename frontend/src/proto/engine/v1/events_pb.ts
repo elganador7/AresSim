@@ -20,7 +20,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/events.proto.
  */
 export const file_engine_v1_events: GenFile = /*@__PURE__*/
-  fileDesc("ChZlbmdpbmUvdjEvZXZlbnRzLnByb3RvEgllbmdpbmUudjEijwIKEUZ1bGxTdGF0ZVNuYXBzaG90Eh4KBXVuaXRzGAEgAygLMg8uZW5naW5lLnYxLlVuaXQSJAoIc2ltX3RpbWUYAyABKAsyEi5lbmdpbmUudjEuU2ltVGltZRItCgd3ZWF0aGVyGAQgASgLMhwuZW5naW5lLnYxLldlYXRoZXJDb25kaXRpb25zEhUKDXNjZW5hcmlvX25hbWUYBSABKAkSNwoSd2VhcG9uX2RlZmluaXRpb25zGAYgAygLMhsuZW5naW5lLnYxLldlYXBvbkRlZmluaXRpb24SNQoNcmVsYXRpb25zaGlwcxgHIAMoCzIeLmVuZ2luZS52MS5Db3VudHJ5UmVsYXRpb25zaGlwIlUKElNjZW5hcmlvU3RhdGVFdmVudBIrCgVzdGF0ZRgBIAEoDjIcLmVuZ2luZS52MS5TY2VuYXJpb1BsYXlTdGF0ZRISCgp0aW1lX3NjYWxlGAIgASgCIl0KD0JhdGNoVW5pdFVwZGF0ZRIkCgZkZWx0YXMYASADKAsyFC5lbmdpbmUudjEuVW5pdERlbHRhEiQKCHNpbV90aW1lGAIgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUikQMKCVVuaXREZWx0YRIPCgd1bml0X2lkGAEgASgJEiUKCHBvc2l0aW9uGAIgASgLMhMuZW5naW5lLnYxLlBvc2l0aW9uEiwKBnN0YXR1cxgDIAEoCzIcLmVuZ2luZS52MS5PcGVyYXRpb25hbFN0YXR1cxIsCgdwb3N0dXJlGAQgASgOMhsuZW5naW5lLnYxLkZvcm1hdGlvblBvc3R1cmUSKAoKbW92ZV9vcmRlchgFIAEoCzIULmVuZ2luZS52MS5Nb3ZlT3JkZXISJwoHd2VhcG9ucxgGIAMoCzIWLmVuZ2luZS52MS5XZWFwb25TdGF0ZRIsCgxkYW1hZ2Vfc3RhdGUYByABKA4yFi5lbmdpbmUudjEuRGFtYWdlU3RhdGUSIQoZbmV4dF9zb3J0aWVfcmVhZHlfc2Vjb25kcxgIIAEoARIpCghiYXNlX29wcxgJIAEoCzIXLmVuZ2luZS52MS5CYXNlT3BzU3RhdGUSIQoZbmV4dF9zdHJpa2VfcmVhZHlfc2Vjb25kcxgKIAEoASJXChBVbml0U3Bhd25lZEV2ZW50Eh0KBHVuaXQYASABKAsyDy5lbmdpbmUudjEuVW5pdBIkCghzaW1fdGltZRgCIAEoCzISLmVuZ2luZS52MS5TaW1UaW1lIm8KElVuaXREZXN0cm95ZWRFdmVudBIPCgd1bml0X2lkGAEgASgJEg0KBWNhdXNlGAIgASgJEiQKCHNpbV90aW1lGAMgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUSEwoLYXR0YWNrZXJfaWQYBCABKAkilwEKD0RldGVjdGlvblVwZGF0ZRIWCg5kZXRlY3Rpbmdfc2lkZRgBIAEoCRIZChFkZXRlY3RlZF91bml0X2lkcxgCIAMoCRIdChVkZXRlY3RlZF9tdW5pdGlvbl9pZHMYAyADKAkSMgoNdW5pdF9jb250YWN0cxgEIAMoCzIbLmVuZ2luZS52MS5EZXRlY3Rpb25Db250YWN0IkgKEERldGVjdGlvbkNvbnRhY3QSDwoHdW5pdF9pZBgBIAEoCRITCgtzb3VyY2VfdGVhbRgCIAEoCRIOCgZzaGFyZWQYAyABKAgibAoQSW5GbGlnaHRNdW5pdGlvbhIKCgJpZBgBIAEoCRIRCgl3ZWFwb25faWQYAiABKAkSEgoKc2hvb3Rlcl9pZBgDIAEoCRIlCghwb3NpdGlvbhgEIAEoCzITLmVuZ2luZS52MS5Qb3NpdGlvbiJmCg5NdW5pdGlvblVwZGF0ZRIuCgltdW5pdGlvbnMYASADKAsyGy5lbmdpbmUudjEuSW5GbGlnaHRNdW5pdGlvbhIkCghzaW1fdGltZRgCIAEoCzISLmVuZ2luZS52MS5TaW1UaW1lIk8KDk5hcnJhdGl2ZUV2ZW50EgwKBHRleHQYASABKAkSEAoIY2F0ZWdvcnkYAiABKAkSDwoHdW5pdF9pZBgDIAEoCRIMCgRzaWRlGAQgASgJKmwKEVNjZW5hcmlvUGxheVN0YXRlEhgKFFNDRU5BUklPX1VOU1BFQ0lGSUVEEAASEwoPU0NFTkFSSU9fUEFVU0VEEAESFAoQU0NFTkFSSU9fUlVOTklORxACEhIKDlNDRU5BUklPX0VOREVEEANCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common, file_engine_v1_scenario, file_engine_v1_unit, file_engine_v1_status, file_engine_v1_weapon]);
+  fileDesc("ChZlbmdpbmUvdjEvZXZlbnRzLnByb3RvEgllbmdpbmUudjEitQIKEUZ1bGxTdGF0ZVNuYXBzaG90Eh4KBXVuaXRzGAEgAygLMg8uZW5naW5lLnYxLlVuaXQSJAoIc2ltX3RpbWUYAyABKAsyEi5lbmdpbmUudjEuU2ltVGltZRItCgd3ZWF0aGVyGAQgASgLMhwuZW5naW5lLnYxLldlYXRoZXJDb25kaXRpb25zEhUKDXNjZW5hcmlvX25hbWUYBSABKAkSNwoSd2VhcG9uX2RlZmluaXRpb25zGAYgAygLMhsuZW5naW5lLnYxLldlYXBvbkRlZmluaXRpb24SNQoNcmVsYXRpb25zaGlwcxgHIAMoCzIeLmVuZ2luZS52MS5Db3VudHJ5UmVsYXRpb25zaGlwEiQKBnNjb3JlcxgIIAMoCzIULmVuZ2luZS52MS5UZWFtU2NvcmUiVQoSU2NlbmFyaW9TdGF0ZUV2ZW50EisKBXN0YXRlGAEgASgOMhwuZW5naW5lLnYxLlNjZW5hcmlvUGxheVN0YXRlEhIKCnRpbWVfc2NhbGUYAiABKAIigwEKD0JhdGNoVW5pdFVwZGF0ZRIkCgZkZWx0YXMYASADKAsyFC5lbmdpbmUudjEuVW5pdERlbHRhEiQKCHNpbV90aW1lGAIgASgLMhIuZW5naW5lLnYxLlNpbVRpbWUSJAoGc2NvcmVzGAMgAygLMhQuZW5naW5lLnYxLlRlYW1TY29yZSKhAQoJVGVhbVNjb3JlEg8KB3RlYW1faWQYASABKAkSHAoUcmVwbGFjZW1lbnRfbG9zc191c2QYAiABKAESGgoSc3RyYXRlZ2ljX2xvc3NfdXNkGAMgASgBEhkKEWVjb25vbWljX2xvc3NfdXNkGAQgASgBEhYKDmh1bWFuX2xvc3NfdXNkGAUgASgBEhYKDnRvdGFsX2xvc3NfdXNkGAYgASgBIpEDCglVbml0RGVsdGESDwoHdW5pdF9pZBgBIAEoCRIlCghwb3NpdGlvbhgCIAEoCzITLmVuZ2luZS52MS5Qb3NpdGlvbhIsCgZzdGF0dXMYAyABKAsyHC5lbmdpbmUudjEuT3BlcmF0aW9uYWxTdGF0dXMSLAoHcG9zdHVyZRgEIAEoDjIbLmVuZ2luZS52MS5Gb3JtYXRpb25Qb3N0dXJlEigKCm1vdmVfb3JkZXIYBSABKAsyFC5lbmdpbmUudjEuTW92ZU9yZGVyEicKB3dlYXBvbnMYBiADKAsyFi5lbmdpbmUudjEuV2VhcG9uU3RhdGUSLAoMZGFtYWdlX3N0YXRlGAcgASgOMhYuZW5naW5lLnYxLkRhbWFnZVN0YXRlEiEKGW5leHRfc29ydGllX3JlYWR5X3NlY29uZHMYCCABKAESKQoIYmFzZV9vcHMYCSABKAsyFy5lbmdpbmUudjEuQmFzZU9wc1N0YXRlEiEKGW5leHRfc3RyaWtlX3JlYWR5X3NlY29uZHMYCiABKAEiVwoQVW5pdFNwYXduZWRFdmVudBIdCgR1bml0GAEgASgLMg8uZW5naW5lLnYxLlVuaXQSJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSJvChJVbml0RGVzdHJveWVkRXZlbnQSDwoHdW5pdF9pZBgBIAEoCRINCgVjYXVzZRgCIAEoCRIkCghzaW1fdGltZRgDIAEoCzISLmVuZ2luZS52MS5TaW1UaW1lEhMKC2F0dGFja2VyX2lkGAQgASgJIpcBCg9EZXRlY3Rpb25VcGRhdGUSFgoOZGV0ZWN0aW5nX3NpZGUYASABKAkSGQoRZGV0ZWN0ZWRfdW5pdF9pZHMYAiADKAkSHQoVZGV0ZWN0ZWRfbXVuaXRpb25faWRzGAMgAygJEjIKDXVuaXRfY29udGFjdHMYBCADKAsyGy5lbmdpbmUudjEuRGV0ZWN0aW9uQ29udGFjdCJIChBEZXRlY3Rpb25Db250YWN0Eg8KB3VuaXRfaWQYASABKAkSEwoLc291cmNlX3RlYW0YAiABKAkSDgoGc2hhcmVkGAMgASgIImwKEEluRmxpZ2h0TXVuaXRpb24SCgoCaWQYASABKAkSEQoJd2VhcG9uX2lkGAIgASgJEhIKCnNob290ZXJfaWQYAyABKAkSJQoIcG9zaXRpb24YBCABKAsyEy5lbmdpbmUudjEuUG9zaXRpb24iZgoOTXVuaXRpb25VcGRhdGUSLgoJbXVuaXRpb25zGAEgAygLMhsuZW5naW5lLnYxLkluRmxpZ2h0TXVuaXRpb24SJAoIc2ltX3RpbWUYAiABKAsyEi5lbmdpbmUudjEuU2ltVGltZSJPCg5OYXJyYXRpdmVFdmVudBIMCgR0ZXh0GAEgASgJEhAKCGNhdGVnb3J5GAIgASgJEg8KB3VuaXRfaWQYAyABKAkSDAoEc2lkZRgEIAEoCSpsChFTY2VuYXJpb1BsYXlTdGF0ZRIYChRTQ0VOQVJJT19VTlNQRUNJRklFRBAAEhMKD1NDRU5BUklPX1BBVVNFRBABEhQKEFNDRU5BUklPX1JVTk5JTkcQAhISCg5TQ0VOQVJJT19FTkRFRBADQitaKWdpdGh1Yi5jb20vYXJlc3NpbS9pbnRlcm5hbC9nZW4vZW5naW5lL3YxYgZwcm90bzM", [file_engine_v1_common, file_engine_v1_scenario, file_engine_v1_unit, file_engine_v1_status, file_engine_v1_weapon]);
 
 /**
  * @generated from message engine.v1.FullStateSnapshot
@@ -58,6 +58,11 @@ export type FullStateSnapshot = Message<"engine.v1.FullStateSnapshot"> & {
    * @generated from field: repeated engine.v1.CountryRelationship relationships = 7;
    */
   relationships: CountryRelationship[];
+
+  /**
+   * @generated from field: repeated engine.v1.TeamScore scores = 8;
+   */
+  scores: TeamScore[];
 };
 
 /**
@@ -102,6 +107,11 @@ export type BatchUnitUpdate = Message<"engine.v1.BatchUnitUpdate"> & {
    * @generated from field: engine.v1.SimTime sim_time = 2;
    */
   simTime?: SimTime;
+
+  /**
+   * @generated from field: repeated engine.v1.TeamScore scores = 3;
+   */
+  scores: TeamScore[];
 };
 
 /**
@@ -110,6 +120,48 @@ export type BatchUnitUpdate = Message<"engine.v1.BatchUnitUpdate"> & {
  */
 export const BatchUnitUpdateSchema: GenMessage<BatchUnitUpdate> = /*@__PURE__*/
   messageDesc(file_engine_v1_events, 2);
+
+/**
+ * @generated from message engine.v1.TeamScore
+ */
+export type TeamScore = Message<"engine.v1.TeamScore"> & {
+  /**
+   * @generated from field: string team_id = 1;
+   */
+  teamId: string;
+
+  /**
+   * @generated from field: double replacement_loss_usd = 2;
+   */
+  replacementLossUsd: number;
+
+  /**
+   * @generated from field: double strategic_loss_usd = 3;
+   */
+  strategicLossUsd: number;
+
+  /**
+   * @generated from field: double economic_loss_usd = 4;
+   */
+  economicLossUsd: number;
+
+  /**
+   * @generated from field: double human_loss_usd = 5;
+   */
+  humanLossUsd: number;
+
+  /**
+   * @generated from field: double total_loss_usd = 6;
+   */
+  totalLossUsd: number;
+};
+
+/**
+ * Describes the message engine.v1.TeamScore.
+ * Use `create(TeamScoreSchema)` to create a new message.
+ */
+export const TeamScoreSchema: GenMessage<TeamScore> = /*@__PURE__*/
+  messageDesc(file_engine_v1_events, 3);
 
 /**
  * @generated from message engine.v1.UnitDelta
@@ -183,7 +235,7 @@ export type UnitDelta = Message<"engine.v1.UnitDelta"> & {
  * Use `create(UnitDeltaSchema)` to create a new message.
  */
 export const UnitDeltaSchema: GenMessage<UnitDelta> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 3);
+  messageDesc(file_engine_v1_events, 4);
 
 /**
  * @generated from message engine.v1.UnitSpawnedEvent
@@ -205,7 +257,7 @@ export type UnitSpawnedEvent = Message<"engine.v1.UnitSpawnedEvent"> & {
  * Use `create(UnitSpawnedEventSchema)` to create a new message.
  */
 export const UnitSpawnedEventSchema: GenMessage<UnitSpawnedEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 4);
+  messageDesc(file_engine_v1_events, 5);
 
 /**
  * @generated from message engine.v1.UnitDestroyedEvent
@@ -241,7 +293,7 @@ export type UnitDestroyedEvent = Message<"engine.v1.UnitDestroyedEvent"> & {
  * Use `create(UnitDestroyedEventSchema)` to create a new message.
  */
 export const UnitDestroyedEventSchema: GenMessage<UnitDestroyedEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 5);
+  messageDesc(file_engine_v1_events, 6);
 
 /**
  * @generated from message engine.v1.DetectionUpdate
@@ -277,7 +329,7 @@ export type DetectionUpdate = Message<"engine.v1.DetectionUpdate"> & {
  * Use `create(DetectionUpdateSchema)` to create a new message.
  */
 export const DetectionUpdateSchema: GenMessage<DetectionUpdate> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 6);
+  messageDesc(file_engine_v1_events, 7);
 
 /**
  * @generated from message engine.v1.DetectionContact
@@ -304,7 +356,7 @@ export type DetectionContact = Message<"engine.v1.DetectionContact"> & {
  * Use `create(DetectionContactSchema)` to create a new message.
  */
 export const DetectionContactSchema: GenMessage<DetectionContact> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 7);
+  messageDesc(file_engine_v1_events, 8);
 
 /**
  * @generated from message engine.v1.InFlightMunition
@@ -344,7 +396,7 @@ export type InFlightMunition = Message<"engine.v1.InFlightMunition"> & {
  * Use `create(InFlightMunitionSchema)` to create a new message.
  */
 export const InFlightMunitionSchema: GenMessage<InFlightMunition> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 8);
+  messageDesc(file_engine_v1_events, 9);
 
 /**
  * Emitted every tick with the complete set of in-flight munitions.
@@ -369,7 +421,7 @@ export type MunitionUpdate = Message<"engine.v1.MunitionUpdate"> & {
  * Use `create(MunitionUpdateSchema)` to create a new message.
  */
 export const MunitionUpdateSchema: GenMessage<MunitionUpdate> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 9);
+  messageDesc(file_engine_v1_events, 10);
 
 /**
  * @generated from message engine.v1.NarrativeEvent
@@ -403,7 +455,7 @@ export type NarrativeEvent = Message<"engine.v1.NarrativeEvent"> & {
  * Use `create(NarrativeEventSchema)` to create a new message.
  */
 export const NarrativeEventSchema: GenMessage<NarrativeEvent> = /*@__PURE__*/
-  messageDesc(file_engine_v1_events, 10);
+  messageDesc(file_engine_v1_events, 11);
 
 /**
  * @generated from enum engine.v1.ScenarioPlayState

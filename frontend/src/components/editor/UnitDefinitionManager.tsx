@@ -92,7 +92,7 @@ function blankDef(): UnitDefinitionDraft {
   return {
     id: "", name: "", description: "",
     domain: 1, form: 30, generalType: 60, specificType: "", shortName: "",
-    assetClass: "combat_unit", targetClass: "armor", employmentRole: "dual_use", stationary: false, affiliation: "military",
+    assetClass: "combat_unit", targetClass: "armor", employmentRole: "dual_use", authorizedPersonnel: 0, stationary: false, affiliation: "military",
     nationOfOrigin: "", operators: [], employedBy: [], serviceEntryYear: 2000,
     baseStrength: 0.8, combatRangeM: 1000, accuracy: 0.75,
     maxSpeedMps: 10, cruiseSpeedMps: 7, maxRangeKm: 500,
@@ -101,6 +101,7 @@ function blankDef(): UnitDefinitionDraft {
     embarkedFixedWingCapacity: 0, embarkedRotaryWingCapacity: 0, embarkedUavCapacity: 0,
     embarkedSurfaceConnectorCapacity: 0, launchCapacityPerInterval: 0, recoveryCapacityPerInterval: 0,
     sortieIntervalMinutes: 0,
+    replacementCostUsd: 0, strategicValueUsd: 0, economicValueUsd: 0,
     defaultWeaponConfiguration: "",
     weaponConfigurations: [],
   };
@@ -131,6 +132,7 @@ function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
     assetClass: str("asset_class") || "combat_unit",
     targetClass: str("target_class") || "soft_infrastructure",
     employmentRole: str("employment_role") || "dual_use",
+    authorizedPersonnel: num("authorized_personnel"),
     stationary: Boolean(r["stationary"]),
     affiliation: str("affiliation") || "military",
     nationOfOrigin: str("nation_of_origin"), operators: Array.isArray(r["operators"]) ? (r["operators"] as unknown[]).map(String) : [], employedBy: Array.isArray(r["employed_by"]) ? (r["employed_by"] as unknown[]).map(String) : (Array.isArray(r["operators"]) ? (r["operators"] as unknown[]).map(String) : []),
@@ -142,6 +144,7 @@ function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
     embarkedFixedWingCapacity: num("embarked_fixed_wing_capacity"), embarkedRotaryWingCapacity: num("embarked_rotary_wing_capacity"), embarkedUavCapacity: num("embarked_uav_capacity"),
     embarkedSurfaceConnectorCapacity: num("embarked_surface_connector_capacity"), launchCapacityPerInterval: num("launch_capacity_per_interval"), recoveryCapacityPerInterval: num("recovery_capacity_per_interval"),
     sortieIntervalMinutes: num("sortie_interval_minutes"),
+    replacementCostUsd: num("replacement_cost_usd"), strategicValueUsd: num("strategic_value_usd"), economicValueUsd: num("economic_value_usd"),
     defaultWeaponConfiguration: str("default_weapon_configuration"),
     weaponConfigurations,
   };
@@ -326,6 +329,17 @@ function DefinitionForm({
               </select>
             </div>
             <div className="field">
+              <label className="field-label">Authorized Personnel</label>
+              <input
+                className="field-input"
+                type="number"
+                min={0}
+                step={1}
+                value={def.authorizedPersonnel}
+                onChange={(e) => patch({ authorizedPersonnel: Number(e.target.value) })}
+              />
+            </div>
+            <div className="field">
               <label className="field-label">Affiliation</label>
               <select className="field-select" value={def.affiliation}
                 onChange={(e) => patch({ affiliation: e.target.value })}>
@@ -377,6 +391,25 @@ function DefinitionForm({
           <div className="field-row">
             {numField("Fuel Capacity (L)", "fuelCapacityLiters", 100, 0)}
             {numField("Burn Rate (L/h)", "fuelBurnRateLph", 10, 0)}
+          </div>
+        </div>
+
+        <div className="panel-section">
+          <div className="panel-section-header">Valuation</div>
+          <div className="field">
+            <label className="field-label">Replacement Cost (USD)</label>
+            <input
+              className="field-input"
+              type="number"
+              min={0}
+              step={1000000}
+              value={def.replacementCostUsd}
+              onChange={(e) => patch({ replacementCostUsd: Number(e.target.value) })}
+            />
+          </div>
+          <div className="field-row">
+            {numField("Strategic Value (USD)", "strategicValueUsd", 1000000, 0)}
+            {numField("Economic Value (USD)", "economicValueUsd", 1000000, 0)}
           </div>
         </div>
 
@@ -438,6 +471,7 @@ export default function UnitDefinitionManager({ onClose }: Props) {
       domain: def.domain, form: def.form, general_type: def.generalType,
       specific_type: def.specificType, short_name: def.shortName,
       asset_class: def.assetClass, target_class: def.targetClass, stationary: def.stationary, affiliation: def.affiliation,
+      employment_role: def.employmentRole, authorized_personnel: def.authorizedPersonnel,
       nation_of_origin: def.nationOfOrigin, operators: def.operators, employed_by: def.employedBy,
       service_entry_year: def.serviceEntryYear,
       base_strength: def.baseStrength, combat_range_m: def.combatRangeM,
@@ -452,6 +486,9 @@ export default function UnitDefinitionManager({ onClose }: Props) {
       launch_capacity_per_interval: def.launchCapacityPerInterval,
       recovery_capacity_per_interval: def.recoveryCapacityPerInterval,
       sortie_interval_minutes: def.sortieIntervalMinutes,
+      replacement_cost_usd: def.replacementCostUsd,
+      strategic_value_usd: def.strategicValueUsd,
+      economic_value_usd: def.economicValueUsd,
       default_weapon_configuration: def.defaultWeaponConfiguration,
       weapon_configurations: def.weaponConfigurations.map((cfg) => ({
         id: cfg.id,

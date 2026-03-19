@@ -17,6 +17,7 @@ import {
   ExplosionFx,
   DetectionContact,
   CountryRelationship,
+  TeamScore,
 } from "../store/simStore";
 import { fromBinary, type DescMessage } from "@bufbuild/protobuf";
 
@@ -40,6 +41,7 @@ import type {
   DetectionUpdate,
   MunitionUpdate,
   UnitDelta,
+  TeamScore as ProtoTeamScore,
 } from "@proto/engine/v1/events_pb";
 import type { Unit as ProtoUnit } from "@proto/engine/v1/unit_pb";
 import type { WeaponDefinition as ProtoWeaponDef } from "@proto/engine/v1/weapon_pb";
@@ -173,6 +175,17 @@ function protoWeaponDefToStore(w: ProtoWeaponDef): WeaponDef {
   };
 }
 
+function protoTeamScoreToStore(score: ProtoTeamScore): TeamScore {
+  return {
+    teamId: score.teamId,
+    replacementLossUsd: score.replacementLossUsd,
+    strategicLossUsd: score.strategicLossUsd,
+    economicLossUsd: score.economicLossUsd,
+    humanLossUsd: score.humanLossUsd,
+    totalLossUsd: score.totalLossUsd,
+  };
+}
+
 function applyDelta(delta: UnitDelta): void {
   const store = useSimStore.getState();
   const patch: Partial<Unit> = {};
@@ -271,7 +284,8 @@ export function initBridge(): void {
       maritimeTransitAllowed: rel.maritimeTransitAllowed,
       maritimeStrikeAllowed: rel.maritimeStrikeAllowed,
     }));
-    store.loadSnapshot(units, snap.scenarioName, weaponDefs, relationships);
+    const scores: TeamScore[] = snap.scores.map(protoTeamScoreToStore);
+    store.loadSnapshot(units, snap.scenarioName, weaponDefs, relationships, scores);
     if (snap.simTime) {
       store.setSimTime(snap.simTime.secondsElapsed, Number(snap.simTime.tickNumber));
     }
@@ -282,6 +296,9 @@ export function initBridge(): void {
   registerProtoEvent<BatchUnitUpdate>("sim:batch_update", BatchUnitUpdateSchema, (msg) => {
     for (const delta of msg.deltas) {
       applyDelta(delta);
+    }
+    if (msg.scores.length > 0) {
+      store.setScores(msg.scores.map(protoTeamScoreToStore));
     }
     if (msg.simTime) {
       store.setSimTime(msg.simTime.secondsElapsed, Number(msg.simTime.tickNumber));

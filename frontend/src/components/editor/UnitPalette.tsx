@@ -71,6 +71,7 @@ function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
     assetClass:         str("asset_class") || "combat_unit",
     targetClass:        str("target_class") || "soft_infrastructure",
     employmentRole:     str("employment_role") || "dual_use",
+    authorizedPersonnel: num("authorized_personnel"),
     stationary:         Boolean(r["stationary"]),
     affiliation:        str("affiliation") || "military",
     nationOfOrigin:     str("nation_of_origin"),
@@ -97,6 +98,9 @@ function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
     launchCapacityPerInterval: num("launch_capacity_per_interval"),
     recoveryCapacityPerInterval: num("recovery_capacity_per_interval"),
     sortieIntervalMinutes: num("sortie_interval_minutes"),
+    replacementCostUsd: num("replacement_cost_usd"),
+    strategicValueUsd: num("strategic_value_usd"),
+    economicValueUsd: num("economic_value_usd"),
     defaultWeaponConfiguration: str("default_weapon_configuration"),
     weaponConfigurations,
   };

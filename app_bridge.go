@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/aressim/internal/library"
 	"github.com/aressim/internal/scenario"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
@@ -208,6 +209,24 @@ func (a *App) SaveUnitDefinition(jsonStr string) BridgeResult {
 	}
 	if toString(rec["employment_role"]) == "" {
 		rec["employment_role"] = "dual_use"
+	}
+	assetClass := toString(rec["asset_class"])
+	targetClass := toString(rec["target_class"])
+	affiliation := toString(rec["affiliation"])
+	employmentRole := toString(rec["employment_role"])
+	domain := int(toFloat64(rec["domain"]))
+	generalType := int(toFloat64(rec["general_type"]))
+	if int(toFloat64(rec["authorized_personnel"])) <= 0 {
+		rec["authorized_personnel"] = library.DefaultAuthorizedPersonnel(assetClass, domain, generalType)
+	}
+	if toFloat64(rec["replacement_cost_usd"]) <= 0 {
+		rec["replacement_cost_usd"] = library.DefaultReplacementCostUSD(assetClass, domain, generalType)
+	}
+	if toFloat64(rec["strategic_value_usd"]) <= 0 {
+		rec["strategic_value_usd"] = library.DefaultStrategicValueUSD(assetClass, targetClass, domain, generalType, employmentRole)
+	}
+	if toFloat64(rec["economic_value_usd"]) <= 0 {
+		rec["economic_value_usd"] = library.DefaultEconomicValueUSD(assetClass, affiliation)
 	}
 	if _, ok := rec["operators"]; !ok {
 		if origin := toString(rec["nation_of_origin"]); origin != "" {

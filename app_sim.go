@@ -91,11 +91,16 @@ func (a *App) makeEmitFn() sim.EmitFn {
 				a.storeLastDetection(du.DetectingSide, du.DetectedUnitIds)
 			}
 		case "batch_update":
-			if bu, ok := msg.(*enginev1.BatchUnitUpdate); ok && bu.SimTime != nil {
-				ticksSinceCheckpoint++
-				if ticksSinceCheckpoint >= db.CheckpointInterval {
-					ticksSinceCheckpoint = 0
-					go a.writeCheckpoint(bu.SimTime.TickNumber, bu.SimTime.SecondsElapsed)
+			if bu, ok := msg.(*enginev1.BatchUnitUpdate); ok {
+				if batchNeedsScoreUpdate(bu) && a.currentScenario != nil {
+					bu.Scores = buildTeamScores(a.currentScenario.GetUnits(), a.getCachedDefs())
+				}
+				if bu.SimTime != nil {
+					ticksSinceCheckpoint++
+					if ticksSinceCheckpoint >= db.CheckpointInterval {
+						ticksSinceCheckpoint = 0
+						go a.writeCheckpoint(bu.SimTime.TickNumber, bu.SimTime.SecondsElapsed)
+					}
 				}
 			}
 		}
@@ -193,6 +198,7 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 		ScenarioName:      scen.Name,
 		WeaponDefinitions: a.listWeaponDefsProto(),
 		Relationships:     scen.GetRelationships(),
+		Scores:            buildTeamScores(scen.GetUnits(), defs),
 	})
 	a.emitProtoEvent("scenario_state", &enginev1.ScenarioStateEvent{
 		State:     enginev1.ScenarioPlayState_SCENARIO_RUNNING,
@@ -444,6 +450,7 @@ func (a *App) RequestSync() BridgeResult {
 		ScenarioName:      a.currentScenario.Name,
 		WeaponDefinitions: a.listWeaponDefsProto(),
 		Relationships:     a.currentScenario.GetRelationships(),
+		Scores:            buildTeamScores(a.currentScenario.GetUnits(), a.getCachedDefs()),
 	})
 	a.emitProtoEvent("scenario_state", &enginev1.ScenarioStateEvent{
 		State:     enginev1.ScenarioPlayState_SCENARIO_RUNNING,
@@ -928,6 +935,10 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 			BaseStrength:                float64(def.BaseStrength),
 			DetectionRangeM:             float64(def.DetectionRangeM),
 			RadarCrossSectionM2:         rcs,
+			AuthorizedPersonnel:         maxInt(def.AuthorizedPersonnel, library.DefaultAuthorizedPersonnel(def.AssetClass, def.Domain, def.GeneralType)),
+			ReplacementCostUSD:          defaultIfZero(def.ReplacementCostUSD, library.DefaultReplacementCostUSD(def.AssetClass, def.Domain, def.GeneralType)),
+			StrategicValueUSD:           defaultIfZero(def.StrategicValueUSD, library.DefaultStrategicValueUSD(def.AssetClass, def.TargetClass, def.Domain, def.GeneralType, def.EmploymentRole)),
+			EconomicValueUSD:            defaultIfZero(def.EconomicValueUSD, library.DefaultEconomicValueUSD(def.AssetClass, def.Affiliation)),
 			Domain:                      domain,
 			TargetClass:                 strings.TrimSpace(def.TargetClass),
 			AssetClass:                  strings.TrimSpace(def.AssetClass),
@@ -958,6 +969,10 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 			BaseStrength:                toFloat64(row["base_strength"]),
 			DetectionRangeM:             toFloat64(row["detection_range_m"]),
 			RadarCrossSectionM2:         rcs,
+			AuthorizedPersonnel:         maxInt(int(toFloat64(row["authorized_personnel"])), library.DefaultAuthorizedPersonnel(toString(row["asset_class"]), int(toFloat64(row["domain"])), int(toFloat64(row["general_type"])))),
+			ReplacementCostUSD:          defaultIfZero(toFloat64(row["replacement_cost_usd"]), library.DefaultReplacementCostUSD(toString(row["asset_class"]), int(toFloat64(row["domain"])), int(toFloat64(row["general_type"])))),
+			StrategicValueUSD:           defaultIfZero(toFloat64(row["strategic_value_usd"]), library.DefaultStrategicValueUSD(toString(row["asset_class"]), toString(row["target_class"]), int(toFloat64(row["domain"])), int(toFloat64(row["general_type"])), toString(row["employment_role"]))),
+			EconomicValueUSD:            defaultIfZero(toFloat64(row["economic_value_usd"]), library.DefaultEconomicValueUSD(toString(row["asset_class"]), toString(row["affiliation"]))),
 			Domain:                      domain,
 			TargetClass:                 toString(row["target_class"]),
 			AssetClass:                  toString(row["asset_class"]),

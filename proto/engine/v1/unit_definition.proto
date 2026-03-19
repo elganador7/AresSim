@@ -216,4 +216,14 @@ message UnitDefinition {
   bool        stationary   = 62;
   Affiliation affiliation  = 63;
   EmploymentRole employment_role = 64;
+  int32       authorized_personnel = 65;
+
+  // ── Strategic / economic valuation ───────────────────────────────────────
+  // These values support scenario scoring and future strike AI.
+  // replacement_cost_usd: approximate cost to replace the platform or site.
+  // strategic_value_usd: military/operational value lost when degraded or destroyed.
+  // economic_value_usd: civilian/economic value lost when degraded or destroyed.
+  double replacement_cost_usd = 70;
+  double strategic_value_usd  = 71;
+  double economic_value_usd   = 72;
 }

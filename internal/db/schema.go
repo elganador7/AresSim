@@ -12,7 +12,7 @@ import (
 // this constant, the database is wiped and rebuilt from scratch. This is
 // acceptable for a single-player desktop application where the database is
 // purely derived state (the authoritative record lives in scenario files).
-const schemaVersion = 16
+const schemaVersion = 17
 
 // SchemaVersion returns the current schema version for logging.
 func SchemaVersion() int { return schemaVersion }
@@ -159,6 +159,7 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS stationary         ON unit_definition TYPE bool`,
 	`DEFINE FIELD IF NOT EXISTS affiliation        ON unit_definition TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS employment_role    ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS authorized_personnel ON unit_definition TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS definition_source  ON unit_definition TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS nation_of_origin   ON unit_definition TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS operators          ON unit_definition TYPE array<string>`,
@@ -181,6 +182,9 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS launch_capacity_per_interval ON unit_definition TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS recovery_capacity_per_interval ON unit_definition TYPE int`,
 	`DEFINE FIELD IF NOT EXISTS sortie_interval_minutes ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS replacement_cost_usd ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS strategic_value_usd ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS economic_value_usd ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS default_weapon_configuration ON unit_definition TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS weapon_configurations ON unit_definition TYPE array<object>`,
 

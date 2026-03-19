@@ -30,6 +30,7 @@ message FullStateSnapshot {
   // weapon names without a separate RPC call.
   repeated WeaponDefinition weapon_definitions = 6;
   repeated CountryRelationship relationships   = 7;
+  repeated TeamScore        scores             = 8;
 }
 
 // ── Scenario state ────────────────────────────────────────────────────────────
@@ -45,6 +46,16 @@ message ScenarioStateEvent {
 message BatchUnitUpdate {
   repeated UnitDelta deltas   = 1;
   SimTime            sim_time = 2;
+  repeated TeamScore scores   = 3;
+}
+
+message TeamScore {
+  string team_id = 1;
+  double replacement_loss_usd = 2;
+  double strategic_loss_usd   = 3;
+  double economic_loss_usd    = 4;
+  double human_loss_usd       = 5;
+  double total_loss_usd       = 6;
 }
 
 message UnitDelta {

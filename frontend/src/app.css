@@ -90,6 +90,35 @@ body,
   letter-spacing: 0.1em;
 }
 
+.score-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.score-chip {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.score-team {
+  font-size: 10px;
+  color: #9ca3af;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.score-value {
+  font-size: 11px;
+  color: #f3f4f6;
+  font-weight: 700;
+}
+
 .sim-time {
   font-size: 18px;
   font-weight: 700;

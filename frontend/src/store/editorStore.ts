@@ -128,6 +128,7 @@ export interface UnitDefinitionDraft {
   assetClass: string;
   targetClass: string;
   employmentRole: string;
+  authorizedPersonnel: number;
   stationary: boolean;
   affiliation: string;
   nationOfOrigin: string;
@@ -152,6 +153,9 @@ export interface UnitDefinitionDraft {
   launchCapacityPerInterval: number;
   recoveryCapacityPerInterval: number;
   sortieIntervalMinutes: number;
+  replacementCostUsd: number;
+  strategicValueUsd: number;
+  economicValueUsd: number;
   defaultWeaponConfiguration: string;
   weaponConfigurations: WeaponConfigurationDraft[];
 }

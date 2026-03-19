@@ -104,6 +104,15 @@ export interface CountryRelationship {
   maritimeStrikeAllowed: boolean;
 }
 
+export interface TeamScore {
+  teamId: string;
+  replacementLossUsd: number;
+  strategicLossUsd: number;
+  economicLossUsd: number;
+  humanLossUsd: number;
+  totalLossUsd: number;
+}
+
 export interface MapCommandMode {
   type: "none" | "route" | "target_pick";
   unitId: string | null;
@@ -160,6 +169,7 @@ export interface SimStore {
   simSeconds: number;
   tickNumber: number;
   relationships: CountryRelationship[];
+  scores: TeamScore[];
 
   // ── Units ────────────────────────────────────────────────────────────────
   // Map keyed by unit ID for O(1) lookup and incremental delta merges.
@@ -205,8 +215,9 @@ export interface SimStore {
 
   // ── Actions ──────────────────────────────────────────────────────────────
   // Called by bridge.ts on incoming sim events.
-  loadSnapshot: (units: Unit[], scenarioName: string, weaponDefs?: WeaponDef[], relationships?: CountryRelationship[]) => void;
+  loadSnapshot: (units: Unit[], scenarioName: string, weaponDefs?: WeaponDef[], relationships?: CountryRelationship[], scores?: TeamScore[]) => void;
   setRelationships: (relationships: CountryRelationship[]) => void;
+  setScores: (scores: TeamScore[]) => void;
   setMunitions: (munitions: Munition[]) => void;
   addExplosion: (explosion: ExplosionFx) => void;
   removeExplosion: (id: string) => void;
@@ -245,6 +256,7 @@ export const useSimStore = create<SimStore>((set) => ({
   simSeconds: 0,
   tickNumber: 0,
   relationships: [],
+  scores: [],
   units: new Map(),
   weaponDefs: new Map(),
   munitions: new Map(),
@@ -259,7 +271,7 @@ export const useSimStore = create<SimStore>((set) => ({
   selectedStrikePreview: null,
   eventLog: [],
 
-  loadSnapshot: (units, scenarioName, weaponDefs, relationships) =>
+  loadSnapshot: (units, scenarioName, weaponDefs, relationships, scores) =>
     // Replaces the entire units Map reference. Zustand notifies all subscribers
     // because the reference changed, so CesiumGlobe's subscription fires and
     // does a full syncUnits pass. This is correct: a snapshot is a full rebuild.
@@ -269,6 +281,7 @@ export const useSimStore = create<SimStore>((set) => ({
       simSeconds: 0,
       tickNumber: 0,
       relationships: relationships ?? state.relationships,
+      scores: scores ?? state.scores,
       units: new Map(units.map((u) => [u.id, u])),
       selectedUnitId: null,
       mapCommandMode: { type: "none", unitId: null },
@@ -327,6 +340,7 @@ export const useSimStore = create<SimStore>((set) => ({
     set({ simSeconds, tickNumber }),
 
   setRelationships: (relationships) => set({ relationships }),
+  setScores: (scores) => set({ scores }),
 
   appendEventLog: (entry) =>
     set((state) => {
