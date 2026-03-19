@@ -215,8 +215,10 @@ something materially better.
 
 Current implementation status:
 
-- airspace ownership: started
-- territorial waters vs international waters: started
+- airspace ownership: now derived from imported global country borders, with
+  sovereign airspace still modeled as land + territorial sea only
+- territorial waters vs international waters: now backed by the global 12nm
+  Marine Regions GeoPackage import in `scripts/import_territorial_waters.py`
 - EEZ / contiguous zone / internal waters: not yet implemented
 - frontend border rendering: still visualization-only
 
@@ -273,9 +275,8 @@ should perform well with a modest index.
 
 ## Frontend Impact
 
-Current frontend helpers in:
+Current frontend helper still relevant here:
 
-- `frontend/src/utils/theaterCountries.ts`
 - `frontend/src/utils/countryRelationships.ts`
 
 should eventually stop doing their own path ownership inference.

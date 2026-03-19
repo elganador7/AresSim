@@ -10,5 +10,5 @@ Keep utilities pure where possible. If a helper starts needing store access or W
 
 ## Review Notes
 
-- `countryRelationships.ts` and `theaterCountries.ts` now mirror logic that also exists in `internal/sim/relationships.go` and `internal/sim/theater_countries.go`. That duplication is currently intentional for UI explainability, but it is also a drift risk: transit/strike validation can disagree between frontend and backend unless both sides are updated together.
-- Access-control and path-legality helpers are becoming policy code, not just formatting/math helpers. If they keep growing, they should move into a clearer shared “rules” layer rather than staying mixed with lightweight view utilities.
+- `countryRelationships.ts` is now intentionally narrow: normalization and lightweight country collection only. Keep relationship policy in backend preview/enforcement code rather than rebuilding it in frontend helpers.
+- Access-control and path-legality helpers should stay out of this folder unless they are truly UI-only. The backend preview layer is now the authority for route/strike legality.

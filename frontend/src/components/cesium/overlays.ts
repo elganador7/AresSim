@@ -5,8 +5,6 @@ import {
   GeoJsonDataSource,
   Viewer,
 } from "cesium";
-import { THEATER_BORDERS_GEOJSON } from "../../data/theaterBorders";
-import { THEATER_MARITIME_GEOJSON } from "../../data/theaterMaritime";
 
 function styleBorderOverlay(dataSource: GeoJsonDataSource) {
   dataSource.entities.values.forEach((entity) => {
@@ -40,6 +38,10 @@ function styleMaritimeOverlay(dataSource: GeoJsonDataSource) {
 }
 
 export async function loadTheaterOverlays(viewer: Viewer) {
+  const [{ THEATER_BORDERS_GEOJSON }, { THEATER_MARITIME_GEOJSON }] = await Promise.all([
+    import("../../data/theaterBorders"),
+    import("../../data/theaterMaritime"),
+  ]);
   const [borderDataSource, maritimeDataSource] = await Promise.all([
     GeoJsonDataSource.load(THEATER_BORDERS_GEOJSON as never, {
       stroke: Color.fromCssColorString("#9eb0c2"),

@@ -9,8 +9,8 @@ export interface TheaterCountryFeature {
     name: string;
   };
   geometry: {
-    type: "Polygon";
-    coordinates: LngLat[][];
+    type: "Polygon" | "MultiPolygon";
+    coordinates: LngLat[][] | LngLat[][][];
   };
 }
 

@@ -18,9 +18,9 @@ const (
 type SeaZoneType string
 
 const (
-	SeaZoneTypeNone            SeaZoneType = ""
-	SeaZoneTypeTerritorialSea  SeaZoneType = "territorial_sea"
-	SeaZoneTypeHighSeas        SeaZoneType = "high_seas"
+	SeaZoneTypeNone           SeaZoneType = ""
+	SeaZoneTypeTerritorialSea SeaZoneType = "territorial_sea"
+	SeaZoneTypeHighSeas       SeaZoneType = "high_seas"
 )
 
 type Point struct {
@@ -48,119 +48,130 @@ type GeoSegmentContext struct {
 	ContainsIntlWaters bool
 }
 
+type polygonBounds struct {
+	MinLon float64
+	MinLat float64
+	MaxLon float64
+	MaxLat float64
+}
+
+type polygonShape struct {
+	Exterior [][2]float64
+	Holes    [][][2]float64
+	Bounds   polygonBounds
+}
+
 type airspacePolygon struct {
 	owner string
-	ring  [][2]float64
+	shape polygonShape
 }
 
 type maritimePolygon struct {
 	owner    string
 	zoneType SeaZoneType
-	ring     [][2]float64
+	shape    polygonShape
 }
 
-//go:embed data/theater_borders.json
-var theaterBordersJSON []byte
+//go:embed data/world_borders.json
+var worldBordersJSON []byte
 
-//go:embed data/theater_maritime.json
-var theaterMaritimeJSON []byte
+//go:embed data/world_12nm.json
+var worldMaritimeJSON []byte
 
 var (
-	theaterAirspacePolygons []airspacePolygon
-	loadAirspaceOnce        sync.Once
-	loadAirspaceErr         error
-	theaterMaritimePolygons []maritimePolygon
-	loadMaritimeOnce        sync.Once
-	loadMaritimeErr         error
+	worldAirspacePolygons []airspacePolygon
+	loadAirspaceOnce      sync.Once
+	loadAirspaceErr       error
+	worldMaritimePolygons []maritimePolygon
+	loadMaritimeOnce      sync.Once
+	loadMaritimeErr       error
 )
 
-type theaterFeatureCollectionJSON struct {
-	Features []theaterFeatureJSON `json:"features"`
+type featureCollectionJSON struct {
+	Features []featureJSON `json:"features"`
 }
 
-type theaterFeatureJSON struct {
-	Properties map[string]any    `json:"properties"`
-	Geometry   theaterGeometryJSON `json:"geometry"`
+type featureJSON struct {
+	Properties map[string]any `json:"properties"`
+	Geometry   geometryJSON   `json:"geometry"`
 }
 
-type theaterGeometryJSON struct {
+type geometryJSON struct {
 	Type        string          `json:"type"`
-	Coordinates [][][]float64 `json:"coordinates"`
+	Coordinates json.RawMessage `json:"coordinates"`
 }
 
 func CountryCode(code string) string {
 	return strings.TrimSpace(strings.ToUpper(code))
 }
 
-func theaterAirspace() []airspacePolygon {
+func worldAirspace() []airspacePolygon {
 	loadAirspaceOnce.Do(func() {
-		var raw theaterFeatureCollectionJSON
-		loadAirspaceErr = json.Unmarshal(theaterBordersJSON, &raw)
+		var raw featureCollectionJSON
+		loadAirspaceErr = json.Unmarshal(worldBordersJSON, &raw)
 		if loadAirspaceErr != nil {
 			return
 		}
-		theaterAirspacePolygons = make([]airspacePolygon, 0, len(raw.Features))
+		worldAirspacePolygons = make([]airspacePolygon, 0, len(raw.Features))
 		for _, feature := range raw.Features {
-			if strings.TrimSpace(feature.Geometry.Type) != "Polygon" || len(feature.Geometry.Coordinates) == 0 {
-				continue
-			}
 			owner := CountryCode(fmt.Sprint(feature.Properties["iso3"]))
 			if owner == "" {
 				continue
 			}
-			ring := make([][2]float64, 0, len(feature.Geometry.Coordinates[0]))
-			for _, coord := range feature.Geometry.Coordinates[0] {
-				if len(coord) < 2 {
-					continue
-				}
-				ring = append(ring, [2]float64{coord[0], coord[1]})
+			shapes, err := parseGeometryShapes(feature.Geometry)
+			if err != nil {
+				loadAirspaceErr = err
+				return
 			}
-			theaterAirspacePolygons = append(theaterAirspacePolygons, airspacePolygon{
-				owner: owner,
-				ring:  ring,
-			})
+			for _, shape := range shapes {
+				worldAirspacePolygons = append(worldAirspacePolygons, airspacePolygon{
+					owner: owner,
+					shape: shape,
+				})
+			}
 		}
 	})
 	if loadAirspaceErr != nil {
 		return nil
 	}
-	return theaterAirspacePolygons
+	return worldAirspacePolygons
 }
 
-func theaterMaritime() []maritimePolygon {
+func worldMaritime() []maritimePolygon {
 	loadMaritimeOnce.Do(func() {
-		var raw theaterFeatureCollectionJSON
-		loadMaritimeErr = json.Unmarshal(theaterMaritimeJSON, &raw)
+		var raw featureCollectionJSON
+		loadMaritimeErr = json.Unmarshal(worldMaritimeJSON, &raw)
 		if loadMaritimeErr != nil {
 			return
 		}
-		theaterMaritimePolygons = make([]maritimePolygon, 0, len(raw.Features))
+		worldMaritimePolygons = make([]maritimePolygon, 0, len(raw.Features))
 		for _, feature := range raw.Features {
-			if strings.TrimSpace(feature.Geometry.Type) != "Polygon" || len(feature.Geometry.Coordinates) == 0 {
-				continue
-			}
 			owner := CountryCode(fmt.Sprint(feature.Properties["owner"]))
 			if owner == "" {
 				continue
 			}
-			ring := make([][2]float64, 0, len(feature.Geometry.Coordinates[0]))
-			for _, coord := range feature.Geometry.Coordinates[0] {
-				if len(coord) < 2 {
-					continue
-				}
-				ring = append(ring, [2]float64{coord[0], coord[1]})
+			zoneType := SeaZoneType(strings.TrimSpace(strings.ToLower(fmt.Sprint(feature.Properties["zoneType"]))))
+			if zoneType == SeaZoneTypeNone {
+				zoneType = SeaZoneTypeTerritorialSea
 			}
-			theaterMaritimePolygons = append(theaterMaritimePolygons, maritimePolygon{
-				owner:    owner,
-				zoneType: SeaZoneType(strings.TrimSpace(strings.ToLower(fmt.Sprint(feature.Properties["zoneType"])))),
-				ring:     ring,
-			})
+			shapes, err := parseGeometryShapes(feature.Geometry)
+			if err != nil {
+				loadMaritimeErr = err
+				return
+			}
+			for _, shape := range shapes {
+				worldMaritimePolygons = append(worldMaritimePolygons, maritimePolygon{
+					owner:    owner,
+					zoneType: zoneType,
+					shape:    shape,
+				})
+			}
 		}
 	})
 	if loadMaritimeErr != nil {
 		return nil
 	}
-	return theaterMaritimePolygons
+	return worldMaritimePolygons
 }
 
 func LookupPoint(p Point) GeoContext {
@@ -170,26 +181,35 @@ func LookupPoint(p Point) GeoContext {
 		IsInternationalWaters:   true,
 		IsInternationalAirspace: true,
 	}
-	for _, poly := range theaterAirspace() {
-		if pointInRing(p.Lon, p.Lat, poly.ring) {
+
+	for _, poly := range worldAirspace() {
+		if pointInPolygon(p.Lon, p.Lat, poly.shape) {
 			ctx.AirspaceOwner = poly.owner
 			ctx.AirspaceType = RegionTypeNationalAirspace
 			ctx.IsInternationalAirspace = false
 			break
 		}
 	}
-	for _, poly := range theaterMaritime() {
-		if pointInRing(p.Lon, p.Lat, poly.ring) {
+
+	for _, poly := range worldMaritime() {
+		if pointInPolygon(p.Lon, p.Lat, poly.shape) {
 			ctx.SeaZoneOwner = poly.owner
 			ctx.SeaZoneType = poly.zoneType
 			ctx.IsInternationalWaters = false
+			if ctx.IsInternationalAirspace && poly.zoneType == SeaZoneTypeTerritorialSea {
+				ctx.AirspaceOwner = poly.owner
+				ctx.AirspaceType = RegionTypeNationalAirspace
+				ctx.IsInternationalAirspace = false
+			}
 			return ctx
 		}
 	}
+
 	if !ctx.IsInternationalAirspace {
 		ctx.SeaZoneType = SeaZoneTypeNone
 		ctx.IsInternationalWaters = false
 	}
+
 	return ctx
 }
 
@@ -263,6 +283,108 @@ func sampleSegment(start, end Point) GeoSegmentContext {
 	}
 }
 
+func parseGeometryShapes(geometry geometryJSON) ([]polygonShape, error) {
+	switch strings.TrimSpace(geometry.Type) {
+	case "Polygon":
+		var coords [][][]float64
+		if err := json.Unmarshal(geometry.Coordinates, &coords); err != nil {
+			return nil, err
+		}
+		shape, ok := buildPolygonShape(coords)
+		if !ok {
+			return nil, nil
+		}
+		return []polygonShape{shape}, nil
+	case "MultiPolygon":
+		var coords [][][][]float64
+		if err := json.Unmarshal(geometry.Coordinates, &coords); err != nil {
+			return nil, err
+		}
+		shapes := make([]polygonShape, 0, len(coords))
+		for _, polygonCoords := range coords {
+			shape, ok := buildPolygonShape(polygonCoords)
+			if ok {
+				shapes = append(shapes, shape)
+			}
+		}
+		return shapes, nil
+	default:
+		return nil, nil
+	}
+}
+
+func buildPolygonShape(coords [][][]float64) (polygonShape, bool) {
+	if len(coords) == 0 {
+		return polygonShape{}, false
+	}
+	exterior := toRing(coords[0])
+	if len(exterior) < 3 {
+		return polygonShape{}, false
+	}
+	shape := polygonShape{
+		Exterior: exterior,
+		Holes:    make([][][2]float64, 0, maxInt(len(coords)-1, 0)),
+		Bounds:   computeBounds(exterior),
+	}
+	for _, holeCoords := range coords[1:] {
+		hole := toRing(holeCoords)
+		if len(hole) >= 3 {
+			shape.Holes = append(shape.Holes, hole)
+		}
+	}
+	return shape, true
+}
+
+func toRing(coords [][]float64) [][2]float64 {
+	ring := make([][2]float64, 0, len(coords))
+	for _, coord := range coords {
+		if len(coord) < 2 {
+			continue
+		}
+		ring = append(ring, [2]float64{coord[0], coord[1]})
+	}
+	return ring
+}
+
+func computeBounds(ring [][2]float64) polygonBounds {
+	bounds := polygonBounds{
+		MinLon: ring[0][0],
+		MinLat: ring[0][1],
+		MaxLon: ring[0][0],
+		MaxLat: ring[0][1],
+	}
+	for _, coord := range ring[1:] {
+		if coord[0] < bounds.MinLon {
+			bounds.MinLon = coord[0]
+		}
+		if coord[0] > bounds.MaxLon {
+			bounds.MaxLon = coord[0]
+		}
+		if coord[1] < bounds.MinLat {
+			bounds.MinLat = coord[1]
+		}
+		if coord[1] > bounds.MaxLat {
+			bounds.MaxLat = coord[1]
+		}
+	}
+	return bounds
+}
+
+func pointInPolygon(lon, lat float64, shape polygonShape) bool {
+	if lon < shape.Bounds.MinLon || lon > shape.Bounds.MaxLon || lat < shape.Bounds.MinLat || lat > shape.Bounds.MaxLat {
+		return false
+	}
+	if !pointInRing(lon, lat, shape.Exterior) {
+		return false
+	}
+	for _, hole := range shape.Holes {
+		if pointInRing(lon, lat, hole) {
+			return false
+		}
+	}
+	return true
+}
+
 func pointInRing(lon, lat float64, ring [][2]float64) bool {
 	inside := false
 	for i, j := 0, len(ring)-1; i < len(ring); j, i = i, i+1 {
@@ -284,6 +406,13 @@ func absFloat(v float64) float64 {
 }
 
 func maxFloat(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func maxInt(a, b int) int {
 	if a > b {
 		return a
 	}

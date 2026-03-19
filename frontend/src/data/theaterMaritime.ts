@@ -7,8 +7,8 @@ export interface TheaterMaritimeFeature {
     zoneType: string;
   };
   geometry: {
-    type: "Polygon";
-    coordinates: [number, number][][];
+    type: "Polygon" | "MultiPolygon";
+    coordinates: [number, number][][] | [number, number][][][];
   };
 }
 

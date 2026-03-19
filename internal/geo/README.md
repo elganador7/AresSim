@@ -4,8 +4,10 @@ This package is the backend geographic lookup layer.
 
 Current scope:
 
-- sovereign airspace ownership lookup for the Iran-war theater
-- coarse territorial-water lookup for the Iran-war theater
+- global land ownership and sovereign-airspace lookup derived from Natural
+  Earth country borders
+- global 12nm territorial-water lookup derived from the Marine Regions
+  GeoPackage in `World_12NM_v4_20231025_gpkg/`
 - path sampling for transit / strike validation
 
 This package is the first step in replacing the older country-only helper logic

@@ -1,3 +1,7 @@
+.DS_Store
+__pycache__/
+World_12NM_v4_20231025_gpkg/
+ne_10m_admin_0_countries/
 node_modules
 dist
 build/bin/
