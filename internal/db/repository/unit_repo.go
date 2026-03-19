@@ -72,7 +72,7 @@ func (r *UnitRepo) UpsertBatch(ctx context.Context, units []UnitRecord) error {
 			}
 		}
 		params[paramKey] = data
-		query += fmt.Sprintf("UPSERT type::thing('unit', $%s) MERGE $%s;\n", idKey, paramKey)
+		query += fmt.Sprintf("UPSERT type::record('unit', $%s) MERGE $%s;\n", idKey, paramKey)
 	}
 	query += "COMMIT TRANSACTION;"
 
