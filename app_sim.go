@@ -150,6 +150,7 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 	}
 
 	a.currentScenario = scen
+	a.setHumanControlledTeam("")
 	defs := a.getCachedDefs()
 	for _, u := range scen.Units {
 		ensureUnitOpsState(u, defs[u.DefinitionId])

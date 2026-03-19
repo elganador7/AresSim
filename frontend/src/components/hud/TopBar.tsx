@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { PauseSim, SetSimSpeed } from "../../../wailsjs/go/main/App";
+import { useMemo, useState } from "react";
+import { PauseSim, SetHumanControlledTeam, SetSimSpeed } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
 import { formatSimTime } from "../../utils/formatters";
 import RelationshipPanel from "./RelationshipPanel";
@@ -29,7 +29,20 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
   const timeScale = useSimStore((s) => s.timeScale);
   const tickNumber = useSimStore((s) => s.tickNumber);
   const scores = useSimStore((s) => s.scores);
+  const units = useSimStore((s) => s.units);
+  const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
+  const setHumanControlledTeam = useSimStore((s) => s.setHumanControlledTeam);
   const [sharingOpen, setSharingOpen] = useState(false);
+  const controllableTeams = useMemo(() => {
+    const present = new Set<string>();
+    units.forEach((unit) => {
+      const code = unit.teamId?.trim().toUpperCase() ?? "";
+      if (code === "USA" || code === "ISR" || code === "IRN") {
+        present.add(code);
+      }
+    });
+    return Array.from(present).sort();
+  }, [units]);
 
   const currentIdx = (() => {
     let best = 0;
@@ -55,6 +68,18 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
   const stepSpeed = (delta: -1 | 1) => {
     const next = SPEED_PRESETS[currentIdx + delta];
     if (next !== undefined) SetSimSpeed(next).catch(console.error);
+  };
+
+  const handleHumanTeamChange = (teamId: string) => {
+    SetHumanControlledTeam(teamId)
+      .then((result) => {
+        if (!result.success) {
+          console.error(result.error || "failed to set human-controlled team");
+          return;
+        }
+        setHumanControlledTeam(teamId);
+      })
+      .catch(console.error);
   };
 
   return (
@@ -115,6 +140,22 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
 
       <div className="top-bar-right">
         <span className="tick-label">T:{tickNumber}</span>
+        {controllableTeams.length > 0 && (
+          <label className="top-bar-select">
+            <span>PLAYER</span>
+            <select
+              value={humanControlledTeam}
+              onChange={(e) => handleHumanTeamChange(e.target.value)}
+            >
+              <option value="">NONE</option>
+              {controllableTeams.map((team) => (
+                <option key={team} value={team}>
+                  {team}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <button className="editor-btn" onClick={() => setSharingOpen((current) => !current)}>
           SHARING
         </button>

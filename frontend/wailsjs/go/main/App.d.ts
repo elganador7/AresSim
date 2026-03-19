@@ -50,6 +50,8 @@ export function SaveUnitDefinition(arg1:string):Promise<main.BridgeResult>;
 
 export function SetCountryRelationship(arg1:string,arg2:string,arg3:boolean,arg4:boolean,arg5:boolean,arg6:boolean,arg7:boolean,arg8:boolean):Promise<main.BridgeResult>;
 
+export function SetHumanControlledTeam(arg1:string):Promise<main.BridgeResult>;
+
 export function SetIntelSharing(arg1:string,arg2:string,arg3:boolean):Promise<main.BridgeResult>;
 
 export function SetSimSpeed(arg1:number):Promise<main.BridgeResult>;

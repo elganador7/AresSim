@@ -98,6 +98,10 @@ export function SetCountryRelationship(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
   return window['go']['main']['App']['SetCountryRelationship'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
 
+export function SetHumanControlledTeam(arg1) {
+  return window['go']['main']['App']['SetHumanControlledTeam'](arg1);
+}
+
 export function SetIntelSharing(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetIntelSharing'](arg1, arg2, arg3);
 }

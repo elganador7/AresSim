@@ -50,6 +50,7 @@ function resetStore() {
     explosions: new Map(),
     munitionDetections: new Map(),
     activeView: "debug",
+    humanControlledTeam: "",
     detections: new Map(),
     selectedUnitId: null,
     mapCommandMode: { type: "none", unitId: null },
@@ -88,11 +89,19 @@ describe("loadSnapshot", () => {
     useSimStore.setState({
       selectedUnitId: "u1",
       mapCommandMode: { type: "route", unitId: "u1" },
+      humanControlledTeam: "ISR",
     });
     useSimStore.getState().loadSnapshot([makeUnit("new")], "S");
     const s = useSimStore.getState();
     expect(s.selectedUnitId).toBeNull();
     expect(s.mapCommandMode).toEqual({ type: "none", unitId: null });
+    expect(s.humanControlledTeam).toBe("");
+  });
+
+  it("preserves human-controlled team on same-scenario resync", () => {
+    useSimStore.setState({ scenarioName: "S", humanControlledTeam: "ISR" });
+    useSimStore.getState().loadSnapshot([makeUnit("new")], "S");
+    expect(useSimStore.getState().humanControlledTeam).toBe("ISR");
   });
 
   it("clears eventLog", () => {

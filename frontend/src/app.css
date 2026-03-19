@@ -198,6 +198,29 @@ body,
 
 .editor-btn:hover { color: #f9fafb; background: rgba(255, 255, 255, 0.1); }
 
+.top-bar-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: #9ca3af;
+  letter-spacing: 0.08em;
+}
+
+.top-bar-select span {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.top-bar-select select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  color: #f3f4f6;
+  font-size: 11px;
+  padding: 3px 6px;
+}
+
 .sharing-panel {
   position: absolute;
   top: 46px;

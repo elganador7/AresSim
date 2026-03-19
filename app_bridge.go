@@ -264,3 +264,8 @@ func (a *App) DeleteUnitDefinition(id string) BridgeResult {
 	a.invalidateDefsCache()
 	return ok()
 }
+
+func (a *App) SetHumanControlledTeam(teamID string) BridgeResult {
+	a.setHumanControlledTeam(teamID)
+	return ok()
+}

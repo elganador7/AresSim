@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"math/rand"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/aressim/internal/db"
 	"github.com/aressim/internal/db/repository"
@@ -40,6 +42,10 @@ type App struct {
 	// currentScenario is the last loaded scenario, kept so RequestSync can
 	// re-emit the full state snapshot on demand.
 	currentScenario *enginev1.Scenario
+	humanTeamMu     sync.RWMutex
+	humanTeam       string
+	aiRandMu        sync.Mutex
+	aiRand          *rand.Rand
 
 	// defsCache caches the result of buildDefs() so we don't re-query SurrealDB
 	// on every MoveUnit call. Invalidated when a unit definition is saved or deleted.
@@ -70,5 +76,7 @@ type App struct {
 
 // NewApp creates a new App instance. Called from main.go before wails.Run.
 func NewApp() *App {
-	return &App{}
+	return &App{
+		aiRand: rand.New(rand.NewSource(time.Now().UnixNano())), //nolint:gosec
+	}
 }

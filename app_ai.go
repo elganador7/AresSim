@@ -15,16 +15,45 @@ var majorActorTeams = map[string]bool{
 	"IRN": true,
 }
 
+type aiTargetCandidate struct {
+	target   *enginev1.Unit
+	priority float64
+}
+
+func (a *App) setHumanControlledTeam(teamID string) {
+	a.humanTeamMu.Lock()
+	a.humanTeam = sim.CountryDisplayCode(teamID)
+	a.humanTeamMu.Unlock()
+}
+
+func (a *App) getHumanControlledTeam() string {
+	a.humanTeamMu.RLock()
+	defer a.humanTeamMu.RUnlock()
+	return a.humanTeam
+}
+
+func (a *App) randomFloat64() float64 {
+	a.aiRandMu.Lock()
+	defer a.aiRandMu.Unlock()
+	if a.aiRand == nil {
+		return 0.5
+	}
+	return a.aiRand.Float64()
+}
+
 func isMajorActorTeam(teamID string) bool {
 	return majorActorTeams[sim.CountryDisplayCode(teamID)]
 }
 
-func isPlannerControlled(unit *enginev1.Unit, def sim.DefStats, simSeconds float64) bool {
+func (a *App) isPlannerControlled(unit *enginev1.Unit, def sim.DefStats, simSeconds float64) bool {
 	if unit == nil || unit.GetStatus() == nil || !unit.GetStatus().GetIsActive() {
 		return false
 	}
 	teamID := sim.CountryDisplayCode(unit.GetTeamId())
 	if !isMajorActorTeam(teamID) {
+		return false
+	}
+	if teamID == a.getHumanControlledTeam() {
 		return false
 	}
 	if strings.EqualFold(def.EmploymentRole, "defensive") {
@@ -163,11 +192,12 @@ func (a *App) planMajorActorStrikes(simSeconds float64) []*enginev1.UnitDelta {
 			continue
 		}
 		def := defs[shooter.GetDefinitionId()]
-		if !isPlannerControlled(shooter, def, simSeconds) {
+		if !a.isPlannerControlled(shooter, def, simSeconds) {
 			continue
 		}
 		var bestTarget *enginev1.Unit
 		bestPriority := 0.0
+		candidates := make([]aiTargetCandidate, 0)
 		for _, target := range targets {
 			if !unitsHostileForPlanning(shooter, target) {
 				continue
@@ -180,11 +210,14 @@ func (a *App) planMajorActorStrikes(simSeconds float64) []*enginev1.UnitDelta {
 				continue
 			}
 			priority := estimatedTargetPriority(shooter.GetTeamId(), target, targetDef)
+			if priority > 0 {
+				candidates = append(candidates, aiTargetCandidate{target: target, priority: priority})
+			}
 			if priority > bestPriority {
 				bestPriority = priority
-				bestTarget = target
 			}
 		}
+		bestTarget = a.selectPlannerTarget(candidates, bestPriority)
 		if bestTarget == nil {
 			continue
 		}
@@ -218,6 +251,40 @@ func (a *App) planMajorActorStrikes(simSeconds float64) []*enginev1.UnitDelta {
 		})
 	}
 	return deltas
+}
+
+func (a *App) selectPlannerTarget(candidates []aiTargetCandidate, bestPriority float64) *enginev1.Unit {
+	if len(candidates) == 0 || bestPriority <= 0 {
+		return nil
+	}
+	shortlist := make([]aiTargetCandidate, 0, len(candidates))
+	for _, candidate := range candidates {
+		if candidate.priority >= bestPriority*0.8 {
+			shortlist = append(shortlist, candidate)
+		}
+	}
+	if len(shortlist) == 0 {
+		shortlist = candidates
+	}
+	if len(shortlist) == 1 {
+		return shortlist[0].target
+	}
+	totalWeight := 0.0
+	for _, candidate := range shortlist {
+		totalWeight += candidate.priority
+	}
+	if totalWeight <= 0 {
+		return shortlist[0].target
+	}
+	roll := a.randomFloat64() * totalWeight
+	accum := 0.0
+	for _, candidate := range shortlist {
+		accum += candidate.priority
+		if roll <= accum {
+			return candidate.target
+		}
+	}
+	return shortlist[len(shortlist)-1].target
 }
 
 func plannedDesiredEffect(target *enginev1.Unit, def sim.DefStats) enginev1.DesiredEffect {

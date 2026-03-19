@@ -195,6 +195,7 @@ export interface SimStore {
   // Controls fog of war: "debug" shows all units; any other value is a
   // team/nation code such as "ISR" or "USA".
   activeView: string;
+  humanControlledTeam: string;
 
   // ── Detections ───────────────────────────────────────────────────────────
   // Maps detecting side → set of enemy unit IDs currently in sensor range.
@@ -235,6 +236,7 @@ export interface SimStore {
   setSelectedRoutePreview: (preview: PathViolationPreview | null) => void;
   setSelectedStrikePreview: (preview: PathViolationPreview | null) => void;
   setActiveView: (view: string) => void;
+  setHumanControlledTeam: (team: string) => void;
   setDetections: (side: string, ids: string[], contacts?: DetectionContact[]) => void;
 }
 
@@ -263,6 +265,7 @@ export const useSimStore = create<SimStore>((set) => ({
   explosions: new Map(),
   munitionDetections: new Map(),
   activeView: "debug",
+  humanControlledTeam: "",
   detections: new Map(),
   detectionContacts: new Map(),
   selectedUnitId: null,
@@ -295,6 +298,7 @@ export const useSimStore = create<SimStore>((set) => ({
       weaponDefs: weaponDefs
         ? new Map(weaponDefs.map((d) => [d.id, d]))
         : state.weaponDefs,
+      humanControlledTeam: state.scenarioName === scenarioName ? state.humanControlledTeam : "",
     })),
 
   applyUnitDelta: (id, delta) =>
@@ -355,6 +359,7 @@ export const useSimStore = create<SimStore>((set) => ({
   setSelectedRoutePreview: (selectedRoutePreview) => set({ selectedRoutePreview }),
   setSelectedStrikePreview: (selectedStrikePreview) => set({ selectedStrikePreview }),
   setActiveView: (activeView) => set({ activeView }),
+  setHumanControlledTeam: (humanControlledTeam) => set({ humanControlledTeam }),
 
   setDetections: (side, ids, contacts = []) =>
     set((state) => {
