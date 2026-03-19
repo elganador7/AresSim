@@ -389,6 +389,7 @@ export function SelectedUnitPanel({
         <span className="selected-unit-name">{editingUnit.displayName}</span>
       </div>
       <InlineEditForm
+        key={editingUnit.id}
         unit={editingUnit}
         units={units}
         unitDefinitions={unitDefinitions}
