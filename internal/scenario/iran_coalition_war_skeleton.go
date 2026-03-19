@@ -94,11 +94,11 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			scenarioUnit("irn-bavar-esfahan", "Bavar Esfahan", "Bavar-373 Battery - Esfahan", "Red", "bavar373-battery", 32.65, 51.67, 0, 0, 0),
 			scenarioUnit("irn-khordad-bushehr", "3rd Khordad", "3rd Khordad Battery - Bushehr Sector", "Red", "third-khordad-battery", 28.95, 50.84, 0, 0, 0),
 			scenarioUnit("irn-tor-natanz", "Tor Natanz", "Tor-M1 Battery - Natanz", "Red", "tor-m1-battery-iran", 33.72, 51.72, 0, 0, 0),
-			scenarioUnit("irn-qiam-central", "Qiam Brigade", "Qiam-1 Missile Brigade", "Red", "qiam1-missile-brigade", 34.10, 49.70, 0, 0, 0),
-			scenarioUnit("irn-kheibar-west", "Kheibar Brigade", "Kheibar Shekan Brigade", "Red", "kheibar-shekan-brigade", 35.20, 46.98, 0, 0, 0),
-			scenarioUnit("irn-paveh-south", "Paveh Regiment", "Paveh Cruise Missile Regiment", "Red", "paveh-cruise-missile-regiment", 27.90, 56.15, 0, 0, 0),
-			scenarioUnit("irn-shahed-central", "Shahed Grp", "Shahed-136 Strike Group", "Red", "shahed136-strike-group", 31.40, 54.50, 0, 0, 0),
-			scenarioUnit("irn-arash-west", "Arash-2", "Arash-2 Strike Group", "Red", "arash2-strike-group", 34.35, 47.20, 0, 0, 0),
+			scenarioStrikeUnit("irn-qiam-central", "Qiam Brigade", "Qiam-1 Missile Brigade", "Red", "qiam1-missile-brigade", 34.10, 49.70, 0, 0, 0, 1200),
+			scenarioStrikeUnit("irn-kheibar-west", "Kheibar Brigade", "Kheibar Shekan Brigade", "Red", "kheibar-shekan-brigade", 35.20, 46.98, 0, 0, 0, 2700),
+			scenarioStrikeUnit("irn-paveh-south", "Paveh Regiment", "Paveh Cruise Missile Regiment", "Red", "paveh-cruise-missile-regiment", 27.90, 56.15, 0, 0, 0, 4500),
+			scenarioStrikeUnit("irn-shahed-central", "Shahed Grp", "Shahed-136 Strike Group", "Red", "shahed136-strike-group", 31.40, 54.50, 0, 0, 0, 5400),
+			scenarioStrikeUnit("irn-arash-west", "Arash-2", "Arash-2 Strike Group", "Red", "arash2-strike-group", 34.35, 47.20, 0, 0, 0, 7200),
 			scenarioAircraft("irn-f14-tehran", "F-14A Tehran", "F-14A Tomcat Interceptor Detachment", "Red", "f14a-tomcat-iriaf", "irn-airbase-tehran", 35.69, 51.31, 0, 250, 0),
 			scenarioAircraft("irn-f4-bandar-abbas", "F-4E Abbas", "F-4E Phantom Maritime Strike Detachment", "Red", "f4e-phantom-iriaf", "irn-airbase-bandar-abbas", 27.22, 56.38, 0, 130, 0),
 			scenarioUnit("irn-soleimani-hormuz", "Shahid Soleimani", "Shahid Soleimani Corvette - Hormuz Patrol", "Red", "shahid-soleimani-corvette", 26.70, 56.05, 0, 110, 12),
@@ -122,6 +122,12 @@ func openingStrike(unitID, targetUnitID, loadoutID string, desiredEffect enginev
 func scenarioAircraft(id, displayName, fullName, side, definitionID, hostBaseID string, lat, lon, altMsl, heading, speed float64) *enginev1.Unit {
 	u := scenarioUnit(id, displayName, fullName, side, definitionID, lat, lon, altMsl, heading, speed)
 	u.HostBaseId = hostBaseID
+	return u
+}
+
+func scenarioStrikeUnit(id, displayName, fullName, side, definitionID string, lat, lon, altMsl, heading, speed, nextStrikeReadySeconds float64) *enginev1.Unit {
+	u := scenarioUnit(id, displayName, fullName, side, definitionID, lat, lon, altMsl, heading, speed)
+	u.NextStrikeReadySeconds = nextStrikeReadySeconds
 	return u
 }
 

@@ -344,3 +344,58 @@ func TestPlanMajorActorStrikesAllowsStrategicRaidBatching(t *testing.T) {
 		}
 	}
 }
+
+func TestPlanMajorActorStrikesIranPrioritizesAirbaseClosure(t *testing.T) {
+	app := &App{ctx: context.Background(), aiRand: rand.New(rand.NewSource(1))} //nolint:gosec
+	app.setSimSeconds(0)
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{
+			{FromCountry: "IRN", ToCountry: "ISR", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
+		},
+		Units: []*enginev1.Unit{
+			{
+				Id:           "irn-missile",
+				DisplayName:  "Missile Brigade",
+				TeamId:       "IRN",
+				CoalitionId:  "Red",
+				DefinitionId: "missile",
+				Position:     &enginev1.Position{Lat: 29, Lon: 51.5, AltMsl: 0},
+				Status:       &enginev1.OperationalStatus{IsActive: true, PersonnelStrength: 1},
+				Weapons:      []*enginev1.WeaponState{{WeaponId: "ssm-kheibar-shekan", CurrentQty: 2, MaxQty: 2}},
+			},
+			{
+				Id:           "coalition-airbase",
+				DisplayName:  "Coalition Airbase",
+				TeamId:       "ISR",
+				CoalitionId:  "Blue",
+				DefinitionId: "airbase-target",
+				Position:     &enginev1.Position{Lat: 29.2, Lon: 51.7},
+				Status:       &enginev1.OperationalStatus{IsActive: true, PersonnelStrength: 1},
+			},
+			{
+				Id:           "coalition-power",
+				DisplayName:  "Coalition Power",
+				TeamId:       "ISR",
+				CoalitionId:  "Blue",
+				DefinitionId: "power-target",
+				Position:     &enginev1.Position{Lat: 29.25, Lon: 51.75},
+				Status:       &enginev1.OperationalStatus{IsActive: true, PersonnelStrength: 1},
+			},
+		},
+	}
+	app.defsCache = map[string]sim.DefStats{
+		"missile":        {Domain: enginev1.UnitDomain_DOMAIN_LAND, EmploymentRole: "offensive", GeneralType: 72, AuthorizedPersonnel: 20},
+		"airbase-target": {Domain: enginev1.UnitDomain_DOMAIN_LAND, AssetClass: "airbase", TargetClass: "runway", ReplacementCostUSD: 120_000_000, StrategicValueUSD: 700_000_000, AuthorizedPersonnel: 50},
+		"power-target":   {Domain: enginev1.UnitDomain_DOMAIN_LAND, AssetClass: "power_plant", TargetClass: "civilian_energy", ReplacementCostUSD: 300_000_000, StrategicValueUSD: 600_000_000, EconomicValueUSD: 300_000_000, AuthorizedPersonnel: 50},
+	}
+
+	app.planMajorActorStrikes(0)
+
+	order := app.currentScenario.GetUnits()[0].GetAttackOrder()
+	if order == nil {
+		t.Fatal("expected iranian strike order to be assigned")
+	}
+	if got := order.GetTargetUnitId(); got != "coalition-airbase" {
+		t.Fatalf("expected iranian planner to favor airbase closure, got %q", got)
+	}
+}

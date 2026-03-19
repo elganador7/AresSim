@@ -128,22 +128,28 @@ func actorTargetBias(shooterTeam string, def sim.DefStats) float64 {
 	case "IRN":
 		switch def.AssetClass {
 		case "airbase":
-			return 1.8
+			return 2.8
 		case "power_plant", "desalination_plant", "oil_field", "pipeline_node", "port":
 			return 1.6
 		}
 		if def.TargetClass == "runway" {
-			return 1.8
+			return 3.0
+		}
+		if def.TargetClass == "sam_battery" {
+			return 1.9
 		}
 	case "USA", "ISR":
 		switch def.GeneralType {
 		case 72:
-			return 4.0
+			return 4.4
 		case 73:
-			return 3.0
+			return 3.4
 		}
 		if def.AssetClass == "airbase" {
-			return 1.4
+			return 1.7
+		}
+		if def.TargetClass == "sam_battery" {
+			return 2.1
 		}
 	}
 	return 1.0

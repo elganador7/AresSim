@@ -58,3 +58,22 @@ func TestIranCoalitionWarSkeletonSeedsOpeningStrikeActions(t *testing.T) {
 		t.Fatal("expected opening strike actions to include shooter and target ids")
 	}
 }
+
+func TestIranCoalitionWarSkeletonStagesIranianRetaliation(t *testing.T) {
+	scen := IranCoalitionWarSkeleton()
+	ready := map[string]float64{}
+	for _, unit := range scen.GetUnits() {
+		switch unit.GetId() {
+		case "irn-qiam-central", "irn-kheibar-west", "irn-paveh-south", "irn-shahed-central", "irn-arash-west":
+			ready[unit.GetId()] = unit.GetNextStrikeReadySeconds()
+		}
+	}
+	if ready["irn-qiam-central"] <= 0 {
+		t.Fatal("expected qiam brigade to have delayed retaliatory readiness")
+	}
+	if !(ready["irn-qiam-central"] < ready["irn-kheibar-west"] &&
+		ready["irn-kheibar-west"] < ready["irn-paveh-south"] &&
+		ready["irn-paveh-south"] < ready["irn-arash-west"]) {
+		t.Fatalf("expected staggered iranian strike readiness, got %+v", ready)
+	}
+}
