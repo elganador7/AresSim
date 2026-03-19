@@ -104,3 +104,129 @@ func TestValidateAndConsumeLaunchAdvancesBaseWindow(t *testing.T) {
 		t.Fatalf("expected launch window %v, got %v", want, got)
 	}
 }
+
+func TestApplyOpeningLoadoutSelections(t *testing.T) {
+	scen := &enginev1.Scenario{
+		Units: []*enginev1.Unit{
+			{Id: "strike-1", LoadoutConfigurationId: "default"},
+		},
+		OpeningStrikeActions: []*enginev1.OpeningStrikeAction{
+			{UnitId: "strike-1", LoadoutConfigurationId: "air_superiority"},
+		},
+	}
+
+	applyOpeningLoadoutSelections(scen)
+
+	if got := scen.GetUnits()[0].GetLoadoutConfigurationId(); got != "air_superiority" {
+		t.Fatalf("expected opening action to override loadout, got %q", got)
+	}
+}
+
+func TestApplyOpeningStrikeActionsAssignsAttackOrders(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.setSimSeconds(0)
+	app.defsCache = map[string]sim.DefStats{
+		"airbase": {AssetClass: "airbase", LaunchCapacityPerInterval: 3},
+	}
+	scen := &enginev1.Scenario{
+		Units: []*enginev1.Unit{
+			{
+				Id:           "base-1",
+				DisplayName:  "Base One",
+				DefinitionId: "airbase",
+				BaseOps: &enginev1.BaseOpsState{
+					State: enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_USABLE,
+				},
+			},
+			{
+				Id:           "strike-1",
+				DisplayName:  "Strike One",
+				DefinitionId: "fighter",
+				HostBaseId:   "base-1",
+				Position:     &enginev1.Position{},
+			},
+			{
+				Id:           "target-1",
+				DisplayName:  "Target One",
+				DefinitionId: "sam",
+				Position:     &enginev1.Position{Lat: 1, Lon: 1},
+			},
+		},
+		OpeningStrikeActions: []*enginev1.OpeningStrikeAction{
+			{
+				UnitId:        "strike-1",
+				TargetUnitId:  "target-1",
+				DesiredEffect: enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL,
+			},
+		},
+	}
+	app.currentScenario = scen
+
+	app.applyOpeningStrikeActions(scen, map[string]sim.DefStats{
+		"fighter": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"sam":     {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"airbase": {AssetClass: "airbase", LaunchCapacityPerInterval: 3},
+	})
+
+	order := scen.GetUnits()[1].GetAttackOrder()
+	if order == nil {
+		t.Fatal("expected opening strike to assign attack order")
+	}
+	if got := order.GetTargetUnitId(); got != "target-1" {
+		t.Fatalf("expected target-1, got %q", got)
+	}
+	if scen.GetUnits()[0].GetBaseOps().GetNextLaunchAvailableSeconds() <= 0 {
+		t.Fatal("expected opening strike to consume host-base launch availability")
+	}
+}
+
+func TestApplyOpeningStrikeActionsSkipsBlockedLaunch(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.setSimSeconds(0)
+	app.defsCache = map[string]sim.DefStats{
+		"airbase": {AssetClass: "airbase", LaunchCapacityPerInterval: 3},
+	}
+	scen := &enginev1.Scenario{
+		Units: []*enginev1.Unit{
+			{
+				Id:           "base-1",
+				DisplayName:  "Base One",
+				DefinitionId: "airbase",
+				BaseOps: &enginev1.BaseOpsState{
+					State: enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_CLOSED,
+				},
+			},
+			{
+				Id:           "strike-1",
+				DisplayName:  "Strike One",
+				DefinitionId: "fighter",
+				HostBaseId:   "base-1",
+				Position:     &enginev1.Position{},
+			},
+			{
+				Id:           "target-1",
+				DisplayName:  "Target One",
+				DefinitionId: "sam",
+				Position:     &enginev1.Position{Lat: 1, Lon: 1},
+			},
+		},
+		OpeningStrikeActions: []*enginev1.OpeningStrikeAction{
+			{
+				UnitId:        "strike-1",
+				TargetUnitId:  "target-1",
+				DesiredEffect: enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL,
+			},
+		},
+	}
+	app.currentScenario = scen
+
+	app.applyOpeningStrikeActions(scen, map[string]sim.DefStats{
+		"fighter": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+		"sam":     {Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"airbase": {AssetClass: "airbase", LaunchCapacityPerInterval: 3},
+	})
+
+	if scen.GetUnits()[1].GetAttackOrder() != nil {
+		t.Fatal("expected blocked launch to leave no attack order")
+	}
+}

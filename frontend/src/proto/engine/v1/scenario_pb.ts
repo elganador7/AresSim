@@ -6,7 +6,7 @@ import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2"
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { WeatherConditions } from "./common_pb";
 import { file_engine_v1_common } from "./common_pb";
-import type { Unit } from "./unit_pb";
+import type { DesiredEffect, Unit } from "./unit_pb";
 import { file_engine_v1_unit } from "./unit_pb";
 import type { Message } from "@bufbuild/protobuf";
 
@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file engine/v1/scenario.proto.
  */
 export const file_engine_v1_scenario: GenFile = /*@__PURE__*/
-  fileDesc("ChhlbmdpbmUvdjEvc2NlbmFyaW8ucHJvdG8SCWVuZ2luZS52MSKBAgoTQ291bnRyeVJlbGF0aW9uc2hpcBIUCgxmcm9tX2NvdW50cnkYASABKAkSEgoKdG9fY291bnRyeRgCIAEoCRITCgtzaGFyZV9pbnRlbBgDIAEoCBIgChhhaXJzcGFjZV90cmFuc2l0X2FsbG93ZWQYBCABKAgSHwoXYWlyc3BhY2Vfc3RyaWtlX2FsbG93ZWQYBSABKAgSJQodZGVmZW5zaXZlX3Bvc2l0aW9uaW5nX2FsbG93ZWQYBiABKAgSIAoYbWFyaXRpbWVfdHJhbnNpdF9hbGxvd2VkGAcgASgIEh8KF21hcml0aW1lX3N0cmlrZV9hbGxvd2VkGAggASgIIrgCCghTY2VuYXJpbxIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEhYKDmNsYXNzaWZpY2F0aW9uGAQgASgJEg4KBmF1dGhvchgFIAEoCRIXCg9zdGFydF90aW1lX3VuaXgYBiABKAESDwoHdmVyc2lvbhgHIAEoCRIvCghzZXR0aW5ncxgIIAEoCzIdLmVuZ2luZS52MS5TaW11bGF0aW9uU2V0dGluZ3MSIwoDbWFwGAkgASgLMhYuZW5naW5lLnYxLk1hcFNldHRpbmdzEh4KBXVuaXRzGAsgAygLMg8uZW5naW5lLnYxLlVuaXQSNQoNcmVsYXRpb25zaGlwcxgMIAMoCzIeLmVuZ2luZS52MS5Db3VudHJ5UmVsYXRpb25zaGlwIj4KElNpbXVsYXRpb25TZXR0aW5ncxIUCgx0aWNrX3JhdGVfaHoYASABKAISEgoKdGltZV9zY2FsZRgCIAEoAiJECgtNYXBTZXR0aW5ncxI1Cg9pbml0aWFsX3dlYXRoZXIYBCABKAsyHC5lbmdpbmUudjEuV2VhdGhlckNvbmRpdGlvbnMqdgoRQWRqdWRpY2F0aW9uTW9kZWwSGQoVQURKX01PREVMX1VOU1BFQ0lGSUVEEAASFQoRQURKX01PREVMX0RFRkFVTFQQARISCg5BREpfTU9ERUxfRkFTVBACEhsKF0FESl9NT0RFTF9ISUdIX0ZJREVMSVRZEANCK1opZ2l0aHViLmNvbS9hcmVzc2ltL2ludGVybmFsL2dlbi9lbmdpbmUvdjFiBnByb3RvMw", [file_engine_v1_common, file_engine_v1_unit]);
+  fileDesc("ChhlbmdpbmUvdjEvc2NlbmFyaW8ucHJvdG8SCWVuZ2luZS52MSKBAgoTQ291bnRyeVJlbGF0aW9uc2hpcBIUCgxmcm9tX2NvdW50cnkYASABKAkSEgoKdG9fY291bnRyeRgCIAEoCRITCgtzaGFyZV9pbnRlbBgDIAEoCBIgChhhaXJzcGFjZV90cmFuc2l0X2FsbG93ZWQYBCABKAgSHwoXYWlyc3BhY2Vfc3RyaWtlX2FsbG93ZWQYBSABKAgSJQodZGVmZW5zaXZlX3Bvc2l0aW9uaW5nX2FsbG93ZWQYBiABKAgSIAoYbWFyaXRpbWVfdHJhbnNpdF9hbGxvd2VkGAcgASgIEh8KF21hcml0aW1lX3N0cmlrZV9hbGxvd2VkGAggASgIIqUBChNPcGVuaW5nU3RyaWtlQWN0aW9uEg8KB3VuaXRfaWQYASABKAkSFgoOdGFyZ2V0X3VuaXRfaWQYAiABKAkSIAoYbG9hZG91dF9jb25maWd1cmF0aW9uX2lkGAMgASgJEjAKDmRlc2lyZWRfZWZmZWN0GAQgASgOMhguZW5naW5lLnYxLkRlc2lyZWRFZmZlY3QSEQoJbmFycmF0aXZlGAUgASgJIvgCCghTY2VuYXJpbxIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEhYKDmNsYXNzaWZpY2F0aW9uGAQgASgJEg4KBmF1dGhvchgFIAEoCRIXCg9zdGFydF90aW1lX3VuaXgYBiABKAESDwoHdmVyc2lvbhgHIAEoCRIvCghzZXR0aW5ncxgIIAEoCzIdLmVuZ2luZS52MS5TaW11bGF0aW9uU2V0dGluZ3MSIwoDbWFwGAkgASgLMhYuZW5naW5lLnYxLk1hcFNldHRpbmdzEh4KBXVuaXRzGAsgAygLMg8uZW5naW5lLnYxLlVuaXQSNQoNcmVsYXRpb25zaGlwcxgMIAMoCzIeLmVuZ2luZS52MS5Db3VudHJ5UmVsYXRpb25zaGlwEj4KFm9wZW5pbmdfc3RyaWtlX2FjdGlvbnMYDSADKAsyHi5lbmdpbmUudjEuT3BlbmluZ1N0cmlrZUFjdGlvbiI+ChJTaW11bGF0aW9uU2V0dGluZ3MSFAoMdGlja19yYXRlX2h6GAEgASgCEhIKCnRpbWVfc2NhbGUYAiABKAIiRAoLTWFwU2V0dGluZ3MSNQoPaW5pdGlhbF93ZWF0aGVyGAQgASgLMhwuZW5naW5lLnYxLldlYXRoZXJDb25kaXRpb25zKnYKEUFkanVkaWNhdGlvbk1vZGVsEhkKFUFESl9NT0RFTF9VTlNQRUNJRklFRBAAEhUKEUFESl9NT0RFTF9ERUZBVUxUEAESEgoOQURKX01PREVMX0ZBU1QQAhIbChdBREpfTU9ERUxfSElHSF9GSURFTElUWRADQitaKWdpdGh1Yi5jb20vYXJlc3NpbS9pbnRlcm5hbC9nZW4vZW5naW5lL3YxYgZwcm90bzM", [file_engine_v1_common, file_engine_v1_unit]);
 
 /**
  * @generated from message engine.v1.CountryRelationship
@@ -67,6 +67,43 @@ export type CountryRelationship = Message<"engine.v1.CountryRelationship"> & {
  */
 export const CountryRelationshipSchema: GenMessage<CountryRelationship> = /*@__PURE__*/
   messageDesc(file_engine_v1_scenario, 0);
+
+/**
+ * @generated from message engine.v1.OpeningStrikeAction
+ */
+export type OpeningStrikeAction = Message<"engine.v1.OpeningStrikeAction"> & {
+  /**
+   * @generated from field: string unit_id = 1;
+   */
+  unitId: string;
+
+  /**
+   * @generated from field: string target_unit_id = 2;
+   */
+  targetUnitId: string;
+
+  /**
+   * @generated from field: string loadout_configuration_id = 3;
+   */
+  loadoutConfigurationId: string;
+
+  /**
+   * @generated from field: engine.v1.DesiredEffect desired_effect = 4;
+   */
+  desiredEffect: DesiredEffect;
+
+  /**
+   * @generated from field: string narrative = 5;
+   */
+  narrative: string;
+};
+
+/**
+ * Describes the message engine.v1.OpeningStrikeAction.
+ * Use `create(OpeningStrikeActionSchema)` to create a new message.
+ */
+export const OpeningStrikeActionSchema: GenMessage<OpeningStrikeAction> = /*@__PURE__*/
+  messageDesc(file_engine_v1_scenario, 1);
 
 /**
  * @generated from message engine.v1.Scenario
@@ -128,6 +165,11 @@ export type Scenario = Message<"engine.v1.Scenario"> & {
    * @generated from field: repeated engine.v1.CountryRelationship relationships = 12;
    */
   relationships: CountryRelationship[];
+
+  /**
+   * @generated from field: repeated engine.v1.OpeningStrikeAction opening_strike_actions = 13;
+   */
+  openingStrikeActions: OpeningStrikeAction[];
 };
 
 /**
@@ -135,7 +177,7 @@ export type Scenario = Message<"engine.v1.Scenario"> & {
  * Use `create(ScenarioSchema)` to create a new message.
  */
 export const ScenarioSchema: GenMessage<Scenario> = /*@__PURE__*/
-  messageDesc(file_engine_v1_scenario, 1);
+  messageDesc(file_engine_v1_scenario, 2);
 
 /**
  * @generated from message engine.v1.SimulationSettings
@@ -161,7 +203,7 @@ export type SimulationSettings = Message<"engine.v1.SimulationSettings"> & {
  * Use `create(SimulationSettingsSchema)` to create a new message.
  */
 export const SimulationSettingsSchema: GenMessage<SimulationSettings> = /*@__PURE__*/
-  messageDesc(file_engine_v1_scenario, 2);
+  messageDesc(file_engine_v1_scenario, 3);
 
 /**
  * @generated from message engine.v1.MapSettings
@@ -178,7 +220,7 @@ export type MapSettings = Message<"engine.v1.MapSettings"> & {
  * Use `create(MapSettingsSchema)` to create a new message.
  */
 export const MapSettingsSchema: GenMessage<MapSettings> = /*@__PURE__*/
-  messageDesc(file_engine_v1_scenario, 3);
+  messageDesc(file_engine_v1_scenario, 4);
 
 /**
  * @generated from enum engine.v1.AdjudicationModel

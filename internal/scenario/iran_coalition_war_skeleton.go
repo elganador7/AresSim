@@ -34,6 +34,14 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			},
 		},
 		Relationships: iranWarDayOneRelationships(),
+		OpeningStrikeActions: []*enginev1.OpeningStrikeAction{
+			openingStrike("isr-f35i-nevatim", "irn-s300-tehran", "air_superiority", enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL, "Israeli F-35I package opens the war against Tehran air defenses."),
+			openingStrike("isr-f15i-hatzor", "irn-qiam-central", "close_air_support", enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY, "Israeli F-15I strike package targets Iranian ballistic-missile forces."),
+			openingStrike("isr-f16i-ramon", "irn-bavar-esfahan", "sead", enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL, "Israeli F-16I SEAD package suppresses Esfahan air defenses."),
+			openingStrike("usa-f35a-al-udeid", "irn-khordad-bushehr", "air_superiority", enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL, "U.S. F-35A package attacks Bushehr-sector air defenses."),
+			openingStrike("usa-f15e-al-dhafra", "irn-paveh-south", "close_air_support", enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY, "U.S. F-15E package strikes southern Iranian cruise-missile forces."),
+			openingStrike("usa-b1b-diego-garcia", "irn-kheibar-west", "default", enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY, "U.S. B-1B long-range strike hits western Iranian missile brigades."),
+		},
 		Units: []*enginev1.Unit{
 			// Core airbases used for first-wave sortie generation and later turnaround.
 			scenarioUnit("isr-airbase-nevatim", "Nevatim AB", "Israeli Strategic Air Base - Nevatim", "Blue", "israel-strategic-airbase", 31.21, 35.01, 0, 0, 0),
@@ -98,6 +106,16 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			scenarioUnit("irn-jamaran-bushehr", "Jamaran", "Jamaran Frigate - Bushehr Patrol", "Red", "jamaran-frigate", 28.75, 50.55, 0, 140, 10),
 			scenarioUnit("irn-ghadir-sub", "Ghadir Sub", "Ghadir Midget Submarine - Strait Ambush Line", "Red", "ghadir-midget-submarine", 26.45, 56.30, -20, 90, 4),
 		},
+	}
+}
+
+func openingStrike(unitID, targetUnitID, loadoutID string, desiredEffect enginev1.DesiredEffect, narrative string) *enginev1.OpeningStrikeAction {
+	return &enginev1.OpeningStrikeAction{
+		UnitId:                 unitID,
+		TargetUnitId:           targetUnitID,
+		LoadoutConfigurationId: loadoutID,
+		DesiredEffect:          desiredEffect,
+		Narrative:              narrative,
 	}
 }
 

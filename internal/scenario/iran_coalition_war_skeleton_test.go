@@ -48,3 +48,13 @@ func TestIranCoalitionWarSkeletonAssignsHostBases(t *testing.T) {
 		}
 	}
 }
+
+func TestIranCoalitionWarSkeletonSeedsOpeningStrikeActions(t *testing.T) {
+	scen := IranCoalitionWarSkeleton()
+	if len(scen.GetOpeningStrikeActions()) < 3 {
+		t.Fatalf("expected opening strike actions to be seeded, got %d", len(scen.GetOpeningStrikeActions()))
+	}
+	if scen.GetOpeningStrikeActions()[0].GetUnitId() == "" || scen.GetOpeningStrikeActions()[0].GetTargetUnitId() == "" {
+		t.Fatal("expected opening strike actions to include shooter and target ids")
+	}
+}
