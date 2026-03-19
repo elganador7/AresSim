@@ -14,6 +14,8 @@ type DefStats struct {
 	BaseStrength                float64
 	DetectionRangeM             float64
 	RadarCrossSectionM2         float64
+	GeneralType                 int32
+	EmploymentRole              string
 	AuthorizedPersonnel         int
 	ReplacementCostUSD          float64
 	StrategicValueUSD           float64

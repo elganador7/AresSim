@@ -1,0 +1,234 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+
+	enginev1 "github.com/aressim/internal/gen/engine/v1"
+	"github.com/aressim/internal/geo"
+	"github.com/aressim/internal/sim"
+)
+
+var majorActorTeams = map[string]bool{
+	"USA": true,
+	"ISR": true,
+	"IRN": true,
+}
+
+func isMajorActorTeam(teamID string) bool {
+	return majorActorTeams[sim.CountryDisplayCode(teamID)]
+}
+
+func isPlannerControlled(unit *enginev1.Unit, def sim.DefStats, simSeconds float64) bool {
+	if unit == nil || unit.GetStatus() == nil || !unit.GetStatus().GetIsActive() {
+		return false
+	}
+	teamID := sim.CountryDisplayCode(unit.GetTeamId())
+	if !isMajorActorTeam(teamID) {
+		return false
+	}
+	if strings.EqualFold(def.EmploymentRole, "defensive") {
+		return false
+	}
+	if unit.GetAttackOrder() != nil && unit.GetAttackOrder().GetTargetUnitId() != "" {
+		return false
+	}
+	if order := unit.GetMoveOrder(); order != nil && len(order.GetWaypoints()) > 0 {
+		return false
+	}
+	if def.Domain == enginev1.UnitDomain_DOMAIN_AIR && unit.GetNextSortieReadySeconds() > simSeconds {
+		return false
+	}
+	if unit.GetNextStrikeReadySeconds() > simSeconds {
+		return false
+	}
+	return true
+}
+
+func isAIFixedStrategicTarget(unit *enginev1.Unit, def sim.DefStats) bool {
+	if unit == nil {
+		return false
+	}
+	if def.AssetClass == "airbase" || def.AssetClass == "port" {
+		return true
+	}
+	if def.TargetClass == "runway" ||
+		def.TargetClass == "hardened_infrastructure" ||
+		def.TargetClass == "soft_infrastructure" ||
+		def.TargetClass == "civilian_energy" ||
+		def.TargetClass == "civilian_water" ||
+		def.TargetClass == "sam_battery" {
+		return true
+	}
+	if def.Domain == enginev1.UnitDomain_DOMAIN_LAND {
+		switch def.GeneralType {
+		case 72, 73:
+			return true
+		}
+	}
+	return false
+}
+
+func targetPainValue(def sim.DefStats) float64 {
+	return def.ReplacementCostUSD + def.StrategicValueUSD + def.EconomicValueUSD + float64(def.AuthorizedPersonnel)*valueOfStatisticalLifeUSD
+}
+
+func actorTargetBias(shooterTeam string, def sim.DefStats) float64 {
+	team := sim.CountryDisplayCode(shooterTeam)
+	switch team {
+	case "IRN":
+		switch def.AssetClass {
+		case "airbase":
+			return 1.8
+		case "power_plant", "desalination_plant", "oil_field", "pipeline_node", "port":
+			return 1.6
+		}
+		if def.TargetClass == "runway" {
+			return 1.8
+		}
+	case "USA", "ISR":
+		switch def.GeneralType {
+		case 72:
+			return 4.0
+		case 73:
+			return 3.0
+		}
+		if def.AssetClass == "airbase" {
+			return 1.4
+		}
+	}
+	return 1.0
+}
+
+func estimatedTargetPriority(shooterTeam string, target *enginev1.Unit, def sim.DefStats) float64 {
+	valueRemaining := targetPainValue(def) * (1 - damageLossFraction(target.GetDamageState()))
+	if valueRemaining <= 0 {
+		return 0
+	}
+	return valueRemaining * actorTargetBias(shooterTeam, def)
+}
+
+func unitsHostileForPlanning(shooter, target *enginev1.Unit) bool {
+	if shooter == nil || target == nil {
+		return false
+	}
+	shooterCoalition := strings.TrimSpace(strings.ToUpper(shooter.GetCoalitionId()))
+	targetCoalition := strings.TrimSpace(strings.ToUpper(target.GetCoalitionId()))
+	if shooterCoalition != "" && targetCoalition != "" {
+		return shooterCoalition != targetCoalition
+	}
+	return shooter.GetSide() != target.GetSide()
+}
+
+func (a *App) aiStrikePathAllowed(shooter, target *enginev1.Unit, defs map[string]sim.DefStats, weapons map[string]sim.WeaponStats) bool {
+	if shooter == nil || target == nil {
+		return false
+	}
+	shooterDef := defs[shooter.GetDefinitionId()]
+	points := []geo.Point{{
+		Lat: shooter.GetPosition().GetLat(),
+		Lon: shooter.GetPosition().GetLon(),
+	}}
+	if waypoint := sim.ComputeAttackWaypointForOrder(shooter, target, defs, weapons); waypoint != nil {
+		points = append(points, geo.Point{Lat: waypoint.GetLat(), Lon: waypoint.GetLon()})
+	}
+	points = append(points, geo.Point{
+		Lat: target.GetPosition().GetLat(),
+		Lon: target.GetPosition().GetLon(),
+	})
+	return previewStrikePath(unitCountryCode(shooter), isMaritimeDomain(shooterDef.Domain), points, a.relationshipRules(), a.countryCoalitions()) == nil
+}
+
+func (a *App) planMajorActorStrikes(simSeconds float64) []*enginev1.UnitDelta {
+	if a.currentScenario == nil {
+		return nil
+	}
+	defs := a.getCachedDefs()
+	weapons := a.buildWeaponCatalog()
+	targets := make([]*enginev1.Unit, 0, len(a.currentScenario.GetUnits()))
+	for _, candidate := range a.currentScenario.GetUnits() {
+		if candidate == nil || !candidate.GetStatus().GetIsActive() {
+			continue
+		}
+		def := defs[candidate.GetDefinitionId()]
+		if !isAIFixedStrategicTarget(candidate, def) {
+			continue
+		}
+		targets = append(targets, candidate)
+	}
+
+	deltas := make([]*enginev1.UnitDelta, 0)
+	for _, shooter := range a.currentScenario.GetUnits() {
+		if shooter == nil {
+			continue
+		}
+		def := defs[shooter.GetDefinitionId()]
+		if !isPlannerControlled(shooter, def, simSeconds) {
+			continue
+		}
+		var bestTarget *enginev1.Unit
+		bestPriority := 0.0
+		for _, target := range targets {
+			if !unitsHostileForPlanning(shooter, target) {
+				continue
+			}
+			targetDef := defs[target.GetDefinitionId()]
+			if !sim.CanUnitAttackTarget(shooter, target, defs, weapons) {
+				continue
+			}
+			if !a.aiStrikePathAllowed(shooter, target, defs, weapons) {
+				continue
+			}
+			priority := estimatedTargetPriority(shooter.GetTeamId(), target, targetDef)
+			if priority > bestPriority {
+				bestPriority = priority
+				bestTarget = target
+			}
+		}
+		if bestTarget == nil {
+			continue
+		}
+		if current := shooter.GetMoveOrder(); current == nil || len(current.GetWaypoints()) == 0 {
+			if err := a.validateAndConsumeLaunch(shooter, def); err != nil {
+				continue
+			}
+		}
+		shooter.AttackOrder = &enginev1.AttackOrder{
+			OrderType:      enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT,
+			TargetUnitId:   bestTarget.GetId(),
+			DesiredEffect:  plannedDesiredEffect(bestTarget, defs[bestTarget.GetDefinitionId()]),
+			PkillThreshold: 0.7,
+		}
+		if waypoint := sim.ComputeAttackWaypointForOrder(shooter, bestTarget, defs, weapons); waypoint != nil {
+			shooter.MoveOrder = &enginev1.MoveOrder{
+				Waypoints:     []*enginev1.Waypoint{waypoint},
+				AutoGenerated: true,
+			}
+		}
+		deltas = append(deltas, launchStateDeltas(shooter, a.currentScenario)...)
+		deltas = append(deltas, &enginev1.UnitDelta{
+			UnitId:    shooter.GetId(),
+			MoveOrder: shooter.GetMoveOrder(),
+		})
+		a.emitProtoEvent("narrative", &enginev1.NarrativeEvent{
+			Text:     fmt.Sprintf("%s AI assigns %s to strike %s", sim.CountryDisplayCode(shooter.GetTeamId()), shooter.GetDisplayName(), bestTarget.GetDisplayName()),
+			Category: "c2",
+			UnitId:   shooter.GetId(),
+			Side:     sim.CountryDisplayCode(shooter.GetTeamId()),
+		})
+	}
+	return deltas
+}
+
+func plannedDesiredEffect(target *enginev1.Unit, def sim.DefStats) enginev1.DesiredEffect {
+	if def.AssetClass == "airbase" || def.TargetClass == "runway" || def.TargetClass == "sam_battery" {
+		return enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL
+	}
+	if def.TargetClass == "civilian_energy" || def.TargetClass == "civilian_water" {
+		return enginev1.DesiredEffect_DESIRED_EFFECT_DAMAGE
+	}
+	if def.GeneralType == 72 {
+		return enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY
+	}
+	return enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL
+}

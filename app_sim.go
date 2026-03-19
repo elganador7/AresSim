@@ -225,6 +225,7 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 		0,
 		a.getSimTimeScale,
 		a.setSimSeconds,
+		a.planMajorActorStrikes,
 		a.makeEmitFn(),
 	)
 	slog.Info("scenario loaded", "name", scen.Name, "units", len(scen.Units))
@@ -486,6 +487,7 @@ func (a *App) PauseSim(paused bool) BridgeResult {
 			a.getSimSeconds(),
 			a.getSimTimeScale,
 			a.setSimSeconds,
+			a.planMajorActorStrikes,
 			a.makeEmitFn(),
 		)
 	}
@@ -935,6 +937,8 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 			BaseStrength:                float64(def.BaseStrength),
 			DetectionRangeM:             float64(def.DetectionRangeM),
 			RadarCrossSectionM2:         rcs,
+			GeneralType:                 int32(def.GeneralType),
+			EmploymentRole:              strings.TrimSpace(def.EmploymentRole),
 			AuthorizedPersonnel:         maxInt(def.AuthorizedPersonnel, library.DefaultAuthorizedPersonnel(def.AssetClass, def.Domain, def.GeneralType)),
 			ReplacementCostUSD:          defaultIfZero(def.ReplacementCostUSD, library.DefaultReplacementCostUSD(def.AssetClass, def.Domain, def.GeneralType)),
 			StrategicValueUSD:           defaultIfZero(def.StrategicValueUSD, library.DefaultStrategicValueUSD(def.AssetClass, def.TargetClass, def.Domain, def.GeneralType, def.EmploymentRole)),
@@ -969,6 +973,8 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 			BaseStrength:                toFloat64(row["base_strength"]),
 			DetectionRangeM:             toFloat64(row["detection_range_m"]),
 			RadarCrossSectionM2:         rcs,
+			GeneralType:                 int32(toFloat64(row["general_type"])),
+			EmploymentRole:              toString(row["employment_role"]),
 			AuthorizedPersonnel:         maxInt(int(toFloat64(row["authorized_personnel"])), library.DefaultAuthorizedPersonnel(toString(row["asset_class"]), int(toFloat64(row["domain"])), int(toFloat64(row["general_type"])))),
 			ReplacementCostUSD:          defaultIfZero(toFloat64(row["replacement_cost_usd"]), library.DefaultReplacementCostUSD(toString(row["asset_class"]), int(toFloat64(row["domain"])), int(toFloat64(row["general_type"])))),
 			StrategicValueUSD:           defaultIfZero(toFloat64(row["strategic_value_usd"]), library.DefaultStrategicValueUSD(toString(row["asset_class"]), toString(row["target_class"]), int(toFloat64(row["domain"])), int(toFloat64(row["general_type"])), toString(row["employment_role"]))),
