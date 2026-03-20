@@ -72,16 +72,23 @@ enum UnitGeneralType {
   GENERAL_TYPE_AEW                  = 16;  // Airborne early warning & control
   GENERAL_TYPE_TANKER               = 17;  // Aerial refuelling
   GENERAL_TYPE_ISR_FIXED_WING       = 18;  // Dedicated reconnaissance
+  GENERAL_TYPE_ELECTRONIC_ATTACK    = 19;  // Dedicated jamming / SEAD support aircraft
 
   // ── Air — Rotary Wing (20–29) ──────────────────────────────────────────────
   GENERAL_TYPE_ATTACK_HELICOPTER    = 20;  // Anti-armour / CAS helicopter
   GENERAL_TYPE_UTILITY_HELICOPTER   = 21;  // Troop lift / medevac
   GENERAL_TYPE_NAVAL_HELICOPTER     = 22;  // ASW / ASuW shipborne helicopter
+  GENERAL_TYPE_ASW_HELICOPTER       = 23;  // Dedicated anti-submarine helicopter
+  GENERAL_TYPE_HEAVY_LIFT_HELICOPTER = 24; // Heavy vertical lift / logistics
+  GENERAL_TYPE_CSAR_HELICOPTER      = 25;  // Combat search and rescue / personnel recovery
 
   // ── Air — Unmanned (30–39) ─────────────────────────────────────────────────
   GENERAL_TYPE_ISR_UAV              = 30;  // Persistent surveillance drone
   GENERAL_TYPE_UCAV                 = 31;  // Unmanned combat air vehicle
   GENERAL_TYPE_LOITERING_MUNITION   = 32;  // Kamikaze / loitering drone
+  GENERAL_TYPE_STRIKE_UAV           = 33;  // Reusable armed drone focused on strike
+  GENERAL_TYPE_EW_UAV               = 34;  // Electronic warfare / decoy drone
+  GENERAL_TYPE_ATTRITABLE_DECOY     = 35;  // One-way or expendable decoy / saturation platform
 
   // ── Sea — Surface (40–49) ──────────────────────────────────────────────────
   GENERAL_TYPE_AIRCRAFT_CARRIER     = 40;  // Fixed-wing carrier aviation
@@ -92,11 +99,15 @@ enum UnitGeneralType {
   GENERAL_TYPE_PATROL_VESSEL        = 45;  // Coastal / inshore patrol
   GENERAL_TYPE_AMPHIBIOUS_ASSAULT   = 46;  // LHA / LHD / LPD
   GENERAL_TYPE_MINE_WARFARE         = 47;  // MCM / minelayer
+  GENERAL_TYPE_MISSILE_BOAT         = 48;  // Fast missile craft / FAC(M)
+  GENERAL_TYPE_OFFSHORE_PATROL_VESSEL = 49; // OPV / EEZ patrol combatant
 
   // ── Sea — Subsurface (50–59) ───────────────────────────────────────────────
   GENERAL_TYPE_ATTACK_SUBMARINE     = 50;  // SSN / SSK hunter-killer
   GENERAL_TYPE_BALLISTIC_MISSILE_SUB = 51; // SSBN strategic deterrent
   GENERAL_TYPE_CRUISE_MISSILE_SUB   = 52;  // SSGN land-attack submarine
+  GENERAL_TYPE_COASTAL_SUBMARINE    = 53;  // Small littoral / ambush submarine
+  GENERAL_TYPE_SPECIAL_MISSION_SUB  = 54;  // ISR / SOF delivery / special mission submarine
 
   // ── Land — Armour & Mechanised (60–69) ────────────────────────────────────
   GENERAL_TYPE_MAIN_BATTLE_TANK     = 60;  // MBT
@@ -109,6 +120,10 @@ enum UnitGeneralType {
   GENERAL_TYPE_TOWED_ARTILLERY           = 71;
   GENERAL_TYPE_ROCKET_ARTILLERY          = 72;  // MLRS / HIMARS
   GENERAL_TYPE_AIR_DEFENSE              = 73;   // SAM / SHORAD / MANPADS
+  GENERAL_TYPE_BALLISTIC_MISSILE_LAUNCHER = 74; // SRBM / MRBM / IRBM TEL / launcher
+  GENERAL_TYPE_COASTAL_DEFENSE_MISSILE  = 75;  // Shore-based anti-ship missile battery
+  GENERAL_TYPE_RADAR_EARLY_WARNING      = 76;  // Ground radar / EW warning node
+  GENERAL_TYPE_COUNTER_ROCKET_ARTILLERY_MORTAR = 77; // C-RAM / counter-fire defense
 
   // ── Land — Infantry (80–89) ───────────────────────────────────────────────
   GENERAL_TYPE_SPECIAL_FORCES       = 80;
@@ -122,6 +137,8 @@ enum UnitGeneralType {
   GENERAL_TYPE_MEDICAL              = 92;
   GENERAL_TYPE_COMMAND              = 93;
   GENERAL_TYPE_ELECTRONIC_WARFARE   = 94;
+  GENERAL_TYPE_SIGNALS_INTELLIGENCE = 95;
+  GENERAL_TYPE_AIRBASE_SUPPORT      = 96;
 }
 
 enum AssetClass {
@@ -163,6 +180,22 @@ enum EmploymentRole {
   EMPLOYMENT_ROLE_OFFENSIVE   = 1;
   EMPLOYMENT_ROLE_DEFENSIVE   = 2;
   EMPLOYMENT_ROLE_DUAL_USE    = 3;
+}
+
+enum DataConfidenceLevel {
+  DATA_CONFIDENCE_LEVEL_UNSPECIFIED = 0;
+  DATA_CONFIDENCE_LEVEL_LOW         = 1;
+  DATA_CONFIDENCE_LEVEL_MEDIUM      = 2;
+  DATA_CONFIDENCE_LEVEL_HIGH        = 3;
+}
+
+enum SourceBasis {
+  SOURCE_BASIS_UNSPECIFIED          = 0;
+  SOURCE_BASIS_HEURISTIC            = 1;
+  SOURCE_BASIS_ESTIMATED            = 2;
+  SOURCE_BASIS_REPUTABLE_ANALYSIS   = 3;
+  SOURCE_BASIS_GOVERNMENT_OR_OFFICIAL = 4;
+  SOURCE_BASIS_MANUFACTURER         = 5;
 }
 
 // ── UNIT DEFINITION ───────────────────────────────────────────────────────────
@@ -226,4 +259,10 @@ message UnitDefinition {
   double replacement_cost_usd = 70;
   double strategic_value_usd  = 71;
   double economic_value_usd   = 72;
+
+  // ── Provenance / confidence ───────────────────────────────────────────────
+  DataConfidenceLevel data_confidence = 80;
+  SourceBasis source_basis = 81;
+  string source_notes = 82;
+  repeated string source_links = 83;
 }

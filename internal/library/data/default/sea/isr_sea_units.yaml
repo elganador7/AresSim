@@ -10,7 +10,7 @@ definitions:
       description: Israeli fast missile craft used for littoral sea control, escort, and precision maritime strike.
       domain: 3
       form: 20
-      general_type: 45
+      general_type: 48
       specific_type: Sa'ar 4.5 Missile Boat
       short_name: Sa'ar 4.5
       nation_of_origin: ISR
@@ -18,6 +18,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as a fast missile combatant optimized for littoral strike and escort rather than generic patrol.
       service_entry_year: 1981
       base_strength: 0.48
       accuracy: 0.58
@@ -58,6 +61,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Based on Sa'ar 6 service in offshore gas-field defense, area air defense, and anti-ship warfare.
       service_entry_year: 2020
       base_strength: 0.68
       accuracy: 0.74

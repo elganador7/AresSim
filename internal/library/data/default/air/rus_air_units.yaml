@@ -526,6 +526,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Iranian Su-24MK availability and modernization depth are uncertain; modeled as a legacy theater strike and maritime-attack squadron.
       service_entry_year: 1991
       base_strength: 0.54
       accuracy: 0.62
@@ -740,52 +743,6 @@ definitions:
         - weapon_id: gbu-32-jdam
           max_qty: 4
           initial_qty: 4
-      default_weapon_configuration: ""
-      weapon_configurations: []
-    - id: su34-fullback
-      name: Su-34 Fullback
-      description: Russian strike fighter-bomber with long range and robust low-level strike capability.
-      domain: 2
-      form: 10
-      general_type: 12
-      specific_type: Su-34 Fullback
-      short_name: Su-34
-      nation_of_origin: RUS
-      operators:
-        - RUS
-      employed_by:
-        - RUS
-      service_entry_year: 2014
-      base_strength: 0.83
-      accuracy: 0.84
-      max_speed_mps: 526
-      cruise_speed_mps: 295
-      max_range_km: 4000
-      survivability: 0.66
-      detection_range_m: 180000
-      radar_cross_section_m2: 9
-      fuel_capacity_liters: 12100
-      fuel_burn_rate_lph: 4800
-      embarked_fixed_wing_capacity: 0
-      embarked_rotary_wing_capacity: 0
-      embarked_uav_capacity: 0
-      embarked_surface_connector_capacity: 0
-      launch_capacity_per_interval: 0
-      recovery_capacity_per_interval: 0
-      sortie_interval_minutes: 0
-      default_loadout:
-        - weapon_id: agm-kh31p
-          max_qty: 4
-          initial_qty: 4
-        - weapon_id: aam-r77-1
-          max_qty: 2
-          initial_qty: 2
-        - weapon_id: aam-r74m
-          max_qty: 2
-          initial_qty: 2
-        - weapon_id: gun-gsh301-30mm
-          max_qty: 150
-          initial_qty: 150
       default_weapon_configuration: ""
       weapon_configurations: []
     - id: su35s-flanker-e

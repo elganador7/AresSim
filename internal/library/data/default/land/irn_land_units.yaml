@@ -18,6 +18,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: System performance claims vary; modeled as Iran's best indigenous long-range SAM with conservative effectiveness.
       service_entry_year: 2019
       base_strength: 0.66
       accuracy: 0.72
@@ -47,7 +50,7 @@ definitions:
       description: Iranian road-mobile short-range ballistic missile formation for regional strike missions.
       domain: 1
       form: 31
-      general_type: 72
+      general_type: 74
       specific_type: Fateh-110 Missile Brigade
       short_name: Fateh-110
       nation_of_origin: IRN
@@ -55,6 +58,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: high
+      source_basis: reputable_analysis
+      source_notes: Modeled as a short-range solid-fuel ballistic-missile brigade for rapid regional strikes against fixed military targets.
       service_entry_year: 2012
       base_strength: 0.6
       accuracy: 0.62
@@ -121,7 +127,7 @@ definitions:
       description: Solid-fuel MRBM formation built for deeper strikes on coalition bases, ports, and strategic infrastructure.
       domain: 1
       form: 31
-      general_type: 72
+      general_type: 74
       specific_type: Kheibar Shekan Missile Brigade
       short_name: Kheibar
       nation_of_origin: IRN
@@ -129,6 +135,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Modeled as a modern Iranian MRBM unit for strategic fixed-target strike against regional bases and infrastructure.
       service_entry_year: 2022
       base_strength: 0.62
       accuracy: 0.64
@@ -203,6 +212,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Public evidence supports a long-range land-attack cruise missile capability, but regiment scale and salvo depth remain uncertain.
       service_entry_year: 2023
       base_strength: 0.54
       accuracy: 0.7
@@ -232,7 +244,7 @@ definitions:
       description: Liquid-fuel SRBM formation suited to high-volume regional strikes against coalition air bases and infrastructure.
       domain: 1
       form: 31
-      general_type: 72
+      general_type: 74
       specific_type: Qiam-1 Missile Brigade
       short_name: Qiam-1
       nation_of_origin: IRN
@@ -240,6 +252,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: high
+      source_basis: reputable_analysis
+      source_notes: Modeled as a liquid-fuel regional ballistic-missile brigade intended for airbase and infrastructure strike.
       service_entry_year: 2010
       base_strength: 0.58
       accuracy: 0.54
@@ -269,7 +284,7 @@ definitions:
       description: Iranian mobile anti-ship coastal defense battery representative of Gulf littoral denial tactics.
       domain: 1
       form: 31
-      general_type: 73
+      general_type: 75
       specific_type: Raad Coastal Defense Battery
       short_name: Raad
       nation_of_origin: IRN
@@ -277,6 +292,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Modeled as a mobile coastal anti-ship missile battery representing Iran's layered Gulf littoral denial concept.
       service_entry_year: 2013
       base_strength: 0.52
       accuracy: 0.58
@@ -306,7 +324,7 @@ definitions:
       description: Iranian solid-fuel medium-range ballistic missile formation for deeper regional strike missions.
       domain: 1
       form: 31
-      general_type: 72
+      general_type: 74
       specific_type: Sejjil Missile Brigade
       short_name: Sejjil
       nation_of_origin: IRN
@@ -314,6 +332,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Modeled as a longer-range solid-fuel ballistic-missile brigade for deeper regional strike missions.
       service_entry_year: 2014
       base_strength: 0.62
       accuracy: 0.58

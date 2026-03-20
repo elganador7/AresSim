@@ -287,6 +287,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: high
+      source_basis: reputable_analysis
+      source_notes: Based on delivered Iranian S-300PMU-2 coverage of strategic sites, with conservative inventory and readiness assumptions.
       service_entry_year: 2016
       base_strength: 0.72
       accuracy: 0.78

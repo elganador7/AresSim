@@ -6,43 +6,6 @@ library:
     author: AresSim Default Library
 definitions:
     - id: h6k-badger
-      name: H-6K
-      description: Chinese theater bomber used for standoff land-attack and anti-ship strike missions.
-      domain: 2
-      form: 10
-      general_type: 13
-      specific_type: H-6K Bomber
-      short_name: H-6K
-      nation_of_origin: CHN
-      operators:
-        - CHN
-      employed_by:
-        - CHN
-      service_entry_year: 2011
-      base_strength: 0.66
-      accuracy: 0.74
-      max_speed_mps: 285
-      cruise_speed_mps: 220
-      max_range_km: 3500
-      survivability: 0.34
-      detection_range_m: 220000
-      radar_cross_section_m2: 35
-      fuel_capacity_liters: 37000
-      fuel_burn_rate_lph: 6500
-      embarked_fixed_wing_capacity: 0
-      embarked_rotary_wing_capacity: 0
-      embarked_uav_capacity: 0
-      embarked_surface_connector_capacity: 0
-      launch_capacity_per_interval: 0
-      recovery_capacity_per_interval: 0
-      sortie_interval_minutes: 0
-      default_loadout:
-        - weapon_id: asm-brahmos
-          max_qty: 4
-          initial_qty: 4
-      default_weapon_configuration: ""
-      weapon_configurations: []
-    - id: h6k-badger
       name: H-6K Badger
       description: Chinese missile-carrying bomber adapted for maritime and land strike.
       domain: 2

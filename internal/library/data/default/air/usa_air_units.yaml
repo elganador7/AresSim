@@ -216,6 +216,9 @@ definitions:
         - USA
       employed_by:
         - USA
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as a conventional long-range bomber for standoff strike using JASSM-ER.
       service_entry_year: 1986
       base_strength: 0.88
       accuracy: 0.82
@@ -361,6 +364,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: low
+      source_basis: estimated
+      source_notes: Iranian tanker availability and readiness are uncertain; modeled conservatively as a limited-value support aircraft.
       service_entry_year: 1990
       base_strength: 0.24
       accuracy: 0.08
@@ -655,58 +661,6 @@ definitions:
       radar_cross_section_m2: 8
       fuel_capacity_liters: 3900
       fuel_burn_rate_lph: 900
-      embarked_fixed_wing_capacity: 0
-      embarked_rotary_wing_capacity: 0
-      embarked_uav_capacity: 0
-      embarked_surface_connector_capacity: 0
-      launch_capacity_per_interval: 0
-      recovery_capacity_per_interval: 0
-      sortie_interval_minutes: 0
-      default_loadout: []
-      default_weapon_configuration: ""
-      weapon_configurations: []
-    - id: ch47f-chinook
-      name: CH-47F Chinook
-      description: Heavy-lift helicopter for logistics, artillery movement, and personnel transport.
-      domain: 2
-      form: 11
-      general_type: 21
-      specific_type: CH-47F Chinook
-      short_name: CH-47F
-      nation_of_origin: USA
-      operators:
-        - USA
-        - AUS
-        - CAN
-        - DEU
-        - ESP
-        - GBR
-        - GRC
-        - ITA
-        - NLD
-        - KOR
-      employed_by:
-        - USA
-        - AUS
-        - CAN
-        - DEU
-        - ESP
-        - GBR
-        - GRC
-        - ITA
-        - NLD
-        - KOR
-      service_entry_year: 2007
-      base_strength: 0.35
-      accuracy: 0.1
-      max_speed_mps: 82
-      cruise_speed_mps: 70
-      max_range_km: 740
-      survivability: 0.3
-      detection_range_m: 7000
-      radar_cross_section_m2: 8
-      fuel_capacity_liters: 3900
-      fuel_burn_rate_lph: 950
       embarked_fixed_wing_capacity: 0
       embarked_rotary_wing_capacity: 0
       embarked_uav_capacity: 0
@@ -1489,6 +1443,9 @@ definitions:
         - USA
       employed_by:
         - USA
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as a low-observable air-superiority fighter with high-end sensing and limited strike utility.
       service_entry_year: 2005
       base_strength: 0.97
       accuracy: 0.95
@@ -1599,6 +1556,9 @@ definitions:
         - NOR
         - POL
         - SGP
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as a penetrating multirole stealth fighter with internal-weapons emphasis.
       service_entry_year: 2016
       base_strength: 0.93
       accuracy: 0.93
@@ -1731,6 +1691,9 @@ definitions:
         - USA
       employed_by:
         - USA
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as the U.S. Navy's low-observable carrier strike fighter with longer range than the F-35B.
       service_entry_year: 2019
       base_strength: 0.91
       accuracy: 0.92
@@ -1761,6 +1724,118 @@ definitions:
           initial_qty: 182
       default_weapon_configuration: ""
       weapon_configurations: []
+    - id: e2d-advanced-hawkeye
+      name: E-2D Advanced Hawkeye
+      description: U.S. Navy carrier-based airborne early warning and battle-management aircraft for fleet defense and strike coordination.
+      domain: 2
+      form: 10
+      general_type: 16
+      specific_type: E-2D Advanced Hawkeye
+      short_name: E-2D
+      nation_of_origin: USA
+      operators:
+        - USA
+        - JPN
+        - FRA
+      employed_by:
+        - USA
+        - JPN
+        - FRA
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as the carrier air wing's principal AEW and battle-management aircraft.
+      source_links:
+        - https://www.navair.navy.mil/product/E-2D
+      service_entry_year: 2014
+      base_strength: 0.58
+      accuracy: 0.22
+      max_speed_mps: 180
+      cruise_speed_mps: 150
+      max_range_km: 2700
+      survivability: 0.28
+      detection_range_m: 450000
+      radar_cross_section_m2: 26
+      fuel_capacity_liters: 5600
+      fuel_burn_rate_lph: 1800
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: ea18g-growler
+      name: EA-18G Growler
+      description: U.S. Navy carrier-based electronic-attack aircraft for escort jamming, SEAD, and standoff electromagnetic support.
+      domain: 2
+      form: 10
+      general_type: 19
+      specific_type: EA-18G Growler
+      short_name: Growler
+      nation_of_origin: USA
+      operators:
+        - USA
+        - AUS
+      employed_by:
+        - USA
+        - AUS
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as the carrier air wing's principal electronic-attack and escort-SEAD aircraft.
+      source_links:
+        - https://www.navy.mil/Resources/Fact-Files/Display-FactFiles/Article/2166036/ea-18g-growler-airborne-electronic-attack-aircraft/
+      service_entry_year: 2009
+      base_strength: 0.76
+      accuracy: 0.78
+      max_speed_mps: 530
+      cruise_speed_mps: 245
+      max_range_km: 2300
+      survivability: 0.58
+      detection_range_m: 230000
+      radar_cross_section_m2: 6
+      fuel_capacity_liters: 6600
+      fuel_burn_rate_lph: 2900
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout:
+        - weapon_id: agm-88-harm
+          max_qty: 4
+          initial_qty: 4
+        - weapon_id: aam-aim120c
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-aim9x
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: gun-m61a2-20mm
+          max_qty: 510
+          initial_qty: 510
+      default_weapon_configuration: escort_sead
+      weapon_configurations:
+        - id: escort_sead
+          name: Escort SEAD
+          description: HARM-heavy escort jamming and suppression configuration.
+          loadout:
+            - weapon_id: agm-88-harm
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim9x
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 510
+              initial_qty: 510
     - id: f4e-phantom-iriaf
       name: F-4E Phantom II (IRIAF)
       description: Legacy Iranian strike and maritime-attack aircraft still relevant for mass and regional strike tasks despite obsolescence.
@@ -1774,6 +1849,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Iranian F-4E readiness and modernization are uncertain; modeled conservatively as a legacy strike and maritime-attack platform using older U.S.-origin missile assumptions.
       service_entry_year: 1971
       base_strength: 0.4
       accuracy: 0.5
@@ -1793,6 +1871,12 @@ definitions:
       recovery_capacity_per_interval: 0
       sortie_interval_minutes: 0
       default_loadout:
+        - weapon_id: aam-aim7m-sparrow
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-aim9j-sidewinder
+          max_qty: 2
+          initial_qty: 2
         - weapon_id: asm-noor
           max_qty: 2
           initial_qty: 2
@@ -1995,6 +2079,9 @@ definitions:
         - USA
       employed_by:
         - USA
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as the principal single-seat U.S. Navy carrier multirole strike fighter.
       service_entry_year: 1999
       base_strength: 0.79
       accuracy: 0.86
@@ -2087,6 +2174,9 @@ definitions:
         - USA
         - AUS
         - KWT
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as the two-seat carrier strike and escort variant that also underpins some U.S. Navy missionized derivatives.
       service_entry_year: 2002
       base_strength: 0.78
       accuracy: 0.85
@@ -2215,6 +2305,9 @@ definitions:
         - JPN
         - ISR
         - QAT
+      data_confidence: medium
+      source_basis: government_or_official
+      source_notes: Based on operational KC-46 service, but modeled conservatively because combat employment maturity remains uneven by operator.
       service_entry_year: 2019
       base_strength: 0.35
       accuracy: 0.1
@@ -2263,6 +2356,9 @@ definitions:
         - KOR
         - SAU
         - ESP
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as the principal U.S. and allied shipborne ASW and maritime-surveillance helicopter.
       service_entry_year: 2006
       base_strength: 0.55
       accuracy: 0.56
@@ -2285,54 +2381,6 @@ definitions:
         - weapon_id: torp-mk54
           max_qty: 2
           initial_qty: 2
-      default_weapon_configuration: ""
-      weapon_configurations: []
-    - id: mh60r-seahawk
-      name: MH-60R Seahawk
-      description: Naval helicopter for ASW, ASuW, and shipborne screening missions.
-      domain: 2
-      form: 11
-      general_type: 22
-      specific_type: MH-60R Seahawk
-      short_name: MH-60R
-      nation_of_origin: USA
-      operators:
-        - USA
-        - AUS
-        - DNK
-        - GRC
-        - IND
-        - KOR
-        - SAU
-        - ESP
-      employed_by:
-        - USA
-        - AUS
-        - DNK
-        - GRC
-        - IND
-        - KOR
-        - SAU
-        - ESP
-      service_entry_year: 2006
-      base_strength: 0.5
-      accuracy: 0.35
-      max_speed_mps: 78
-      cruise_speed_mps: 68
-      max_range_km: 830
-      survivability: 0.36
-      detection_range_m: 60000
-      radar_cross_section_m2: 5
-      fuel_capacity_liters: 2230
-      fuel_burn_rate_lph: 700
-      embarked_fixed_wing_capacity: 0
-      embarked_rotary_wing_capacity: 0
-      embarked_uav_capacity: 0
-      embarked_surface_connector_capacity: 0
-      launch_capacity_per_interval: 0
-      recovery_capacity_per_interval: 0
-      sortie_interval_minutes: 0
-      default_loadout: []
       default_weapon_configuration: ""
       weapon_configurations: []
     - id: mq1c-gray-eagle
@@ -2431,6 +2479,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Iranian P-3F readiness and mission-system quality are uncertain; modeled as legacy maritime patrol and surveillance support.
       service_entry_year: 1975
       base_strength: 0.34
       accuracy: 0.14
@@ -2479,6 +2530,9 @@ definitions:
         - KOR
         - NOR
         - NZL
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as a modern maritime patrol and theater ISR aircraft with strong ASW and over-water surveillance utility.
       service_entry_year: 2013
       base_strength: 0.5
       accuracy: 0.2
@@ -2653,62 +2707,6 @@ definitions:
       radar_cross_section_m2: 6
       fuel_capacity_liters: 1362
       fuel_burn_rate_lph: 650
-      embarked_fixed_wing_capacity: 0
-      embarked_rotary_wing_capacity: 0
-      embarked_uav_capacity: 0
-      embarked_surface_connector_capacity: 0
-      launch_capacity_per_interval: 0
-      recovery_capacity_per_interval: 0
-      sortie_interval_minutes: 0
-      default_loadout: []
-      default_weapon_configuration: ""
-      weapon_configurations: []
-    - id: uh60m-black-hawk
-      name: UH-60M Black Hawk
-      description: General-purpose tactical utility helicopter for lift, medevac, and assault support.
-      domain: 2
-      form: 11
-      general_type: 21
-      specific_type: UH-60M Black Hawk
-      short_name: UH-60M
-      nation_of_origin: USA
-      operators:
-        - USA
-        - AUS
-        - ARE
-        - BRA
-        - COL
-        - JOR
-        - KWT
-        - MEX
-        - SAU
-        - SWE
-        - TUR
-        - TWN
-      employed_by:
-        - USA
-        - AUS
-        - ARE
-        - BRA
-        - COL
-        - JOR
-        - KWT
-        - MEX
-        - SAU
-        - SWE
-        - TUR
-        - TWN
-      service_entry_year: 2007
-      base_strength: 0.42
-      accuracy: 0.18
-      max_speed_mps: 82
-      cruise_speed_mps: 70
-      max_range_km: 590
-      survivability: 0.36
-      detection_range_m: 12000
-      radar_cross_section_m2: 4
-      fuel_capacity_liters: 1360
-      fuel_burn_rate_lph: 430
       embarked_fixed_wing_capacity: 0
       embarked_rotary_wing_capacity: 0
       embarked_uav_capacity: 0

@@ -18,6 +18,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Public role and loadout details are partly opaque; modeled as a strategic diesel-electric submarine with torpedo and long-range strike utility.
       service_entry_year: 2014
       base_strength: 0.72
       accuracy: 0.74

@@ -92,6 +92,9 @@ definitions:
         - USA
       employed_by:
         - USA
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as a large Aegis cruiser optimized for air defense and strike-group command support.
       service_entry_year: 1983
       base_strength: 0.88
       accuracy: 0.87
@@ -126,6 +129,9 @@ definitions:
         - USA
       employed_by:
         - USA
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as the established U.S. fleet-carrier baseline with lower sortie throughput than Ford-class assumptions.
       service_entry_year: 1975
       base_strength: 1
       accuracy: 0.88
@@ -160,6 +166,9 @@ definitions:
         - USA
       employed_by:
         - USA
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as the newest U.S. fleet carrier with improved sortie-generation throughput relative to Nimitz-class assumptions.
       service_entry_year: 2017
       base_strength: 1
       accuracy: 0.9
@@ -236,6 +245,9 @@ definitions:
         - JPN
         - KOR
         - AUS
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as the core Aegis destroyer workhorse for area air defense, missile defense, and strike escort.
       service_entry_year: 1997
       base_strength: 0.86
       accuracy: 0.86

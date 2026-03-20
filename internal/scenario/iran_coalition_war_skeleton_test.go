@@ -21,50 +21,76 @@ func TestIranCoalitionWarSkeletonAssignsHostBases(t *testing.T) {
 		byID[unit.GetId()] = unit.GetHostBaseId()
 	}
 	cases := map[string]string{
-		"isr-f35i-nevatim":      "isr-airbase-nevatim",
-		"isr-f35i-nevatim-2":    "isr-airbase-nevatim",
-		"isr-f15i-hatzor":       "isr-airbase-hatzor",
-		"isr-f15i-hatzor-2":     "isr-airbase-hatzor",
-		"isr-f16i-ramon":        "isr-airbase-ramon",
-		"isr-f16i-ramon-2":      "isr-airbase-ramon",
-		"usa-f35a-al-udeid":     "qat-airbase-al-udeid",
-		"usa-f22a-al-udeid":     "qat-airbase-al-udeid",
-		"usa-p8a-gulf":          "qat-airbase-al-udeid",
-		"usa-f15e-al-dhafra":    "uae-airbase-al-dhafra",
-		"usa-b1b-diego-garcia":  "usa-airbase-diego-garcia",
-		"usa-c17a-diego-garcia": "usa-airbase-diego-garcia",
-		"usa-kc46-gulf":         "qat-airbase-al-udeid",
-		"irn-f14-tehran":        "irn-airbase-tehran",
-		"irn-f14-tehran-2":      "irn-airbase-tehran",
-		"irn-su24-tehran":       "irn-airbase-tehran",
-		"irn-707-tehran":        "irn-airbase-tehran",
-		"irn-f4-bandar-abbas":   "irn-airbase-bandar-abbas",
-		"irn-p3f-bandar-abbas":  "irn-airbase-bandar-abbas",
-		"isr-eitam-central":     "isr-airbase-nevatim",
-		"isr-oron-central":      "isr-airbase-hatzor",
-		"isr-reem-support":      "isr-airbase-nevatim",
-		"sau-f15sa-khamis":      "sau-airbase-khamis",
-		"sau-f15sa-khamis-2":    "sau-airbase-khamis",
-		"sau-e3a-riyadh":        "sau-airbase-khamis",
-		"uae-f16-block60":       "uae-airbase-al-dhafra",
-		"uae-f16-block60-2":     "uae-airbase-al-dhafra",
-		"uae-globaleye":         "uae-airbase-al-dhafra",
-		"uae-dash8-mpa":         "uae-airbase-al-dhafra",
-		"qat-f15qa":             "qat-airbase-al-udeid",
-		"qat-f15qa-2":           "qat-airbase-al-udeid",
-		"omn-f16-seeb":          "omn-airbase-seeb",
-		"omn-cn235-mpa":         "omn-airbase-seeb",
-		"omn-super-lynx":        "omn-airbase-seeb",
-		"bhr-f16v-isa":          "bhr-airbase-isa",
-		"bhr-bell412":           "bhr-airbase-isa",
-		"kwt-fa18-ahmad":        "kwt-airbase-ahmad",
-		"kwt-kc130j-ahmad":      "kwt-airbase-ahmad",
-		"jord-f16-central":      "jor-airbase-central",
+		"isr-f35i-nevatim":        "isr-airbase-nevatim",
+		"isr-f35i-nevatim-2":      "isr-airbase-nevatim",
+		"isr-f35i-nevatim-3":      "isr-airbase-nevatim",
+		"isr-f35i-nevatim-4":      "isr-airbase-nevatim",
+		"isr-f15i-hatzor":         "isr-airbase-hatzor",
+		"isr-f15i-hatzor-2":       "isr-airbase-hatzor",
+		"isr-f15i-hatzor-3":       "isr-airbase-hatzor",
+		"isr-f16i-ramon":          "isr-airbase-ramon",
+		"isr-f16i-ramon-2":        "isr-airbase-ramon",
+		"isr-f16i-ramon-3":        "isr-airbase-ramon",
+		"isr-f16i-ramat-david":    "isr-airbase-ramat-david",
+		"isr-f16i-telnof":         "isr-airbase-telnof",
+		"usa-f35a-al-udeid":       "qat-airbase-al-udeid",
+		"usa-f22a-al-udeid":       "qat-airbase-al-udeid",
+		"usa-p8a-gulf":            "qat-airbase-al-udeid",
+		"usa-f15e-al-dhafra":      "uae-airbase-al-dhafra",
+		"usa-b1b-diego-garcia":    "usa-airbase-diego-garcia",
+		"usa-c17a-diego-garcia":   "usa-airbase-diego-garcia",
+		"usa-kc46-gulf":           "qat-airbase-al-udeid",
+		"irn-f14-tehran":          "irn-airbase-tehran",
+		"irn-f14-tehran-2":        "irn-airbase-tehran",
+		"irn-su24-tehran":         "irn-airbase-tehran",
+		"irn-707-tehran":          "irn-airbase-tehran",
+		"irn-f4-bandar-abbas":     "irn-airbase-bandar-abbas",
+		"irn-p3f-bandar-abbas":    "irn-airbase-bandar-abbas",
+		"isr-eitam-central":       "isr-airbase-nevatim",
+		"isr-eitam-central-2":     "isr-airbase-telnof",
+		"isr-oron-central":        "isr-airbase-hatzor",
+		"isr-oron-central-2":      "isr-airbase-nevatim",
+		"isr-reem-support":        "isr-airbase-nevatim",
+		"isr-reem-support-2":      "isr-airbase-nevatim",
+		"isr-heron-nevatim":       "isr-airbase-nevatim",
+		"isr-heron-palmachim":     "isr-airbase-palmachim",
+		"isr-hermes900-palmachim": "isr-airbase-palmachim",
+		"isr-hermes450-ramon":     "isr-airbase-ramon",
+		"sau-f15sa-khamis":        "sau-airbase-khamis",
+		"sau-f15sa-khamis-2":      "sau-airbase-khamis",
+		"sau-e3a-riyadh":          "sau-airbase-khamis",
+		"uae-f16-block60":         "uae-airbase-al-dhafra",
+		"uae-f16-block60-2":       "uae-airbase-al-dhafra",
+		"uae-globaleye":           "uae-airbase-al-dhafra",
+		"uae-dash8-mpa":           "uae-airbase-al-dhafra",
+		"qat-f15qa":               "qat-airbase-al-udeid",
+		"qat-f15qa-2":             "qat-airbase-al-udeid",
+		"omn-f16-seeb":            "omn-airbase-seeb",
+		"omn-cn235-mpa":           "omn-airbase-seeb",
+		"omn-super-lynx":          "omn-airbase-seeb",
+		"bhr-f16v-isa":            "bhr-airbase-isa",
+		"bhr-bell412":             "bhr-airbase-isa",
+		"kwt-fa18-ahmad":          "kwt-airbase-ahmad",
+		"kwt-kc130j-ahmad":        "kwt-airbase-ahmad",
+		"jord-f16-central":        "jor-airbase-central",
 	}
 	for unitID, wantBaseID := range cases {
 		if got := byID[unitID]; got != wantBaseID {
 			t.Fatalf("expected %s host base %s, got %s", unitID, wantBaseID, got)
 		}
+	}
+}
+
+func TestIranCoalitionWarSkeletonHasDeepIsraeliOrderOfBattle(t *testing.T) {
+	scen := IranCoalitionWarSkeleton()
+	count := 0
+	for _, unit := range scen.GetUnits() {
+		if len(unit.GetId()) >= 4 && unit.GetId()[:4] == "isr-" {
+			count++
+		}
+	}
+	if count < 30 {
+		t.Fatalf("expected deep Israeli order of battle, got only %d israeli units", count)
 	}
 }
 

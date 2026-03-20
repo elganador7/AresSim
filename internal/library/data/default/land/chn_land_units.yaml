@@ -116,37 +116,3 @@ definitions:
           initial_qty: 32
       default_weapon_configuration: ""
       weapon_configurations: []
-    - id: type99a-mbt
-      name: Type 99A MBT
-      description: Chinese third-generation MBT with advanced armor, thermal sights, and high mobility.
-      domain: 1
-      form: 32
-      general_type: 60
-      specific_type: Type 99A Main Battle Tank
-      short_name: Type 99A
-      nation_of_origin: CHN
-      operators:
-        - CHN
-      employed_by:
-        - CHN
-      service_entry_year: 2011
-      base_strength: 0.9
-      accuracy: 0.83
-      max_speed_mps: 18.3
-      cruise_speed_mps: 10.5
-      max_range_km: 500
-      survivability: 0.76
-      detection_range_m: 3900
-      radar_cross_section_m2: 11
-      fuel_capacity_liters: 1500
-      fuel_burn_rate_lph: 300
-      embarked_fixed_wing_capacity: 0
-      embarked_rotary_wing_capacity: 0
-      embarked_uav_capacity: 0
-      embarked_surface_connector_capacity: 0
-      launch_capacity_per_interval: 0
-      recovery_capacity_per_interval: 0
-      sortie_interval_minutes: 0
-      default_loadout: []
-      default_weapon_configuration: ""
-      weapon_configurations: []

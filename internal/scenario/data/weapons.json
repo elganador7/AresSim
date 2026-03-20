@@ -1,0 +1,1059 @@
+[
+  {
+    "id": "gnd-120mm-apfsds",
+    "name": "120mm APFSDS",
+    "description": "M829A3 kinetic-energy penetrator for MBTs",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 1700,
+    "range_m": 3500,
+    "probability_of_hit": 0.85,
+    "guidance": 1,
+    "effect_type": 3
+  },
+  {
+    "id": "gnd-25mm-hei",
+    "name": "25mm HEI",
+    "description": "M919 25mm high-explosive incendiary for IFV autocannons",
+    "domain_targets": [
+      1,
+      2
+    ],
+    "speed_mps": 1100,
+    "range_m": 2500,
+    "probability_of_hit": 0.7,
+    "guidance": 1,
+    "effect_type": 8
+  },
+  {
+    "id": "gnd-155mm-he",
+    "name": "155mm HE Shell",
+    "description": "M795 HE projectile for 155mm howitzers",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 550,
+    "range_m": 30000,
+    "probability_of_hit": 0.75,
+    "guidance": 1,
+    "effect_type": 4
+  },
+  {
+    "id": "gnd-gmlrs",
+    "name": "GMLRS 227mm",
+    "description": "Guided MLRS rocket with GPS/INS precision guidance",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 1075,
+    "range_m": 84000,
+    "probability_of_hit": 0.72,
+    "guidance": 2,
+    "effect_type": 4
+  },
+  {
+    "id": "gnd-tow",
+    "name": "BGM-71 TOW",
+    "description": "Wire-guided anti-tank missile",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 318,
+    "range_m": 4200,
+    "probability_of_hit": 0.88,
+    "guidance": 6,
+    "effect_type": 3
+  },
+  {
+    "id": "gnd-javelin",
+    "name": "FGM-148 Javelin",
+    "description": "Fire-and-forget man-portable ATGM with IR seeker",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 300,
+    "range_m": 4000,
+    "probability_of_hit": 0.9,
+    "guidance": 4,
+    "effect_type": 3
+  },
+  {
+    "id": "gnd-spike-nlos",
+    "name": "Spike NLOS",
+    "description": "Israeli long-range precision missile for helicopter, vehicle, and ground-launch strike",
+    "domain_targets": [
+      1,
+      3
+    ],
+    "speed_mps": 360,
+    "range_m": 32000,
+    "probability_of_hit": 0.87,
+    "guidance": 4,
+    "effect_type": 4
+  },
+  {
+    "id": "gnd-556mm-rifle",
+    "name": "5.56mm Rifle",
+    "description": "Standard infantry rifle ammunition",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 940,
+    "range_m": 500,
+    "probability_of_hit": 0.6,
+    "guidance": 1,
+    "effect_type": 8
+  },
+  {
+    "id": "gnd-at4",
+    "name": "AT4 Rocket",
+    "description": "Single-shot 84mm unguided rocket launcher",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 290,
+    "range_m": 300,
+    "probability_of_hit": 0.65,
+    "guidance": 1,
+    "effect_type": 8
+  },
+  {
+    "id": "aam-aim120c",
+    "name": "AIM-120C AMRAAM",
+    "description": "Beyond-visual-range active-radar AAM",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1450,
+    "range_m": 105000,
+    "probability_of_hit": 0.8,
+    "guidance": 3,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-aim54a-phoenix",
+    "name": "AIM-54A Phoenix",
+    "description": "Legacy very-long-range active-radar AAM associated with the F-14 Tomcat",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1450,
+    "range_m": 160000,
+    "probability_of_hit": 0.66,
+    "guidance": 3,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-aim7m-sparrow",
+    "name": "AIM-7M Sparrow",
+    "description": "Legacy semi-active radar-guided medium-range AAM",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1200,
+    "range_m": 70000,
+    "probability_of_hit": 0.62,
+    "guidance": 3,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-aim9x",
+    "name": "AIM-9X Sidewinder",
+    "description": "Short-range infrared-guided AAM",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1000,
+    "range_m": 35000,
+    "probability_of_hit": 0.78,
+    "guidance": 4,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-aim9j-sidewinder",
+    "name": "AIM-9J/P Sidewinder",
+    "description": "Legacy short-range infrared-guided Sidewinder family representative of older export inventories",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 850,
+    "range_m": 18000,
+    "probability_of_hit": 0.58,
+    "guidance": 4,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-r77-1",
+    "name": "R-77-1 (AA-12 Adder B)",
+    "description": "Russian active-radar BVR AAM; primary armament of Flanker/Felon family",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1480,
+    "range_m": 110000,
+    "probability_of_hit": 0.78,
+    "guidance": 3,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-r74m",
+    "name": "R-74M (AA-11 Archer)",
+    "description": "Russian high-off-boresight short-range IR-guided AAM",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 900,
+    "range_m": 40000,
+    "probability_of_hit": 0.76,
+    "guidance": 4,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-r37m",
+    "name": "R-37M (AA-13 Axehead)",
+    "description": "Russian very-long-range interceptor missile; primary armament of MiG-31BM",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1500,
+    "range_m": 300000,
+    "probability_of_hit": 0.72,
+    "guidance": 3,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-pl15",
+    "name": "PL-15 BVR Missile",
+    "description": "Chinese long-range active-radar BVR AAM for J-20/J-16/J-10C",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1500,
+    "range_m": 200000,
+    "probability_of_hit": 0.78,
+    "guidance": 3,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-pl10",
+    "name": "PL-10 WVR Missile",
+    "description": "Chinese high-off-boresight short-range IR-guided AAM",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1000,
+    "range_m": 20000,
+    "probability_of_hit": 0.8,
+    "guidance": 4,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-pl12",
+    "name": "PL-12 BVR Missile",
+    "description": "Chinese active-radar BVR AAM; primary on J-11B/J-15",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1400,
+    "range_m": 100000,
+    "probability_of_hit": 0.76,
+    "guidance": 3,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-meteor",
+    "name": "Meteor BVR Missile",
+    "description": "European ramjet-powered BVR AAM with very large no-escape zone; Typhoon/Rafale/Gripen E",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1500,
+    "range_m": 200000,
+    "probability_of_hit": 0.85,
+    "guidance": 3,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-mica-em",
+    "name": "MICA-EM BVR Missile",
+    "description": "French active-radar BVR/WVR AAM; primary armament of Rafale and Mirage 2000-5",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1200,
+    "range_m": 80000,
+    "probability_of_hit": 0.8,
+    "guidance": 3,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-mica-ir",
+    "name": "MICA-IR WVR Missile",
+    "description": "French IR-guided short-range AAM for Rafale and Mirage 2000-5",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1000,
+    "range_m": 25000,
+    "probability_of_hit": 0.82,
+    "guidance": 4,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-iris-t",
+    "name": "IRIS-T WVR Missile",
+    "description": "German high-off-boresight short-range IR-guided AAM; Eurofighter/Gripen standard",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1000,
+    "range_m": 25000,
+    "probability_of_hit": 0.82,
+    "guidance": 4,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-python5",
+    "name": "Python-5 WVR Missile",
+    "description": "Israeli imaging-IR short-range AAM; exceptional off-boresight capability",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 900,
+    "range_m": 20000,
+    "probability_of_hit": 0.85,
+    "guidance": 4,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-derby",
+    "name": "Derby / I-Derby ER BVR",
+    "description": "Israeli active-radar BVR AAM; I-Derby ER variant extends range to 100 km",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1300,
+    "range_m": 100000,
+    "probability_of_hit": 0.78,
+    "guidance": 3,
+    "effect_type": 1
+  },
+  {
+    "id": "aam-astra-mk1",
+    "name": "Astra Mk1 BVR",
+    "description": "Indian domestically developed active-radar BVR AAM for Su-30MKI and Tejas",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1400,
+    "range_m": 80000,
+    "probability_of_hit": 0.74,
+    "guidance": 3,
+    "effect_type": 1
+  },
+  {
+    "id": "agm-114-hellfire",
+    "name": "AGM-114 Hellfire",
+    "description": "Semi-active laser or radar-guided anti-armor missile for helicopters",
+    "domain_targets": [
+      1,
+      3
+    ],
+    "speed_mps": 475,
+    "range_m": 8000,
+    "probability_of_hit": 0.9,
+    "guidance": 5,
+    "effect_type": 4
+  },
+  {
+    "id": "agm-65-maverick",
+    "name": "AGM-65 Maverick",
+    "description": "EO/IR-guided air-to-ground missile",
+    "domain_targets": [
+      1,
+      3
+    ],
+    "speed_mps": 340,
+    "range_m": 27000,
+    "probability_of_hit": 0.82,
+    "guidance": 4,
+    "effect_type": 4
+  },
+  {
+    "id": "agm-84-harpoon",
+    "name": "AGM-84 Harpoon",
+    "description": "Air-launched anti-ship cruise missile with active radar seeker",
+    "domain_targets": [
+      3
+    ],
+    "speed_mps": 310,
+    "range_m": 290000,
+    "probability_of_hit": 0.85,
+    "guidance": 3,
+    "effect_type": 2
+  },
+  {
+    "id": "agm-88-harm",
+    "name": "AGM-88 HARM",
+    "description": "High-speed anti-radiation missile; homes on radar emissions",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 1480,
+    "range_m": 150000,
+    "probability_of_hit": 0.8,
+    "guidance": 3,
+    "effect_type": 5
+  },
+  {
+    "id": "gbu-32-jdam",
+    "name": "GBU-32 JDAM",
+    "description": "GPS/INS-guided 1,000-lb precision bomb",
+    "domain_targets": [
+      1,
+      3
+    ],
+    "speed_mps": 280,
+    "range_m": 28000,
+    "probability_of_hit": 0.88,
+    "guidance": 2,
+    "effect_type": 4
+  },
+  {
+    "id": "agm-154-jsow",
+    "name": "AGM-154 JSOW",
+    "description": "Standoff glide weapon for precision strike against fixed and relocatable targets",
+    "domain_targets": [
+      1,
+      3
+    ],
+    "speed_mps": 250,
+    "range_m": 130000,
+    "probability_of_hit": 0.84,
+    "guidance": 2,
+    "effect_type": 4
+  },
+  {
+    "id": "agm-158-jassm-er",
+    "name": "AGM-158B JASSM-ER",
+    "description": "Low-observable extended-range cruise missile for land and maritime strike",
+    "domain_targets": [
+      1,
+      3
+    ],
+    "speed_mps": 280,
+    "range_m": 925000,
+    "probability_of_hit": 0.86,
+    "guidance": 2,
+    "effect_type": 4
+  },
+  {
+    "id": "agm-158c-lrasm",
+    "name": "AGM-158C LRASM",
+    "description": "Long-range anti-ship cruise missile derived from JASSM-ER",
+    "domain_targets": [
+      3
+    ],
+    "speed_mps": 280,
+    "range_m": 500000,
+    "probability_of_hit": 0.88,
+    "guidance": 3,
+    "effect_type": 2
+  },
+  {
+    "id": "asm-am39-exocet",
+    "name": "AM39 Exocet",
+    "description": "French sea-skimming anti-ship missile used by aircraft and surface combatants",
+    "domain_targets": [
+      3
+    ],
+    "speed_mps": 315,
+    "range_m": 180000,
+    "probability_of_hit": 0.83,
+    "guidance": 3,
+    "effect_type": 2
+  },
+  {
+    "id": "asm-nsm",
+    "name": "Naval Strike Missile",
+    "description": "Imaging-seeker anti-ship and land-attack missile with low-observable profile",
+    "domain_targets": [
+      3,
+      1
+    ],
+    "speed_mps": 300,
+    "range_m": 250000,
+    "probability_of_hit": 0.86,
+    "guidance": 4,
+    "effect_type": 2
+  },
+  {
+    "id": "asm-gabriel-v",
+    "name": "Gabriel V",
+    "description": "Israeli long-range sea-skimming anti-ship missile for naval and coastal strike",
+    "domain_targets": [
+      3,
+      1
+    ],
+    "speed_mps": 300,
+    "range_m": 200000,
+    "probability_of_hit": 0.85,
+    "guidance": 3,
+    "effect_type": 2
+  },
+  {
+    "id": "asm-brahmos",
+    "name": "BrahMos",
+    "description": "Supersonic cruise missile for ship, land, and maritime strike missions",
+    "domain_targets": [
+      3,
+      1
+    ],
+    "speed_mps": 850,
+    "range_m": 450000,
+    "probability_of_hit": 0.84,
+    "guidance": 3,
+    "effect_type": 2
+  },
+  {
+    "id": "asm-noor",
+    "name": "Noor / Qader",
+    "description": "Iranian anti-ship cruise missile family used from shore batteries, fast attack craft, and larger combatants",
+    "domain_targets": [
+      3
+    ],
+    "speed_mps": 280,
+    "range_m": 200000,
+    "probability_of_hit": 0.79,
+    "guidance": 3,
+    "effect_type": 2
+  },
+  {
+    "id": "asm-abu-mahdi",
+    "name": "Abu Mahdi",
+    "description": "Iranian long-range anti-ship cruise missile for coastal denial and maritime strike",
+    "domain_targets": [
+      3
+    ],
+    "speed_mps": 260,
+    "range_m": 700000,
+    "probability_of_hit": 0.76,
+    "guidance": 3,
+    "effect_type": 2
+  },
+  {
+    "id": "agm-kh31p",
+    "name": "Kh-31P",
+    "description": "Russian anti-radiation missile for suppression of enemy air defenses",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 1000,
+    "range_m": 110000,
+    "probability_of_hit": 0.78,
+    "guidance": 3,
+    "effect_type": 5
+  },
+  {
+    "id": "gun-m61a2-20mm",
+    "name": "M61A2 Vulcan 20mm",
+    "description": "20mm rotary cannon for fighter aircraft",
+    "domain_targets": [
+      2,
+      1
+    ],
+    "speed_mps": 1050,
+    "range_m": 1800,
+    "probability_of_hit": 0.75,
+    "guidance": 1,
+    "effect_type": 8
+  },
+  {
+    "id": "gun-m230-30mm",
+    "name": "M230 30mm Chain Gun",
+    "description": "30mm cannon for AH-64 Apache",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 805,
+    "range_m": 4000,
+    "probability_of_hit": 0.78,
+    "guidance": 1,
+    "effect_type": 8
+  },
+  {
+    "id": "gun-gsh301-30mm",
+    "name": "GSh-30-1 30mm Cannon",
+    "description": "Single-barrel 30mm cannon on Russian Flanker/Felon family fighters",
+    "domain_targets": [
+      2,
+      1
+    ],
+    "speed_mps": 900,
+    "range_m": 2000,
+    "probability_of_hit": 0.72,
+    "guidance": 1,
+    "effect_type": 8
+  },
+  {
+    "id": "gun-mauser-bk27",
+    "name": "Mauser BK-27 27mm Cannon",
+    "description": "27mm revolver cannon on Eurofighter Typhoon and Gripen",
+    "domain_targets": [
+      2,
+      1
+    ],
+    "speed_mps": 1025,
+    "range_m": 2000,
+    "probability_of_hit": 0.74,
+    "guidance": 1,
+    "effect_type": 8
+  },
+  {
+    "id": "gun-defa554-30mm",
+    "name": "DEFA 554 30mm Cannon",
+    "description": "30mm revolver cannon on Rafale and Mirage 2000",
+    "domain_targets": [
+      2,
+      1
+    ],
+    "speed_mps": 820,
+    "range_m": 2000,
+    "probability_of_hit": 0.7,
+    "guidance": 1,
+    "effect_type": 8
+  },
+  {
+    "id": "ssm-rgm84-harpoon",
+    "name": "RGM-84 Harpoon",
+    "description": "Ship/sub-launched anti-ship cruise missile with active radar seeker",
+    "domain_targets": [
+      3
+    ],
+    "speed_mps": 310,
+    "range_m": 315000,
+    "probability_of_hit": 0.82,
+    "guidance": 3,
+    "effect_type": 2
+  },
+  {
+    "id": "sam-sm2-block3",
+    "name": "SM-2 Block III",
+    "description": "Long-range area air defense missile with semi-active/active radar",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 900,
+    "range_m": 167000,
+    "probability_of_hit": 0.8,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-sm6",
+    "name": "SM-6",
+    "description": "Extended-range air defense / ballistic missile defense; active radar seeker",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1200,
+    "range_m": 370000,
+    "probability_of_hit": 0.78,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-patriot-pac3",
+    "name": "Patriot PAC-3 MSE",
+    "description": "Land-based hit-to-kill interceptor for aircraft and missile defense",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1600,
+    "range_m": 120000,
+    "probability_of_hit": 0.81,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-nasams-amraam-er",
+    "name": "NASAMS AMRAAM-ER",
+    "description": "Medium-range networked surface-to-air missile using AMRAAM-ER interceptors",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1100,
+    "range_m": 50000,
+    "probability_of_hit": 0.79,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-vl-mica",
+    "name": "VL MICA",
+    "description": "Vertical-launch MICA family interceptor for point and local-area air defense",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 950,
+    "range_m": 25000,
+    "probability_of_hit": 0.77,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-s400-40n6",
+    "name": "S-400 40N6",
+    "description": "Very-long-range Russian surface-to-air missile for high-value aerial targets",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1400,
+    "range_m": 380000,
+    "probability_of_hit": 0.77,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-irist-slm",
+    "name": "IRIS-T SLM",
+    "description": "Short-to-medium range air defense missile with imaging infrared terminal seeker",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1000,
+    "range_m": 40000,
+    "probability_of_hit": 0.8,
+    "guidance": 4,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-hq9b",
+    "name": "HQ-9B",
+    "description": "Chinese long-range area air defense missile system",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1350,
+    "range_m": 250000,
+    "probability_of_hit": 0.78,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-s300pmu2",
+    "name": "S-300PMU-2",
+    "description": "Long-range Russian-origin strategic surface-to-air missile used for high-value air-defense coverage",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1450,
+    "range_m": 200000,
+    "probability_of_hit": 0.79,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-sayyad4b",
+    "name": "Sayyad-4B",
+    "description": "Iranian long-range SAM used by Bavar-373 for strategic air and missile defense",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1500,
+    "range_m": 300000,
+    "probability_of_hit": 0.77,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-3rd-khordad",
+    "name": "3rd Khordad",
+    "description": "Iranian medium-range mobile SAM for air-defense ambush and high-value target engagement",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1200,
+    "range_m": 105000,
+    "probability_of_hit": 0.75,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-tor-m1",
+    "name": "Tor-M1",
+    "description": "Short-range point-defense SAM for cruise missile, aircraft, and guided munition interception",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 850,
+    "range_m": 16000,
+    "probability_of_hit": 0.74,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-barak-8",
+    "name": "Barak-8",
+    "description": "Israeli area air defense missile for naval and land-based interception",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1200,
+    "range_m": 100000,
+    "probability_of_hit": 0.8,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-tamir",
+    "name": "Tamir",
+    "description": "Iron Dome interceptor for short-range rockets, artillery, and aircraft threats",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 750,
+    "range_m": 70000,
+    "probability_of_hit": 0.82,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-stunner",
+    "name": "Stunner",
+    "description": "David's Sling interceptor for cruise missiles, aircraft, and theater ballistic threats",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1400,
+    "range_m": 250000,
+    "probability_of_hit": 0.8,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-arrow3",
+    "name": "Arrow-3",
+    "description": "Israeli exo-atmospheric interceptor for long-range ballistic missile defense",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 2500,
+    "range_m": 500000,
+    "probability_of_hit": 0.76,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-arrow2",
+    "name": "Arrow-2",
+    "description": "Israeli upper-tier interceptor for endo-atmospheric ballistic missile defense",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 2200,
+    "range_m": 150000,
+    "probability_of_hit": 0.79,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-spyder-python5",
+    "name": "SPYDER Python-5",
+    "description": "Israeli short-range quick-reaction interceptor using the Python-5 seeker",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1000,
+    "range_m": 20000,
+    "probability_of_hit": 0.8,
+    "guidance": 4,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-spyder-derby-er",
+    "name": "SPYDER Derby-ER",
+    "description": "Israeli medium-range networked interceptor derived from the I-Derby ER missile",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1100,
+    "range_m": 50000,
+    "probability_of_hit": 0.78,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "sam-ihawk",
+    "name": "I-Hawk",
+    "description": "Legacy medium-range semi-active radar-guided surface-to-air missile",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 900,
+    "range_m": 40000,
+    "probability_of_hit": 0.68,
+    "guidance": 3,
+    "effect_type": 7
+  },
+  {
+    "id": "gun-phalanx-20mm",
+    "name": "Phalanx CIWS 20mm",
+    "description": "Close-in weapon system; last-ditch anti-missile defense",
+    "domain_targets": [
+      2
+    ],
+    "speed_mps": 1100,
+    "range_m": 3500,
+    "probability_of_hit": 0.65,
+    "guidance": 1,
+    "effect_type": 8
+  },
+  {
+    "id": "gun-mk45-5in",
+    "name": "Mk 45 5\"/62 Naval Gun",
+    "description": "127mm naval gun for surface and shore fire",
+    "domain_targets": [
+      1,
+      3
+    ],
+    "speed_mps": 920,
+    "range_m": 24000,
+    "probability_of_hit": 0.72,
+    "guidance": 1,
+    "effect_type": 8
+  },
+  {
+    "id": "asw-vlasroc",
+    "name": "VL-ASROC",
+    "description": "Vertically-launched rocket-propelled Mk 54 torpedo; GPS midcourse, sonar terminal",
+    "domain_targets": [
+      4
+    ],
+    "speed_mps": 350,
+    "range_m": 22000,
+    "probability_of_hit": 0.75,
+    "guidance": 7
+  },
+  {
+    "id": "torp-mk48",
+    "name": "Mk 48 ADCAP Torpedo",
+    "description": "Heavy-weight wire-guided torpedo for submarines",
+    "domain_targets": [
+      3,
+      4
+    ],
+    "speed_mps": 28,
+    "range_m": 55000,
+    "probability_of_hit": 0.8,
+    "guidance": 7,
+    "effect_type": 9
+  },
+  {
+    "id": "torp-mk54",
+    "name": "Mk 54 LHT Torpedo",
+    "description": "Lightweight hybrid torpedo for surface ships and aircraft",
+    "domain_targets": [
+      4,
+      3
+    ],
+    "speed_mps": 28,
+    "range_m": 18000,
+    "probability_of_hit": 0.75,
+    "guidance": 7
+  },
+  {
+    "id": "ssm-tomahawk",
+    "name": "Tomahawk Land Attack Missile",
+    "description": "Long-range subsonic land-attack cruise missile for surface ships and submarines",
+    "domain_targets": [
+      1,
+      3
+    ],
+    "speed_mps": 245,
+    "range_m": 1600000,
+    "probability_of_hit": 0.84,
+    "guidance": 2,
+    "effect_type": 6
+  },
+  {
+    "id": "ssm-kalibr",
+    "name": "3M-14 Kalibr",
+    "description": "Russian long-range land-attack and antiship cruise missile family",
+    "domain_targets": [
+      1,
+      3
+    ],
+    "speed_mps": 250,
+    "range_m": 1500000,
+    "probability_of_hit": 0.82,
+    "guidance": 2,
+    "effect_type": 6
+  },
+  {
+    "id": "ssm-fateh110",
+    "name": "Fateh-110",
+    "description": "Iranian road-mobile short-range ballistic missile for regional precision strike",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 1400,
+    "range_m": 300000,
+    "probability_of_hit": 0.74,
+    "guidance": 2,
+    "effect_type": 6
+  },
+  {
+    "id": "ssm-qiam1",
+    "name": "Qiam-1",
+    "description": "Iranian liquid-fuel SRBM used for larger regional salvos against fixed targets",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 1500,
+    "range_m": 800000,
+    "probability_of_hit": 0.7,
+    "guidance": 2,
+    "effect_type": 6
+  },
+  {
+    "id": "ssm-kheibar-shekan",
+    "name": "Kheibar Shekan",
+    "description": "Iranian solid-fuel MRBM intended for deep regional strike against defended bases and infrastructure",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 1800,
+    "range_m": 1450000,
+    "probability_of_hit": 0.72,
+    "guidance": 2,
+    "effect_type": 6
+  },
+  {
+    "id": "ssm-sejjil",
+    "name": "Sejjil",
+    "description": "Iranian two-stage solid-fuel MRBM for long-range theater strike",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 1900,
+    "range_m": 2000000,
+    "probability_of_hit": 0.68,
+    "guidance": 2,
+    "effect_type": 6
+  },
+  {
+    "id": "ssm-paveh",
+    "name": "Paveh",
+    "description": "Iranian long-range land-attack cruise missile for terrain-following regional strike",
+    "domain_targets": [
+      1
+    ],
+    "speed_mps": 240,
+    "range_m": 1650000,
+    "probability_of_hit": 0.8,
+    "guidance": 2,
+    "effect_type": 6
+  }
+]

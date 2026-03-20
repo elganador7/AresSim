@@ -18,6 +18,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as Israel's established upper-tier ballistic-missile defense layer beneath Arrow-3.
       service_entry_year: 2000
       base_strength: 0.8
       accuracy: 0.79
@@ -55,6 +58,11 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as Israel's strategic exo-atmospheric missile-defense layer for long-range ballistic threats.
+      source_links:
+        - https://www.mod.gov.il/%D7%9B%D7%AA%D7%91%D7%95%D7%AA-%D7%95%D7%9E%D7%91%D7%96%D7%A7%D7%99%D7%9D/%D7%97%D7%93%D7%A9%D7%95%D7%AA-%D7%9E%D7%A9%D7%A8%D7%93-%D7%94%D7%91%D7%99%D7%98%D7%97%D7%95%D7%9F/%D7%90%D7%91%D7%9F-%D7%93%D7%A8%D7%9A-%D7%97%D7%A9%D7%95%D7%91%D7%94-%D7%A0%D7%95%D7%A1%D7%A4%D7%AA-%D7%91%D7%93%D7%A8%D7%9A-%D7%9C%D7%9E%D7%99%D7%9E%D7%95%D7%A9-%D7%A2%D7%A1%D7%A7%D7%AA-%D7%94%D7%9E%D7%9B%D7%99%D7%A8%D7%94-%D7%9C%D7%92%D7%A8%D7%9E%D7%A0%D7%99%D7%94-%D7%A9%D7%9C-%D7%9E%D7%A2%D7%A8%D7%9B%D7%AA-%D7%97%D7%A5-3
       service_entry_year: 2017
       base_strength: 0.82
       accuracy: 0.8
@@ -98,6 +106,9 @@ definitions:
         - IND
         - AZE
         - MAR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Export footprint and family performance are public, but exact Israeli homeland deployment patterns are modeled conservatively.
       service_entry_year: 2018
       base_strength: 0.68
       accuracy: 0.78
@@ -169,6 +180,11 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as Israel's medium- to long-range missile-defense layer for cruise missiles, aircraft, and some ballistic threats.
+      source_links:
+        - https://www.mda.mil/news/25news0008.html
       service_entry_year: 2017
       base_strength: 0.8
       accuracy: 0.82
@@ -244,6 +260,9 @@ definitions:
         - USA
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as Israel's short-range air and rocket defense backbone with broad public operational history.
       service_entry_year: 2011
       base_strength: 0.78
       accuracy: 0.84
@@ -397,6 +416,11 @@ definitions:
         - ETH
       employed_by:
         - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Modeled as a mobile medium-range quick-reaction air-defense system protecting maneuver forces and selected fixed sites.
+      source_links:
+        - https://he.rafael.co.il/worlds/air-missile-defense/%D7%9E%D7%A2%D7%A8%D7%9B%D7%AA-spyder/
       service_entry_year: 2012
       base_strength: 0.72
       accuracy: 0.79
@@ -442,6 +466,9 @@ definitions:
         - ETH
       employed_by:
         - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Modeled as a short-range quick-reaction point-defense layer for UAV, cruise-missile, and low-altitude aircraft threats.
       service_entry_year: 2005
       base_strength: 0.7
       accuracy: 0.8
@@ -483,6 +510,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Represents major Israeli wartime airbase infrastructure with hardened support functions and high sortie throughput rather than a single named installation template.
       service_entry_year: 1980
       base_strength: 0.46
       accuracy: 0.05
@@ -521,6 +551,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Abstracted hardened national command node representing Israel's theater-level command and air-defense coordination backbone.
       service_entry_year: 2000
       base_strength: 0.32
       accuracy: 0.12
@@ -559,6 +592,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Abstracted strategic early-warning radar installation representing fixed Israeli long-range surveillance and BMD cueing architecture.
       service_entry_year: 2008
       base_strength: 0.28
       accuracy: 0.18
@@ -597,6 +633,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Abstracted dual-use strategic port representing major Israeli Mediterranean logistics and naval-support throughput.
       service_entry_year: 1975
       base_strength: 0.24
       accuracy: 0.02
@@ -635,6 +674,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Abstracted major coastal desalination infrastructure critical to wartime civil resilience and strategic continuity.
       service_entry_year: 2013
       base_strength: 0.16
       accuracy: 0.01

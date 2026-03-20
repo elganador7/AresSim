@@ -5,8 +5,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log/slog"
-	"slices"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/surrealdb/surrealdb.go/pkg/models"
@@ -127,6 +127,67 @@ func scenarioRecord(scen *enginev1.Scenario) map[string]any {
 		"last_tick":        0,
 		"last_sim_seconds": 0.0,
 	}
+}
+
+func unitRecord(u *enginev1.Unit) map[string]any {
+	if u == nil {
+		return nil
+	}
+	pos := u.GetPosition()
+	status := u.GetStatus()
+	combatEffects := status.GetCombatEffects()
+	record := map[string]any{
+		"id":               models.RecordID{Table: "unit", ID: u.GetId()},
+		"display_name":     u.GetDisplayName(),
+		"full_name":        u.GetFullName(),
+		"team_id":          strings.TrimSpace(u.GetTeamId()),
+		"coalition_id":     strings.TrimSpace(u.GetCoalitionId()),
+		"nato_symbol_sidc": u.GetNatoSymbolSidc(),
+		"definition_id":    strings.TrimSpace(u.GetDefinitionId()),
+		"posture":          int32(u.GetPosture()),
+		"position": map[string]any{
+			"type":        "Point",
+			"coordinates": []float64{pos.GetLon(), pos.GetLat()},
+		},
+		"alt_msl":                    pos.GetAltMsl(),
+		"heading":                    pos.GetHeading(),
+		"speed":                      pos.GetSpeed(),
+		"personnel_strength":         status.GetPersonnelStrength(),
+		"equipment_strength":         status.GetEquipmentStrength(),
+		"combat_effectiveness":       status.GetCombatEffectiveness(),
+		"fuel_level_liters":          status.GetFuelLevelLiters(),
+		"morale":                     status.GetMorale(),
+		"fatigue":                    status.GetFatigue(),
+		"is_active":                  status.GetIsActive(),
+		"suppressed":                 combatEffects.GetSuppressed(),
+		"disrupted":                  combatEffects.GetDisrupted(),
+		"routing":                    combatEffects.GetRouting(),
+		"parent_unit_id":             emptyToNil(u.GetParentUnitId()),
+		"damage_state":               int32(u.GetDamageState()),
+		"engagement_behavior":        int32(u.GetEngagementBehavior()),
+		"engagement_pkill_threshold": u.GetEngagementPkillThreshold(),
+		"attack_order":               attackOrderRecord(u.GetAttackOrder()),
+	}
+	return record
+}
+
+func attackOrderRecord(order *enginev1.AttackOrder) map[string]any {
+	if order == nil {
+		return nil
+	}
+	return map[string]any{
+		"order_type":      int32(order.GetOrderType()),
+		"target_unit_id":  order.GetTargetUnitId(),
+		"desired_effect":  int32(order.GetDesiredEffect()),
+		"pkill_threshold": order.GetPkillThreshold(),
+	}
+}
+
+func emptyToNil(value string) any {
+	if strings.TrimSpace(value) == "" {
+		return nil
+	}
+	return value
 }
 
 // decodeScenarioB64 decodes a base64-encoded proto Scenario binary.

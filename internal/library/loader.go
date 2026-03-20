@@ -96,6 +96,10 @@ type Definition struct {
 	ReplacementCostUSD               float64               `yaml:"replacement_cost_usd"`
 	StrategicValueUSD                float64               `yaml:"strategic_value_usd"`
 	EconomicValueUSD                 float64               `yaml:"economic_value_usd"`
+	DataConfidence                   string                `yaml:"data_confidence"`
+	SourceBasis                      string                `yaml:"source_basis"`
+	SourceNotes                      string                `yaml:"source_notes"`
+	SourceLinks                      []string              `yaml:"source_links"`
 	DefaultLoadout                   []LoadoutSlot         `yaml:"default_loadout"`
 	DefaultWeaponConfiguration       string                `yaml:"default_weapon_configuration"`
 	WeaponConfigurations             []WeaponConfiguration `yaml:"weapon_configurations"`
@@ -178,9 +182,47 @@ func (d Definition) ToRecord() map[string]any {
 		"replacement_cost_usd":                replacementCost,
 		"strategic_value_usd":                 strategicValue,
 		"economic_value_usd":                  economicValue,
+		"data_confidence":                     normalizeDataConfidence(d.DataConfidence),
+		"source_basis":                        normalizeSourceBasis(d.SourceBasis),
+		"source_notes":                        strings.TrimSpace(d.SourceNotes),
+		"source_links":                        normalizeSourceLinks(d.SourceLinks),
 		"default_weapon_configuration":        defaultConfigID,
 		"weapon_configurations":               configs,
 	}
+}
+
+func normalizeDataConfidence(v string) string {
+	v = strings.TrimSpace(strings.ToLower(v))
+	switch v {
+	case "high", "medium", "low":
+		return v
+	default:
+		return "heuristic"
+	}
+}
+
+func normalizeSourceBasis(v string) string {
+	v = strings.TrimSpace(strings.ToLower(v))
+	switch v {
+	case "manufacturer", "government_or_official", "reputable_analysis", "estimated", "heuristic":
+		return v
+	default:
+		return "heuristic"
+	}
+}
+
+func normalizeSourceLinks(values []string) []string {
+	seen := make(map[string]bool)
+	var normalized []string
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" || seen[value] {
+			continue
+		}
+		seen[value] = true
+		normalized = append(normalized, value)
+	}
+	return normalized
 }
 
 func normalizeEmploymentRole(v, assetClass string, generalType int) string {
@@ -193,9 +235,9 @@ func normalizeEmploymentRole(v, assetClass string, generalType int) string {
 		return "defensive"
 	}
 	switch generalType {
-	case 73:
+	case 73, 75:
 		return "defensive"
-	case 31, 32, 51, 52, 72:
+	case 31, 32, 51, 52, 72, 74:
 		return "offensive"
 	default:
 		return "dual_use"

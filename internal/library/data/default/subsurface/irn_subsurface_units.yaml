@@ -10,7 +10,7 @@ definitions:
       description: Iranian coastal submarine intended for sea denial, ambush, and littoral deterrence missions.
       domain: 4
       form: 21
-      general_type: 50
+      general_type: 53
       specific_type: Fateh-class Submarine
       short_name: Fateh
       nation_of_origin: IRN
@@ -18,6 +18,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Modeled as an Iranian coastal sea-denial submarine with limited blue-water endurance and uncertain combat proficiency.
       service_entry_year: 2019
       base_strength: 0.42
       accuracy: 0.5
@@ -47,7 +50,7 @@ definitions:
       description: Very small Iranian coastal submarine optimized for ambush, mine-like disruption, and confined-water sea denial.
       domain: 4
       form: 21
-      general_type: 50
+      general_type: 53
       specific_type: Ghadir-class Midget Submarine
       short_name: Ghadir Sub
       nation_of_origin: IRN
@@ -55,6 +58,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Modeled as a very small coastal ambush platform for Gulf chokepoint denial rather than open-ocean attack operations.
       service_entry_year: 2007
       base_strength: 0.28
       accuracy: 0.36

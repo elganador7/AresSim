@@ -6,5 +6,6 @@ This folder contains longer-lived project documentation and implementation notes
 - `relationships/README.md`: planned country-to-country diplomacy, intel-sharing, and airspace-access model.
 - `geography/README.md`: replacement plan for land, maritime, and airspace lookup.
 - `scoring/README.md`: war-cost scoring model, valuation defaults, and source benchmarks.
+- `platform_library/README.md`: platform classification expansion, sourcing standards, and the long-term library moat plan.
 
 Use this folder for design notes that should outlive a single feature branch. Short operational guidance belongs in the nearest folder `README.md` instead.

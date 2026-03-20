@@ -12,7 +12,6 @@ import (
 	"github.com/aressim/internal/library"
 	"github.com/aressim/internal/scenario"
 	"github.com/aressim/internal/sim"
-	"github.com/surrealdb/surrealdb.go/pkg/models"
 	"google.golang.org/protobuf/proto"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
@@ -118,17 +117,9 @@ func (a *App) writeCheckpoint(tick int64, simSeconds float64) {
 		if u.Status != nil && !u.Status.IsActive {
 			continue
 		}
-		pos := u.GetPosition()
-		units = append(units, repository.UnitRecord{
-			"id": models.RecordID{Table: "unit", ID: u.Id},
-			"position": map[string]any{
-				"type":        "Point",
-				"coordinates": []float64{pos.GetLon(), pos.GetLat()},
-			},
-			"alt_msl": pos.GetAltMsl(),
-			"heading": pos.GetHeading(),
-			"speed":   pos.GetSpeed(),
-		})
+		if row := unitRecord(u); row != nil {
+			units = append(units, row)
+		}
 	}
 	snap := db.Snapshot{
 		ScenarioID: a.currentScenario.Id,
@@ -191,6 +182,21 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 		slog.Info("weapon loadout from defaults", "unit", u.DisplayName, "def", defID, "general_type", gt, "weapons", len(u.Weapons))
 	}
 	a.applyOpeningStrikeActions(scen, defs)
+	if a.unitRepo != nil {
+		if err := a.unitRepo.DeleteAll(a.ctx); err != nil {
+			slog.Warn("clear unit table", "err", err)
+		} else {
+			rows := make([]repository.UnitRecord, 0, len(scen.Units))
+			for _, u := range scen.Units {
+				if row := unitRecord(u); row != nil {
+					rows = append(rows, row)
+				}
+			}
+			if err := a.unitRepo.UpsertBatch(a.ctx, rows); err != nil {
+				slog.Warn("seed unit rows", "err", err)
+			}
+		}
+	}
 
 	a.emitProtoEvent("full_state_snapshot", &enginev1.FullStateSnapshot{
 		Units:             scen.Units,

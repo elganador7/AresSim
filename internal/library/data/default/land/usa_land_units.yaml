@@ -795,6 +795,9 @@ definitions:
         - SWE
         - TWN
         - ARE
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as the principal U.S.-aligned high-end mobile SAM and missile-defense battery in theater service.
       service_entry_year: 2002
       base_strength: 0.82
       accuracy: 0.86
@@ -974,6 +977,9 @@ definitions:
         - USA
         - SAU
         - ARE
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Modeled as the highest-tier deployed ballistic-missile defense battery available to the U.S. and selected Gulf partners.
       service_entry_year: 2008
       base_strength: 0.76
       accuracy: 0.8

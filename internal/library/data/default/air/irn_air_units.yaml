@@ -10,7 +10,7 @@ definitions:
       description: Long-range one-way attack drone grouping intended for mass strike and base-saturation missions.
       domain: 2
       form: 12
-      general_type: 32
+      general_type: 35
       specific_type: Arash-2 Strike Group
       short_name: Arash-2
       nation_of_origin: IRN
@@ -18,6 +18,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Modeled as a long-range one-way attack drone group intended to saturate defenses and consume interceptors.
       service_entry_year: 2022
       base_strength: 0.18
       accuracy: 0.46
@@ -55,6 +58,11 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Airframe counts and usable missile inventory are uncertain; modeled conservatively as a degraded interceptor using legacy Phoenix/Sparrow-era assumptions.
+      source_links:
+        - https://www.twz.com/air/irans-f-14-persian-tomcats-obliterated-in-israeli-airstrike
       service_entry_year: 1976
       base_strength: 0.5
       accuracy: 0.58
@@ -74,10 +82,13 @@ definitions:
       recovery_capacity_per_interval: 0
       sortie_interval_minutes: 0
       default_loadout:
-        - weapon_id: aam-aim120c
+        - weapon_id: aam-aim54a-phoenix
           max_qty: 2
           initial_qty: 2
-        - weapon_id: aam-aim9x
+        - weapon_id: aam-aim7m-sparrow
+          max_qty: 2
+          initial_qty: 2
+        - weapon_id: aam-aim9j-sidewinder
           max_qty: 2
           initial_qty: 2
         - weapon_id: gun-m61a2-20mm
@@ -90,7 +101,7 @@ definitions:
       description: Iranian tactical UAV squadron for armed reconnaissance and localized strike support.
       domain: 2
       form: 12
-      general_type: 31
+      general_type: 33
       specific_type: Mohajer-6 UAV Squadron
       short_name: Mohajer-6
       nation_of_origin: IRN
@@ -98,6 +109,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Modeled as an armed reconnaissance UAV squadron with limited precision-strike capacity.
       service_entry_year: 2018
       base_strength: 0.24
       accuracy: 0.4
@@ -137,6 +151,9 @@ definitions:
       employed_by:
         - IRN
         - RUS
+      data_confidence: high
+      source_basis: reputable_analysis
+      source_notes: Publicly well documented as a long-range one-way attack drone used for fixed-target saturation strike.
       service_entry_year: 2021
       base_strength: 0.16
       accuracy: 0.52
@@ -166,7 +183,7 @@ definitions:
       description: Iranian MALE UAV squadron for ISR, target acquisition, and limited precision strike.
       domain: 2
       form: 12
-      general_type: 31
+      general_type: 33
       specific_type: Shahed-129 UAV Squadron
       short_name: Shahed-129
       nation_of_origin: IRN
@@ -174,6 +191,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Modeled as Iran's longer-endurance armed UAV for ISR and limited strike support.
       service_entry_year: 2013
       base_strength: 0.26
       accuracy: 0.42
@@ -203,7 +223,7 @@ definitions:
       description: Operational one-way attack drone grouping for saturation strikes against air defenses, air bases, and infrastructure.
       domain: 2
       form: 12
-      general_type: 32
+      general_type: 35
       specific_type: Shahed-136 Strike Group
       short_name: Shahed Grp
       nation_of_origin: IRN
@@ -211,6 +231,9 @@ definitions:
         - IRN
       employed_by:
         - IRN
+      data_confidence: high
+      source_basis: reputable_analysis
+      source_notes: Publicly well documented as a one-way attack drone used for massed saturation strikes against fixed targets.
       service_entry_year: 2021
       base_strength: 0.2
       accuracy: 0.5

@@ -34,24 +34,24 @@ const FORM_BY_DOMAIN: Record<number, number[]> = {
 
 const GENERAL_TYPE_LABELS: Record<number, string> = {
   10: "Fighter", 11: "Multirole", 12: "Attack Aircraft", 13: "Bomber",
-  14: "Transport Aircraft", 15: "Maritime Patrol", 16: "AEW", 17: "Tanker", 18: "ISR Fixed Wing",
-  20: "Attack Helicopter", 21: "Utility Helicopter", 22: "Naval Helicopter",
-  30: "ISR UAV", 31: "UCAV", 32: "Loitering Munition",
+  14: "Transport Aircraft", 15: "Maritime Patrol", 16: "AEW", 17: "Tanker", 18: "ISR Fixed Wing", 19: "Electronic Attack",
+  20: "Attack Helicopter", 21: "Utility Helicopter", 22: "Naval Helicopter", 23: "ASW Helicopter", 24: "Heavy Lift Helicopter", 25: "CSAR Helicopter",
+  30: "ISR UAV", 31: "UCAV", 32: "Loitering Munition", 33: "Strike UAV", 34: "EW UAV", 35: "Attritable Decoy",
   40: "Aircraft Carrier", 41: "Cruiser", 42: "Destroyer", 43: "Frigate",
-  44: "Corvette", 45: "Patrol Vessel", 46: "Amphibious Assault", 47: "Mine Warfare",
-  50: "Attack Submarine", 51: "Ballistic Missile Sub", 52: "Cruise Missile Sub",
+  44: "Corvette", 45: "Patrol Vessel", 46: "Amphibious Assault", 47: "Mine Warfare", 48: "Missile Boat", 49: "Offshore Patrol Vessel",
+  50: "Attack Submarine", 51: "Ballistic Missile Sub", 52: "Cruise Missile Sub", 53: "Coastal Submarine", 54: "Special Mission Sub",
   60: "Main Battle Tank", 61: "Infantry Fighting Vehicle", 62: "Armored Personnel Carrier",
   63: "Reconnaissance Vehicle",
-  70: "Self-Propelled Artillery", 71: "Towed Artillery", 72: "Rocket Artillery", 73: "Air Defense",
+  70: "Self-Propelled Artillery", 71: "Towed Artillery", 72: "Rocket Artillery", 73: "Air Defense", 74: "Ballistic Missile Launcher", 75: "Coastal Defense Missile", 76: "Radar / Early Warning", 77: "C-RAM",
   80: "Special Forces", 81: "Light Infantry", 82: "Airborne Infantry", 83: "Marine Infantry",
-  90: "Engineer", 91: "Logistics", 92: "Medical", 93: "Command", 94: "Electronic Warfare",
+  90: "Engineer", 91: "Logistics", 92: "Medical", 93: "Command", 94: "Electronic Warfare", 95: "Signals Intelligence", 96: "Airbase Support",
 };
 
 const GENERAL_TYPE_BY_DOMAIN: Record<number, number[]> = {
-  1: [60, 61, 62, 63, 70, 71, 72, 73, 80, 81, 82, 83, 90, 91, 92, 93, 94],
-  2: [10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22, 30, 31, 32],
-  3: [40, 41, 42, 43, 44, 45, 46, 47, 50, 51, 52],
-  4: [50, 51, 52],
+  1: [60, 61, 62, 63, 70, 71, 72, 73, 74, 75, 76, 77, 80, 81, 82, 83, 90, 91, 92, 93, 94, 95, 96],
+  2: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 30, 31, 32, 33, 34, 35],
+  3: [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54],
+  4: [50, 51, 52, 53, 54],
 };
 
 const DOMAIN_COLORS: Record<number, string> = {
@@ -85,6 +85,8 @@ const TARGET_CLASS_OPTIONS = [
 
 const AFFILIATION_OPTIONS = ["military", "civilian", "dual_use"];
 const EMPLOYMENT_ROLE_OPTIONS = ["offensive", "defensive", "dual_use"];
+const DATA_CONFIDENCE_OPTIONS = ["heuristic", "low", "medium", "high"];
+const SOURCE_BASIS_OPTIONS = ["heuristic", "estimated", "reputable_analysis", "government_or_official", "manufacturer"];
 
 // ─── BLANK DEF ────────────────────────────────────────────────────────────────
 
@@ -102,6 +104,7 @@ function blankDef(): UnitDefinitionDraft {
     embarkedSurfaceConnectorCapacity: 0, launchCapacityPerInterval: 0, recoveryCapacityPerInterval: 0,
     sortieIntervalMinutes: 0,
     replacementCostUsd: 0, strategicValueUsd: 0, economicValueUsd: 0,
+    dataConfidence: "heuristic", sourceBasis: "heuristic", sourceNotes: "", sourceLinks: [],
     defaultWeaponConfiguration: "",
     weaponConfigurations: [],
   };
@@ -145,6 +148,10 @@ function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
     embarkedSurfaceConnectorCapacity: num("embarked_surface_connector_capacity"), launchCapacityPerInterval: num("launch_capacity_per_interval"), recoveryCapacityPerInterval: num("recovery_capacity_per_interval"),
     sortieIntervalMinutes: num("sortie_interval_minutes"),
     replacementCostUsd: num("replacement_cost_usd"), strategicValueUsd: num("strategic_value_usd"), economicValueUsd: num("economic_value_usd"),
+    dataConfidence: str("data_confidence") || "heuristic",
+    sourceBasis: str("source_basis") || "heuristic",
+    sourceNotes: str("source_notes"),
+    sourceLinks: Array.isArray(r["source_links"]) ? (r["source_links"] as unknown[]).map(String) : [],
     defaultWeaponConfiguration: str("default_weapon_configuration"),
     weaponConfigurations,
   };
@@ -413,6 +420,46 @@ function DefinitionForm({
           </div>
         </div>
 
+        <div className="panel-section">
+          <div className="panel-section-header">Provenance</div>
+          <div className="field-row">
+            <div className="field">
+              <label className="field-label">Data Confidence</label>
+              <select className="field-select" value={def.dataConfidence}
+                onChange={(e) => patch({ dataConfidence: e.target.value })}>
+                {DATA_CONFIDENCE_OPTIONS.map((v) => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label className="field-label">Source Basis</label>
+              <select className="field-select" value={def.sourceBasis}
+                onChange={(e) => patch({ sourceBasis: e.target.value })}>
+                {SOURCE_BASIS_OPTIONS.map((v) => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="field">
+            <label className="field-label">Source Notes</label>
+            <textarea className="field-textarea" value={def.sourceNotes}
+              onChange={(e) => patch({ sourceNotes: e.target.value })} />
+          </div>
+          <div className="field">
+            <label className="field-label">Source Links</label>
+            <textarea
+              className="field-textarea"
+              value={def.sourceLinks.join("\n")}
+              onChange={(e) => patch({
+                sourceLinks: e.target.value.split("\n").map((v) => v.trim()).filter(Boolean),
+              })}
+              placeholder="One URL per line"
+            />
+          </div>
+        </div>
+
       </div>
 
       {err && <div className="defform-error">{err}</div>}
@@ -489,6 +536,10 @@ export default function UnitDefinitionManager({ onClose }: Props) {
       replacement_cost_usd: def.replacementCostUsd,
       strategic_value_usd: def.strategicValueUsd,
       economic_value_usd: def.economicValueUsd,
+      data_confidence: def.dataConfidence,
+      source_basis: def.sourceBasis,
+      source_notes: def.sourceNotes,
+      source_links: def.sourceLinks,
       default_weapon_configuration: def.defaultWeaponConfiguration,
       weapon_configurations: def.weaponConfigurations.map((cfg) => ({
         id: cfg.id,

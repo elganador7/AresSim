@@ -106,59 +106,6 @@ definitions:
           initial_qty: 125
       default_weapon_configuration: ""
       weapon_configurations: []
-    - id: mirage2000-5
-      name: Mirage 2000-5
-      description: Upgraded Mirage 2000 interceptor and multirole export standard.
-      domain: 2
-      form: 10
-      general_type: 10
-      specific_type: Mirage 2000-5
-      short_name: M2000-5
-      nation_of_origin: FRA
-      operators:
-        - FRA
-        - GRC
-        - TWN
-        - QAT
-        - ARE
-        - EGY
-      employed_by:
-        - FRA
-        - GRC
-        - TWN
-        - QAT
-        - ARE
-        - EGY
-      service_entry_year: 1999
-      base_strength: 0.74
-      accuracy: 0.82
-      max_speed_mps: 650
-      cruise_speed_mps: 270
-      max_range_km: 1550
-      survivability: 0.52
-      detection_range_m: 140000
-      radar_cross_section_m2: 2.2
-      fuel_capacity_liters: 3978
-      fuel_burn_rate_lph: 2600
-      embarked_fixed_wing_capacity: 0
-      embarked_rotary_wing_capacity: 0
-      embarked_uav_capacity: 0
-      embarked_surface_connector_capacity: 0
-      launch_capacity_per_interval: 0
-      recovery_capacity_per_interval: 0
-      sortie_interval_minutes: 0
-      default_loadout:
-        - weapon_id: aam-mica-em
-          max_qty: 4
-          initial_qty: 4
-        - weapon_id: aam-mica-ir
-          max_qty: 2
-          initial_qty: 2
-        - weapon_id: gun-defa554-30mm
-          max_qty: 125
-          initial_qty: 125
-      default_weapon_configuration: ""
-      weapon_configurations: []
     - id: mirage2000d-rmv
       name: Mirage 2000D RMV
       description: French strike-oriented Mirage modernization for precision attack and escort missions.

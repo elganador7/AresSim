@@ -12,7 +12,7 @@ import (
 // this constant, the database is wiped and rebuilt from scratch. This is
 // acceptable for a single-player desktop application where the database is
 // purely derived state (the authoritative record lives in scenario files).
-const schemaVersion = 18
+const schemaVersion = 20
 
 // SchemaVersion returns the current schema version for logging.
 func SchemaVersion() int { return schemaVersion }
@@ -185,8 +185,21 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS replacement_cost_usd ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS strategic_value_usd ON unit_definition TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS economic_value_usd ON unit_definition TYPE float`,
+	`DEFINE FIELD IF NOT EXISTS data_confidence ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS source_basis ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS source_notes ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS source_links ON unit_definition TYPE array<string>`,
 	`DEFINE FIELD IF NOT EXISTS default_weapon_configuration ON unit_definition TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS weapon_configurations ON unit_definition TYPE array<object>`,
+	`DEFINE FIELD IF NOT EXISTS weapon_configurations.* ON unit_definition TYPE object`,
+	`DEFINE FIELD IF NOT EXISTS weapon_configurations.*.id ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS weapon_configurations.*.name ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS weapon_configurations.*.description ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS weapon_configurations.*.loadout ON unit_definition TYPE array<object>`,
+	`DEFINE FIELD IF NOT EXISTS weapon_configurations.*.loadout.* ON unit_definition TYPE object`,
+	`DEFINE FIELD IF NOT EXISTS weapon_configurations.*.loadout.*.weapon_id ON unit_definition TYPE string`,
+	`DEFINE FIELD IF NOT EXISTS weapon_configurations.*.loadout.*.max_qty ON unit_definition TYPE int`,
+	`DEFINE FIELD IF NOT EXISTS weapon_configurations.*.loadout.*.initial_qty ON unit_definition TYPE int`,
 
 	`DEFINE INDEX IF NOT EXISTS idx_unitdef_domain ON unit_definition FIELDS domain`,
 

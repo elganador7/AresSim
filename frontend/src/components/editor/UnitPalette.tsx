@@ -101,6 +101,10 @@ function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
     replacementCostUsd: num("replacement_cost_usd"),
     strategicValueUsd: num("strategic_value_usd"),
     economicValueUsd: num("economic_value_usd"),
+    dataConfidence: str("data_confidence") || "heuristic",
+    sourceBasis: str("source_basis") || "heuristic",
+    sourceNotes: str("source_notes"),
+    sourceLinks: Array.isArray(r["source_links"]) ? (r["source_links"] as unknown[]).map(String) : [],
     defaultWeaponConfiguration: str("default_weapon_configuration"),
     weaponConfigurations,
   };

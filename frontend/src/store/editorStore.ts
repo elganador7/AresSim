@@ -155,6 +155,10 @@ export interface UnitDefinitionDraft {
   replacementCostUsd: number;
   strategicValueUsd: number;
   economicValueUsd: number;
+  dataConfidence: string;
+  sourceBasis: string;
+  sourceNotes: string;
+  sourceLinks: string[];
   defaultWeaponConfiguration: string;
   weaponConfigurations: WeaponConfigurationDraft[];
 }

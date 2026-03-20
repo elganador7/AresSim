@@ -18,6 +18,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Based on publicly acknowledged IAF tanker operations and long-standing Boeing 707 Re'em service use.
       service_entry_year: 1971
       base_strength: 0.34
       accuracy: 0.1
@@ -52,6 +55,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: reputable_analysis
+      source_notes: Modeled as Israel's principal long-range heavy strike fighter with conformal tanks and mixed air-to-air self-escort capacity.
       service_entry_year: 1998
       base_strength: 0.87
       accuracy: 0.9
@@ -80,8 +86,40 @@ definitions:
         - weapon_id: gun-m61a2-20mm
           max_qty: 940
           initial_qty: 940
-      default_weapon_configuration: ""
-      weapon_configurations: []
+      default_weapon_configuration: deep_strike
+      weapon_configurations:
+        - id: deep_strike
+          name: Deep Strike
+          description: Long-range strike loadout with self-escort missiles.
+          loadout:
+            - weapon_id: agm-158-jassm-er
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-aim120c
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-python5
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 940
+              initial_qty: 940
+        - id: sead
+          name: SEAD
+          description: HARM-based suppression package with reduced self-escort.
+          loadout:
+            - weapon_id: agm-88-harm
+              max_qty: 4
+              initial_qty: 4
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-python5
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 940
+              initial_qty: 940
     - id: f16i-sufa
       name: F-16I Sufa
       description: Israeli Air Force heavily modified F-16D Block 52+ with conformal tanks, Israeli avionics, Python 5 missiles, and Litening targeting pod.
@@ -95,6 +133,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: reputable_analysis
+      source_notes: Modeled as an Israeli multirole strike fighter with conformal fuel and flexible precision-attack tasking.
       service_entry_year: 2004
       base_strength: 0.81
       accuracy: 0.88
@@ -123,8 +164,40 @@ definitions:
         - weapon_id: gun-m61a2-20mm
           max_qty: 511
           initial_qty: 511
-      default_weapon_configuration: ""
-      weapon_configurations: []
+      default_weapon_configuration: strike
+      weapon_configurations:
+        - id: strike
+          name: Strike
+          description: Precision strike package with self-escort missiles.
+          loadout:
+            - weapon_id: gbu-32-jdam
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-python5
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 511
+              initial_qty: 511
+        - id: sead
+          name: SEAD
+          description: HARM-based suppression package.
+          loadout:
+            - weapon_id: agm-88-harm
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-aim120c
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-python5
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: gun-m61a2-20mm
+              max_qty: 511
+              initial_qty: 511
     - id: f35i-adir
       name: F-35I Adir
       description: Israeli variant of the F-35A with national EW, mission systems integration, and long-range strike emphasis.
@@ -138,6 +211,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: reputable_analysis
+      source_notes: Modeled as Israel's premier penetrating strike aircraft with Israeli mission-system integration and internal-weapons emphasis.
       service_entry_year: 2017
       base_strength: 0.94
       accuracy: 0.94
@@ -166,8 +242,31 @@ definitions:
         - weapon_id: gbu-32-jdam
           max_qty: 2
           initial_qty: 2
-      default_weapon_configuration: ""
-      weapon_configurations: []
+      default_weapon_configuration: internal_strike
+      weapon_configurations:
+        - id: internal_strike
+          name: Internal Strike
+          description: Internal precision strike configuration preserving low observability.
+          loadout:
+            - weapon_id: gbu-32-jdam
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-python5
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-derby
+              max_qty: 2
+              initial_qty: 2
+        - id: sweep
+          name: Sweep
+          description: Internal air-to-air sweep with reduced strike payload.
+          loadout:
+            - weapon_id: aam-python5
+              max_qty: 2
+              initial_qty: 2
+            - weapon_id: aam-derby
+              max_qty: 4
+              initial_qty: 4
     - id: g550-eitam
       name: G550 Eitam
       description: Israeli AEW&C aircraft built on the G550 airframe for theater surveillance and battle management.
@@ -181,6 +280,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Based on Israeli CAEW Eitam service as a theater air-battle management and AEW platform.
       service_entry_year: 2008
       base_strength: 0.5
       accuracy: 0.2
@@ -215,6 +317,9 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Publicly known as Israel's newer standoff ISR platform; mission-system details remain partially opaque.
       service_entry_year: 2021
       base_strength: 0.48
       accuracy: 0.3
@@ -283,6 +388,11 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: government_or_official
+      source_notes: Based on well-documented Israeli Hermes 900 service in persistent ISR and strike-support roles.
+      source_links:
+        - https://www.elbitsystems.com/product/hermes-900/
       service_entry_year: 2014
       base_strength: 0.26
       accuracy: 0.2
@@ -317,6 +427,11 @@ definitions:
         - ISR
       employed_by:
         - ISR
+      data_confidence: high
+      source_basis: reputable_analysis
+      source_notes: Modeled as Israel's long-endurance strategic ISR UAV with persistent theater surveillance utility.
+      source_links:
+        - https://mod.gov.il/media/otaeo2yv/%D7%9E%D7%93%D7%A8%D7%99%D7%9A-%D7%94%D7%99%D7%A6%D7%95%D7%90_250811_080922-1-_compressed.pdf
       service_entry_year: 2010
       base_strength: 0.28
       accuracy: 0.2
