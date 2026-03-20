@@ -9,7 +9,7 @@ import (
 
 // IranCoalitionWarSkeleton is a reviewable starting point for the current war.
 // It is intentionally incomplete: the goal is to establish the major force
-// packages, theater geometry, and side structure before filling out the full
+// packages, theater geometry, and country structure before filling out the full
 // order of battle.
 func IranCoalitionWarSkeleton() *enginev1.Scenario {
 	return &enginev1.Scenario{
@@ -52,6 +52,7 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			scenarioUnit("sau-airbase-khamis", "Khamis Mushait AB", "Saudi Strategic Air Base - Khamis Mushait", "Blue", "saudi-strategic-airbase", 18.30, 42.80, 0, 0, 0),
 			scenarioUnit("omn-airbase-seeb", "Seeb AB", "Omani Maritime Air Base - Seeb", "Blue", "omani-maritime-airbase", 23.59, 58.28, 0, 0, 0),
 			scenarioUnit("bhr-airbase-isa", "Isa AB", "Bahraini Air Base - Isa", "Blue", "bahraini-airbase", 26.27, 50.63, 0, 0, 0),
+			scenarioUnit("kwt-airbase-ahmad", "Ahmad al-Jaber AB", "Kuwaiti Air Base - Ahmad al-Jaber", "Blue", "kuwaiti-airbase", 29.22, 47.98, 0, 0, 0),
 			scenarioUnit("jor-airbase-central", "Jordan AB", "Jordanian Air Base - Central Sector", "Blue", "jordanian-airbase", 31.72, 35.99, 0, 0, 0),
 			scenarioUnit("usa-airbase-diego-garcia", "Diego Garcia AB", "U.S. Expeditionary Air Base - Diego Garcia", "Blue", "expeditionary-air-base", -7.31, 72.41, 0, 0, 0),
 			scenarioUnit("irn-airbase-tehran", "Tehran AB", "Iranian Strategic Air Base - Tehran", "Red", "iran-strategic-airbase", 35.69, 51.31, 0, 0, 0),
@@ -61,6 +62,9 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			scenarioAircraft("isr-f35i-nevatim", "Adir 101", "F-35I Adir 101st Squadron", "Blue", "f35i-adir", "isr-airbase-nevatim", 31.21, 35.01, 0, 270, 0),
 			scenarioAircraft("isr-f15i-hatzor", "Ra'am 69", "F-15I Ra'am 69 Squadron", "Blue", "f15i-raam", "isr-airbase-hatzor", 31.73, 34.72, 0, 270, 0),
 			scenarioAircraft("isr-f16i-ramon", "Sufa 119", "F-16I Sufa 119 Squadron", "Blue", "f16i-sufa", "isr-airbase-ramon", 30.61, 34.78, 0, 270, 0),
+			scenarioAircraft("isr-f35i-nevatim-2", "Adir 140", "F-35I Adir Follow-on Strike Detachment", "Blue", "f35i-adir", "isr-airbase-nevatim", 31.22, 35.02, 0, 270, 0),
+			scenarioAircraft("isr-f15i-hatzor-2", "Ra'am 133", "F-15I Ra'am Deep Strike Detachment", "Blue", "f15i-raam", "isr-airbase-hatzor", 31.74, 34.73, 0, 270, 0),
+			scenarioAircraft("isr-f16i-ramon-2", "Sufa 201", "F-16I Sufa Follow-on Strike Squadron", "Blue", "f16i-sufa", "isr-airbase-ramon", 30.62, 34.79, 0, 270, 0),
 			scenarioAircraft("isr-eitam-central", "Eitam", "G550 Eitam AEW&C", "Blue", "g550-eitam", "isr-airbase-nevatim", 31.99, 34.90, 9000, 90, 210),
 			scenarioAircraft("isr-oron-central", "Oron", "G550 Oron ISR Aircraft", "Blue", "g550-oron", "isr-airbase-hatzor", 31.90, 34.65, 9000, 100, 210),
 			scenarioAircraft("isr-reem-support", "Re'em", "Boeing 707 Re'em Tanker", "Blue", "boeing707-reem", "isr-airbase-nevatim", 31.60, 34.85, 8500, 110, 190),
@@ -68,25 +72,46 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			scenarioUnit("isr-davids-sling-dan", "David's Sling Dan", "David's Sling Battery - Dan Region", "Blue", "davids-sling-battery", 32.08, 34.86, 0, 0, 0),
 			scenarioUnit("isr-iron-dome-haifa", "Iron Dome Haifa", "Iron Dome Battery - Haifa", "Blue", "iron-dome-battery", 32.82, 35.02, 0, 0, 0),
 			scenarioUnit("isr-saar6-eastern-med", "Sa'ar 6-1", "Sa'ar 6 Corvette - Eastern Mediterranean Screen", "Blue", "saar6-corvette", 33.40, 34.40, 0, 180, 8),
+			scenarioUnit("isr-saar6-eastern-med-2", "Sa'ar 6-2", "Sa'ar 6 Corvette - Offshore Gas Defense", "Blue", "saar6-corvette", 32.90, 34.05, 0, 180, 8),
+			scenarioUnit("isr-dolphin-med", "Dolphin II", "Dolphin II Submarine - Eastern Mediterranean Patrol", "Blue", "dolphin-ii-submarine", 33.05, 34.20, -30, 165, 5),
 
 			// United States: carrier and long-range strike posture plus Gulf air and missile defense.
 			scenarioUnit("usa-cvn78-redsea", "CVN-78", "USS Gerald R. Ford Carrier Strike Group", "Blue", "cvn78-ford", 24.20, 36.90, 0, 330, 10),
+			scenarioUnit("usa-ddg51-redsea", "DDG-51", "Arleigh Burke Flight IIA Destroyer - Red Sea Escort", "Blue", "ddg51-flight-iia", 24.55, 36.60, 0, 330, 11),
+			scenarioUnit("usa-ddg51-gulf", "DDG-99", "Arleigh Burke Flight IIA Destroyer - Gulf BMD Patrol", "Blue", "ddg51-flight-iia", 26.15, 51.95, 0, 120, 10),
 			scenarioAircraft("usa-f35a-al-udeid", "F-35A Al Udeid", "F-35A Lightning II Detachment - Al Udeid", "Blue", "f35a-lightning", "qat-airbase-al-udeid", 25.12, 51.31, 0, 0, 0),
 			scenarioAircraft("usa-f15e-al-dhafra", "F-15E Dhafra", "F-15E Strike Eagle Detachment - Al Dhafra", "Blue", "f15e-strike-eagle", "uae-airbase-al-dhafra", 24.25, 54.55, 0, 0, 0),
+			scenarioAircraft("usa-f22a-al-udeid", "F-22A Qatar", "F-22A Raptor Air Dominance Detachment", "Blue", "f22a-raptor", "qat-airbase-al-udeid", 25.13, 51.30, 0, 0, 0),
+			scenarioAircraft("usa-p8a-gulf", "P-8A Gulf", "P-8A Poseidon Gulf Maritime Patrol", "Blue", "p8a-poseidon", "qat-airbase-al-udeid", 25.15, 51.28, 0, 0, 0),
+			scenarioAircraft("usa-c17a-diego-garcia", "C-17A DG", "C-17A Globemaster III Airlift Detachment", "Blue", "c17a-globemaster-iii", "usa-airbase-diego-garcia", -7.30, 72.42, 0, 0, 0),
 			scenarioAircraft("usa-b1b-diego-garcia", "B-1B DG", "B-1B Lancer Detachment - Diego Garcia", "Blue", "b1b-lancer", "usa-airbase-diego-garcia", -7.31, 72.41, 0, 0, 0),
 			scenarioAircraft("usa-kc46-gulf", "KC-46 Gulf", "KC-46A Pegasus Gulf Tanker Orbit", "Blue", "kc46a-pegasus", "qat-airbase-al-udeid", 26.20, 51.80, 8500, 315, 210),
 			scenarioUnit("usa-thaad-uae", "THAAD UAE", "THAAD Battery - UAE", "Blue", "thaad-battery", 24.43, 54.65, 0, 0, 0),
 			scenarioUnit("usa-patriot-kuwait", "Patriot KWT", "Patriot Battery - Kuwait", "Blue", "patriot-kuwait", 29.22, 47.98, 0, 0, 0),
 			scenarioUnit("usa-patriot-qatar", "Patriot QAT", "Patriot PAC-3 Battery - Qatar", "Blue", "patriot-pac3-battery", 25.10, 51.36, 0, 0, 0),
+			scenarioUnit("usa-patriot-bahrain", "Patriot BHR", "Patriot PAC-3 Battery - Bahrain", "Blue", "patriot-pac3-battery", 26.14, 50.58, 0, 0, 0),
 
 			// Gulf coalition: key partner airpower, AEW, and sea control.
 			scenarioAircraft("sau-f15sa-khamis", "F-15SA Khamis", "F-15SA Wing - King Khalid Air Base", "Blue", "f15sa-strike-eagle", "sau-airbase-khamis", 18.30, 42.80, 0, 45, 0),
+			scenarioAircraft("sau-f15sa-khamis-2", "F-15SA South", "F-15SA Follow-on Counter-Air Wing", "Blue", "f15sa-strike-eagle", "sau-airbase-khamis", 18.31, 42.81, 0, 45, 0),
 			scenarioAircraft("sau-e3a-riyadh", "E-3A RSAF", "E-3A Sentry - Saudi AEW", "Blue", "e3a-sentry-saudi", "sau-airbase-khamis", 24.95, 46.72, 8500, 70, 200),
+			scenarioUnit("sau-alriyadh-gulf", "Al Riyadh", "Al Riyadh Frigate - Gulf Air Defense Patrol", "Blue", "al-riyadh-frigate-saudi", 26.95, 50.05, 0, 120, 9),
+			scenarioUnit("sau-avante-gulf", "Avante 2200", "Avante 2200 Corvette - Eastern Province Patrol", "Blue", "avante-2200-corvette-saudi", 27.10, 49.95, 0, 120, 11),
 			scenarioAircraft("uae-f16-block60", "Desert Falcon", "F-16E/F Block 60 Desert Falcon Wing", "Blue", "f16e-desert-falcon", "uae-airbase-al-dhafra", 24.25, 54.55, 0, 0, 0),
+			scenarioAircraft("uae-f16-block60-2", "Desert Falcon 2", "F-16E/F Block 60 Follow-on Strike Wing", "Blue", "f16e-desert-falcon", "uae-airbase-al-dhafra", 24.26, 54.56, 0, 0, 0),
 			scenarioAircraft("uae-globaleye", "GlobalEye", "GlobalEye UAE AEW/ISR", "Blue", "globaleye-uae", "uae-airbase-al-dhafra", 24.30, 54.40, 9000, 60, 205),
+			scenarioAircraft("uae-dash8-mpa", "Dash-8 MPA", "Dash-8 Maritime Patrol Aircraft - UAE", "Blue", "dash8-mpa-uae", "uae-airbase-al-dhafra", 24.24, 54.54, 0, 0, 0),
+			scenarioUnit("uae-baynunah-hormuz", "Baynunah", "Baynunah Corvette - Strait of Hormuz Patrol", "Blue", "baynunah-corvette-uae", 25.85, 55.10, 0, 95, 11),
 			scenarioAircraft("qat-f15qa", "F-15QA", "F-15QA Ababil Wing", "Blue", "f15qa-ababil", "qat-airbase-al-udeid", 25.12, 51.31, 0, 0, 0),
+			scenarioAircraft("qat-f15qa-2", "F-15QA North", "F-15QA Air Defense Detachment", "Blue", "f15qa-ababil", "qat-airbase-al-udeid", 25.11, 51.30, 0, 0, 0),
+			scenarioUnit("qat-doha-corvette", "Doha", "Doha Corvette - Qatari Maritime Screen", "Blue", "doha-corvette-qatar", 25.75, 51.95, 0, 115, 10),
 			scenarioAircraft("omn-f16-seeb", "F-16 Oman", "F-16C/D Block 50 Wing - Oman", "Blue", "f16c-oman", "omn-airbase-seeb", 23.59, 58.28, 0, 330, 0),
+			scenarioAircraft("omn-cn235-mpa", "CN-235 Oman", "CN-235 Maritime Patrol Aircraft - Oman", "Blue", "cn235-mpa-oman", "omn-airbase-seeb", 23.58, 58.27, 0, 330, 0),
+			scenarioAircraft("omn-super-lynx", "Super Lynx", "Super Lynx 300 - Omani Naval Aviation", "Blue", "super-lynx-300-oman", "omn-airbase-seeb", 23.60, 58.29, 0, 330, 0),
 			scenarioAircraft("bhr-f16v-isa", "F-16V Bahrain", "F-16V Viper Squadron - Bahrain", "Blue", "f16v-viper", "bhr-airbase-isa", 26.27, 50.63, 0, 0, 0),
+			scenarioAircraft("bhr-bell412", "Bell 412", "Bell 412 Utility Helicopter - Bahrain", "Blue", "bell412-bahrain", "bhr-airbase-isa", 26.26, 50.62, 0, 0, 0),
+			scenarioAircraft("kwt-fa18-ahmad", "F/A-18 Kuwait", "F/A-18E/F Super Hornet Wing - Kuwait", "Blue", "fa18-super-hornet-kuwait", "kwt-airbase-ahmad", 29.21, 47.97, 0, 45, 0),
+			scenarioAircraft("kwt-kc130j-ahmad", "KC-130J Kuwait", "KC-130J Tanker/Transport - Kuwait", "Blue", "kc130j-kuwait", "kwt-airbase-ahmad", 29.20, 47.96, 0, 45, 0),
 			scenarioAircraft("jord-f16-central", "F-16 Jordan", "F-16AM/BM Jordanian Air Defense Squadron", "Blue", "f16-jordan", "jor-airbase-central", 31.72, 35.99, 0, 90, 0),
 
 			// Iran: layered IADS, missile forces, strike aircraft, and Gulf denial.
@@ -94,16 +119,25 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			scenarioUnit("irn-bavar-esfahan", "Bavar Esfahan", "Bavar-373 Battery - Esfahan", "Red", "bavar373-battery", 32.65, 51.67, 0, 0, 0),
 			scenarioUnit("irn-khordad-bushehr", "3rd Khordad", "3rd Khordad Battery - Bushehr Sector", "Red", "third-khordad-battery", 28.95, 50.84, 0, 0, 0),
 			scenarioUnit("irn-tor-natanz", "Tor Natanz", "Tor-M1 Battery - Natanz", "Red", "tor-m1-battery-iran", 33.72, 51.72, 0, 0, 0),
+			scenarioUnit("irn-s300-bandar-abbas", "S-300 Abbas", "S-300PMU-2 Battery - Bandar Abbas", "Red", "s300pmu2-battery-iran", 27.18, 56.25, 0, 0, 0),
+			scenarioUnit("irn-khordad-hormuz", "3rd Khordad Hormuz", "3rd Khordad Battery - Strait Sector", "Red", "third-khordad-battery", 27.05, 56.10, 0, 0, 0),
 			scenarioStrikeUnit("irn-qiam-central", "Qiam Brigade", "Qiam-1 Missile Brigade", "Red", "qiam1-missile-brigade", 34.10, 49.70, 0, 0, 0, 1200),
 			scenarioStrikeUnit("irn-kheibar-west", "Kheibar Brigade", "Kheibar Shekan Brigade", "Red", "kheibar-shekan-brigade", 35.20, 46.98, 0, 0, 0, 2700),
 			scenarioStrikeUnit("irn-paveh-south", "Paveh Regiment", "Paveh Cruise Missile Regiment", "Red", "paveh-cruise-missile-regiment", 27.90, 56.15, 0, 0, 0, 4500),
 			scenarioStrikeUnit("irn-shahed-central", "Shahed Grp", "Shahed-136 Strike Group", "Red", "shahed136-strike-group", 31.40, 54.50, 0, 0, 0, 5400),
 			scenarioStrikeUnit("irn-arash-west", "Arash-2", "Arash-2 Strike Group", "Red", "arash2-strike-group", 34.35, 47.20, 0, 0, 0, 7200),
+			scenarioStrikeUnit("irn-shahed129-central", "Shahed-129", "Shahed-129 Armed UAV Squadron", "Red", "shahed129-uav-squadron", 31.60, 54.20, 0, 0, 0, 3600),
+			scenarioStrikeUnit("irn-mohajer6-central", "Mohajer-6", "Mohajer-6 UAV Squadron", "Red", "mohajer6-uav-squadron", 31.58, 54.18, 0, 0, 0, 3000),
 			scenarioAircraft("irn-f14-tehran", "F-14A Tehran", "F-14A Tomcat Interceptor Detachment", "Red", "f14a-tomcat-iriaf", "irn-airbase-tehran", 35.69, 51.31, 0, 250, 0),
+			scenarioAircraft("irn-f14-tehran-2", "F-14A Tehran 2", "F-14A Tomcat CAP Detachment", "Red", "f14a-tomcat-iriaf", "irn-airbase-tehran", 35.68, 51.30, 0, 250, 0),
 			scenarioAircraft("irn-f4-bandar-abbas", "F-4E Abbas", "F-4E Phantom Maritime Strike Detachment", "Red", "f4e-phantom-iriaf", "irn-airbase-bandar-abbas", 27.22, 56.38, 0, 130, 0),
+			scenarioAircraft("irn-su24-tehran", "Su-24MK Tehran", "Su-24MK Strike Squadron - Central Iran", "Red", "su24mk-strike-squadron-iran", "irn-airbase-tehran", 35.67, 51.29, 0, 250, 0),
+			scenarioAircraft("irn-p3f-bandar-abbas", "P-3F Orion", "P-3F Orion Maritime Patrol - Bandar Abbas", "Red", "p3f-orion-mpa-iran", "irn-airbase-bandar-abbas", 27.23, 56.37, 0, 130, 0),
+			scenarioAircraft("irn-707-tehran", "707 Tanker", "Boeing 707 Tanker - Tehran", "Red", "boeing707-tanker-iran", "irn-airbase-tehran", 35.66, 51.28, 0, 250, 0),
 			scenarioUnit("irn-soleimani-hormuz", "Shahid Soleimani", "Shahid Soleimani Corvette - Hormuz Patrol", "Red", "shahid-soleimani-corvette", 26.70, 56.05, 0, 110, 12),
 			scenarioUnit("irn-swarm-qeshm", "IRGCN Swarm", "IRGCN Swarm Attack Group - Qeshm Axis", "Red", "irgcn-swarm-group", 26.88, 55.95, 0, 95, 14),
 			scenarioUnit("irn-jamaran-bushehr", "Jamaran", "Jamaran Frigate - Bushehr Patrol", "Red", "jamaran-frigate", 28.75, 50.55, 0, 140, 10),
+			scenarioUnit("irn-tareq-gulf", "Tareq Kilo", "Tareq Kilo Submarine - Gulf Ambush Patrol", "Red", "tareq-kilo-submarine", 26.60, 55.80, -25, 95, 5),
 			scenarioUnit("irn-ghadir-sub", "Ghadir Sub", "Ghadir Midget Submarine - Strait Ambush Line", "Red", "ghadir-midget-submarine", 26.45, 56.30, -20, 90, 4),
 		},
 	}
@@ -119,14 +153,14 @@ func openingStrike(unitID, targetUnitID, loadoutID string, desiredEffect enginev
 	}
 }
 
-func scenarioAircraft(id, displayName, fullName, side, definitionID, hostBaseID string, lat, lon, altMsl, heading, speed float64) *enginev1.Unit {
-	u := scenarioUnit(id, displayName, fullName, side, definitionID, lat, lon, altMsl, heading, speed)
+func scenarioAircraft(id, displayName, fullName, coalitionHint, definitionID, hostBaseID string, lat, lon, altMsl, heading, speed float64) *enginev1.Unit {
+	u := scenarioUnit(id, displayName, fullName, coalitionHint, definitionID, lat, lon, altMsl, heading, speed)
 	u.HostBaseId = hostBaseID
 	return u
 }
 
-func scenarioStrikeUnit(id, displayName, fullName, side, definitionID string, lat, lon, altMsl, heading, speed, nextStrikeReadySeconds float64) *enginev1.Unit {
-	u := scenarioUnit(id, displayName, fullName, side, definitionID, lat, lon, altMsl, heading, speed)
+func scenarioStrikeUnit(id, displayName, fullName, coalitionHint, definitionID string, lat, lon, altMsl, heading, speed, nextStrikeReadySeconds float64) *enginev1.Unit {
+	u := scenarioUnit(id, displayName, fullName, coalitionHint, definitionID, lat, lon, altMsl, heading, speed)
 	u.NextStrikeReadySeconds = nextStrikeReadySeconds
 	return u
 }
@@ -162,15 +196,15 @@ func relationship(from, to string, shareIntel, transit, strike, defensive, marit
 	}
 }
 
-func scenarioUnit(id, displayName, fullName, side, definitionID string, lat, lon, altMsl, heading, speed float64) *enginev1.Unit {
-	teamID := inferScenarioTeamID(id, side)
+func scenarioUnit(id, displayName, fullName, coalitionHint, definitionID string, lat, lon, altMsl, heading, speed float64) *enginev1.Unit {
+	teamID := inferScenarioTeamID(id, coalitionHint)
+	coalitionID := inferScenarioCoalition(coalitionHint, teamID)
 	return &enginev1.Unit{
 		Id:           id,
 		DisplayName:  displayName,
 		FullName:     fullName,
-		Side:         side,
 		TeamId:       teamID,
-		CoalitionId:  side,
+		CoalitionId:  coalitionID,
 		DefinitionId: definitionID,
 		Position: &enginev1.Position{
 			Lat:     lat,
@@ -197,4 +231,19 @@ func inferScenarioTeamID(id, side string) string {
 		return prefix
 	}
 	return strings.ToUpper(side)
+}
+
+func inferScenarioCoalition(coalitionHint, teamID string) string {
+	switch strings.ToUpper(coalitionHint) {
+	case "BLUE":
+		return "COALITION_WEST"
+	case "RED":
+		return "COALITION_IRAN"
+	case "NEUTRAL":
+		return "NON_ALIGNED"
+	}
+	if strings.TrimSpace(coalitionHint) != "" {
+		return strings.ToUpper(coalitionHint)
+	}
+	return strings.ToUpper(teamID)
 }

@@ -1,6 +1,7 @@
 import type { WeaponDef, Unit } from "../store/simStore";
 import type { UnitDraft, UnitDefinitionDraft } from "../store/editorStore";
 import { weaponCanEffectivelyAttackTarget, type UnitDefinitionTargetLite, type WeaponDefLite } from "./loadoutValidation";
+import { areHostile } from "./allegiance";
 
 export const ENGAGEMENT_BEHAVIORS = [
   { value: 1, label: "Auto Engage" },
@@ -37,7 +38,7 @@ export function filterValidLiveTargets(
     return [];
   }
   return Array.from(units.values()).filter((candidate) => {
-    if (candidate.id === unit.id || candidate.side === unit.side) {
+    if (candidate.id === unit.id || !areHostile(unit, candidate)) {
       return false;
     }
     const targetDef = definitionMap.get(candidate.definitionId);
@@ -50,13 +51,17 @@ export function filterValidEditorTargets(
   units: UnitDraft[],
   loadedWeapons: WeaponDefLite[],
   unitDefinitions: UnitDefinitionDraft[],
-  side: UnitDraft["side"],
+  allegianceOverride?: { teamId?: string; coalitionId?: string },
 ): UnitDraft[] {
   if (loadedWeapons.length === 0) {
     return [];
   }
+  const actingUnit = {
+    teamId: allegianceOverride?.teamId ?? unit.teamId,
+    coalitionId: allegianceOverride?.coalitionId ?? unit.coalitionId,
+  };
   return units.filter((candidate) => {
-    if (candidate.id === unit.id || candidate.side === side) {
+    if (candidate.id === unit.id || !areHostile(actingUnit, candidate)) {
       return false;
     }
     const candidateDef = unitDefinitions.find((def) => def.id === candidate.definitionId);

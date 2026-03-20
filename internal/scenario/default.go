@@ -36,7 +36,8 @@ func Default() *enginev1.Scenario {
 				Id:             "ddg-51-burke",
 				DisplayName:    "DDG-51",
 				FullName:       "USS Arleigh Burke (DDG-51)",
-				Side:           "Blue",
+				TeamId:         "USA",
+				CoalitionId:    "COALITION_WEST",
 				DefinitionId:   "destroyer-arleigh-burke-class",
 				NatoSymbolSidc: "SFSPCLDD--E----",
 				Position: &enginev1.Position{
@@ -60,7 +61,8 @@ func Default() *enginev1.Scenario {
 				Id:             "ddg-67-cole",
 				DisplayName:    "DDG-67",
 				FullName:       "USS Cole (DDG-67)",
-				Side:           "Blue",
+				TeamId:         "USA",
+				CoalitionId:    "COALITION_WEST",
 				DefinitionId:   "destroyer-arleigh-burke-class",
 				NatoSymbolSidc: "SFSPCLDD--E----",
 				Position: &enginev1.Position{

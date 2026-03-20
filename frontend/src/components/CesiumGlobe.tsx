@@ -9,7 +9,7 @@
  *
  * Interactions:
  *   Left-click entity  → select unit (highlights billboard, opens panel)
- *   Left-click terrain → move selected unit (if the active view owns that side)
+ *   Left-click terrain → move selected unit (if the active view owns that team)
  *
  * Fog-of-war:
  *   "debug" view  — all units visible

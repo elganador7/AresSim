@@ -11,12 +11,13 @@ import type { Unit } from "./simStore";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-function makeUnit(id: string, side = "Blue"): Unit {
+function makeUnit(id: string, teamId = "USA"): Unit {
   return {
     id,
     displayName: `Unit-${id}`,
     fullName: `Full Name ${id}`,
-    side,
+    teamId,
+    coalitionId: teamId,
     natoPendingSymbol: "",
     definitionId: "def-1",
     damageState: 1,
@@ -69,7 +70,7 @@ describe("loadSnapshot", () => {
     const s = useSimStore.getState();
     expect(s.units.size).toBe(2);
     expect(s.units.get("a")?.displayName).toBe("Unit-a");
-    expect(s.units.get("b")?.side).toBe("Blue");
+    expect(s.units.get("b")?.teamId).toBe("USA");
   });
 
   it("sets scenarioName", () => {
@@ -106,7 +107,7 @@ describe("loadSnapshot", () => {
 
   it("clears eventLog", () => {
     useSimStore.setState({
-      eventLog: [{ id: "1", text: "hi", category: "combat", unitId: "", side: "", simSeconds: 0 }],
+      eventLog: [{ id: "1", text: "hi", category: "combat", unitId: "", teamId: "", simSeconds: 0 }],
     });
     useSimStore.getState().loadSnapshot([], "S");
     expect(useSimStore.getState().eventLog).toHaveLength(0);
@@ -198,7 +199,7 @@ describe("destroyUnit", () => {
     useSimStore.getState().destroyUnit("u1");
     const u = useSimStore.getState().units.get("u1")!;
     expect(u.displayName).toBe("Unit-u1");
-    expect(u.side).toBe("Blue");
+    expect(u.teamId).toBe("USA");
   });
 
   it("does not throw for unknown unit id", () => {
@@ -250,8 +251,8 @@ describe("appendEventLog", () => {
 
   it("appends entries to the log", () => {
     const store = useSimStore.getState();
-    store.appendEventLog({ id: "1", text: "Hello", category: "combat", unitId: "u1", side: "Blue", simSeconds: 10 });
-    store.appendEventLog({ id: "2", text: "World", category: "scenario", unitId: "", side: "", simSeconds: 20 });
+    store.appendEventLog({ id: "1", text: "Hello", category: "combat", unitId: "u1", teamId: "USA", simSeconds: 10 });
+    store.appendEventLog({ id: "2", text: "World", category: "scenario", unitId: "", teamId: "", simSeconds: 20 });
     expect(useSimStore.getState().eventLog).toHaveLength(2);
     expect(useSimStore.getState().eventLog[1].text).toBe("World");
   });
@@ -259,7 +260,7 @@ describe("appendEventLog", () => {
   it("caps log at 200 entries, dropping oldest", () => {
     const store = useSimStore.getState();
     for (let i = 0; i < 210; i++) {
-      store.appendEventLog({ id: String(i), text: `msg-${i}`, category: "scenario", unitId: "", side: "", simSeconds: i });
+      store.appendEventLog({ id: String(i), text: `msg-${i}`, category: "scenario", unitId: "", teamId: "", simSeconds: i });
     }
     const log = useSimStore.getState().eventLog;
     expect(log).toHaveLength(200);
@@ -308,33 +309,33 @@ describe("setActiveView", () => {
 describe("setDetections", () => {
   beforeEach(resetStore);
 
-  it("stores detected IDs as a Set for a given side", () => {
-    useSimStore.getState().setDetections("Blue", ["red1", "red2"]);
-    const d = useSimStore.getState().detections.get("Blue")!;
+  it("stores detected IDs as a Set for a given team", () => {
+    useSimStore.getState().setDetections("USA", ["red1", "red2"]);
+    const d = useSimStore.getState().detections.get("USA")!;
     expect(d.has("red1")).toBe(true);
     expect(d.has("red2")).toBe(true);
     expect(d.size).toBe(2);
   });
 
-  it("replaces previous detections for the same side", () => {
-    useSimStore.getState().setDetections("Blue", ["r1", "r2"]);
-    useSimStore.getState().setDetections("Blue", ["r3"]);
-    const d = useSimStore.getState().detections.get("Blue")!;
+  it("replaces previous detections for the same team", () => {
+    useSimStore.getState().setDetections("USA", ["r1", "r2"]);
+    useSimStore.getState().setDetections("USA", ["r3"]);
+    const d = useSimStore.getState().detections.get("USA")!;
     expect(d.has("r1")).toBe(false);
     expect(d.has("r3")).toBe(true);
     expect(d.size).toBe(1);
   });
 
-  it("clears detections for a side when empty array passed", () => {
-    useSimStore.getState().setDetections("Red", ["b1"]);
-    useSimStore.getState().setDetections("Red", []);
-    expect(useSimStore.getState().detections.get("Red")!.size).toBe(0);
+  it("clears detections for a team when empty array passed", () => {
+    useSimStore.getState().setDetections("IRN", ["b1"]);
+    useSimStore.getState().setDetections("IRN", []);
+    expect(useSimStore.getState().detections.get("IRN")!.size).toBe(0);
   });
 
-  it("tracks multiple sides independently", () => {
-    useSimStore.getState().setDetections("Blue", ["r1"]);
-    useSimStore.getState().setDetections("Red", ["b1", "b2"]);
-    expect(useSimStore.getState().detections.get("Blue")!.size).toBe(1);
-    expect(useSimStore.getState().detections.get("Red")!.size).toBe(2);
+  it("tracks multiple teams independently", () => {
+    useSimStore.getState().setDetections("USA", ["r1"]);
+    useSimStore.getState().setDetections("IRN", ["b1", "b2"]);
+    expect(useSimStore.getState().detections.get("USA")!.size).toBe(1);
+    expect(useSimStore.getState().detections.get("IRN")!.size).toBe(2);
   });
 });

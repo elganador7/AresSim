@@ -10,6 +10,7 @@ import {
 import type { MutableRefObject } from "react";
 import { AppendMoveWaypoint, MoveUnit, UpdateMoveWaypoint } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
+import { areHostile } from "../../utils/allegiance";
 import type { DefInfo } from "./helpers";
 import { canMove, ensureBridgeSuccess } from "./helpers";
 
@@ -139,7 +140,7 @@ export function setupCesiumInteractions(
           if (mapCommandMode.type === "target_pick" && mapCommandMode.unitId && selectedUnitId) {
             const shooter = units.get(mapCommandMode.unitId);
             const clickedUnit = units.get(clickedId);
-            if (shooter && clickedUnit && shooter.id !== clickedUnit.id && shooter.side !== clickedUnit.side) {
+            if (shooter && clickedUnit && shooter.id !== clickedUnit.id && areHostile(shooter, clickedUnit)) {
               selectUnit(mapCommandMode.unitId);
               clearMapCommandMode();
               window.dispatchEvent(new CustomEvent("sim:target-picked", {

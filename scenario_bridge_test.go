@@ -118,7 +118,7 @@ func TestDecodeScenarioB64RoundTrip(t *testing.T) {
 		Id:   "decode-test",
 		Name: "Decode Test",
 		Units: []*enginev1.Unit{
-			{Id: "u1", DisplayName: "UNIT-1", Side: "Blue", DefinitionId: "some-def"},
+			{Id: "u1", DisplayName: "UNIT-1", TeamId: "USA", CoalitionId: "COALITION_WEST", DefinitionId: "some-def"},
 		},
 	}
 

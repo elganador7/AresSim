@@ -4,7 +4,7 @@
  * CesiumJS globe for the scenario editor.
  *
  * Supports:
- *  - Rendering unit draft entities colour-coded by side
+ *  - Rendering unit draft entities colour-coded by country/team
  *  - Left-click on terrain → onMapClick(lat, lon)  [click-to-place fallback]
  *  - Left-click on entity → onUnitClick(unitId)
  *  - HTML5 dragover / drop on the container div → onUnitDrop(lat, lon, payload)
@@ -38,6 +38,7 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 import { useEditorStore, type UnitDraft } from "../../store/editorStore";
 import type { DragPayload } from "./UnitPalette";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
+import { teamColorHex } from "../../utils/teamColors";
 import { loadTheaterOverlays, removeTheaterOverlays } from "../cesium/overlays";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -230,6 +231,7 @@ export default function EditorGlobe({
         const def = defMap[unit.definitionId];
         const generalType = def?.generalType ?? 0;
         const shortName = def?.shortName || unit.displayName;
+        const teamCode = unit.teamId?.trim().toUpperCase() || "UNK";
         const pos         = Cartesian3.fromDegrees(unit.lon, unit.lat, unit.altMsl);
         const entityId    = `editor-${unit.id}`;
         const existing    = viewer.entities.getById(entityId);
@@ -238,7 +240,7 @@ export default function EditorGlobe({
           (existing.position as unknown as { setValue(p: Cartesian3): void }).setValue(pos);
           if (existing.billboard) {
             existing.billboard.image = new ConstantProperty(
-              getUnitBillboardUrl(generalType, unit.side, shortName),
+              getUnitBillboardUrl(generalType, teamCode, shortName),
             );
           }
           if (existing.polyline) {
@@ -256,7 +258,7 @@ export default function EditorGlobe({
             billboard: {
               image: getUnitBillboardUrl(
                 generalType,
-                unit.side,
+                teamCode,
                 shortName,
               ),
               width: 62,
@@ -273,7 +275,7 @@ export default function EditorGlobe({
                 ...(unit.moveOrder?.waypoints ?? []).map((wp) => Cartesian3.fromDegrees(wp.lon, wp.lat, wp.altMsl)),
               ], false),
               width: 2.5,
-              material: Color.fromCssColorString(unit.side === "Red" ? "#ef4444" : unit.side === "Neutral" ? "#f59e0b" : "#60a5fa").withAlpha(0.9),
+              material: Color.fromCssColorString(teamColorHex(teamCode)).withAlpha(0.9),
               clampToGround: false,
               show: (unit.moveOrder?.waypoints?.length ?? 0) > 0,
             },

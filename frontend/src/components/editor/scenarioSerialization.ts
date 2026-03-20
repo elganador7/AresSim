@@ -53,7 +53,6 @@ export function draftToProtoB64(draft: ScenarioDraft): string {
         id: u.id,
         displayName: u.displayName,
         fullName: u.fullName,
-        side: u.side,
         teamId: u.teamId,
         coalitionId: u.coalitionId,
         definitionId: u.definitionId,

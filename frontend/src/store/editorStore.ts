@@ -14,7 +14,6 @@ export interface UnitDraft {
   id: string;
   displayName: string;
   fullName: string;
-  side: "Blue" | "Red" | "Neutral";
   teamId: string;
   coalitionId: string;
   definitionId: string;
@@ -218,9 +217,8 @@ export function blankUnit(lat = 35.0, lon = 25.0): UnitDraft {
     id: crypto.randomUUID(),
     displayName: "UNIT-1",
     fullName: "",
-    side: "Blue",
     teamId: "",
-    coalitionId: "Blue",
+    coalitionId: "",
     definitionId: "",
     hostBaseId: undefined,
     parentUnitId: undefined,

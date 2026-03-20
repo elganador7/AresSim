@@ -11,21 +11,31 @@ import { useSimStore, type PathViolationPreview, type WeaponDef } from "../../st
 import { formatDist, formatETA } from "../../utils/formatters";
 import { haversineM } from "../../utils/geo";
 import { type UnitDefinitionTargetLite } from "../../utils/loadoutValidation";
-import { inferUnitTeamCode } from "../../utils/unitTeams";
+import { teamColorHex } from "../../utils/teamColors";
 import { ATTACK_ORDER_TYPES, DESIRED_EFFECTS, ENGAGEMENT_BEHAVIORS, filterValidLiveTargets } from "../../utils/tasking";
 
 type UnitDefinitionPanelMeta = UnitDefinitionTargetLite & { teamCode?: string };
 
-const sideColor: Record<string, string> = {
-  Blue: "#3b82f6",
-  Red: "#ef4444",
-  Neutral: "#f59e0b",
+const BASE_OPS_STATE_LABEL: Record<number, string> = {
+  0: "Unknown",
+  1: "Usable",
+  2: "Degraded",
+  3: "Closed",
 };
 
-function canControlUnit(unitId: string, side: string, definitionId: string, explicitTeamId: string | undefined, view: string, definitionMap: Map<string, UnitDefinitionPanelMeta>): boolean {
+const DAMAGE_STATE_LABEL: Record<number, string> = {
+  0: "Unknown",
+  1: "Operational",
+  2: "Damaged",
+  3: "Mission Killed",
+  4: "Destroyed",
+};
+
+function canControlUnit(definitionId: string, explicitTeamId: string | undefined, view: string, definitionMap: Map<string, UnitDefinitionPanelMeta>): boolean {
   if (view === "debug") return true;
   const teamCode = explicitTeamId?.trim().toUpperCase()
-    || inferUnitTeamCode(unitId, side, { teamCode: definitionMap.get(definitionId)?.teamCode ?? "" });
+    || definitionMap.get(definitionId)?.teamCode?.trim().toUpperCase()
+    || "";
   return teamCode === view;
 }
 
@@ -54,8 +64,9 @@ export default function UnitPanel() {
 
   const unit = selectedUnitId ? units.get(selectedUnitId) : undefined;
   const controllable = unit
-    ? canControlUnit(unit.id, unit.side, unit.definitionId, unit.teamId, activeView, definitionMap)
+    ? canControlUnit(unit.definitionId, unit.teamId, activeView, definitionMap)
     : false;
+  const teamColor = teamColorHex(unit?.teamId);
   const contactMeta = unit && activeView !== "debug"
     ? detectionContacts.get(activeView)?.get(unit.id)
     : undefined;
@@ -70,6 +81,14 @@ export default function UnitPanel() {
   }, [definitionMap, unit, units, weaponDefs]);
   const routeWarning = routePreview?.blocked ? (routePreview.reason ?? "Transit blocked.") : null;
   const strikeWarning = strikePreview?.blocked ? (strikePreview.reason ?? "Strike blocked.") : null;
+  const definition = unit ? definitionMap.get(unit.definitionId) : undefined;
+  const isFacility = definition?.assetClass === "airbase";
+  const hostedUnits = useMemo(() => {
+    if (!unit) {
+      return [];
+    }
+    return Array.from(units.values()).filter((candidate) => candidate.hostBaseId === unit.id);
+  }, [unit, units]);
 
   const [engagementBehavior, setEngagementBehavior] = useState(unit?.engagementBehavior ?? 1);
   const [engagementPkillThreshold, setEngagementPkillThreshold] = useState(unit?.engagementPkillThreshold ?? 0.5);
@@ -245,7 +264,7 @@ export default function UnitPanel() {
       <div className="unit-panel-header">
         <span
           className="unit-side-indicator"
-          style={{ background: sideColor[unit.side] ?? "#6b7280" }}
+          style={{ background: teamColor }}
         />
         <span className="unit-display-name">{unit.displayName}</span>
         <button
@@ -278,7 +297,7 @@ export default function UnitPanel() {
           </div>
         )}
 
-        {unit.moveOrder && unit.moveOrder.waypoints.length > 0 ? (() => {
+        {!isFacility && unit.moveOrder && unit.moveOrder.waypoints.length > 0 ? (() => {
           const waypoints = unit.moveOrder.waypoints;
           const last = waypoints[waypoints.length - 1];
           const points = [
@@ -354,7 +373,7 @@ export default function UnitPanel() {
               )}
             </div>
           );
-        })() : (
+        })() : !isFacility ? (
           <div className={`move-hint ${controllable ? "" : "move-hint-locked"}`}>
             {controllable
               ? routeModeActive
@@ -362,9 +381,27 @@ export default function UnitPanel() {
                 : "Click map to move, or use Append Waypoints to build a route"
               : "Enemy unit — read only"}
           </div>
+        ) : (
+          <div className="facility-summary-card">
+            <div className="facility-summary-row">
+              <span className="stat-label">Asset Type</span>
+              <span className="stat-value">{definition?.assetClass?.replaceAll("_", " ") ?? "facility"}</span>
+            </div>
+            <div className="facility-summary-row">
+              <span className="stat-label">Damage</span>
+              <span className="stat-value">{DAMAGE_STATE_LABEL[unit.damageState] ?? "Unknown"}</span>
+            </div>
+            <div className="facility-summary-row">
+              <span className="stat-label">Operations</span>
+              <span className="stat-value">{BASE_OPS_STATE_LABEL[unit.baseOps?.state ?? 0]}</span>
+            </div>
+            <div className="facility-summary-copy">
+              Fixed installation. Base operations and hosted-unit readiness matter here, not movement or onboard fuel.
+            </div>
+          </div>
         )}
 
-        {controllable && (
+        {controllable && !isFacility && (
           <div className="unit-command-section">
             <div className="unit-command-header">Commands</div>
             <div className="unit-command-row">
@@ -415,7 +452,7 @@ export default function UnitPanel() {
                     <option value="">Select target…</option>
                     {validTargets.map((candidate) => (
                       <option key={candidate.id} value={candidate.id}>
-                        {candidate.displayName} · {candidate.side}
+                        {candidate.displayName} · {(candidate.teamId || "UNK")}
                       </option>
                     ))}
                   </select>
@@ -481,35 +518,66 @@ export default function UnitPanel() {
         )}
 
         <div className="unit-stat-row">
-          <span className="stat-label">Side</span>
-          <span className="stat-value" style={{ color: sideColor[unit.side] }}>
-            {unit.side}
+          <span className="stat-label">Country</span>
+          <span className="stat-value" style={{ color: teamColor }}>
+            {unit.teamId || "UNK"}
           </span>
         </div>
-        <div className="unit-stat-row">
-          <span className="stat-label">Effectiveness</span>
-          <span className="stat-value">{strength}%</span>
-        </div>
-        <div className="unit-stat-row">
-          <span className="stat-label">Personnel</span>
-          <span className="stat-value">{unit.status.personnelStrength}</span>
-        </div>
-        <div className="unit-stat-row">
-          <span className="stat-label">Equipment</span>
-          <span className="stat-value">{unit.status.equipmentStrength}</span>
-        </div>
-        <div className="unit-stat-row">
-          <span className="stat-label">Fuel (L)</span>
-          <span className="stat-value">{Math.round(unit.status.fuelLevelLiters)}</span>
-        </div>
-        <div className="unit-stat-row">
-          <span className="stat-label">Morale</span>
-          <span className="stat-value">{Math.round(unit.status.morale * 100)}%</span>
-        </div>
-        <div className="unit-stat-row">
-          <span className="stat-label">Fatigue</span>
-          <span className="stat-value">{Math.round(unit.status.fatigue * 100)}%</span>
-        </div>
+        {unit.coalitionId && (
+          <div className="unit-stat-row">
+            <span className="stat-label">Coalition</span>
+            <span className="stat-value">{unit.coalitionId}</span>
+          </div>
+        )}
+        {!isFacility ? (
+          <>
+            <div className="unit-stat-row">
+              <span className="stat-label">Effectiveness</span>
+              <span className="stat-value">{strength}%</span>
+            </div>
+            <div className="unit-stat-row">
+              <span className="stat-label">Personnel</span>
+              <span className="stat-value">{unit.status.personnelStrength}</span>
+            </div>
+            <div className="unit-stat-row">
+              <span className="stat-label">Equipment</span>
+              <span className="stat-value">{unit.status.equipmentStrength}</span>
+            </div>
+            <div className="unit-stat-row">
+              <span className="stat-label">Fuel (L)</span>
+              <span className="stat-value">{Math.round(unit.status.fuelLevelLiters)}</span>
+            </div>
+            <div className="unit-stat-row">
+              <span className="stat-label">Morale</span>
+              <span className="stat-value">{Math.round(unit.status.morale * 100)}%</span>
+            </div>
+            <div className="unit-stat-row">
+              <span className="stat-label">Fatigue</span>
+              <span className="stat-value">{Math.round(unit.status.fatigue * 100)}%</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="unit-stat-row">
+              <span className="stat-label">Hosted Units</span>
+              <span className="stat-value">{hostedUnits.length}</span>
+            </div>
+            {hostedUnits.length > 0 && (
+              <div className="facility-hosted-list">
+                {hostedUnits.map((hosted) => (
+                  <button
+                    key={hosted.id}
+                    className="facility-hosted-row"
+                    onClick={() => selectUnit(hosted.id)}
+                  >
+                    <span>{hosted.displayName}</span>
+                    <span>{hosted.damageState === 4 ? "Destroyed" : hosted.nextSortieReadySeconds && hosted.nextSortieReadySeconds > 0 ? "Delayed" : "Ready"}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
 
         <div className="unit-position">
           <span className="stat-label">Position</span>

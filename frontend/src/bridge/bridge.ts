@@ -117,7 +117,6 @@ export function protoUnitToStore(u: ProtoUnit): Unit {
     id: u.id,
     displayName: u.displayName,
     fullName: u.fullName,
-    side: u.side,
     teamId: u.teamId || undefined,
     coalitionId: u.coalitionId || undefined,
     natoPendingSymbol: u.natoSymbolSidc,
@@ -260,7 +259,7 @@ export function protoEventToLogEntry(e: NarrativeEvent, simSeconds: number): Eve
     text: e.text,
     category: e.category,
     unitId: e.unitId,
-    side: e.side,
+    teamId: e.teamId,
     simSeconds,
   };
 }
@@ -348,8 +347,8 @@ export function initBridge(): void {
       sourceTeam: contact.sourceTeam,
       shared: contact.shared,
     }));
-    store.setDetections(ev.detectingSide, ev.detectedUnitIds, contacts);
-    store.setMunitionDetections(ev.detectingSide, ev.detectedMunitionIds);
+    store.setDetections(ev.detectingTeam, ev.detectedUnitIds, contacts);
+    store.setMunitionDetections(ev.detectingTeam, ev.detectedMunitionIds);
   });
 
   // ── In-flight munition update ──────────────────────────────────────────

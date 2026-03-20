@@ -16,7 +16,7 @@ function makeProtoUnit(overrides: Record<string, unknown> = {}) {
     id: "u1",
     displayName: "Alpha",
     fullName: "1st Battalion Alpha",
-    side: "Blue",
+    teamId: "USA",
     natoSymbolSidc: "SFGPUCI----D",
     definitionId: "def-1",
     damageState: 1,
@@ -44,7 +44,7 @@ function makeProtoNarrative(overrides: Record<string, unknown> = {}) {
     text: "Alpha destroyed Bravo",
     category: "combat",
     unitId: "u1",
-    side: "Blue",
+    teamId: "USA",
     ...overrides,
   } as any;
 }
@@ -52,12 +52,12 @@ function makeProtoNarrative(overrides: Record<string, unknown> = {}) {
 // ─── protoUnitToStore ─────────────────────────────────────────────────────────
 
 describe("protoUnitToStore", () => {
-  it("maps id, displayName, fullName, side", () => {
+  it("maps id, displayName, fullName, and team fields", () => {
     const u = protoUnitToStore(makeProtoUnit());
     expect(u.id).toBe("u1");
     expect(u.displayName).toBe("Alpha");
     expect(u.fullName).toBe("1st Battalion Alpha");
-    expect(u.side).toBe("Blue");
+    expect(u.teamId).toBe("USA");
     expect(u.damageState).toBe(1);
   });
 
@@ -141,12 +141,12 @@ describe("protoUnitToStore", () => {
 // ─── protoEventToLogEntry ─────────────────────────────────────────────────────
 
 describe("protoEventToLogEntry", () => {
-  it("maps text, category, unitId, side", () => {
+  it("maps text, category, unitId, teamId", () => {
     const entry = protoEventToLogEntry(makeProtoNarrative(), 120);
     expect(entry.text).toBe("Alpha destroyed Bravo");
     expect(entry.category).toBe("combat");
     expect(entry.unitId).toBe("u1");
-    expect(entry.side).toBe("Blue");
+    expect(entry.teamId).toBe("USA");
     expect(entry.simSeconds).toBe(120);
   });
 

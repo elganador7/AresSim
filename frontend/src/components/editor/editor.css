@@ -853,6 +853,66 @@
   margin: 2px 4px 6px;
 }
 
+.editor-facility-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.editor-facility-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.editor-facility-tag,
+.editor-facility-state,
+.editor-hosted-header {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.editor-facility-tag,
+.editor-facility-state {
+  color: #cbd5e1;
+}
+
+.editor-facility-copy,
+.editor-hosted-empty {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #94a3b8;
+}
+
+.editor-hosted-header {
+  color: #64748b;
+}
+
+.editor-hosted-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.editor-hosted-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 12px;
+  color: #e2e8f0;
+}
+
 .order-validation-note {
   margin-top: 2px;
   padding: 8px 10px;

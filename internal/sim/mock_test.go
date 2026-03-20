@@ -125,10 +125,11 @@ func TestMovePoint_RoundTrip(t *testing.T) {
 
 // ─── processTick ──────────────────────────────────────────────────────────────
 
-func makeMovingUnit(id, side, defID string, lat, lon, destLat, destLon float64) *enginev1.Unit {
+func makeMovingUnit(id, teamID, defID string, lat, lon, destLat, destLon float64) *enginev1.Unit {
 	return &enginev1.Unit{
 		Id:           id,
-		Side:         side,
+		TeamId:       teamID,
+		CoalitionId:  teamID,
 		DefinitionId: defID,
 		Position:     &enginev1.Position{Lat: lat, Lon: lon},
 		Status:       &enginev1.OperationalStatus{IsActive: true},
@@ -235,7 +236,8 @@ func TestProcessTick_MultipleWaypoints_AdvancesThrough(t *testing.T) {
 	// Speed fast enough to reach first waypoint in one tick.
 	u := &enginev1.Unit{
 		Id:           "u1",
-		Side:         "Blue",
+		TeamId:       "Blue",
+		CoalitionId:  "Blue",
 		DefinitionId: "fast",
 		Position:     &enginev1.Position{Lat: 0, Lon: 0},
 		Status:       &enginev1.OperationalStatus{IsActive: true},
@@ -542,7 +544,7 @@ func TestMockLoop_UsesUpdatedRelationshipRules(t *testing.T) {
 			return
 		}
 		ev, ok := msg.(*enginev1.DetectionUpdate)
-		if !ok || ev.GetDetectingSide() != "USA" {
+		if !ok || ev.GetDetectingTeam() != "USA" {
 			return
 		}
 		select {

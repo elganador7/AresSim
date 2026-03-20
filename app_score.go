@@ -2,7 +2,6 @@ package main
 
 import (
 	"sort"
-	"strings"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
 	"github.com/aressim/internal/library"
@@ -15,10 +14,7 @@ func currentTeamID(u *enginev1.Unit) string {
 	if u == nil {
 		return ""
 	}
-	if team := strings.TrimSpace(u.GetTeamId()); team != "" {
-		return team
-	}
-	return strings.TrimSpace(u.GetSide())
+	return sim.CountryDisplayCode(u.GetTeamId())
 }
 
 func damageLossFraction(state enginev1.DamageState) float64 {

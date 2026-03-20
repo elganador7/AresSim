@@ -124,7 +124,7 @@ export const FALLBACK: IconDef = { icon: GiRifle, color: "#6b7280", label: "Unkn
 interface UnitTypeIconProps {
   generalType: number;
   size?: number;
-  /** Override the domain color — e.g. to tint by side instead */
+  /** Override the domain color — e.g. to tint by team instead */
   color?: string;
   className?: string;
 }

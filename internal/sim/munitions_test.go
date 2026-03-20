@@ -14,7 +14,7 @@ func makeMunition(id string, curLat, curLon, destLat, destLon, speedMps float64,
 		ID:            id,
 		WeaponID:      "test-weapon",
 		ShooterID:     "shooter",
-		TrackGroupID:  "Blue|shooter",
+		TrackGroupID:  "BLUE|shooter",
 		CurLat:        curLat,
 		CurLon:        curLon,
 		DestLat:       destLat,
@@ -105,8 +105,8 @@ func makeTrackingMunition(guidance enginev1.GuidanceType) (*InFlightMunition, *e
 		ID:           "m1",
 		WeaponID:     "test",
 		ShooterID:    "shooter",
-		ShooterSide:  "Blue",
-		TrackGroupID: "Blue|shooter",
+		ShooterTeam:  "USA",
+		TrackGroupID: "BLUE|shooter",
 		TargetID:     "tgt",
 		CurLat:       0, CurLon: 0,
 		DestLat: 1.0, DestLon: 0.0,
@@ -191,7 +191,7 @@ func TestAdvanceMunitions_Radar_TracksWhenSiblingSensorHoldsLock(t *testing.T) {
 	parent := makeUnit("battery", "Blue", "command", 0, 0)
 	shooter := makeChildUnit("shooter", "Blue", "launcher", "battery", 0, 0)
 	sensor := makeChildUnit("sensor", "Blue", "sensor", "battery", 0, 0)
-	m.TrackGroupID = "Blue|battery"
+	m.TrackGroupID = "BLUE|battery"
 	target.Position.Lon = 1.0
 	units := []*enginev1.Unit{parent, shooter, sensor, target}
 	defs := map[string]DefStats{
@@ -230,9 +230,9 @@ func TestDetectMunitions_InRangeCorrectDomain(t *testing.T) {
 	}
 
 	result := DetectMunitions([]*enginev1.Unit{blue}, defs, []*InFlightMunition{m})
-	ids, ok := result["Blue"]
+	ids, ok := result["BLUE"]
 	if !ok || len(ids) == 0 {
-		t.Fatal("Blue should detect the munition")
+		t.Fatal("BLUE should detect the munition")
 	}
 	if ids[0] != "m1" {
 		t.Errorf("expected munition id 'm1', got %s", ids[0])
@@ -247,7 +247,7 @@ func TestDetectMunitions_OutOfRange_NotDetected(t *testing.T) {
 	}
 
 	result := DetectMunitions([]*enginev1.Unit{blue}, defs, []*InFlightMunition{m})
-	for _, id := range result["Blue"] {
+	for _, id := range result["BLUE"] {
 		if id == "m1" {
 			t.Error("munition at 555 km should not be detected with 10 km sensor")
 		}
@@ -263,7 +263,7 @@ func TestDetectMunitions_WrongDomain_NotDetected(t *testing.T) {
 	}
 
 	result := DetectMunitions([]*enginev1.Unit{blue}, defs, []*InFlightMunition{m})
-	for _, id := range result["Blue"] {
+	for _, id := range result["BLUE"] {
 		if id == "m1" {
 			t.Error("land sensor should not detect air-targeting munition")
 		}
@@ -280,7 +280,7 @@ func TestDetectMunitions_CorrectDomain_Detected(t *testing.T) {
 
 	result := DetectMunitions([]*enginev1.Unit{blue}, defs, []*InFlightMunition{m})
 	found := false
-	for _, id := range result["Blue"] {
+	for _, id := range result["BLUE"] {
 		if id == "m1" {
 			found = true
 		}
@@ -316,23 +316,23 @@ func TestDetectMunitions_BothSidesCanDetect(t *testing.T) {
 
 	result := DetectMunitions([]*enginev1.Unit{blue, red}, defs, []*InFlightMunition{m})
 	blueDetects := false
-	for _, id := range result["Blue"] {
+	for _, id := range result["BLUE"] {
 		if id == "m1" {
 			blueDetects = true
 		}
 	}
 	redDetects := false
-	for _, id := range result["Red"] {
+	for _, id := range result["RED"] {
 		if id == "m1" {
 			redDetects = true
 		}
 	}
 
 	if !blueDetects {
-		t.Error("Blue should detect the munition")
+		t.Error("BLUE should detect the munition")
 	}
 	if !redDetects {
-		t.Error("Red should detect the incoming munition")
+		t.Error("RED should detect the incoming munition")
 	}
 }
 
@@ -360,7 +360,7 @@ func TestInterceptMunitionsTick_InterceptsThreatToSide(t *testing.T) {
 		ID:            "m1",
 		WeaponID:      "raid",
 		ShooterID:     "irn-launcher",
-		ShooterSide:   "Red",
+		ShooterTeam:   "IRN",
 		TargetID:      "qat-base",
 		CurLat:        25.20,
 		CurLon:        51.31,

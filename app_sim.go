@@ -68,16 +68,16 @@ func (a *App) invalidateDefsCache() {
 	a.defsCacheMu.Unlock()
 }
 
-// storeLastDetection records the most recent sensor result for one side so
+// storeLastDetection records the most recent sensor result for one team so
 // RequestSync can replay it to reconnecting clients.
-func (a *App) storeLastDetection(side string, ids []string) {
+func (a *App) storeLastDetection(teamID string, ids []string) {
 	a.lastDetMu.Lock()
 	if a.lastDetections == nil {
 		a.lastDetections = make(map[string][]string)
 	}
 	cp := make([]string, len(ids))
 	copy(cp, ids)
-	a.lastDetections[side] = cp
+	a.lastDetections[teamID] = cp
 	a.lastDetMu.Unlock()
 }
 
@@ -88,7 +88,7 @@ func (a *App) makeEmitFn() sim.EmitFn {
 		switch name {
 		case "detection_update":
 			if du, ok := msg.(*enginev1.DetectionUpdate); ok {
-				a.storeLastDetection(du.DetectingSide, du.DetectedUnitIds)
+				a.storeLastDetection(du.DetectingTeam, du.DetectedUnitIds)
 			}
 		case "batch_update":
 			if bu, ok := msg.(*enginev1.BatchUnitUpdate); ok {
@@ -403,15 +403,12 @@ func (a *App) applyOpeningStrikeActions(scen *enginev1.Scenario, defs map[string
 			}
 		}
 		if text := strings.TrimSpace(action.GetNarrative()); text != "" {
-			side := sim.CountryDisplayCode(shooter.GetTeamId())
-			if side == "" {
-				side = shooter.GetSide()
-			}
+			teamID := sim.CountryDisplayCode(shooter.GetTeamId())
 			a.emitProtoEvent("narrative", &enginev1.NarrativeEvent{
 				Text:     text,
 				Category: "scenario",
 				UnitId:   shooter.GetId(),
-				Side:     side,
+				TeamId:   teamID,
 			})
 		}
 	}
@@ -459,9 +456,9 @@ func (a *App) RequestSync() BridgeResult {
 		TimeScale: float32(a.getSimTimeScale()),
 	})
 	a.lastDetMu.RLock()
-	for side, ids := range a.lastDetections {
+	for teamID, ids := range a.lastDetections {
 		a.emitProtoEvent("detection_update", &enginev1.DetectionUpdate{
-			DetectingSide:   side,
+			DetectingTeam:   teamID,
 			DetectedUnitIds: ids,
 		})
 	}

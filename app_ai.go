@@ -217,12 +217,20 @@ func unitsHostileForPlanning(shooter, target *enginev1.Unit) bool {
 	if shooter == nil || target == nil {
 		return false
 	}
+	shooterTeam := sim.CountryDisplayCode(shooter.GetTeamId())
+	targetTeam := sim.CountryDisplayCode(target.GetTeamId())
+	if shooterTeam == "" || targetTeam == "" {
+		return false
+	}
+	if shooterTeam == targetTeam {
+		return false
+	}
 	shooterCoalition := strings.TrimSpace(strings.ToUpper(shooter.GetCoalitionId()))
 	targetCoalition := strings.TrimSpace(strings.ToUpper(target.GetCoalitionId()))
 	if shooterCoalition != "" && targetCoalition != "" {
 		return shooterCoalition != targetCoalition
 	}
-	return shooter.GetSide() != target.GetSide()
+	return true
 }
 
 func (a *App) aiStrikePathAllowed(shooter, target *enginev1.Unit, defs map[string]sim.DefStats, weapons map[string]sim.WeaponStats) bool {
@@ -334,7 +342,7 @@ func (a *App) planMajorActorStrikes(simSeconds float64) []*enginev1.UnitDelta {
 			Text:     fmt.Sprintf("%s AI assigns %s to strike %s", sim.CountryDisplayCode(shooter.GetTeamId()), shooter.GetDisplayName(), bestTarget.GetDisplayName()),
 			Category: "c2",
 			UnitId:   shooter.GetId(),
-			Side:     sim.CountryDisplayCode(shooter.GetTeamId()),
+			TeamId:   sim.CountryDisplayCode(shooter.GetTeamId()),
 		})
 	}
 	return deltas

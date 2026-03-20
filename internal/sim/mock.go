@@ -119,7 +119,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 							ID:             NextMunitionID(),
 							WeaponID:       shot.WeaponID,
 							ShooterID:      shot.Shooter.Id,
-							ShooterSide:    unitCoalitionID(shot.Shooter),
+							ShooterTeam:    unitTeamID(shot.Shooter),
 							TrackGroupID:   trackGroups[shot.Shooter.Id],
 							TargetID:       shot.Target.Id,
 							HitProbability: shot.HitProbability,
@@ -192,7 +192,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 					})
 				}
 				emit("detection_update", &enginev1.DetectionUpdate{
-					DetectingSide:       side,
+					DetectingTeam:       side,
 					DetectedUnitIds:     detections[side],
 					DetectedMunitionIds: munitionDets[side],
 					UnitContacts:        protoContacts,
@@ -255,7 +255,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 					Text:     narrative,
 					Category: "combat",
 					UnitId:   unitID,
-					Side:     side,
+					TeamId:   side,
 				})
 			}
 		}

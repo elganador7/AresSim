@@ -34,7 +34,7 @@ export default function ViewSwitcher() {
     const codes = new Set<string>();
     units.forEach((unit) => {
       const code = (unit.teamId?.trim().toUpperCase())
-        || inferUnitTeamCode(unit.id, unit.side, definitionTeams.get(unit.definitionId));
+        || inferUnitTeamCode(unit.id, definitionTeams.get(unit.definitionId)?.teamCode ?? "");
       if (/^[A-Z]{3}$/.test(code)) {
         codes.add(code);
       }

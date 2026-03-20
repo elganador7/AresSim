@@ -11,18 +11,19 @@ func approxEqual(a, b float64) bool { return math.Abs(a-b) < 1e-9 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-func makeUnit(id, side, defID string, lat, lon float64) *enginev1.Unit {
+func makeUnit(id, teamID, defID string, lat, lon float64) *enginev1.Unit {
 	return &enginev1.Unit{
 		Id:           id,
-		Side:         side,
+		TeamId:       teamID,
+		CoalitionId:  teamID,
 		DefinitionId: defID,
 		Position:     &enginev1.Position{Lat: lat, Lon: lon},
 		Status:       &enginev1.OperationalStatus{IsActive: true},
 	}
 }
 
-func makeChildUnit(id, side, defID, parentID string, lat, lon float64) *enginev1.Unit {
-	u := makeUnit(id, side, defID, lat, lon)
+func makeChildUnit(id, teamID, defID, parentID string, lat, lon float64) *enginev1.Unit {
+	u := makeUnit(id, teamID, defID, lat, lon)
 	u.ParentUnitId = parentID
 	return u
 }
@@ -918,9 +919,9 @@ func TestSensorTick_InRange_Detected(t *testing.T) {
 	}
 
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
-	ids, ok := result["Blue"]
+	ids, ok := result["BLUE"]
 	if !ok {
-		t.Fatal("Blue side should have a detection entry")
+		t.Fatal("BLUE team should have a detection entry")
 	}
 	found := false
 	for _, id := range ids {
@@ -929,7 +930,7 @@ func TestSensorTick_InRange_Detected(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Errorf("expected 'red' in Blue detections, got %v", ids)
+		t.Errorf("expected 'red' in BLUE detections, got %v", ids)
 	}
 }
 
@@ -942,7 +943,7 @@ func TestSensorTick_OutOfRange_NotDetected(t *testing.T) {
 	}
 
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
-	ids := result["Blue"]
+	ids := result["BLUE"]
 	for _, id := range ids {
 		if id == "red" {
 			t.Error("red should not be detected at 111 km with 10 km sensor range")
@@ -956,9 +957,9 @@ func TestSensorTick_FriendlyNotDetected(t *testing.T) {
 	defs := map[string]DefStats{"sensor": makeDef(100_000, 0)}
 
 	result := SensorTick([]*enginev1.Unit{b1, b2}, defs, nil)
-	for _, id := range result["Blue"] {
+	for _, id := range result["BLUE"] {
 		if id == "b1" || id == "b2" {
-			t.Errorf("friendly unit %s should not appear in Blue detections", id)
+			t.Errorf("friendly unit %s should not appear in BLUE detections", id)
 		}
 	}
 }
@@ -973,7 +974,7 @@ func TestSensorTick_DestroyedUnitSkipped(t *testing.T) {
 	}
 
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
-	for _, id := range result["Blue"] {
+	for _, id := range result["BLUE"] {
 		if id == "red" {
 			t.Error("destroyed unit should not be detected")
 		}
@@ -991,11 +992,11 @@ func TestSensorTick_EmptySliceForSideWithNoContacts(t *testing.T) {
 	}
 
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
-	if _, ok := result["Blue"]; !ok {
-		t.Error("Blue should have an entry even with zero contacts (to clear stale state)")
+	if _, ok := result["BLUE"]; !ok {
+		t.Error("BLUE should have an entry even with zero contacts (to clear stale state)")
 	}
-	if len(result["Blue"]) != 0 {
-		t.Errorf("Blue should have 0 detections, got %v", result["Blue"])
+	if len(result["BLUE"]) != 0 {
+		t.Errorf("BLUE should have 0 detections, got %v", result["BLUE"])
 	}
 }
 
@@ -1007,23 +1008,23 @@ func TestSensorTick_BothSidesDetectEachOther(t *testing.T) {
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
 
 	foundRed := false
-	for _, id := range result["Blue"] {
+	for _, id := range result["BLUE"] {
 		if id == "red" {
 			foundRed = true
 		}
 	}
 	foundBlue := false
-	for _, id := range result["Red"] {
+	for _, id := range result["RED"] {
 		if id == "blue" {
 			foundBlue = true
 		}
 	}
 
 	if !foundRed {
-		t.Error("Blue should detect Red")
+		t.Error("BLUE should detect RED")
 	}
 	if !foundBlue {
-		t.Error("Red should detect Blue")
+		t.Error("RED should detect BLUE")
 	}
 }
 
@@ -1036,8 +1037,8 @@ func TestSensorTick_StealthTargetCanAvoidDetection(t *testing.T) {
 	}
 
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
-	if len(result["Blue"]) != 0 {
-		t.Fatalf("expected stealth target to remain undetected, got %v", result["Blue"])
+	if len(result["BLUE"]) != 0 {
+		t.Fatalf("expected stealth target to remain undetected, got %v", result["BLUE"])
 	}
 }
 
@@ -1050,8 +1051,8 @@ func TestSensorTick_LargeTargetDetectedEarlier(t *testing.T) {
 	}
 
 	result := SensorTick([]*enginev1.Unit{blue, red}, defs, nil)
-	if len(result["Blue"]) != 1 || result["Blue"][0] != "red" {
-		t.Fatalf("expected large-RCS target to be detected, got %v", result["Blue"])
+	if len(result["BLUE"]) != 1 || result["BLUE"][0] != "red" {
+		t.Fatalf("expected large-RCS target to be detected, got %v", result["BLUE"])
 	}
 }
 

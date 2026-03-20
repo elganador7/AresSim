@@ -12,6 +12,7 @@ import {
 import type { ExplosionFx, Munition, Unit, WeaponDef } from "../../store/simStore";
 import { useSimStore } from "../../store/simStore";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
+import { teamColorHex } from "../../utils/teamColors";
 import { inferUnitTeamCode } from "../../utils/unitTeams";
 
 export type ActiveView = string;
@@ -25,12 +26,6 @@ export interface DefInfo {
 
 export type Detections = Map<string, Set<string>>;
 export type MunitionDetections = Map<string, Set<string>>;
-
-export const ROUTE_COLOR: Record<string, Color> = {
-  Blue: Color.fromCssColorString("#60a5fa"),
-  Red: Color.fromCssColorString("#f87171"),
-  Neutral: Color.fromCssColorString("#fcd34d"),
-};
 
 export const MUNITION_ENTITY_PREFIX = "mun_";
 export const EXPLOSION_ENTITY_PREFIX = "explosion_";
@@ -68,7 +63,7 @@ export function isMunitionVisible(
   const shooter = units.get(munition.shooterId);
   if (!shooter) return false;
   const shooterTeam = shooter.teamId?.trim().toUpperCase()
-    || inferUnitTeamCode(shooter.id, shooter.side, defInfoRefFallback(shooter.definitionId, {}));
+    || inferUnitTeamCode(shooter.id, defInfoRefFallback(shooter.definitionId, {})?.teamCode ?? "");
   if (shooterTeam === view) {
     return true;
   }
@@ -81,7 +76,11 @@ function defInfoRefFallback(definitionId: string, defInfo: Record<string, DefInf
 
 export function teamForUnit(unit: Unit, defInfo: Record<string, DefInfo>): string {
   return unit.teamId?.trim().toUpperCase()
-    || inferUnitTeamCode(unit.id, unit.side, defInfo[unit.definitionId]);
+    || inferUnitTeamCode(unit.id, defInfo[unit.definitionId]?.teamCode ?? "");
+}
+
+export function routeColorForUnit(unit: Unit, defInfo: Record<string, DefInfo>): Color {
+  return Color.fromCssColorString(teamColorHex(teamForUnit(unit, defInfo)));
 }
 
 export function isVisible(
@@ -109,12 +108,13 @@ export function canMove(unit: Unit, view: ActiveView, defInfo: Record<string, De
 }
 
 export function makeUnitEntity(unit: Unit, generalType: number, shortName: string): Entity {
+  const teamCode = unit.teamId?.trim().toUpperCase() || "UNK";
   return new Entity({
     id: unit.id,
     position: Cartesian3.fromDegrees(unit.position.lon, unit.position.lat, unit.position.altMsl),
     show: true,
     billboard: {
-      image: getUnitBillboardUrl(generalType, unit.side, shortName),
+      image: getUnitBillboardUrl(generalType, teamCode, shortName),
       width: 62,
       height: 62,
       verticalOrigin: VerticalOrigin.CENTER,

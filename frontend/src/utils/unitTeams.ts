@@ -14,12 +14,12 @@ function teamFromUnitID(unitID: string): string {
 
 export function inferUnitTeamCode(
   unitID: string,
-  unitSide: string,
+  fallbackCode: string,
   meta?: DefinitionTeamMeta,
 ): string {
-  const sideCode = normalizeTeamCode(unitSide);
-  if (/^[A-Z]{3}$/.test(sideCode)) {
-    return sideCode;
+  const explicitCode = normalizeTeamCode(fallbackCode);
+  if (/^[A-Z]{3}$/.test(explicitCode)) {
+    return explicitCode;
   }
 
   const idCode = teamFromUnitID(unitID);
@@ -32,5 +32,5 @@ export function inferUnitTeamCode(
     return metaCode;
   }
 
-  return sideCode || "UNK";
+  return explicitCode || "UNK";
 }

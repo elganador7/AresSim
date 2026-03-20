@@ -75,10 +75,7 @@ func unitTeamID(u *enginev1.Unit) string {
 	if u == nil {
 		return ""
 	}
-	if team := strings.TrimSpace(u.GetTeamId()); team != "" {
-		return team
-	}
-	return strings.TrimSpace(u.GetSide())
+	return CountryDisplayCode(u.GetTeamId())
 }
 
 func unitCoalitionID(u *enginev1.Unit) string {
@@ -88,19 +85,27 @@ func unitCoalitionID(u *enginev1.Unit) string {
 	if coalition := strings.TrimSpace(u.GetCoalitionId()); coalition != "" {
 		return coalition
 	}
-	return strings.TrimSpace(u.GetSide())
+	return unitTeamID(u)
 }
 
 func unitsAreHostile(a, b *enginev1.Unit) bool {
 	if a == nil || b == nil {
 		return false
 	}
+	aTeam := unitTeamID(a)
+	bTeam := unitTeamID(b)
+	if aTeam == "" || bTeam == "" {
+		return false
+	}
+	if aTeam == bTeam {
+		return false
+	}
 	aCoalition := unitCoalitionID(a)
 	bCoalition := unitCoalitionID(b)
-	if aCoalition == "" || bCoalition == "" {
-		return a.GetSide() != b.GetSide()
+	if aCoalition != "" && bCoalition != "" {
+		return aCoalition != bCoalition
 	}
-	return aCoalition != bCoalition
+	return true
 }
 
 func isUnauthorizedOverflight(defender, intruder *enginev1.Unit, defs map[string]DefStats, rules RelationshipRules) bool {
@@ -673,8 +678,8 @@ func decrementAmmo(shooter *enginev1.Unit, weaponID string, amount int32) {
 
 // ─── SENSOR DETECTION ─────────────────────────────────────────────────────────
 
-// DetectionSet maps each detecting side to the full set of enemy unit IDs
-// currently within sensor range of at least one unit on that side.
+// DetectionSet maps each detecting team to the full set of enemy unit IDs
+// currently within sensor range of at least one unit on that team.
 type DetectionSet map[string][]string
 
 // SensorTick scans all operational units and builds the current detection picture.

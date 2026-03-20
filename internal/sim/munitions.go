@@ -21,7 +21,7 @@ type InFlightMunition struct {
 	ID             string
 	WeaponID       string
 	ShooterID      string
-	ShooterSide    string // side of the firing unit; used for radar lock check
+	ShooterTeam    string // firing team / country code
 	TrackGroupID   string // shared sensor / fire-control group that can maintain radar track
 	TargetID       string // unit ID of the intended target
 	HitProbability float64
@@ -139,13 +139,13 @@ func updateMunitionDestination(
 	}
 }
 
-// DetectMunitions determines which in-flight munitions each side can currently
+// DetectMunitions determines which in-flight munitions each team can currently
 // detect. A platform can detect a munition when:
 //  1. The platform's domain is one of the munition's target domains (sensors
 //     appropriate for that type of threat), and
 //  2. The munition is within the platform's detection range.
 //
-// Returns a map of side → deduplicated slice of detected munition IDs.
+// Returns a map of team → deduplicated slice of detected munition IDs.
 func DetectMunitions(units []*enginev1.Unit, defs map[string]DefStats, munitions []*InFlightMunition) map[string][]string {
 	if len(munitions) == 0 {
 		return nil

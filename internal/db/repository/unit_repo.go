@@ -106,19 +106,6 @@ func (r *UnitRepo) GetAllActive(ctx context.Context) ([]UnitRecord, error) {
 	return flattenQueryResults(results), nil
 }
 
-// GetBySide returns all active units belonging to a given side.
-func (r *UnitRepo) GetBySide(ctx context.Context, side string) ([]UnitRecord, error) {
-	results, err := surrealdb.Query[[]UnitRecord](
-		ctx, r.db,
-		"SELECT * FROM unit WHERE side = $side AND is_active = true",
-		map[string]any{"side": side},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("get units by side %q: %w", side, err)
-	}
-	return flattenQueryResults(results), nil
-}
-
 // MarkDestroyed sets is_active = false for a unit.
 // The record is retained for the event log and post-game analytics.
 func (r *UnitRepo) MarkDestroyed(ctx context.Context, unitID string) error {

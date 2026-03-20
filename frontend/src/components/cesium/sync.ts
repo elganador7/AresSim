@@ -30,7 +30,6 @@ import {
   KILL_COLOR,
   MUNITION_COLOR,
   MUNITION_ENTITY_PREFIX,
-  ROUTE_COLOR,
   SENSOR_COLOR,
   STRIKE_PATH_COLOR,
   TRACK_LINK_PREFIX,
@@ -40,6 +39,7 @@ import {
   isVisible,
   makeUnitEntity,
   maxWeaponRangeM,
+  routeColorForUnit,
   teamForUnit,
   updateMapCursor,
 } from "./helpers";
@@ -105,7 +105,7 @@ export function setupCesiumStoreSync({
       if (existing.billboard) {
         const def = defInfoRef.current[unit.definitionId];
         existing.billboard.image = new ConstantProperty(
-          getUnitBillboardUrl(def?.generalType ?? 0, unit.side, def?.shortName ?? unit.displayName),
+          getUnitBillboardUrl(def?.generalType ?? 0, teamForUnit(unit, defInfoRef.current), def?.shortName ?? unit.displayName),
         );
         existing.billboard.scale = new ConstantProperty(isSelected ? 1.4 : 1.0);
         existing.billboard.color = new ConstantProperty(Color.WHITE.withAlpha(trackAlpha));
@@ -122,7 +122,7 @@ export function setupCesiumStoreSync({
 
     const order = unit.moveOrder;
     if (!track && order && order.waypoints.length > 0) {
-      const routeColor = ROUTE_COLOR[unit.side] ?? Color.YELLOW;
+      const routeColor = routeColorForUnit(unit, defInfoRef.current);
       const positions: Cartesian3[] = [
         Cartesian3.fromDegrees(unit.position.lon, unit.position.lat),
         ...order.waypoints.map((wp) => Cartesian3.fromDegrees(wp.lon, wp.lat)),
@@ -286,7 +286,7 @@ export function setupCesiumStoreSync({
 
     viewer.entities.removeById(rangeId);
     if (isSelected && visible) {
-      const ringColor = ROUTE_COLOR[unit.side] ?? Color.WHITE;
+      const ringColor = routeColorForUnit(unit, defInfoRef.current);
       const { weaponDefs } = useSimStore.getState();
       const weaponRangeM = maxWeaponRangeM(unit, weaponDefs);
       if (weaponRangeM > 0) {

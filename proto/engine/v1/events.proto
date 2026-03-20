@@ -89,13 +89,13 @@ message UnitDestroyedEvent {
 
 // ── Sensor / detection update ─────────────────────────────────────────────────
 // Emitted every tick with the *full current set* of unit and munition IDs
-// detected by each side. The frontend replaces its per-side detection set on
-// receipt. Empty lists mean the side currently has no contacts of that type.
+// detected by each team. The frontend replaces its per-team detection set on
+// receipt. Empty lists mean the team currently has no contacts of that type.
 
 message DetectionUpdate {
-  string          detecting_side        = 1; // "Blue" | "Red" | "Neutral"
+  string          detecting_team        = 1; // country / team code such as "USA" or "IRN"
   repeated string detected_unit_ids    = 2;
-  repeated string detected_munition_ids = 3; // in-flight munition IDs visible to this side
+  repeated string detected_munition_ids = 3; // in-flight munition IDs visible to this team
   repeated DetectionContact unit_contacts = 4;
 }
 
@@ -129,5 +129,5 @@ message NarrativeEvent {
   string text     = 1;
   string category = 2; // "combat" | "scenario" | "c2"
   string unit_id  = 3;
-  string side     = 4;
+  string team_id  = 4;
 }

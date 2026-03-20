@@ -62,7 +62,6 @@ message Unit {
   string id           = 1; // UUID
   string display_name = 2; // Short designator e.g. "DDG-51"
   string full_name    = 3; // Full name e.g. "USS Arleigh Burke (DDG-51)"
-  string side         = 4; // "Blue" | "Red" | "Neutral"
   string definition_id = 5; // References UnitDefinition.id slug
   string team_id      = 6; // Owning team / nation, e.g. "ISR", "USA", "IRN"
   string coalition_id = 7; // Friendly grouping used for combat / detection sharing

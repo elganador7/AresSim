@@ -129,7 +129,6 @@ export interface Unit {
   id: string;
   displayName: string;
   fullName: string;
-  side: string;  // "Blue" | "Red" | "Neutral"
   teamId?: string;
   coalitionId?: string;
   natoPendingSymbol: string;  // NATO APP-6D SIDC code
@@ -188,7 +187,7 @@ export interface SimStore {
   explosions: Map<string, ExplosionFx>;
 
   // ── Munition detections ───────────────────────────────────────────────────
-  // Maps detecting side → set of munition IDs currently visible to that side.
+  // Maps detecting team → set of munition IDs currently visible to that team.
   munitionDetections: Map<string, Set<string>>;
 
   // ── View ─────────────────────────────────────────────────────────────────
@@ -198,7 +197,7 @@ export interface SimStore {
   humanControlledTeam: string;
 
   // ── Detections ───────────────────────────────────────────────────────────
-  // Maps detecting side → set of enemy unit IDs currently in sensor range.
+  // Maps detecting team → set of enemy unit IDs currently in sensor range.
   // Updated every tick by the adjudicator's sensor pass. Replaced in full
   // (not merged) so stale contacts are automatically cleared.
   detections: Map<string, Set<string>>;
@@ -222,7 +221,7 @@ export interface SimStore {
   setMunitions: (munitions: Munition[]) => void;
   addExplosion: (explosion: ExplosionFx) => void;
   removeExplosion: (id: string) => void;
-  setMunitionDetections: (side: string, ids: string[]) => void;
+  setMunitionDetections: (teamId: string, ids: string[]) => void;
   applyUnitDelta: (id: string, delta: Partial<Unit>) => void;
   spawnUnit: (unit: Unit) => void;
   destroyUnit: (id: string) => void;
@@ -237,7 +236,7 @@ export interface SimStore {
   setSelectedStrikePreview: (preview: PathViolationPreview | null) => void;
   setActiveView: (view: string) => void;
   setHumanControlledTeam: (team: string) => void;
-  setDetections: (side: string, ids: string[], contacts?: DetectionContact[]) => void;
+  setDetections: (teamId: string, ids: string[], contacts?: DetectionContact[]) => void;
 }
 
 export interface EventLogEntry {
@@ -245,7 +244,7 @@ export interface EventLogEntry {
   text: string;
   category: string;  // "combat" | "logistics" | "c2" | "intelligence" | "scenario"
   unitId: string;
-  side: string;
+  teamId: string;
   simSeconds: number;
 }
 
@@ -361,12 +360,12 @@ export const useSimStore = create<SimStore>((set) => ({
   setActiveView: (activeView) => set({ activeView }),
   setHumanControlledTeam: (humanControlledTeam) => set({ humanControlledTeam }),
 
-  setDetections: (side, ids, contacts = []) =>
+  setDetections: (teamId, ids, contacts = []) =>
     set((state) => {
       const updated = new Map(state.detections);
-      updated.set(side, new Set(ids));
+      updated.set(teamId, new Set(ids));
       const updatedContacts = new Map(state.detectionContacts);
-      updatedContacts.set(side, new Map(contacts.map((contact) => [contact.unitId, contact])));
+      updatedContacts.set(teamId, new Map(contacts.map((contact) => [contact.unitId, contact])));
       return { detections: updated, detectionContacts: updatedContacts };
     }),
 
@@ -388,10 +387,10 @@ export const useSimStore = create<SimStore>((set) => ({
       return { explosions: updated };
     }),
 
-  setMunitionDetections: (side, ids) =>
+  setMunitionDetections: (teamId, ids) =>
     set((state) => {
       const updated = new Map(state.munitionDetections);
-      updated.set(side, new Set(ids));
+      updated.set(teamId, new Set(ids));
       return { munitionDetections: updated };
     }),
 }));

@@ -2,18 +2,12 @@
  * DropConfirmDialog.tsx
  *
  * Compact modal shown after a unit is dropped on the globe.
- * Asks for Designator and Side only.
+ * Asks for designator, country, and loadout.
  */
 
 import { useRef, useEffect, useState } from "react";
 import { blankUnit, type PendingDrop, type UnitDraft, useEditorStore } from "../../store/editorStore";
 import { EDITOR_COUNTRY_NAME_BY_CODE } from "../../data/editorCountries";
-
-const SIDE_COLOR: Record<string, string> = {
-  Blue: "#3b82f6",
-  Red: "#ef4444",
-  Neutral: "#f59e0b",
-};
 
 interface Props {
   drop: PendingDrop;
@@ -27,7 +21,6 @@ export default function DropConfirmDialog({ drop, onConfirm, onCancel }: Props) 
     const base = (drop.shortName || drop.label).toUpperCase().replace(/\s+/g, "-");
     return `${base}-1`;
   });
-  const [side, setSide] = useState<"Blue" | "Red" | "Neutral">("Blue");
   const countryOptions = Array.from(new Set([selectedCountryCode, ...drop.employedBy, drop.nationOfOrigin].filter(Boolean)));
   const [teamId, setTeamId] = useState(() => countryOptions[0] ?? "");
   const [loadoutConfigurationId, setLoadoutConfigurationId] = useState(
@@ -44,9 +37,8 @@ export default function DropConfirmDialog({ drop, onConfirm, onCancel }: Props) 
     const unit: UnitDraft = {
       ...blankUnit(drop.lat, drop.lon),
       displayName: designator.trim() || drop.label,
-      side,
       teamId,
-      coalitionId: side,
+      coalitionId: teamId,
       definitionId: drop.definitionId,
       loadoutConfigurationId,
       lat: drop.lat,
@@ -97,31 +89,6 @@ export default function DropConfirmDialog({ drop, onConfirm, onCancel }: Props) 
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="field">
-            <label className="field-label">Side</label>
-            <div className="drop-side-tabs">
-              {(["Blue", "Red", "Neutral"] as const).map((s) => (
-                <button
-                  key={s}
-                  className={`drop-side-tab${side === s ? " active" : ""}`}
-                  data-side={s}
-                  onClick={() => setSide(s)}
-                  style={
-                    side === s
-                      ? {
-                          background: `${SIDE_COLOR[s]}22`,
-                          borderColor: `${SIDE_COLOR[s]}88`,
-                          color: SIDE_COLOR[s],
-                        }
-                      : undefined
-                  }
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
           </div>
 
           {drop.weaponConfigurations.length > 0 && (

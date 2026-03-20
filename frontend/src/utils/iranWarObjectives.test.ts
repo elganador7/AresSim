@@ -7,7 +7,6 @@ function makeUnit(id: string, teamId: string, coalitionId: string): Unit {
     id,
     displayName: id,
     fullName: id,
-    side: coalitionId,
     teamId,
     coalitionId,
     natoPendingSymbol: "",

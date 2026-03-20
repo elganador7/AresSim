@@ -12,7 +12,7 @@ import (
 // this constant, the database is wiped and rebuilt from scratch. This is
 // acceptable for a single-player desktop application where the database is
 // purely derived state (the authoritative record lives in scenario files).
-const schemaVersion = 17
+const schemaVersion = 18
 
 // SchemaVersion returns the current schema version for logging.
 func SchemaVersion() int { return schemaVersion }
@@ -92,7 +92,7 @@ var schemaStatements = []string{
 
 	// ── unit ──────────────────────────────────────────────────────────────────
 	// Core simulation entity. Indexed fields support the adjudicator's hot-path
-	// queries (all units by side, all active units). Capabilities and orders are
+	// queries (all units by team, all active units). Capabilities and orders are
 	// stored as proto binary blobs because they are deeply nested and not queried.
 
 	`DEFINE TABLE IF NOT EXISTS unit SCHEMAFULL`,
@@ -100,8 +100,8 @@ var schemaStatements = []string{
 	// Identity
 	`DEFINE FIELD IF NOT EXISTS display_name      ON unit TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS full_name         ON unit TYPE string`,
-	`DEFINE FIELD IF NOT EXISTS side              ON unit TYPE string`,
-	`DEFINE FIELD IF NOT EXISTS nation_id         ON unit TYPE option<string>`,
+	`DEFINE FIELD IF NOT EXISTS team_id           ON unit TYPE option<string>`,
+	`DEFINE FIELD IF NOT EXISTS coalition_id      ON unit TYPE option<string>`,
 	`DEFINE FIELD IF NOT EXISTS nato_symbol_sidc  ON unit TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS definition_id     ON unit TYPE option<string>`,
 
@@ -137,7 +137,7 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS attack_order      ON unit TYPE option<object>`,
 
 	// Indexes
-	`DEFINE INDEX IF NOT EXISTS idx_unit_side     ON unit FIELDS side`,
+	`DEFINE INDEX IF NOT EXISTS idx_unit_team     ON unit FIELDS team_id`,
 	`DEFINE INDEX IF NOT EXISTS idx_unit_active   ON unit FIELDS is_active`,
 	`DEFINE INDEX IF NOT EXISTS idx_unit_pos      ON unit FIELDS position`,
 

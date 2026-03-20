@@ -5,15 +5,22 @@ import {
   type UnitDraft,
   type UnitDefinitionDraft,
 } from "../../store/editorStore";
+import { areFriendly } from "../../utils/allegiance";
 import { assessLoadoutAgainstTarget, type WeaponDefLite } from "../../utils/loadoutValidation";
+import { teamColorHex } from "../../utils/teamColors";
 import { ATTACK_ORDER_TYPES, DESIRED_EFFECTS, ENGAGEMENT_BEHAVIORS, filterValidEditorTargets } from "../../utils/tasking";
 import { formatCountry } from "./scenarioSerialization";
 
-const SIDE_COLOR: Record<string, string> = {
-  Blue: "#3b82f6",
-  Red: "#ef4444",
-  Neutral: "#f59e0b",
+const BASE_OPS_STATE_LABEL: Record<number, string> = {
+  0: "Unknown",
+  1: "Usable",
+  2: "Degraded",
+  3: "Closed",
 };
+
+function isAirbaseAsset(assetClass: string | undefined): boolean {
+  return assetClass === "airbase";
+}
 
 function InlineEditForm({
   unit,
@@ -37,8 +44,8 @@ function InlineEditForm({
   onCancel: () => void;
 }) {
   const [displayName, setDisplayName] = useState(unit.displayName);
-  const [side, setSide] = useState<UnitDraft["side"]>(unit.side);
   const [teamId, setTeamId] = useState(unit.teamId);
+  const [coalitionId, setCoalitionId] = useState(unit.coalitionId || unit.teamId);
   const [hostBaseId, setHostBaseId] = useState(unit.hostBaseId ?? "");
   const [heading, setHeading] = useState(unit.heading);
   const [speed, setSpeed] = useState(unit.speed);
@@ -60,7 +67,10 @@ function InlineEditForm({
     .filter((slot) => slot.initialQty > 0 || slot.maxQty > 0)
     .map((slot) => weaponDefs.get(slot.weaponId))
     .filter((weapon): weapon is WeaponDefLite => Boolean(weapon));
-  const validTargets = filterValidEditorTargets(unit, units, loadedWeapons, unitDefinitions, side);
+  const validTargets = filterValidEditorTargets(unit, units, loadedWeapons, unitDefinitions, {
+    teamId,
+    coalitionId,
+  });
   const targetUnit = validTargets.find((candidate) => candidate.id === targetUnitId);
   const targetDef = unitDefinitions.find((candidate) => candidate.id === targetUnit?.definitionId);
   const selectedDefinition = unitDefinitions.find((candidate) => candidate.id === unit.definitionId);
@@ -68,13 +78,15 @@ function InlineEditForm({
     if (candidate.id === unit.id) {
       return false;
     }
-    if (candidate.side !== side) {
+    if (!areFriendly({ teamId, coalitionId }, candidate)) {
       return false;
     }
     const candidateDefinition = unitDefinitions.find((definition) => definition.id === candidate.definitionId);
     return candidateDefinition?.assetClass === "airbase";
   });
   const canAssignHostBase = selectedDefinition?.domain === 2;
+  const isFacility = isAirbaseAsset(selectedDefinition?.assetClass);
+  const hostedUnits = units.filter((candidate) => candidate.hostBaseId === unit.id);
   const countryOptions = Array.from(
     new Set([
       teamId,
@@ -121,6 +133,15 @@ function InlineEditForm({
           ))}
         </select>
       </div>
+      <div className="field">
+        <label className="field-label">Coalition</label>
+        <input
+          className="field-input"
+          value={coalitionId}
+          onChange={(e) => setCoalitionId(e.target.value.trim().toUpperCase())}
+          placeholder="Optional coalition tag"
+        />
+      </div>
       {canAssignHostBase && (
         <div className="field">
           <label className="field-label">Host Base</label>
@@ -134,40 +155,48 @@ function InlineEditForm({
           </select>
         </div>
       )}
-      <div className="field">
-        <label className="field-label">Side</label>
-        <div className="drop-side-tabs">
-          {(["Blue", "Red", "Neutral"] as const).map((s) => (
-            <button
-              key={s}
-              className={`drop-side-tab${side === s ? " active" : ""}`}
-              data-side={s}
-              onClick={() => setSide(s)}
-              style={side === s ? {
-                background: `${SIDE_COLOR[s]}22`,
-                borderColor: `${SIDE_COLOR[s]}88`,
-                color: SIDE_COLOR[s],
-              } : undefined}
-            >
-              {s}
-            </button>
-          ))}
+      {!isFacility && (
+        <>
+          <div className="field-row">
+            <div className="field">
+              <label className="field-label">Heading (°)</label>
+              <input className="field-input" type="number" min={0} max={359} value={heading} onChange={(e) => setHeading(Number(e.target.value))} />
+            </div>
+            <div className="field">
+              <label className="field-label">Speed (m/s)</label>
+              <input className="field-input" type="number" min={0} step="0.1" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} />
+            </div>
+          </div>
+          <div className="field">
+            <label className="field-label">Strength (0–1)</label>
+            <input className="field-input" type="number" min={0} max={1} step="0.01" value={strength} onChange={(e) => setStrength(Number(e.target.value))} />
+          </div>
+        </>
+      )}
+      {isFacility && (
+        <div className="editor-facility-block">
+          <div className="editor-facility-meta">
+            <span className="editor-facility-tag">{selectedDefinition?.assetClass?.replaceAll("_", " ") ?? "facility"}</span>
+            <span className="editor-facility-state">{BASE_OPS_STATE_LABEL[unit.baseOps?.state ?? 0]}</span>
+          </div>
+          <div className="editor-facility-copy">
+            Fixed facility. Launch and recovery state is driven by base operations, not mobile unit movement or fuel.
+          </div>
+          <div className="editor-hosted-header">Stationed Units</div>
+          {hostedUnits.length > 0 ? (
+            <div className="editor-hosted-list">
+              {hostedUnits.map((hosted) => (
+                <div key={hosted.id} className="editor-hosted-row">
+                  <span>{hosted.displayName}</span>
+                  <span>{formatCountry(hosted.teamId || "UNK")}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="editor-hosted-empty">No units assigned to this base.</div>
+          )}
         </div>
-      </div>
-      <div className="field-row">
-        <div className="field">
-          <label className="field-label">Heading (°)</label>
-          <input className="field-input" type="number" min={0} max={359} value={heading} onChange={(e) => setHeading(Number(e.target.value))} />
-        </div>
-        <div className="field">
-          <label className="field-label">Speed (m/s)</label>
-          <input className="field-input" type="number" min={0} step="0.1" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} />
-        </div>
-      </div>
-      <div className="field">
-        <label className="field-label">Strength (0–1)</label>
-        <input className="field-input" type="number" min={0} max={1} step="0.01" value={strength} onChange={(e) => setStrength(Number(e.target.value))} />
-      </div>
+      )}
       {availableLoadouts.length > 0 && (
         <div className="field">
           <label className="field-label">Mission Loadout</label>
@@ -178,71 +207,78 @@ function InlineEditForm({
           </select>
         </div>
       )}
-      <div className="field">
-        <label className="field-label">Engagement Behavior</label>
-        <select className="field-select" value={engagementBehavior} onChange={(e) => setEngagementBehavior(Number(e.target.value))}>
-          {ENGAGEMENT_BEHAVIORS.map((option) => (
-            <option key={option.value} value={option.value}>{option.label}</option>
-          ))}
-        </select>
-      </div>
-      <div className="field">
-        <label className="field-label">Autonomous Pkill Threshold</label>
-        <input className="field-input" type="number" min={0.1} max={0.99} step={0.05} value={engagementPkillThreshold} onChange={(e) => setEngagementPkillThreshold(Number(e.target.value))} />
-      </div>
-      <div className="field">
-        <label className="field-label">Attack Task</label>
-        <select className="field-select" value={attackOrderType} onChange={(e) => setAttackOrderType(Number(e.target.value))}>
-          {ATTACK_ORDER_TYPES.map((option) => (
-            <option key={option.value} value={option.value}>{option.label}</option>
-          ))}
-        </select>
-      </div>
-      {attackOrderType !== 0 && (
+      {!isFacility && (
         <>
           <div className="field">
-            <label className="field-label">Assigned Target</label>
-            <select className="field-select" value={targetUnitId} onChange={(e) => setTargetUnitId(e.target.value)}>
-              <option value="">Select enemy unit…</option>
-              {validTargets.map((candidate) => (
-                <option key={candidate.id} value={candidate.id}>{candidate.displayName} · {candidate.side}</option>
+            <label className="field-label">Engagement Behavior</label>
+            <select className="field-select" value={engagementBehavior} onChange={(e) => setEngagementBehavior(Number(e.target.value))}>
+              {ENGAGEMENT_BEHAVIORS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
           </div>
-          <div className="field-row">
-            <div className="field">
-              <label className="field-label">Desired Effect</label>
-              <select className="field-select" value={desiredEffect} onChange={(e) => setDesiredEffect(Number(e.target.value))}>
-                {DESIRED_EFFECTS.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <label className="field-label">Order Pkill Threshold</label>
-              <input className="field-input" type="number" min={0.1} max={0.99} step={0.05} value={pkillThreshold} onChange={(e) => setPkillThreshold(Number(e.target.value))} />
-            </div>
+          <div className="field">
+            <label className="field-label">Autonomous Pkill Threshold</label>
+            <input className="field-input" type="number" min={0.1} max={0.99} step={0.05} value={engagementPkillThreshold} onChange={(e) => setEngagementPkillThreshold(Number(e.target.value))} />
           </div>
-          {loadoutAssessment.severity !== "none" && loadoutAssessment.message && (
-            <div className={`order-validation-note ${loadoutAssessment.severity}`}>{loadoutAssessment.message}</div>
+          <div className="field">
+            <label className="field-label">Attack Task</label>
+            <select className="field-select" value={attackOrderType} onChange={(e) => setAttackOrderType(Number(e.target.value))}>
+              {ATTACK_ORDER_TYPES.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+          {attackOrderType !== 0 && (
+            <>
+              <div className="field">
+                <label className="field-label">Assigned Target</label>
+                <select className="field-select" value={targetUnitId} onChange={(e) => setTargetUnitId(e.target.value)}>
+                  <option value="">Select enemy unit…</option>
+                  {validTargets.map((candidate) => (
+                    <option key={candidate.id} value={candidate.id}>{candidate.displayName} · {(candidate.teamId || "UNK")}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="field-row">
+                <div className="field">
+                  <label className="field-label">Desired Effect</label>
+                  <select className="field-select" value={desiredEffect} onChange={(e) => setDesiredEffect(Number(e.target.value))}>
+                    {DESIRED_EFFECTS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label className="field-label">Order Pkill Threshold</label>
+                  <input className="field-input" type="number" min={0.1} max={0.99} step={0.05} value={pkillThreshold} onChange={(e) => setPkillThreshold(Number(e.target.value))} />
+                </div>
+              </div>
+              {loadoutAssessment.severity !== "none" && loadoutAssessment.message && (
+                <div className={`order-validation-note ${loadoutAssessment.severity}`}>{loadoutAssessment.message}</div>
+              )}
+            </>
           )}
         </>
       )}
       <div className="field-row" style={{ marginTop: 8 }}>
-        <button className={`btn btn-sm${isRouteMode ? " btn-primary" : ""}`} onClick={onToggleRouteMode}>
-          {isRouteMode ? "Finish Route" : "Edit Route"}
-        </button>
-        <button className="btn btn-sm" onClick={() => onSave({ moveOrder: undefined })}>
-          Clear Route
-        </button>
+        {!isFacility && (
+          <>
+            <button className={`btn btn-sm${isRouteMode ? " btn-primary" : ""}`} onClick={onToggleRouteMode}>
+              {isRouteMode ? "Finish Route" : "Edit Route"}
+            </button>
+            <button className="btn btn-sm" onClick={() => onSave({ moveOrder: undefined })}>
+              Clear Route
+            </button>
+          </>
+        )}
         <button
           className="btn btn-success btn-sm"
           disabled={loadoutAssessment.severity === "invalid"}
           onClick={() => onSave({
             displayName,
-            side,
             teamId,
-            coalitionId: side,
+            coalitionId: coalitionId || teamId,
             hostBaseId: hostBaseId || undefined,
             loadoutConfigurationId,
             engagementBehavior,
@@ -295,7 +331,7 @@ export function PlacedUnits({
               setEditingUnit(u.id);
             }}
           >
-            <span className="unit-dot" style={{ background: SIDE_COLOR[u.side] }} />
+            <span className="unit-dot" style={{ background: teamColorHex(u.teamId) }} />
             <span className="unit-list-name">{u.displayName}</span>
             {u.attackOrder?.targetUnitId && (
               <span className="unit-list-order">
@@ -303,7 +339,7 @@ export function PlacedUnits({
               </span>
             )}
             {u.moveOrder?.waypoints?.length ? <span className="unit-list-order">Route {u.moveOrder.waypoints.length}</span> : null}
-            <span className="unit-list-side">{u.side}</span>
+            <span className="unit-list-side">{u.teamId || "UNK"}</span>
             <span className="unit-list-actions">
               <button
                 className={`btn btn-sm${routeEditUnitId === u.id ? " btn-primary" : ""}`}
