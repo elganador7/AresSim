@@ -39,9 +39,12 @@ import {
   isVisible,
   makeUnitEntity,
   maxWeaponRangeM,
+  relationshipColorHex,
   routeColorForUnit,
   teamForUnit,
   updateMapCursor,
+  definitionInfoFor,
+  normalizeDefinitionId,
 } from "./helpers";
 
 interface SetupCesiumStoreSyncOptions {
@@ -103,15 +106,16 @@ export function setupCesiumStoreSync({
       (existing.position as unknown as { setValue: (p: Cartesian3) => void }).setValue(pos);
       existing.show = visible;
       if (existing.billboard) {
-        const def = defInfoRef.current[unit.definitionId];
+        const def = definitionInfoFor(defInfoRef.current, unit.definitionId);
+        const { humanControlledTeam, units } = useSimStore.getState();
         existing.billboard.image = new ConstantProperty(
-          getUnitBillboardUrl(def?.generalType ?? 0, teamForUnit(unit, defInfoRef.current), def?.shortName ?? unit.displayName),
+          getUnitBillboardUrl(def?.generalType ?? 0, relationshipColorHex(unit, humanControlledTeam, units), def?.shortName ?? unit.displayName),
         );
         existing.billboard.scale = new ConstantProperty(isSelected ? 1.4 : 1.0);
         existing.billboard.color = new ConstantProperty(Color.WHITE.withAlpha(trackAlpha));
       }
     } else {
-      const def = defInfoRef.current[unit.definitionId];
+      const def = definitionInfoFor(defInfoRef.current, unit.definitionId);
       const entity = makeUnitEntity(unit, def?.generalType ?? 0, def?.shortName ?? unit.displayName);
       entity.show = visible;
       viewer.entities.add(entity);
@@ -122,7 +126,8 @@ export function setupCesiumStoreSync({
 
     const order = unit.moveOrder;
     if (!track && order && order.waypoints.length > 0) {
-      const routeColor = routeColorForUnit(unit, defInfoRef.current);
+      const { humanControlledTeam, units } = useSimStore.getState();
+      const routeColor = routeColorForUnit(unit, humanControlledTeam, units);
       const positions: Cartesian3[] = [
         Cartesian3.fromDegrees(unit.position.lon, unit.position.lat),
         ...order.waypoints.map((wp) => Cartesian3.fromDegrees(wp.lon, wp.lat)),
@@ -286,7 +291,8 @@ export function setupCesiumStoreSync({
 
     viewer.entities.removeById(rangeId);
     if (isSelected && visible) {
-      const ringColor = routeColorForUnit(unit, defInfoRef.current);
+      const { humanControlledTeam, units } = useSimStore.getState();
+      const ringColor = routeColorForUnit(unit, humanControlledTeam, units);
       const { weaponDefs } = useSimStore.getState();
       const weaponRangeM = maxWeaponRangeM(unit, weaponDefs);
       if (weaponRangeM > 0) {
@@ -307,7 +313,7 @@ export function setupCesiumStoreSync({
       }
     }
 
-    const sensorRangeM = defInfoRef.current[unit.definitionId]?.detectionRangeM ?? 0;
+    const sensorRangeM = definitionInfoFor(defInfoRef.current, unit.definitionId)?.detectionRangeM ?? 0;
     if (!visible || !isSelected || sensorRangeM <= 0) {
       viewer.entities.removeById(sensorId);
     } else {
@@ -511,13 +517,21 @@ export function setupCesiumStoreSync({
     ListUnitDefinitions()
       .then((rows) => {
         const map: Record<string, DefInfo> = {};
+        const numeric = (value: unknown) => {
+          const parsed = Number(value);
+          return Number.isFinite(parsed) ? parsed : 0;
+        };
         rows.forEach((r) => {
+          const id = normalizeDefinitionId(String(r["id"] ?? ""));
+          if (!id) {
+            return;
+          }
           const shortName = String(r["short_name"] ?? "").trim()
             || String(r["specific_type"] ?? "").trim()
             || String(r["name"] ?? "").trim();
-          map[String(r["id"])] = {
-            generalType: Number(r["general_type"]),
-            detectionRangeM: Number(r["detection_range_m"]) || 0,
+          map[id] = {
+            generalType: numeric(r["general_type"]),
+            detectionRangeM: numeric(r["detection_range_m"]),
             shortName,
             teamCode: Array.isArray(r["employed_by"]) && r["employed_by"].length > 0
               ? String(r["employed_by"][0]).trim().toUpperCase()

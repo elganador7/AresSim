@@ -12,8 +12,8 @@ import {
 import type { ExplosionFx, Munition, Unit, WeaponDef } from "../../store/simStore";
 import { useSimStore } from "../../store/simStore";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
-import { teamColorHex } from "../../utils/teamColors";
 import { inferUnitTeamCode } from "../../utils/unitTeams";
+import { areHostile } from "../../utils/allegiance";
 
 export type ActiveView = string;
 
@@ -22,6 +22,7 @@ export interface DefInfo {
   detectionRangeM: number;
   shortName: string;
   teamCode: string;
+  coalitionId?: string;
 }
 
 export type Detections = Map<string, Set<string>>;
@@ -71,16 +72,52 @@ export function isMunitionVisible(
 }
 
 function defInfoRefFallback(definitionId: string, defInfo: Record<string, DefInfo>) {
-  return defInfo[definitionId];
+  return defInfo[normalizeDefinitionId(definitionId)];
+}
+
+export function normalizeDefinitionId(definitionId: string): string {
+  const raw = String(definitionId ?? "").trim();
+  const idx = raw.lastIndexOf(":");
+  return idx >= 0 ? raw.slice(idx + 1) : raw;
+}
+
+export function definitionInfoFor(defInfo: Record<string, DefInfo>, definitionId: string): DefInfo | undefined {
+  return defInfo[normalizeDefinitionId(definitionId)];
 }
 
 export function teamForUnit(unit: Unit, defInfo: Record<string, DefInfo>): string {
   return unit.teamId?.trim().toUpperCase()
-    || inferUnitTeamCode(unit.id, defInfo[unit.definitionId]?.teamCode ?? "");
+    || inferUnitTeamCode(unit.id, definitionInfoFor(defInfo, unit.definitionId)?.teamCode ?? "");
 }
 
-export function routeColorForUnit(unit: Unit, defInfo: Record<string, DefInfo>): Color {
-  return Color.fromCssColorString(teamColorHex(teamForUnit(unit, defInfo)));
+function sharesIntelIntoView(sourceTeam: string, view: ActiveView): boolean {
+  const { relationships } = useSimStore.getState();
+  return relationships.some((relationship) =>
+    relationship.shareIntel
+    && relationship.fromCountry.trim().toUpperCase() === sourceTeam
+    && relationship.toCountry.trim().toUpperCase() === view,
+  );
+}
+
+export function relationshipColorHex(unit: Unit, humanControlledTeam: string, units: Map<string, Unit>): string {
+  const { activeView } = useSimStore.getState();
+  const playerTeam = (humanControlledTeam.trim() || (activeView !== "debug" ? activeView : "")).toUpperCase();
+  if (!playerTeam) {
+    return "#94a3b8";
+  }
+  const unitTeam = (unit.teamId ?? "").trim().toUpperCase();
+  if (unitTeam === playerTeam) {
+    return "#3b82f6";
+  }
+  const playerReference = Array.from(units.values()).find((candidate) => (candidate.teamId ?? "").trim().toUpperCase() === playerTeam);
+  if (!playerReference) {
+    return "#94a3b8";
+  }
+  return areHostile(playerReference, unit) ? "#ef4444" : "#94a3b8";
+}
+
+export function routeColorForUnit(unit: Unit, humanControlledTeam: string, units: Map<string, Unit>): Color {
+  return Color.fromCssColorString(relationshipColorHex(unit, humanControlledTeam, units));
 }
 
 export function isVisible(
@@ -94,27 +131,37 @@ export function isVisible(
   if (teamCode === view) {
     return true;
   }
+  if (teamCode && sharesIntelIntoView(teamCode, view)) {
+    return true;
+  }
   return detections.get(view)?.has(unit.id) ?? false;
 }
 
 export function isTrack(unit: Unit, view: ActiveView, defInfo: Record<string, DefInfo>): boolean {
   if (view === "debug") return false;
-  return teamForUnit(unit, defInfo) !== view;
+  const teamCode = teamForUnit(unit, defInfo);
+  if (teamCode === view) {
+    return false;
+  }
+  return !(teamCode && sharesIntelIntoView(teamCode, view));
 }
 
 export function canMove(unit: Unit, view: ActiveView, defInfo: Record<string, DefInfo>): boolean {
-  if (view === "debug") return true;
-  return teamForUnit(unit, defInfo) === view;
+  const { humanControlledTeam } = useSimStore.getState();
+  const controlTeam = (humanControlledTeam.trim() || (view !== "debug" ? view : "")).toUpperCase();
+  if (!controlTeam) return view === "debug";
+  return teamForUnit(unit, defInfo) === controlTeam;
 }
 
 export function makeUnitEntity(unit: Unit, generalType: number, shortName: string): Entity {
-  const teamCode = unit.teamId?.trim().toUpperCase() || "UNK";
+  const { humanControlledTeam, units } = useSimStore.getState();
+  const frameColor = relationshipColorHex(unit, humanControlledTeam, units);
   return new Entity({
     id: unit.id,
     position: Cartesian3.fromDegrees(unit.position.lon, unit.position.lat, unit.position.altMsl),
     show: true,
     billboard: {
-      image: getUnitBillboardUrl(generalType, teamCode, shortName),
+      image: getUnitBillboardUrl(generalType, frameColor, shortName),
       width: 62,
       height: 62,
       verticalOrigin: VerticalOrigin.CENTER,

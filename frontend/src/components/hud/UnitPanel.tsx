@@ -14,7 +14,14 @@ import { type UnitDefinitionTargetLite } from "../../utils/loadoutValidation";
 import { teamColorHex } from "../../utils/teamColors";
 import { ATTACK_ORDER_TYPES, DESIRED_EFFECTS, ENGAGEMENT_BEHAVIORS, filterValidLiveTargets } from "../../utils/tasking";
 
-type UnitDefinitionPanelMeta = UnitDefinitionTargetLite & { teamCode?: string };
+type UnitDefinitionPanelMeta = UnitDefinitionTargetLite & {
+  teamCode?: string;
+  embarkedFixedWingCapacity?: number;
+  embarkedRotaryWingCapacity?: number;
+  embarkedUavCapacity?: number;
+  launchCapacityPerInterval?: number;
+  recoveryCapacityPerInterval?: number;
+};
 
 const BASE_OPS_STATE_LABEL: Record<number, string> = {
   0: "Unknown",
@@ -31,12 +38,12 @@ const DAMAGE_STATE_LABEL: Record<number, string> = {
   4: "Destroyed",
 };
 
-function canControlUnit(definitionId: string, explicitTeamId: string | undefined, view: string, definitionMap: Map<string, UnitDefinitionPanelMeta>): boolean {
-  if (view === "debug") return true;
+function canControlUnit(definitionId: string, explicitTeamId: string | undefined, controlTeam: string, definitionMap: Map<string, UnitDefinitionPanelMeta>): boolean {
+  if (!controlTeam) return false;
   const teamCode = explicitTeamId?.trim().toUpperCase()
     || definitionMap.get(definitionId)?.teamCode?.trim().toUpperCase()
     || "";
-  return teamCode === view;
+  return teamCode === controlTeam;
 }
 
 function ensureSuccess(result: { success: boolean; error?: string }) {
@@ -45,11 +52,22 @@ function ensureSuccess(result: { success: boolean; error?: string }) {
   }
 }
 
+function isHostPlatform(definition: UnitDefinitionPanelMeta | undefined): boolean {
+  if (!definition) return false;
+  return definition.assetClass === "airbase"
+    || (definition.embarkedFixedWingCapacity ?? 0) > 0
+    || (definition.embarkedRotaryWingCapacity ?? 0) > 0
+    || (definition.embarkedUavCapacity ?? 0) > 0
+    || (definition.launchCapacityPerInterval ?? 0) > 0
+    || (definition.recoveryCapacityPerInterval ?? 0) > 0;
+}
+
 export default function UnitPanel() {
   const selectedUnitId = useSimStore((s) => s.selectedUnitId);
   const units = useSimStore((s) => s.units);
   const weaponDefs = useSimStore((s) => s.weaponDefs);
   const activeView = useSimStore((s) => s.activeView);
+  const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
   const selectUnit = useSimStore((s) => s.selectUnit);
   const routePreview = useSimStore((s) => s.selectedRoutePreview);
   const strikePreview = useSimStore((s) => s.selectedStrikePreview);
@@ -63,8 +81,10 @@ export default function UnitPanel() {
   const [definitionMap, setDefinitionMap] = useState<Map<string, UnitDefinitionPanelMeta>>(new Map());
 
   const unit = selectedUnitId ? units.get(selectedUnitId) : undefined;
+  const playerTeam = (humanControlledTeam.trim() || (activeView !== "debug" ? activeView : "")).toUpperCase();
+  const ownedByPlayer = unit ? (unit.teamId ?? "").trim().toUpperCase() === playerTeam : false;
   const controllable = unit
-    ? canControlUnit(unit.definitionId, unit.teamId, activeView, definitionMap)
+    ? canControlUnit(unit.definitionId, unit.teamId, playerTeam, definitionMap)
     : false;
   const teamColor = teamColorHex(unit?.teamId);
   const contactMeta = unit && activeView !== "debug"
@@ -82,7 +102,7 @@ export default function UnitPanel() {
   const routeWarning = routePreview?.blocked ? (routePreview.reason ?? "Transit blocked.") : null;
   const strikeWarning = strikePreview?.blocked ? (strikePreview.reason ?? "Strike blocked.") : null;
   const definition = unit ? definitionMap.get(unit.definitionId) : undefined;
-  const isFacility = definition?.assetClass === "airbase";
+  const isFacility = isHostPlatform(definition);
   const hostedUnits = useMemo(() => {
     if (!unit) {
       return [];
@@ -113,9 +133,14 @@ export default function UnitPanel() {
           }
           defs.set(id, {
             domain: Number(row.domain ?? 0),
-            targetClass: typeof row.target_class === "string" ? row.target_class : "soft_infrastructure",
+            targetClass: typeof row.target_class === "string" ? row.target_class : "",
             stationary: Boolean(row.stationary),
             assetClass: typeof row.asset_class === "string" ? row.asset_class : "combat_unit",
+            embarkedFixedWingCapacity: Number(row.embarked_fixed_wing_capacity ?? 0),
+            embarkedRotaryWingCapacity: Number(row.embarked_rotary_wing_capacity ?? 0),
+            embarkedUavCapacity: Number(row.embarked_uav_capacity ?? 0),
+            launchCapacityPerInterval: Number(row.launch_capacity_per_interval ?? 0),
+            recoveryCapacityPerInterval: Number(row.recovery_capacity_per_interval ?? 0),
             teamCode: Array.isArray(row.employed_by) && row.employed_by.length > 0
               ? String(row.employed_by[0]).trim().toUpperCase()
               : String(row.nation_of_origin ?? "").trim().toUpperCase(),
@@ -128,6 +153,13 @@ export default function UnitPanel() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (unit && playerTeam && !ownedByPlayer) {
+      clearMapCommandMode();
+      selectUnit(null);
+    }
+  }, [clearMapCommandMode, ownedByPlayer, playerTeam, selectUnit, unit]);
 
   useEffect(() => {
     if (!unit) {
@@ -257,7 +289,7 @@ export default function UnitPanel() {
     }
   };
 
-  if (!unit) return null;
+  if (!unit || (playerTeam && !ownedByPlayer)) return null;
 
   return (
     <div className="unit-panel">

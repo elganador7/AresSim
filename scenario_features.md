@@ -84,6 +84,69 @@ Current baseline: scenario loading, YAML-backed unit libraries, named loadouts, 
   - `withdraw_on_detect`
 - Behavior should be a default policy. Manual attack orders should override it when appropriate.
 
+## 6. OPFOR AI For First-24-Hour War Gaming
+- Replace deterministic follow-on strike scripting with a bounded operational AI for adversary and non-player behavior.
+- Keep scope limited to `USA`, `ISR`, and `IRN` as major actors plus simple defensive behavior for everyone else.
+
+### 6.1 Major-Actor Strike AI
+- Add a target-selection layer for `USA`, `ISR`, and `IRN` that chooses targets to cause maximum strategic pain within current sim limits.
+- First target categories to score:
+  - airbases
+  - runway / base throughput nodes
+  - missile brigades and drone strike groups
+  - SAM / IADS nodes
+  - ports / naval bases
+  - oil / gas / desalination targets
+- Required model inputs:
+  - target strategic value
+  - current target damage / usability
+  - distance / access feasibility
+  - weapon suitability
+  - expected defensive risk
+  - strike cooldown / sortie readiness
+- Initial objective bias:
+  - `IRN`: maximize coalition sortie disruption, regional base pain, infrastructure shock, and pressure in the Gulf
+  - `USA` / `ISR`: maximize suppression of missile/drone forces, IADS degradation, and airbase denial
+
+### 6.2 Lightweight Strike Planner
+- Add a reusable planner that chooses:
+  - shooter
+  - target
+  - desired effect
+  - route / ingress point
+  - launch timing
+- Keep it small:
+  - no full ATO
+  - no tanker scheduling optimizer
+  - no detailed package deconfliction
+- Planner should support:
+  - single-unit opportunistic strikes
+  - grouped salvos against one target
+  - prioritizing stationary strategic targets over mobile ones when target quality is weak
+
+### 6.3 Third-Country Defensive Autopilot
+- Non-player countries should remain defensive/local:
+  - engage unauthorized overflight
+  - intercept inbound missiles and drones threatening their territory or hosted assets
+  - avoid initiating theater-wide offensive campaigns
+- This is intentionally not a diplomacy engine. It is a local sovereign-defense behavior layer.
+
+### 6.4 Scoring Inputs The AI Needs
+- Add authored or derived strategic-value weights on targets and units:
+  - `airbase_value`
+  - `missile_force_value`
+  - `iads_value`
+  - `infrastructure_value`
+  - `naval_chokepoint_value`
+- The first AI should optimize against those weights rather than trying to infer doctrine from raw unit types alone.
+
+### 6.5 Bounded AI Non-Goals
+- No full logistics AI
+- No dynamic diplomacy
+- No operational research-grade package optimization
+- No campaign-level reinforcement planning
+- No political / escalation AI beyond target weights
+
 ## Recommended Milestones
 1. Data-model foundation
 2. Stationary assets in library + editor
@@ -91,7 +154,9 @@ Current baseline: scenario loading, YAML-backed unit libraries, named loadouts, 
 4. Manual attack orders
 5. Loadout-aware order validation
 6. Engagement behavior profiles
-7. Scenario-specific UX polish
+7. Base capacity and first-day operational effects
+8. Major-actor OPFOR strike AI
+9. Scenario-specific UX polish and scoring
 
 ## Validation Scenarios
 - F-15I ordered to strike an S-300 site with a strike loadout
@@ -99,8 +164,11 @@ Current baseline: scenario loading, YAML-backed unit libraries, named loadouts, 
 - Iranian missile brigade striking a desalination plant and leaving it mission-killed
 - Patriot battery set to `self_defense_only` while nearby fighters remain on `auto_engage`
 - Tanker aircraft ordered to hold while escorts attack assigned targets
+- Iranian AI choosing between Al Udeid, Al Dhafra, and Israeli airbases based on current operational impact
+- Israeli / U.S. AI reprioritizing from air defenses to missile brigades after the first successful suppression wave
 
 ## Likely Refactors
 - Separate `unit` from `asset` presentation in the editor without splitting the core entity model
 - Move autonomous target selection logic out of `AdjudicateTick` into behavior-aware helpers
 - Add a dedicated authored-data layer for weapon effects rather than growing `weapons.go` into behavior logic
+- Split strike-planning heuristics from low-level engagement execution so AI target choice does not further bloat `AdjudicateTick`

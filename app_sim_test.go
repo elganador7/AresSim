@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
+	"github.com/aressim/internal/library"
+	scenario "github.com/aressim/internal/scenario"
 	"github.com/aressim/internal/sim"
 )
 
@@ -22,6 +25,23 @@ func TestEnsureUnitOpsStateInitializesAirbaseOps(t *testing.T) {
 	}
 	if got := unit.GetNextSortieReadySeconds(); got != 0 {
 		t.Fatalf("expected non-negative sortie ready time default, got %v", got)
+	}
+}
+
+func TestEnsureUnitOpsStateInitializesCarrierOps(t *testing.T) {
+	unit := &enginev1.Unit{Id: "cvn-1"}
+	def := sim.DefStats{
+		Domain:                      enginev1.UnitDomain_DOMAIN_SEA,
+		EmbarkedFixedWingCapacity:   70,
+		EmbarkedRotaryWingCapacity:  12,
+		LaunchCapacityPerInterval:   20,
+		RecoveryCapacityPerInterval: 20,
+	}
+
+	ensureUnitOpsState(unit, def)
+
+	if unit.GetBaseOps() == nil {
+		t.Fatal("expected carrier host platform to get default base ops state")
 	}
 }
 
@@ -108,6 +128,51 @@ func TestValidateAndConsumeLaunchAdvancesBaseWindow(t *testing.T) {
 	}
 }
 
+func TestValidateAndConsumeLaunchSnapsAircraftToHostBase(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.setSimSeconds(120)
+	app.defsCache = map[string]sim.DefStats{
+		"carrier": {
+			Domain:                    enginev1.UnitDomain_DOMAIN_SEA,
+			EmbarkedFixedWingCapacity: 75,
+			LaunchCapacityPerInterval: 24,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Units: []*enginev1.Unit{
+			{
+				Id:           "carrier-1",
+				DisplayName:  "Carrier One",
+				DefinitionId: "carrier",
+				Position:     &enginev1.Position{Lat: 24.2, Lon: 36.9},
+				BaseOps: &enginev1.BaseOpsState{
+					State: enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_USABLE,
+				},
+			},
+			{
+				Id:           "ac-1",
+				DisplayName:  "Shooter",
+				DefinitionId: "fighter",
+				HostBaseId:   "carrier-1",
+				Position:     &enginev1.Position{Lat: 0, Lon: 0},
+			},
+		},
+	}
+
+	err := app.validateAndConsumeLaunch(app.currentScenario.Units[1], sim.DefStats{
+		Domain: enginev1.UnitDomain_DOMAIN_AIR,
+	})
+	if err != nil {
+		t.Fatalf("unexpected launch validation failure: %v", err)
+	}
+	if got := app.currentScenario.Units[1].GetPosition().GetLat(); got != 24.2 {
+		t.Fatalf("expected aircraft lat to snap to host base, got %v", got)
+	}
+	if got := app.currentScenario.Units[1].GetPosition().GetLon(); got != 36.9 {
+		t.Fatalf("expected aircraft lon to snap to host base, got %v", got)
+	}
+}
+
 func TestValidateAndConsumeLaunch_DegradedBaseSlowsLaunchAndSortieWindows(t *testing.T) {
 	app := &App{ctx: context.Background()}
 	app.setSimSeconds(300)
@@ -135,7 +200,7 @@ func TestValidateAndConsumeLaunch_DegradedBaseSlowsLaunchAndSortieWindows(t *tes
 	}
 
 	err := app.validateAndConsumeLaunch(app.currentScenario.Units[1], sim.DefStats{
-		Domain:               enginev1.UnitDomain_DOMAIN_AIR,
+		Domain:                enginev1.UnitDomain_DOMAIN_AIR,
 		SortieIntervalMinutes: 60,
 	})
 	if err != nil {
@@ -272,5 +337,99 @@ func TestApplyOpeningStrikeActionsSkipsBlockedLaunch(t *testing.T) {
 
 	if scen.GetUnits()[1].GetAttackOrder() != nil {
 		t.Fatal("expected blocked launch to leave no attack order")
+	}
+}
+
+func TestLoadScenarioSeedsOhioSSGNWeaponsFromLibrary(t *testing.T) {
+	app := &App{
+		ctx: context.Background(),
+		libDefsCache: map[string]library.Definition{
+			"ohio-ssgn": {
+				ID:   "ohio-ssgn",
+				Name: "Ohio-class SSGN",
+				DefaultLoadout: []library.LoadoutSlot{
+					{WeaponID: "ssm-tomahawk", MaxQty: 40, InitialQty: 40},
+					{WeaponID: "torp-mk48", MaxQty: 12, InitialQty: 12},
+				},
+			},
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Id:   "scen-1",
+		Name: "Test Scenario",
+		Units: []*enginev1.Unit{
+			{
+				Id:           "usa-ohio-1",
+				DisplayName:  "Ohio",
+				DefinitionId: "ohio-ssgn",
+				TeamId:       "USA",
+				CoalitionId:  "COALITION_WEST",
+				Position:     &enginev1.Position{Lat: 10, Lon: 10, AltMsl: -30},
+				Status: &enginev1.OperationalStatus{
+					PersonnelStrength:   1,
+					EquipmentStrength:   1,
+					CombatEffectiveness: 1,
+					FuelLevelLiters:     1,
+					Morale:              1,
+					Fatigue:             0,
+					IsActive:            true,
+				},
+			},
+		},
+	}
+
+	app.loadScenario(app.currentScenario)
+
+	if len(app.currentScenario.GetUnits()[0].GetWeapons()) == 0 {
+		t.Fatal("expected Ohio SSGN to receive weapons on scenario load")
+	}
+	weaponIDs := make([]string, 0, len(app.currentScenario.GetUnits()[0].GetWeapons()))
+	for _, w := range app.currentScenario.GetUnits()[0].GetWeapons() {
+		weaponIDs = append(weaponIDs, w.GetWeaponId())
+	}
+	got := strings.Join(weaponIDs, ",")
+	if !strings.Contains(got, "ssm-tomahawk") {
+		t.Fatalf("expected Ohio SSGN loadout to include ssm-tomahawk, got %q", got)
+	}
+}
+
+func TestLoadScenarioSeedsOhioSSGNWeaponsInIranWarScenario(t *testing.T) {
+	defs, err := library.LoadAll("")
+	if err != nil {
+		t.Fatalf("LoadAll failed: %v", err)
+	}
+	defsByID := make(map[string]library.Definition, len(defs))
+	for _, def := range defs {
+		defsByID[def.ID] = def
+	}
+
+	app := &App{
+		ctx:         context.Background(),
+		libDefsCache: defsByID,
+	}
+	scen := scenario.IranCoalitionWarSkeleton()
+
+	app.loadScenario(scen)
+
+	var ohio *enginev1.Unit
+	for _, unit := range scen.GetUnits() {
+		if unit.GetId() == "usa-ohio-arabian-sea" {
+			ohio = unit
+			break
+		}
+	}
+	if ohio == nil {
+		t.Fatal("expected usa-ohio-arabian-sea in Iran war scenario")
+	}
+	if len(ohio.GetWeapons()) == 0 {
+		t.Fatal("expected Ohio SSGN in Iran war scenario to have seeded weapons")
+	}
+	weaponIDs := make([]string, 0, len(ohio.GetWeapons()))
+	for _, w := range ohio.GetWeapons() {
+		weaponIDs = append(weaponIDs, w.GetWeaponId())
+	}
+	got := strings.Join(weaponIDs, ",")
+	if !strings.Contains(got, "ssm-tomahawk") {
+		t.Fatalf("expected Ohio SSGN in Iran war scenario to include ssm-tomahawk, got %q", got)
 	}
 }

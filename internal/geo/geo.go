@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"math"
 	"strings"
 	"sync"
 )
@@ -224,6 +225,97 @@ func SamplePath(points []Point) []GeoSegmentContext {
 	return result
 }
 
+func IsLandPoint(p Point) bool {
+	ctx := LookupPoint(p)
+	return ctx.AirspaceOwner != "" &&
+		ctx.SeaZoneOwner == "" &&
+		ctx.SeaZoneType == SeaZoneTypeNone &&
+		!ctx.IsInternationalAirspace
+}
+
+func SegmentCrossesLand(start, end Point) bool {
+	steps := 8
+	if d := maxFloat(absFloat(end.Lat-start.Lat), absFloat(end.Lon-start.Lon)); d > 0 {
+		if n := int(d / 0.15); n > steps {
+			steps = n
+		}
+	}
+	if steps > 160 {
+		steps = 160
+	}
+	for i := 0; i <= steps; i++ {
+		t := float64(i) / float64(steps)
+		pt := Point{
+			Lat: start.Lat + (end.Lat-start.Lat)*t,
+			Lon: start.Lon + (end.Lon-start.Lon)*t,
+		}
+		if IsLandPoint(pt) {
+			return true
+		}
+	}
+	return false
+}
+
+func BuildMaritimeRoute(start, end Point) ([]Point, bool) {
+	if IsLandPoint(end) {
+		return nil, false
+	}
+	if !SegmentCrossesLand(start, end) {
+		return []Point{end}, true
+	}
+
+	samples := sampleLinePoints(start, end, 96)
+	firstLand, lastLand := -1, -1
+	for idx, pt := range samples {
+		if IsLandPoint(pt) {
+			if firstLand == -1 {
+				firstLand = idx
+			}
+			lastLand = idx
+		}
+	}
+	if firstLand == -1 || lastLand == -1 {
+		return []Point{end}, true
+	}
+
+	entryIdx := maxInt(0, firstLand-1)
+	exitIdx := minInt(len(samples)-1, lastLand+1)
+	entry := samples[entryIdx]
+	exit := samples[exitIdx]
+
+	dLat := end.Lat - start.Lat
+	dLon := end.Lon - start.Lon
+	length := math.Hypot(dLat, dLon)
+	if length == 0 {
+		return nil, false
+	}
+	perpLat := -dLon / length
+	perpLon := dLat / length
+	distances := []float64{0.2, 0.4, 0.8, 1.2, 2.0, 3.0, 4.5, 6.0}
+
+	for _, sign := range []float64{1, -1} {
+		for _, distance := range distances {
+			wp1 := Point{
+				Lat: entry.Lat + perpLat*distance*sign,
+				Lon: entry.Lon + perpLon*distance*sign,
+			}
+			wp2 := Point{
+				Lat: exit.Lat + perpLat*distance*sign,
+				Lon: exit.Lon + perpLon*distance*sign,
+			}
+			if IsLandPoint(wp1) || IsLandPoint(wp2) {
+				continue
+			}
+			if SegmentCrossesLand(start, wp1) || SegmentCrossesLand(wp1, wp2) || SegmentCrossesLand(wp2, end) {
+				continue
+			}
+			return []Point{wp1, wp2, end}, true
+		}
+	}
+
+	return nil, false
+}
+
 func sampleSegment(start, end Point) GeoSegmentContext {
 	steps := 8
 	if d := maxFloat(absFloat(end.Lat-start.Lat), absFloat(end.Lon-start.Lon)); d > 0 {
@@ -281,6 +373,35 @@ func sampleSegment(start, end Point) GeoSegmentContext {
 		ContainsIntlAir:    hasIntlAir,
 		ContainsIntlWaters: hasIntlWaters,
 	}
+}
+
+func sampleLinePoints(start, end Point, steps int) []Point {
+	if steps < 2 {
+		steps = 2
+	}
+	points := make([]Point, 0, steps+1)
+	for i := 0; i <= steps; i++ {
+		t := float64(i) / float64(steps)
+		points = append(points, Point{
+			Lat: start.Lat + (end.Lat-start.Lat)*t,
+			Lon: start.Lon + (end.Lon-start.Lon)*t,
+		})
+	}
+	return points
+}
+
+func minInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 func parseGeometryShapes(geometry geometryJSON) ([]polygonShape, error) {
@@ -406,13 +527,6 @@ func absFloat(v float64) float64 {
 }
 
 func maxFloat(a, b float64) float64 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func maxInt(a, b int) int {
 	if a > b {
 		return a
 	}

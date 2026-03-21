@@ -11,7 +11,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import { TYPE_MAP, FALLBACK } from "../components/UnitTypeIcon";
-import { teamColorHex } from "./teamColors";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
@@ -24,9 +23,8 @@ const cache = new Map<string, string>();
 
 // ─── BUILDER ─────────────────────────────────────────────────────────────────
 
-function buildSvgUrl(generalType: number, teamCode: string, badgeText: string, selected: boolean): string {
+function buildSvgUrl(generalType: number, frameColor: string, badgeText: string, selected: boolean): string {
   const def    = TYPE_MAP[generalType] ?? FALLBACK;
-  const teamHex = teamColorHex(teamCode);
   const size   = selected ? SELECTED_SIZE : NORMAL_SIZE;
   const frameRadius = 12;
   const faceInset = 3;
@@ -50,9 +48,9 @@ function buildSvgUrl(generalType: number, teamCode: string, badgeText: string, s
     : "";
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
-  <rect width="${size}" height="${size}" rx="${frameRadius}" fill="${teamHex}"/>
+  <rect width="${size}" height="${size}" rx="${frameRadius}" fill="${frameColor}"/>
   <rect x="${faceInset}" y="${faceInset}" width="${size - faceInset * 2}" height="${size - faceInset * 2}" rx="${frameRadius - 2}" fill="#10161d"/>
-  <rect x="${faceInset}" y="${size - tagHeight - faceInset}" width="${size - faceInset * 2}" height="${tagHeight}" rx="0" fill="${def.color}" opacity="0.96"/>
+  <rect x="${faceInset}" y="${size - tagHeight - faceInset}" width="${size - faceInset * 2}" height="${tagHeight}" rx="0" fill="${frameColor}" opacity="0.96"/>
   ${selectionRing}
   <svg x="${iconOffX}" y="${iconOffY}" width="${iconSize}" height="${iconSize}" viewBox="${viewBox}" fill="white" overflow="visible">
     ${innerPaths}
@@ -69,20 +67,20 @@ function buildSvgUrl(generalType: number, teamCode: string, badgeText: string, s
  * Returns a cached SVG data URL suitable for a CesiumJS billboard `image`.
  *
  * @param generalType  UnitGeneralType numeric value (from TYPE_MAP)
- * @param teamCode     Country/team code
+ * @param frameColor   Border/frame color
  * @param selected     Whether to render the selection ring (default false)
  */
 export function getUnitBillboardUrl(
   generalType: number,
-  teamCode: string,
+  frameColor: string,
   badgeText: string,
   selected = false,
 ): string {
   const normalizedBadgeText = badgeText.trim().toUpperCase() || (TYPE_MAP[generalType] ?? FALLBACK).shortName;
-  const key = `${generalType}|${teamCode}|${normalizedBadgeText}|${selected}`;
+  const key = `${generalType}|${frameColor}|${normalizedBadgeText}|${selected}`;
   let url = cache.get(key);
   if (!url) {
-    url = buildSvgUrl(generalType, teamCode, normalizedBadgeText, selected);
+    url = buildSvgUrl(generalType, frameColor, normalizedBadgeText, selected);
     cache.set(key, url);
   }
   return url;

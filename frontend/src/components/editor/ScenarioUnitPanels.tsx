@@ -18,8 +18,14 @@ const BASE_OPS_STATE_LABEL: Record<number, string> = {
   3: "Closed",
 };
 
-function isAirbaseAsset(assetClass: string | undefined): boolean {
-  return assetClass === "airbase";
+function isHostPlatform(definition: UnitDefinitionDraft | undefined): boolean {
+  if (!definition) return false;
+  return definition.assetClass === "airbase"
+    || definition.embarkedFixedWingCapacity > 0
+    || definition.embarkedRotaryWingCapacity > 0
+    || definition.embarkedUavCapacity > 0
+    || definition.launchCapacityPerInterval > 0
+    || definition.recoveryCapacityPerInterval > 0;
 }
 
 function InlineEditForm({
@@ -82,10 +88,10 @@ function InlineEditForm({
       return false;
     }
     const candidateDefinition = unitDefinitions.find((definition) => definition.id === candidate.definitionId);
-    return candidateDefinition?.assetClass === "airbase";
+    return isHostPlatform(candidateDefinition);
   });
   const canAssignHostBase = selectedDefinition?.domain === 2;
-  const isFacility = isAirbaseAsset(selectedDefinition?.assetClass);
+  const isFacility = isHostPlatform(selectedDefinition);
   const hostedUnits = units.filter((candidate) => candidate.hostBaseId === unit.id);
   const countryOptions = Array.from(
     new Set([

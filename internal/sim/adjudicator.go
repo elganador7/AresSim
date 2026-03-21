@@ -23,6 +23,9 @@ type DefStats struct {
 	Domain                      enginev1.UnitDomain // physical domain of this platform
 	TargetClass                 string
 	AssetClass                  string
+	EmbarkedFixedWingCapacity   int
+	EmbarkedRotaryWingCapacity  int
+	EmbarkedUAVCapacity         int
 	LaunchCapacityPerInterval   int
 	RecoveryCapacityPerInterval int
 	SortieIntervalMinutes       int

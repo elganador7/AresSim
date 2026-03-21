@@ -3,9 +3,9 @@ import { initBridge } from "./bridge/bridge";
 import CesiumGlobe from "./components/CesiumGlobe";
 import ScenarioEditor from "./components/editor/ScenarioEditor";
 import EventLog from "./components/hud/EventLog";
+import ScenarioLoadModal from "./components/hud/ScenarioLoadModal";
 import TopBar from "./components/hud/TopBar";
 import UnitPanel from "./components/hud/UnitPanel";
-import ViewSwitcher from "./components/hud/ViewSwitcher";
 import { useSimStore } from "./store/simStore";
 import { RequestSync } from "../wailsjs/go/main/App";
 import "./app.css";
@@ -39,11 +39,24 @@ function MapModeBanner() {
 
 export default function App() {
   const [appView, setAppView] = useState<"sim" | "editor">("sim");
+  const [scenarioLoadOpen, setScenarioLoadOpen] = useState(false);
+  const [debugViewMenuVisible, setDebugViewMenuVisible] = useState(false);
 
   useEffect(() => {
     initBridge();
     RequestSync().catch((e) => console.warn("[App] RequestSync:", e));
     console.log("[App] AresSim frontend initialized");
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey && event.key.toLowerCase() === "d") {
+        event.preventDefault();
+        setDebugViewMenuVisible((current) => !current);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   if (appView === "editor") {
@@ -60,11 +73,15 @@ export default function App() {
       <CesiumGlobe />
 
       <div className="hud-overlay">
-        <TopBar onOpenEditor={() => setAppView("editor")} />
+        <TopBar
+          onOpenEditor={() => setAppView("editor")}
+          onOpenScenario={() => setScenarioLoadOpen(true)}
+          debugViewMenuVisible={debugViewMenuVisible}
+        />
         <MapModeBanner />
-        <ViewSwitcher />
         <EventLog />
         <UnitPanel />
+        <ScenarioLoadModal open={scenarioLoadOpen} onClose={() => setScenarioLoadOpen(false)} />
       </div>
     </div>
   );

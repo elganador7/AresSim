@@ -91,18 +91,26 @@ describe("loadSnapshot", () => {
       selectedUnitId: "u1",
       mapCommandMode: { type: "route", unitId: "u1" },
       humanControlledTeam: "ISR",
+      activeView: "IRN",
     });
     useSimStore.getState().loadSnapshot([makeUnit("new")], "S");
     const s = useSimStore.getState();
     expect(s.selectedUnitId).toBeNull();
     expect(s.mapCommandMode).toEqual({ type: "none", unitId: null });
     expect(s.humanControlledTeam).toBe("");
+    expect(s.activeView).toBe("debug");
   });
 
   it("preserves human-controlled team on same-scenario resync", () => {
     useSimStore.setState({ scenarioName: "S", humanControlledTeam: "ISR" });
     useSimStore.getState().loadSnapshot([makeUnit("new")], "S");
     expect(useSimStore.getState().humanControlledTeam).toBe("ISR");
+  });
+
+  it("preserves active view on same-scenario resync", () => {
+    useSimStore.setState({ scenarioName: "S", activeView: "ISR" });
+    useSimStore.getState().loadSnapshot([makeUnit("new")], "S");
+    expect(useSimStore.getState().activeView).toBe("ISR");
   });
 
   it("clears eventLog", () => {

@@ -421,6 +421,68 @@ func attackRouteNeedsUpdate(unit *enginev1.Unit, waypoint *enginev1.Waypoint) bo
 	return haversineM(current.GetLat(), current.GetLon(), waypoint.GetLat(), waypoint.GetLon()) > 5_000
 }
 
+func canHostAircraft(def DefStats) bool {
+	if def.AssetClass == "airbase" {
+		return true
+	}
+	return def.EmbarkedFixedWingCapacity > 0 ||
+		def.EmbarkedRotaryWingCapacity > 0 ||
+		def.EmbarkedUAVCapacity > 0 ||
+		def.LaunchCapacityPerInterval > 0 ||
+		def.RecoveryCapacityPerInterval > 0
+}
+
+func hostedUnitShouldMirrorBase(unit *enginev1.Unit, def DefStats) bool {
+	if unit == nil || unit.GetPosition() == nil {
+		return false
+	}
+	if def.Domain != enginev1.UnitDomain_DOMAIN_AIR {
+		return false
+	}
+	if unit.GetPosition().GetAltMsl() > 0 {
+		return false
+	}
+	if order := unit.GetMoveOrder(); order != nil && len(order.GetWaypoints()) > 0 {
+		return false
+	}
+	return unit.GetHostBaseId() != ""
+}
+
+func syncHostedAircraftToHostBases(units []*enginev1.Unit, defs map[string]DefStats) []*enginev1.UnitDelta {
+	unitByID := make(map[string]*enginev1.Unit, len(units))
+	for _, unit := range units {
+		unitByID[unit.GetId()] = unit
+	}
+
+	deltas := make([]*enginev1.UnitDelta, 0)
+	for _, unit := range units {
+		if !hostedUnitShouldMirrorBase(unit, defs[unit.GetDefinitionId()]) {
+			continue
+		}
+		base := unitByID[unit.GetHostBaseId()]
+		if base == nil || base.GetPosition() == nil || !canHostAircraft(defs[base.GetDefinitionId()]) {
+			continue
+		}
+		if unit.GetPosition().GetLat() == base.GetPosition().GetLat() &&
+			unit.GetPosition().GetLon() == base.GetPosition().GetLon() &&
+			unit.GetPosition().GetAltMsl() == base.GetPosition().GetAltMsl() {
+			continue
+		}
+		unit.Position = &enginev1.Position{
+			Lat:     base.GetPosition().GetLat(),
+			Lon:     base.GetPosition().GetLon(),
+			AltMsl:  base.GetPosition().GetAltMsl(),
+			Heading: base.GetPosition().GetHeading(),
+			Speed:   base.GetPosition().GetSpeed(),
+		}
+		deltas = append(deltas, &enginev1.UnitDelta{
+			UnitId:   unit.GetId(),
+			Position: unit.GetPosition(),
+		})
+	}
+	return deltas
+}
+
 // processTick advances all active units with move orders by one tick and
 // returns a UnitDelta for every unit that changed position or order state.
 // timeScale multiplies how many sim-seconds of movement occur per real second.
@@ -502,6 +564,7 @@ func processTick(units []*enginev1.Unit, defs map[string]DefStats, timeScale flo
 		})
 	}
 
+	deltas = append(deltas, syncHostedAircraftToHostBases(units, defs)...)
 	return deltas
 }
 

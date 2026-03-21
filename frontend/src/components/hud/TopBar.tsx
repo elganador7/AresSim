@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PauseSim, SetHumanControlledTeam, SetSimSpeed } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
 import { formatSimTime } from "../../utils/formatters";
 import ObjectivePanel from "./ObjectivePanel";
 import RelationshipPanel from "./RelationshipPanel";
+import ViewSwitcher from "./ViewSwitcher";
 
 const SPEED_PRESETS = [0.5, 1, 2, 5, 10, 30] as const;
 
@@ -23,7 +24,15 @@ function formatUsdCompact(value: number): string {
   }).format(value);
 }
 
-export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
+export default function TopBar({
+  onOpenEditor,
+  onOpenScenario,
+  debugViewMenuVisible,
+}: {
+  onOpenEditor: () => void;
+  onOpenScenario: () => void;
+  debugViewMenuVisible: boolean;
+}) {
   const scenarioName = useSimStore((s) => s.scenarioName);
   const scenarioState = useSimStore((s) => s.scenarioState);
   const simSeconds = useSimStore((s) => s.simSeconds);
@@ -32,9 +41,12 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
   const scores = useSimStore((s) => s.scores);
   const units = useSimStore((s) => s.units);
   const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
+  const setActiveView = useSimStore((s) => s.setActiveView);
   const setHumanControlledTeam = useSimStore((s) => s.setHumanControlledTeam);
   const [sharingOpen, setSharingOpen] = useState(false);
   const [briefingOpen, setBriefingOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   const controllableTeams = useMemo(() => {
     const present = new Set<string>();
     units.forEach((unit) => {
@@ -80,9 +92,28 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
           return;
         }
         setHumanControlledTeam(teamId);
+        setActiveView(teamId || "debug");
       })
       .catch(console.error);
   };
+
+  const toggleMenuAction = (action: () => void) => {
+    setMenuOpen(false);
+    action();
+  };
+
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener("mousedown", handlePointerDown);
+    return () => window.removeEventListener("mousedown", handlePointerDown);
+  }, [menuOpen]);
 
   return (
     <div className="top-bar">
@@ -158,15 +189,40 @@ export default function TopBar({ onOpenEditor }: { onOpenEditor: () => void }) {
             </select>
           </label>
         )}
-        <button className="editor-btn" onClick={() => setBriefingOpen((current) => !current)}>
-          BRIEFING
-        </button>
-        <button className="editor-btn" onClick={() => setSharingOpen((current) => !current)}>
-          SHARING
-        </button>
-        <button className="editor-btn" onClick={onOpenEditor}>
-          EDITOR
-        </button>
+        {debugViewMenuVisible && <ViewSwitcher />}
+        <div className="top-bar-menu-wrap" ref={menuRef}>
+          <button className="editor-btn top-bar-menu-btn" onClick={() => setMenuOpen((current) => !current)}>
+            MENU
+          </button>
+          {menuOpen && (
+            <div className="top-bar-menu">
+              <button
+                className={`top-bar-menu-item${briefingOpen ? " active" : ""}`}
+                onClick={() => toggleMenuAction(() => setBriefingOpen((current) => !current))}
+              >
+                {briefingOpen ? "Hide Briefing" : "Show Briefing"}
+              </button>
+              <button
+                className={`top-bar-menu-item${sharingOpen ? " active" : ""}`}
+                onClick={() => toggleMenuAction(() => setSharingOpen((current) => !current))}
+              >
+                {sharingOpen ? "Hide Relationships" : "Show Relationships"}
+              </button>
+              <button
+                className="top-bar-menu-item"
+                onClick={() => toggleMenuAction(onOpenScenario)}
+              >
+                Open Scenario
+              </button>
+              <button
+                className="top-bar-menu-item"
+                onClick={() => toggleMenuAction(onOpenEditor)}
+              >
+                Open Editor
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       <ObjectivePanel open={briefingOpen} onClose={() => setBriefingOpen(false)} />
       <RelationshipPanel open={sharingOpen} onClose={() => setSharingOpen(false)} />

@@ -30,6 +30,18 @@ type EffectiveRelationshipPreview struct {
 	MaritimeStrikeAllowed       bool   `json:"maritimeStrikeAllowed"`
 }
 
+func isDisplayCountryCode(code string) bool {
+	code = strings.TrimSpace(strings.ToUpper(code))
+	if code == "" {
+		return false
+	}
+	switch code {
+	case "BLUE", "RED", "NEUTRAL", "DEBUG", "NON_ALIGNED":
+		return false
+	}
+	return !strings.HasPrefix(code, "COALITION_")
+}
+
 func isMaritimeDomain(domain enginev1.UnitDomain) bool {
 	return domain == enginev1.UnitDomain_DOMAIN_SEA || domain == enginev1.UnitDomain_DOMAIN_SUBSURFACE
 }
@@ -55,7 +67,7 @@ func buildEffectiveRelationships(countries []string, rules sim.RelationshipRules
 	seen := make(map[string]bool, len(countries))
 	for _, country := range countries {
 		code := geo.CountryCode(country)
-		if code == "" || seen[code] {
+		if !isDisplayCountryCode(code) || seen[code] {
 			continue
 		}
 		seen[code] = true
@@ -94,7 +106,7 @@ func currentScenarioCountries(scen *enginev1.Scenario) []string {
 		if unit == nil {
 			continue
 		}
-		if code := sim.CountryDisplayCode(unit.GetTeamId()); code != "" {
+		if code := sim.CountryDisplayCode(unit.GetTeamId()); isDisplayCountryCode(code) {
 			countries = append(countries, code)
 		}
 	}
@@ -102,10 +114,10 @@ func currentScenarioCountries(scen *enginev1.Scenario) []string {
 		if relationship == nil {
 			continue
 		}
-		if code := geo.CountryCode(relationship.GetFromCountry()); code != "" {
+		if code := geo.CountryCode(relationship.GetFromCountry()); isDisplayCountryCode(code) {
 			countries = append(countries, code)
 		}
-		if code := geo.CountryCode(relationship.GetToCountry()); code != "" {
+		if code := geo.CountryCode(relationship.GetToCountry()); isDisplayCountryCode(code) {
 			countries = append(countries, code)
 		}
 	}
@@ -116,6 +128,24 @@ func previewTransitPath(ownerCountry string, maritime bool, points []geo.Point, 
 	ownerCountry = sim.CountryDisplayCode(ownerCountry)
 	if ownerCountry == "" || len(points) < 2 {
 		return nil
+	}
+	if maritime {
+		for idx := 1; idx < len(points); idx++ {
+			if geo.IsLandPoint(points[idx]) {
+				return &PathViolationPreview{
+					Blocked:  true,
+					LegIndex: idx,
+					Reason:   fmt.Sprintf("%s naval units cannot route onto land", ownerCountry),
+				}
+			}
+			if geo.SegmentCrossesLand(points[idx-1], points[idx]) {
+				return &PathViolationPreview{
+					Blocked:  true,
+					LegIndex: idx,
+					Reason:   fmt.Sprintf("%s naval route crosses land", ownerCountry),
+				}
+			}
+		}
 	}
 	for idx, segment := range geo.SamplePath(points) {
 		var countries []string

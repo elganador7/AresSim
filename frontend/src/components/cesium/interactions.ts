@@ -128,6 +128,7 @@ export function setupCesiumInteractions(
         selectedUnitId,
         mapCommandMode,
         activeView,
+        humanControlledTeam,
         selectUnit,
         startRouteEdit,
         clearMapCommandMode,
@@ -153,6 +154,11 @@ export function setupCesiumInteractions(
             }
           }
           const clickedUnit = units.get(clickedId);
+          const playerTeam = (humanControlledTeam.trim() || (activeView !== "debug" ? activeView : "")).toUpperCase();
+          const ownsClickedUnit = clickedUnit && (clickedUnit.teamId ?? "").trim().toUpperCase() === playerTeam;
+          if (!ownsClickedUnit) {
+            return;
+          }
           const nextSelectedId = selectedUnitId === clickedId ? null : clickedId;
           selectUnit(nextSelectedId);
           clearMapCommandMode();

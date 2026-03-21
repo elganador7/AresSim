@@ -6,6 +6,7 @@ import { inferUnitTeamCode, type DefinitionTeamMeta } from "../../utils/unitTeam
 export default function ViewSwitcher() {
   const activeView = useSimStore((s) => s.activeView);
   const setActiveView = useSimStore((s) => s.setActiveView);
+  const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
   const units = useSimStore((s) => s.units);
   const [definitionTeams, setDefinitionTeams] = useState<Map<string, DefinitionTeamMeta>>(new Map());
 
@@ -42,25 +43,35 @@ export default function ViewSwitcher() {
     return Array.from(codes).sort();
   }, [definitionTeams, units]);
 
+  const options = useMemo(() => {
+    const playerTeam = humanControlledTeam.trim().toUpperCase();
+    if (playerTeam) {
+      return ["debug", playerTeam];
+    }
+    return ["debug", ...teams];
+  }, [humanControlledTeam, teams]);
+
+  useEffect(() => {
+    const playerTeam = humanControlledTeam.trim().toUpperCase();
+    if (playerTeam && activeView !== "debug" && activeView !== playerTeam) {
+      setActiveView(playerTeam);
+    }
+  }, [activeView, humanControlledTeam, setActiveView]);
+
   return (
-    <div className="view-switcher">
-      <button
-        className={`view-btn ${activeView === "debug" ? "view-btn-debug-active" : ""}`}
-        onClick={() => setActiveView("debug")}
-        title="Show all units (game master view)"
+    <label className="top-bar-select top-bar-select-debug">
+      <span>VIEW</span>
+      <select
+        value={activeView}
+        onChange={(e) => setActiveView(e.target.value)}
+        title="Switch map visibility mode"
       >
-        DEBUG
-      </button>
-      {teams.map((team) => (
-        <button
-          key={team}
-          className={`view-btn ${activeView === team ? "view-btn-team-active" : ""}`}
-          onClick={() => setActiveView(team)}
-          title={`${team} national view`}
-        >
-          {team}
-        </button>
-      ))}
-    </div>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option === "debug" ? "DEBUG" : option}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

@@ -294,6 +294,7 @@ export const useSimStore = create<SimStore>((set) => ({
       detections: new Map(),
       detectionContacts: new Map(),
       eventLog: [],
+      activeView: state.scenarioName === scenarioName ? state.activeView : "debug",
       weaponDefs: weaponDefs
         ? new Map(weaponDefs.map((d) => [d.id, d]))
         : state.weaponDefs,

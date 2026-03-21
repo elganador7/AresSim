@@ -10,7 +10,7 @@ export interface WeaponDefLite {
 
 export interface UnitDefinitionTargetLite {
   domain: number;
-  targetClass: string;
+  targetClass?: string;
   stationary?: boolean;
   assetClass?: string;
 }
@@ -57,6 +57,30 @@ function resolveEffectOutcome(effectType: number, targetClass: string): "none" |
   }
 }
 
+function resolveTargetClass(targetDef: UnitDefinitionTargetLite): string {
+  const explicit = String(targetDef.targetClass ?? "").trim();
+  if (explicit !== "") {
+    return explicit;
+  }
+
+  if (targetDef.assetClass === "airbase") {
+    return "runway";
+  }
+
+  switch (targetDef.domain) {
+    case 2:
+      return "aircraft";
+    case 3:
+      return "surface_warship";
+    case 4:
+      return "submarine";
+    case 1:
+      return targetDef.stationary ? "hardened_infrastructure" : "armor";
+    default:
+      return "soft_infrastructure";
+  }
+}
+
 export function weaponCanEffectivelyAttackTarget(
   weapon: WeaponDefLite,
   targetDef: UnitDefinitionTargetLite | undefined,
@@ -67,6 +91,7 @@ export function weaponCanEffectivelyAttackTarget(
   if (!weapon.domainTargets.includes(targetDef.domain)) {
     return false;
   }
+  const targetClass = resolveTargetClass(targetDef);
 
   // Ballistic strike weapons are strategic / fixed-target tools in this sim.
   // They should not be assignable against mobile units like aircraft or armor.
@@ -79,12 +104,12 @@ export function weaponCanEffectivelyAttackTarget(
       "civilian_water",
       "sam_battery",
     ]);
-    if (!targetDef.stationary && !fixedTargetClass.has(targetDef.targetClass)) {
+    if (!targetDef.stationary && !fixedTargetClass.has(targetClass)) {
       return false;
     }
   }
 
-  return resolveEffectOutcome(weapon.effectType, targetDef.targetClass) !== "none";
+  return resolveEffectOutcome(weapon.effectType, targetClass) !== "none";
 }
 
 function outcomeSupportsDesiredEffect(outcome: "none" | "damage" | "mission_kill" | "destroy", desiredEffect: number): boolean {
@@ -130,7 +155,7 @@ export function assessLoadoutAgainstTarget(
   }
 
   const effectMatches = effectiveWeapons.filter((weapon) =>
-    outcomeSupportsDesiredEffect(resolveEffectOutcome(weapon.effectType, targetDef.targetClass), desiredEffect),
+    outcomeSupportsDesiredEffect(resolveEffectOutcome(weapon.effectType, resolveTargetClass(targetDef)), desiredEffect),
   );
   if (effectMatches.length === 0) {
     return { severity: "poor", message: "Selected loadout can reach the target, but it is a poor fit for the requested effect." };

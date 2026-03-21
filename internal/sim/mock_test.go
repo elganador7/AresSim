@@ -218,6 +218,38 @@ func TestProcessTick_TimeScale_AffectsMovement(t *testing.T) {
 	}
 }
 
+func TestProcessTick_GroundedHostedAircraftFollowsMovingCarrier(t *testing.T) {
+	carrier := makeMovingUnit("cvn", "USA", "carrier", 24.2, 36.9, 24.3, 37.0)
+	aircraft := &enginev1.Unit{
+		Id:           "f35c",
+		TeamId:       "USA",
+		CoalitionId:  "USA",
+		DefinitionId: "fighter",
+		HostBaseId:   "cvn",
+		Position:     &enginev1.Position{Lat: 0, Lon: 0, AltMsl: 0},
+		Status:       &enginev1.OperationalStatus{IsActive: true},
+	}
+	defs := map[string]DefStats{
+		"carrier": {
+			Domain:                    enginev1.UnitDomain_DOMAIN_SEA,
+			CruiseSpeedMps:            15,
+			EmbarkedFixedWingCapacity: 70,
+			LaunchCapacityPerInterval: 20,
+		},
+		"fighter": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+	}
+
+	processTick([]*enginev1.Unit{carrier, aircraft}, defs, 1.0)
+
+	if aircraft.GetPosition().GetLat() != carrier.GetPosition().GetLat() ||
+		aircraft.GetPosition().GetLon() != carrier.GetPosition().GetLon() {
+		t.Fatalf("expected hosted aircraft to mirror moving carrier position, got (%v,%v) want (%v,%v)",
+			aircraft.GetPosition().GetLat(), aircraft.GetPosition().GetLon(),
+			carrier.GetPosition().GetLat(), carrier.GetPosition().GetLon(),
+		)
+	}
+}
+
 func TestProcessTick_FallbackSpeed_UsedWhenDefMissing(t *testing.T) {
 	u := makeMovingUnit("u1", "Blue", "unknown_def", 0, 0, 1, 0)
 	// empty defs — CruiseSpeedMps will be 0, triggering the 10 m/s fallback

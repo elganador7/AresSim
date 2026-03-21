@@ -176,6 +176,38 @@ func (a *App) ListUnitDefinitions() ([]map[string]any, error) {
 		if source == "" && defsByID[id] == nil {
 			continue
 		}
+		if base, ok := defsByID[id]; ok {
+			merged := make(map[string]any, len(base)+len(row))
+			for key, value := range base {
+				merged[key] = value
+			}
+			for key, value := range row {
+				merged[key] = value
+			}
+			if toFloat64(merged["general_type"]) == 0 && toFloat64(base["general_type"]) != 0 {
+				merged["general_type"] = base["general_type"]
+			}
+			if toFloat64(merged["domain"]) == 0 && toFloat64(base["domain"]) != 0 {
+				merged["domain"] = base["domain"]
+			}
+			if toString(merged["short_name"]) == "" && toString(base["short_name"]) != "" {
+				merged["short_name"] = base["short_name"]
+			}
+			if toString(merged["specific_type"]) == "" && toString(base["specific_type"]) != "" {
+				merged["specific_type"] = base["specific_type"]
+			}
+			if toString(merged["name"]) == "" && toString(base["name"]) != "" {
+				merged["name"] = base["name"]
+			}
+			if toString(merged["nation_of_origin"]) == "" && toString(base["nation_of_origin"]) != "" {
+				merged["nation_of_origin"] = base["nation_of_origin"]
+			}
+			if employedBy, ok := merged["employed_by"].([]any); ok && len(employedBy) == 0 {
+				merged["employed_by"] = base["employed_by"]
+			}
+			defsByID[id] = merged
+			continue
+		}
 		defsByID[id] = row
 	}
 

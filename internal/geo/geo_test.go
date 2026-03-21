@@ -90,3 +90,36 @@ func TestLookupPointInternationalWaters(t *testing.T) {
 		t.Fatalf("expected high seas, got %q", ctx.SeaZoneType)
 	}
 }
+
+func TestIsLandPoint(t *testing.T) {
+	if !IsLandPoint(Point{Lat: 32.08, Lon: 34.78}) {
+		t.Fatal("expected Tel Aviv point to be land")
+	}
+	if IsLandPoint(Point{Lat: 25.44547, Lon: 51.66943}) {
+		t.Fatal("expected territorial waters point not to be land")
+	}
+}
+
+func TestSegmentCrossesLand(t *testing.T) {
+	if !SegmentCrossesLand(
+		Point{Lat: 29.5, Lon: 47.8},
+		Point{Lat: 29.5, Lon: 49.2},
+	) {
+		t.Fatal("expected Gulf segment across Kuwait/Iraq coast to cross land")
+	}
+	if SegmentCrossesLand(
+		Point{Lat: 25.30, Lon: 51.80},
+		Point{Lat: 25.30, Lon: 52.20},
+	) {
+		t.Fatal("expected open-water segment not to cross land")
+	}
+}
+
+func TestBuildMaritimeRouteRejectsLandDestination(t *testing.T) {
+	if route, ok := BuildMaritimeRoute(
+		Point{Lat: 25.8, Lon: 51.5},
+		Point{Lat: 32.08, Lon: 34.78},
+	); ok || route != nil {
+		t.Fatal("expected land destination to be rejected")
+	}
+}
