@@ -65,11 +65,19 @@ func AdvanceMunitions(
 	units []*enginev1.Unit,
 	defs map[string]DefStats,
 ) (remaining, arrived []*InFlightMunition) {
+	tracks := buildTrackPicture(units, defs, nil, nil, fixedRng(0))
+	return advanceMunitionsWithTracks(munitions, timeScale, units, tracks.ByGroup)
+}
+
+func advanceMunitionsWithTracks(
+	munitions []*InFlightMunition,
+	timeScale float64,
+	units []*enginev1.Unit,
+	groupTracks detectionIndex,
+) (remaining, arrived []*InFlightMunition) {
 	if len(munitions) == 0 {
 		return
 	}
-
-	tracks := buildTrackPicture(units, defs, nil)
 
 	// Build O(1) lookup helpers only when there are tracking munitions.
 	unitByID := make(map[string]*enginev1.Unit, len(units))
@@ -78,7 +86,7 @@ func AdvanceMunitions(
 	}
 
 	for _, m := range munitions {
-		updateMunitionDestination(m, unitByID, tracks.ByGroup)
+		updateMunitionDestination(m, unitByID, groupTracks)
 
 		dist := haversineM(m.CurLat, m.CurLon, m.DestLat, m.DestLon)
 		canMove := m.SpeedMps * timeScale

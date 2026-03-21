@@ -183,6 +183,15 @@ definitions:
       survivability: 0.24
       detection_range_m: 18000
       radar_cross_section_m2: 2.4
+      sensor_suite:
+        - sensor_type: surface_search
+          max_range_m: 18000
+          target_states: [surface]
+          fire_control: true
+        - sensor_type: eo_ir
+          max_range_m: 12000
+          target_states: [surface, land]
+          fire_control: false
       fuel_capacity_liters: 1100
       fuel_burn_rate_lph: 340
       embarked_fixed_wing_capacity: 0

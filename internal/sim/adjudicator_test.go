@@ -42,6 +42,23 @@ type constRng float64
 
 func (c constRng) Float64() float64 { return float64(c) }
 
+type sequenceRng struct {
+	values []float64
+	index  int
+}
+
+func (s *sequenceRng) Float64() float64 {
+	if len(s.values) == 0 {
+		return 0
+	}
+	if s.index >= len(s.values) {
+		return s.values[len(s.values)-1]
+	}
+	v := s.values[s.index]
+	s.index++
+	return v
+}
+
 // alwaysHit and alwaysMiss are convenience instances.
 const alwaysHit = constRng(0.0)
 const alwaysMiss = constRng(1.0)
@@ -1066,7 +1083,7 @@ func TestSensorTick_DetectsUnauthorizedOverflight(t *testing.T) {
 	intruder.Position.AltMsl = 5000
 
 	defs := map[string]DefStats{
-		"sam":     {DetectionRangeM: 100_000, Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"sam":     {DetectionRangeM: 100_000, Domain: enginev1.UnitDomain_DOMAIN_LAND, GeneralType: int32(enginev1.UnitGeneralType_GENERAL_TYPE_AIR_DEFENSE)},
 		"fighter": {Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 1},
 	}
 	rules := BuildRelationshipRules([]*enginev1.CountryRelationship{{
@@ -1094,7 +1111,7 @@ func TestAdjudicateTick_EngagesUnauthorizedOverflight(t *testing.T) {
 	intruder.Position.AltMsl = 5000
 
 	defs := map[string]DefStats{
-		"sam":     {DetectionRangeM: 100_000, Domain: enginev1.UnitDomain_DOMAIN_LAND},
+		"sam":     {DetectionRangeM: 100_000, Domain: enginev1.UnitDomain_DOMAIN_LAND, GeneralType: int32(enginev1.UnitGeneralType_GENERAL_TYPE_AIR_DEFENSE)},
 		"fighter": {Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 1},
 	}
 	catalog := makeWeaponCatalog("sam-shot", 100_000, 1.0, enginev1.UnitDomain_DOMAIN_AIR)
@@ -1127,7 +1144,7 @@ func TestAdjudicateTick_GroundedFighterDoesNotEngageUnauthorizedOverflight(t *te
 	intruder.Position.AltMsl = 5000
 
 	defs := map[string]DefStats{
-		"fighter": {DetectionRangeM: 100_000, Domain: enginev1.UnitDomain_DOMAIN_AIR, RadarCrossSectionM2: 1},
+		"fighter": {DetectionRangeM: 100_000, Domain: enginev1.UnitDomain_DOMAIN_AIR, GeneralType: int32(enginev1.UnitGeneralType_GENERAL_TYPE_FIGHTER), RadarCrossSectionM2: 1},
 	}
 	catalog := makeWeaponCatalog("aam", 100_000, 1.0, enginev1.UnitDomain_DOMAIN_AIR)
 	rules := BuildRelationshipRules([]*enginev1.CountryRelationship{{
@@ -1139,6 +1156,130 @@ func TestAdjudicateTick_GroundedFighterDoesNotEngageUnauthorizedOverflight(t *te
 	adj := AdjudicateTick([]*enginev1.Unit{defender, intruder}, defs, catalog, nil, rules, 0)
 	if len(adj.Shots) != 0 {
 		t.Fatalf("expected grounded fighter to hold fire on unauthorized overflight, got %d shots", len(adj.Shots))
+	}
+}
+
+func TestSensorTick_LandUnitWithoutSurfaceSearchCannotDetectShip(t *testing.T) {
+	detector := makeUnit("brigade", "ISR", "brigade", 0, 0)
+	target := makeUnit("ship", "IRN", "ship", 0, 0.05)
+	defs := map[string]DefStats{
+		"brigade": {DetectionRangeM: 100_000, Domain: enginev1.UnitDomain_DOMAIN_LAND, GeneralType: int32(enginev1.UnitGeneralType_GENERAL_TYPE_LIGHT_INFANTRY)},
+		"ship":    {Domain: enginev1.UnitDomain_DOMAIN_SEA, RadarCrossSectionM2: 10},
+	}
+
+	result := SensorTick([]*enginev1.Unit{detector, target}, defs, nil)
+	if len(result["ISR"]) != 0 {
+		t.Fatalf("expected land unit without maritime sensor to miss ship, got %v", result["ISR"])
+	}
+}
+
+func TestSensorTick_CoastalBatteryCanDetectShip(t *testing.T) {
+	detector := makeUnit("coastal", "ISR", "battery", 0, 0)
+	target := makeUnit("ship", "IRN", "ship", 0, 0.05)
+	defs := map[string]DefStats{
+		"battery": {
+			DetectionRangeM: 100_000,
+			Domain:          enginev1.UnitDomain_DOMAIN_LAND,
+			GeneralType:     int32(enginev1.UnitGeneralType_GENERAL_TYPE_COASTAL_DEFENSE_MISSILE),
+		},
+		"ship": {Domain: enginev1.UnitDomain_DOMAIN_SEA, RadarCrossSectionM2: 10},
+	}
+
+	result := SensorTick([]*enginev1.Unit{detector, target}, defs, nil)
+	if len(result["ISR"]) != 1 || result["ISR"][0] != "ship" {
+		t.Fatalf("expected coastal battery to detect ship, got %v", result["ISR"])
+	}
+}
+
+func TestSensorTick_AuthoredSensorSuiteOverridesInference(t *testing.T) {
+	detector := makeUnit("custom-radar", "ISR", "radar", 0, 0)
+	target := makeUnit("ship", "IRN", "ship", 0, 0.05)
+	defs := map[string]DefStats{
+		"radar": {
+			DetectionRangeM: 10_000,
+			Domain:          enginev1.UnitDomain_DOMAIN_LAND,
+			GeneralType:     int32(enginev1.UnitGeneralType_GENERAL_TYPE_LIGHT_INFANTRY),
+			SensorSuite: []SensorCapability{{
+				SensorType:   enginev1.SensorType_SENSOR_TYPE_SURFACE_SEARCH,
+				MaxRangeM:    100_000,
+				TargetStates: []enginev1.SensorTargetState{enginev1.SensorTargetState_SENSOR_TARGET_STATE_SURFACE},
+			}},
+		},
+		"ship": {Domain: enginev1.UnitDomain_DOMAIN_SEA, RadarCrossSectionM2: 10},
+	}
+
+	result := SensorTick([]*enginev1.Unit{detector, target}, defs, nil)
+	if len(result["ISR"]) != 1 || result["ISR"][0] != "ship" {
+		t.Fatalf("expected authored sensor suite to enable surface detection, got %v", result["ISR"])
+	}
+}
+
+func TestSensorTick_FighterCannotDetectSubmarine(t *testing.T) {
+	fighter := makeUnit("fighter", "ISR", "fighter", 0, 0)
+	fighter.Position.AltMsl = 5_000
+	sub := makeUnit("sub", "IRN", "sub", 0, 0.05)
+	defs := map[string]DefStats{
+		"fighter": {
+			DetectionRangeM: 150_000,
+			Domain:          enginev1.UnitDomain_DOMAIN_AIR,
+			GeneralType:     int32(enginev1.UnitGeneralType_GENERAL_TYPE_FIGHTER),
+		},
+		"sub": {Domain: enginev1.UnitDomain_DOMAIN_SUBSURFACE, RadarCrossSectionM2: 1},
+	}
+
+	result := SensorTick([]*enginev1.Unit{fighter, sub}, defs, nil)
+	if len(result["ISR"]) != 0 {
+		t.Fatalf("expected fighter not to detect submarine, got %v", result["ISR"])
+	}
+}
+
+func TestSensorTick_MaritimePatrolCanDetectSubmarine(t *testing.T) {
+	mpa := makeUnit("mpa", "USA", "mpa", 0, 0)
+	mpa.Position.AltMsl = 2_000
+	sub := makeUnit("sub", "IRN", "sub", 0, 0.05)
+	defs := map[string]DefStats{
+		"mpa": {
+			DetectionRangeM: 150_000,
+			Domain:          enginev1.UnitDomain_DOMAIN_AIR,
+			GeneralType:     int32(enginev1.UnitGeneralType_GENERAL_TYPE_MARITIME_PATROL),
+		},
+		"sub": {Domain: enginev1.UnitDomain_DOMAIN_SUBSURFACE, RadarCrossSectionM2: 1},
+	}
+
+	result := SensorTick([]*enginev1.Unit{mpa, sub}, defs, nil)
+	if len(result["USA"]) != 1 || result["USA"][0] != "sub" {
+		t.Fatalf("expected maritime patrol aircraft to detect submarine, got %v", result["USA"])
+	}
+}
+
+func TestBuildTrackPicture_RetainProbabilityExceedsAcquireProbability(t *testing.T) {
+	detector := makeUnit("fighter", "ISR", "fighter", 0, 0)
+	detector.Position.AltMsl = 5_000
+	target := makeUnit("target", "IRN", "target", 0, 0.72)
+	target.Position.AltMsl = 5_000
+	defs := map[string]DefStats{
+		"fighter": {
+			DetectionRangeM: 100_000,
+			Domain:          enginev1.UnitDomain_DOMAIN_AIR,
+			GeneralType:     int32(enginev1.UnitGeneralType_GENERAL_TYPE_FIGHTER),
+		},
+		"target": {
+			Domain:              enginev1.UnitDomain_DOMAIN_AIR,
+			GeneralType:         int32(enginev1.UnitGeneralType_GENERAL_TYPE_FIGHTER),
+			RadarCrossSectionM2: 1,
+		},
+	}
+
+	noTrack := buildTrackPicture([]*enginev1.Unit{detector, target}, defs, nil, nil, &sequenceRng{values: []float64{0.50}})
+	if len(noTrack.BySide["ISR"]) != 0 {
+		t.Fatalf("expected initial acquire roll to fail, got %v", noTrack.BySide["ISR"])
+	}
+
+	retained := buildTrackPicture([]*enginev1.Unit{detector, target}, defs, nil, detectionIndex{
+		"fighter": {"target": true},
+	}, &sequenceRng{values: []float64{0.50}})
+	if len(retained.BySide["ISR"]) != 1 || retained.BySide["ISR"][0] != "target" {
+		t.Fatalf("expected retained track to survive higher retain probability, got %v", retained.BySide["ISR"])
 	}
 }
 

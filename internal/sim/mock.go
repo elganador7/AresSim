@@ -43,6 +43,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 	tick := int64(0)
 	simSeconds := startSeconds
 	var inFlight []*InFlightMunition
+	var previousTracks detectionIndex
 
 	for {
 		select {
@@ -82,9 +83,15 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 
 			rules := relationshipRules()
 
-			// ── Adjudication ──────────────────────────────────────────────
-			adj := AdjudicateTick(units, defs, weapons, inFlight, rules, simSeconds)
-			trackGroups := resolveTrackGroupIDs(units)
+			// ── Detection / adjudication ─────────────────────────────────
+			basePicture := buildTrackPicture(units, defs, rules, previousTracks, rng)
+			previousTracks = basePicture.ByDetector
+			baseDetections := basePicture.BySide
+			detections := ApplyIntelSharing(baseDetections, rules)
+			detectionContacts := BuildDetectionContacts(baseDetections, rules)
+
+			adj := adjudicateTickWithTracks(units, defs, weapons, inFlight, basePicture, rules, simSeconds)
+			trackGroups := basePicture.GroupForUnit
 
 			// Emit a weapon-state delta for every unit that fired this tick
 			// so the frontend can update ammo counters in real time.
@@ -137,16 +144,9 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 				}
 			}
 
-			// ── Sensor detection (unit-to-unit) ───────────────────────────
-			// Run before AdvanceMunitions so radar-guided munitions can check
-			// whether the shooter still holds a detection on their target.
-			baseDetections := SensorTick(units, defs, rules)
-			detections := ApplyIntelSharing(baseDetections, rules)
-			detectionContacts := BuildDetectionContacts(baseDetections, rules)
-
 			// ── Move in-flight munitions ───────────────────────────────────
 			var arrived []*InFlightMunition
-			inFlight, arrived = AdvanceMunitions(inFlight, timeScale, units, defs)
+			inFlight, arrived = advanceMunitionsWithTracks(inFlight, timeScale, units, basePicture.ByGroup)
 
 			// ── Munition detection / interception (post-advance positions) ─
 			munitionDets := DetectMunitions(units, defs, inFlight)
@@ -263,7 +263,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 }
 
 func processBehaviorTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats) []*enginev1.UnitDelta {
-	tracks := buildTrackPicture(units, defs, nil)
+	tracks := buildTrackPicture(units, defs, nil, nil, fixedRng(0))
 	unitByID := make(map[string]*enginev1.Unit, len(units))
 	for _, u := range units {
 		unitByID[u.Id] = u

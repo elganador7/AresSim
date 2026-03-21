@@ -104,6 +104,19 @@ definitions:
       survivability: 0.72
       detection_range_m: 370000
       radar_cross_section_m2: 14000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 370000
+          target_states: [airborne]
+          fire_control: true
+        - sensor_type: surface_search
+          max_range_m: 220000
+          target_states: [surface]
+          fire_control: true
+        - sensor_type: sonar
+          max_range_m: 50000
+          target_states: [submerged]
+          fire_control: false
       fuel_capacity_liters: 1.9e+06
       fuel_burn_rate_lph: 2500
       embarked_fixed_wing_capacity: 0
@@ -141,6 +154,15 @@ definitions:
       survivability: 0.9
       detection_range_m: 370000
       radar_cross_section_m2: 100000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 370000
+          target_states: [airborne]
+          fire_control: false
+        - sensor_type: surface_search
+          max_range_m: 180000
+          target_states: [surface]
+          fire_control: false
       fuel_capacity_liters: 3e+06
       fuel_burn_rate_lph: 0
       embarked_fixed_wing_capacity: 70
@@ -178,6 +200,15 @@ definitions:
       survivability: 0.92
       detection_range_m: 380000
       radar_cross_section_m2: 110000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 380000
+          target_states: [airborne]
+          fire_control: false
+        - sensor_type: surface_search
+          max_range_m: 180000
+          target_states: [surface]
+          fire_control: false
       fuel_capacity_liters: 3e+06
       fuel_burn_rate_lph: 0
       embarked_fixed_wing_capacity: 75
@@ -257,6 +288,19 @@ definitions:
       survivability: 0.7
       detection_range_m: 370000
       radar_cross_section_m2: 12000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 370000
+          target_states: [airborne]
+          fire_control: true
+        - sensor_type: surface_search
+          max_range_m: 220000
+          target_states: [surface]
+          fire_control: true
+        - sensor_type: sonar
+          max_range_m: 50000
+          target_states: [submerged]
+          fire_control: false
       fuel_capacity_liters: 1.8e+06
       fuel_burn_rate_lph: 2400
       embarked_fixed_wing_capacity: 0

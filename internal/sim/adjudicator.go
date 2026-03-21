@@ -14,6 +14,7 @@ type DefStats struct {
 	BaseStrength                float64
 	DetectionRangeM             float64
 	RadarCrossSectionM2         float64
+	SensorSuite                 []SensorCapability
 	GeneralType                 int32
 	EmploymentRole              string
 	AuthorizedPersonnel         int
@@ -64,14 +65,6 @@ type FiredShot struct {
 // munition arrives at its destination (see ResolveArrivals).
 type AdjudicateResult struct {
 	Shots []FiredShot
-}
-
-type detectionIndex map[string]map[string]bool
-
-type trackPicture struct {
-	BySide       DetectionSet
-	ByGroup      detectionIndex
-	GroupForUnit map[string]string
 }
 
 func unitTeamID(u *enginev1.Unit) string {
@@ -161,10 +154,14 @@ func canPerformSovereignAirDefense(unit *enginev1.Unit, def DefStats) bool {
 // Already in-flight munitions targeting the same unit are counted, so platforms
 // do not keep firing after enough rounds are already on the way.
 func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, inFlight []*InFlightMunition, rules RelationshipRules, simSeconds float64) AdjudicateResult {
+	tracks := buildTrackPicture(units, defs, rules, nil, fixedRng(0))
+	return adjudicateTickWithTracks(units, defs, weapons, inFlight, tracks, rules, simSeconds)
+}
+
+func adjudicateTickWithTracks(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, inFlight []*InFlightMunition, tracks trackPicture, rules RelationshipRules, simSeconds float64) AdjudicateResult {
 	firedThisTick := make(map[string]bool)
 	orderedUnits := make(map[string]bool)
 	var result AdjudicateResult
-	tracks := buildTrackPicture(units, defs, rules)
 	unitByID := make(map[string]*enginev1.Unit, len(units))
 	for _, u := range units {
 		unitByID[u.Id] = u
@@ -680,91 +677,6 @@ func decrementAmmo(shooter *enginev1.Unit, weaponID string, amount int32) {
 }
 
 // ─── SENSOR DETECTION ─────────────────────────────────────────────────────────
-
-// DetectionSet maps each detecting team to the full set of enemy unit IDs
-// currently within sensor range of at least one unit on that team.
-type DetectionSet map[string][]string
-
-// SensorTick scans all operational units and builds the current detection picture.
-func SensorTick(units []*enginev1.Unit, defs map[string]DefStats, rules RelationshipRules) DetectionSet {
-	return buildTrackPicture(units, defs, rules).BySide
-}
-
-func buildTrackPicture(units []*enginev1.Unit, defs map[string]DefStats, rules RelationshipRules) trackPicture {
-	groupForUnit := resolveTrackGroupIDs(units)
-	bySide := make(map[string]map[string]bool)
-	byGroup := make(detectionIndex)
-
-	for _, u := range units {
-		if !unitCanOperate(u) {
-			continue
-		}
-		teamID := unitTeamID(u)
-		if bySide[teamID] == nil {
-			bySide[teamID] = make(map[string]bool)
-		}
-		groupID := groupForUnit[u.Id]
-		if groupID != "" && byGroup[groupID] == nil {
-			byGroup[groupID] = make(map[string]bool)
-		}
-	}
-
-	for _, detector := range units {
-		if !unitCanOperate(detector) {
-			continue
-		}
-		detectorDef := defs[detector.DefinitionId]
-		if detectorDef.DetectionRangeM <= 0 {
-			continue
-		}
-		groupID := groupForUnit[detector.Id]
-		for _, target := range units {
-			if !unitIsAlive(target) {
-				continue
-			}
-			if !unitsAreHostile(detector, target) && !isUnauthorizedOverflight(detector, target, defs, rules) {
-				continue
-			}
-			dist := haversineM(
-				detector.GetPosition().GetLat(), detector.GetPosition().GetLon(),
-				target.GetPosition().GetLat(), target.GetPosition().GetLon(),
-			)
-			if dist > effectiveDetectionRangeM(detectorDef, defs[target.DefinitionId]) {
-				continue
-			}
-			bySide[unitTeamID(detector)][target.Id] = true
-			if groupID != "" {
-				byGroup[groupID][target.Id] = true
-			}
-		}
-	}
-
-	return trackPicture{
-		BySide:       boolSetsToDetectionSet(bySide),
-		ByGroup:      byGroup,
-		GroupForUnit: groupForUnit,
-	}
-}
-
-func (tp trackPicture) unitHasTrack(unitID, targetID string) bool {
-	groupID := tp.GroupForUnit[unitID]
-	if groupID == "" {
-		return false
-	}
-	return tp.ByGroup[groupID][targetID]
-}
-
-func boolSetsToDetectionSet(bySide map[string]map[string]bool) DetectionSet {
-	result := make(DetectionSet, len(bySide))
-	for side, ids := range bySide {
-		list := make([]string, 0, len(ids))
-		for id := range ids {
-			list = append(list, id)
-		}
-		result[side] = list
-	}
-	return result
-}
 
 func resolveTrackGroupIDs(units []*enginev1.Unit) map[string]string {
 	unitByID := make(map[string]*enginev1.Unit, len(units))

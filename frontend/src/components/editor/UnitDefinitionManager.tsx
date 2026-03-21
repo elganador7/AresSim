@@ -105,6 +105,7 @@ function blankDef(): UnitDefinitionDraft {
     sortieIntervalMinutes: 0,
     replacementCostUsd: 0, strategicValueUsd: 0, economicValueUsd: 0,
     dataConfidence: "heuristic", sourceBasis: "heuristic", sourceNotes: "", sourceLinks: [],
+    sensorSuite: [],
     defaultWeaponConfiguration: "",
     weaponConfigurations: [],
   };
@@ -126,6 +127,14 @@ function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
               initialQty: Number(slot["initial_qty"] ?? 0),
             }))
           : [],
+      }))
+    : [];
+  const sensorSuite = Array.isArray(r["sensor_suite"])
+    ? (r["sensor_suite"] as Record<string, unknown>[]).map((sensor) => ({
+        sensorType: String(sensor["sensor_type"] ?? ""),
+        maxRangeM: Number(sensor["max_range_m"] ?? 0),
+        targetStates: Array.isArray(sensor["target_states"]) ? (sensor["target_states"] as unknown[]).map(String) : [],
+        fireControl: Boolean(sensor["fire_control"]),
       }))
     : [];
   return {
@@ -152,6 +161,7 @@ function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
     sourceBasis: str("source_basis") || "heuristic",
     sourceNotes: str("source_notes"),
     sourceLinks: Array.isArray(r["source_links"]) ? (r["source_links"] as unknown[]).map(String) : [],
+    sensorSuite,
     defaultWeaponConfiguration: str("default_weapon_configuration"),
     weaponConfigurations,
   };
@@ -540,6 +550,12 @@ export default function UnitDefinitionManager({ onClose }: Props) {
       source_basis: def.sourceBasis,
       source_notes: def.sourceNotes,
       source_links: def.sourceLinks,
+      sensor_suite: def.sensorSuite.map((sensor) => ({
+        sensor_type: sensor.sensorType,
+        max_range_m: sensor.maxRangeM,
+        target_states: sensor.targetStates,
+        fire_control: sensor.fireControl,
+      })),
       default_weapon_configuration: def.defaultWeaponConfiguration,
       weapon_configurations: def.weaponConfigurations.map((cfg) => ({
         id: cfg.id,

@@ -55,6 +55,13 @@ type WeaponConfiguration struct {
 	Loadout     []LoadoutSlot `yaml:"loadout"`
 }
 
+type SensorDefinition struct {
+	SensorType   string   `yaml:"sensor_type"`
+	MaxRangeM    float32  `yaml:"max_range_m"`
+	TargetStates []string `yaml:"target_states"`
+	FireControl  bool     `yaml:"fire_control"`
+}
+
 // Definition is one unit definition record inside a library file.
 // Field names use snake_case to match the DB schema and YAML convention.
 type Definition struct {
@@ -100,6 +107,7 @@ type Definition struct {
 	SourceBasis                      string                `yaml:"source_basis"`
 	SourceNotes                      string                `yaml:"source_notes"`
 	SourceLinks                      []string              `yaml:"source_links"`
+	SensorSuite                      []SensorDefinition    `yaml:"sensor_suite"`
 	DefaultLoadout                   []LoadoutSlot         `yaml:"default_loadout"`
 	DefaultWeaponConfiguration       string                `yaml:"default_weapon_configuration"`
 	WeaponConfigurations             []WeaponConfiguration `yaml:"weapon_configurations"`
@@ -186,9 +194,58 @@ func (d Definition) ToRecord() map[string]any {
 		"source_basis":                        normalizeSourceBasis(d.SourceBasis),
 		"source_notes":                        strings.TrimSpace(d.SourceNotes),
 		"source_links":                        normalizeSourceLinks(d.SourceLinks),
+		"sensor_suite":                        normalizeSensorSuite(d.SensorSuite),
 		"default_weapon_configuration":        defaultConfigID,
 		"weapon_configurations":               configs,
 	}
+}
+
+func normalizeSensorSuite(values []SensorDefinition) []map[string]any {
+	normalized := make([]map[string]any, 0, len(values))
+	for _, value := range values {
+		sensorType := normalizeSensorType(value.SensorType)
+		if sensorType == "" || value.MaxRangeM <= 0 {
+			continue
+		}
+		targetStates := normalizeSensorTargetStates(value.TargetStates)
+		if len(targetStates) == 0 {
+			continue
+		}
+		normalized = append(normalized, map[string]any{
+			"sensor_type":   sensorType,
+			"max_range_m":   float64(value.MaxRangeM),
+			"target_states": targetStates,
+			"fire_control":  value.FireControl,
+		})
+	}
+	return normalized
+}
+
+func normalizeSensorType(v string) string {
+	v = strings.TrimSpace(strings.ToLower(v))
+	switch v {
+	case "air_search", "surface_search", "ground_search", "sonar", "eo_ir", "passive_esm", "visual":
+		return v
+	default:
+		return ""
+	}
+}
+
+func normalizeSensorTargetStates(values []string) []string {
+	seen := make(map[string]bool)
+	var normalized []string
+	for _, value := range values {
+		value = strings.TrimSpace(strings.ToLower(value))
+		switch value {
+		case "airborne", "land", "surface", "submerged":
+			if seen[value] {
+				continue
+			}
+			seen[value] = true
+			normalized = append(normalized, value)
+		}
+	}
+	return normalized
 }
 
 func normalizeDataConfidence(v string) string {

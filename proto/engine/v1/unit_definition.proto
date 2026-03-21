@@ -198,6 +198,32 @@ enum SourceBasis {
   SOURCE_BASIS_MANUFACTURER         = 5;
 }
 
+enum SensorType {
+  SENSOR_TYPE_UNSPECIFIED    = 0;
+  SENSOR_TYPE_AIR_SEARCH     = 1;
+  SENSOR_TYPE_SURFACE_SEARCH = 2;
+  SENSOR_TYPE_GROUND_SEARCH  = 3;
+  SENSOR_TYPE_SONAR          = 4;
+  SENSOR_TYPE_EO_IR          = 5;
+  SENSOR_TYPE_PASSIVE_ESM    = 6;
+  SENSOR_TYPE_VISUAL         = 7;
+}
+
+enum SensorTargetState {
+  SENSOR_TARGET_STATE_UNSPECIFIED = 0;
+  SENSOR_TARGET_STATE_AIRBORNE    = 1;
+  SENSOR_TARGET_STATE_LAND        = 2;
+  SENSOR_TARGET_STATE_SURFACE     = 3;
+  SENSOR_TARGET_STATE_SUBMERGED   = 4;
+}
+
+message SensorDefinition {
+  SensorType sensor_type = 1;
+  float max_range_m = 2;
+  repeated SensorTargetState target_states = 3;
+  bool fire_control = 4;
+}
+
 // ── UNIT DEFINITION ───────────────────────────────────────────────────────────
 // Canonical template describing a specific platform type.
 // A live Unit instance references a definition by definition_id.
@@ -265,4 +291,5 @@ message UnitDefinition {
   SourceBasis source_basis = 81;
   string source_notes = 82;
   repeated string source_links = 83;
+  repeated SensorDefinition sensor_suite = 84;
 }

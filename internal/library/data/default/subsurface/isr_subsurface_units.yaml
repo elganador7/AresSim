@@ -30,6 +30,11 @@ definitions:
       survivability: 0.68
       detection_range_m: 110000
       radar_cross_section_m2: 0.16
+      sensor_suite:
+        - sensor_type: sonar
+          max_range_m: 110000
+          target_states: [surface, submerged]
+          fire_control: true
       fuel_capacity_liters: 180000
       fuel_burn_rate_lph: 160
       embarked_fixed_wing_capacity: 0

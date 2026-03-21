@@ -851,6 +851,12 @@ func (a *App) SetUnitAttackOrder(unitID string, orderType int32, targetUnitID st
 		if target == nil {
 			return failMsg("target unit not found: " + targetUnitID)
 		}
+		if isMaritimeDomain(defs[u.DefinitionId].Domain) && geo.IsLandPoint(geo.Point{
+			Lat: target.GetPosition().GetLat(),
+			Lon: target.GetPosition().GetLon(),
+		}) {
+			return failMsg("naval units cannot attack land targets")
+		}
 		if err := a.validateStrike(shooter, target); err != nil {
 			return failMsg(err.Error())
 		}
@@ -1005,6 +1011,7 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 			BaseStrength:                float64(def.BaseStrength),
 			DetectionRangeM:             float64(def.DetectionRangeM),
 			RadarCrossSectionM2:         rcs,
+			SensorSuite:                 sensorSuiteFromRecord(def.ToRecord()["sensor_suite"]),
 			GeneralType:                 int32(def.GeneralType),
 			EmploymentRole:              strings.TrimSpace(def.EmploymentRole),
 			AuthorizedPersonnel:         maxInt(def.AuthorizedPersonnel, library.DefaultAuthorizedPersonnel(def.AssetClass, def.Domain, def.GeneralType)),
@@ -1044,6 +1051,7 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 			BaseStrength:                toFloat64(row["base_strength"]),
 			DetectionRangeM:             toFloat64(row["detection_range_m"]),
 			RadarCrossSectionM2:         rcs,
+			SensorSuite:                 sensorSuiteFromRecord(row["sensor_suite"]),
 			GeneralType:                 int32(toFloat64(row["general_type"])),
 			EmploymentRole:              toString(row["employment_role"]),
 			AuthorizedPersonnel:         maxInt(int(toFloat64(row["authorized_personnel"])), library.DefaultAuthorizedPersonnel(toString(row["asset_class"]), int(toFloat64(row["domain"])), int(toFloat64(row["general_type"])))),
@@ -1062,6 +1070,112 @@ func (a *App) buildDefs() map[string]sim.DefStats {
 		}
 	}
 	return defs
+}
+
+func sensorSuiteFromRecord(raw any) []sim.SensorCapability {
+	switch values := raw.(type) {
+	case []map[string]any:
+		sensors := make([]sim.SensorCapability, 0, len(values))
+		for _, value := range values {
+			if sensor, ok := sensorCapabilityFromMap(value); ok {
+				sensors = append(sensors, sensor)
+			}
+		}
+		return sensors
+	case []any:
+		sensors := make([]sim.SensorCapability, 0, len(values))
+		for _, value := range values {
+			row, ok := value.(map[string]any)
+			if !ok {
+				continue
+			}
+			if sensor, ok := sensorCapabilityFromMap(row); ok {
+				sensors = append(sensors, sensor)
+			}
+		}
+		return sensors
+	default:
+		return nil
+	}
+}
+
+func sensorCapabilityFromMap(row map[string]any) (sim.SensorCapability, bool) {
+	sensorType := parseSensorType(toString(row["sensor_type"]))
+	maxRange := toFloat64(row["max_range_m"])
+	targetStates := parseSensorTargetStates(row["target_states"])
+	if sensorType == enginev1.SensorType_SENSOR_TYPE_UNSPECIFIED || maxRange <= 0 || len(targetStates) == 0 {
+		return sim.SensorCapability{}, false
+	}
+	return sim.SensorCapability{
+		SensorType:   sensorType,
+		MaxRangeM:    maxRange,
+		TargetStates: targetStates,
+		FireControl:  toBool(row["fire_control"]),
+	}, true
+}
+
+func parseSensorType(v string) enginev1.SensorType {
+	switch strings.TrimSpace(v) {
+	case "air_search":
+		return enginev1.SensorType_SENSOR_TYPE_AIR_SEARCH
+	case "surface_search":
+		return enginev1.SensorType_SENSOR_TYPE_SURFACE_SEARCH
+	case "ground_search":
+		return enginev1.SensorType_SENSOR_TYPE_GROUND_SEARCH
+	case "sonar":
+		return enginev1.SensorType_SENSOR_TYPE_SONAR
+	case "eo_ir":
+		return enginev1.SensorType_SENSOR_TYPE_EO_IR
+	case "passive_esm":
+		return enginev1.SensorType_SENSOR_TYPE_PASSIVE_ESM
+	case "visual":
+		return enginev1.SensorType_SENSOR_TYPE_VISUAL
+	default:
+		return enginev1.SensorType_SENSOR_TYPE_UNSPECIFIED
+	}
+}
+
+func parseSensorTargetStates(raw any) []enginev1.SensorTargetState {
+	values, ok := raw.([]any)
+	if !ok {
+		if stringsValues, ok := raw.([]string); ok {
+			values = make([]any, len(stringsValues))
+			for i, value := range stringsValues {
+				values[i] = value
+			}
+		} else {
+			return nil
+		}
+	}
+	states := make([]enginev1.SensorTargetState, 0, len(values))
+	for _, value := range values {
+		switch strings.TrimSpace(toString(value)) {
+		case "airborne":
+			states = append(states, enginev1.SensorTargetState_SENSOR_TARGET_STATE_AIRBORNE)
+		case "land":
+			states = append(states, enginev1.SensorTargetState_SENSOR_TARGET_STATE_LAND)
+		case "surface":
+			states = append(states, enginev1.SensorTargetState_SENSOR_TARGET_STATE_SURFACE)
+		case "submerged":
+			states = append(states, enginev1.SensorTargetState_SENSOR_TARGET_STATE_SUBMERGED)
+		}
+	}
+	return states
+}
+
+func toBool(v any) bool {
+	switch value := v.(type) {
+	case bool:
+		return value
+	case string:
+		return strings.EqualFold(strings.TrimSpace(value), "true")
+	case float64:
+		return value != 0
+	case int:
+		return value != 0
+	default:
+		return false
+	}
 }
 
 func defaultRadarCrossSectionM2(domain enginev1.UnitDomain, generalType int32) float64 {

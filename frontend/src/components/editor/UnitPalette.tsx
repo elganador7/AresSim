@@ -59,6 +59,14 @@ function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
           : [],
       }))
     : [];
+  const sensorSuite = Array.isArray(r["sensor_suite"])
+    ? (r["sensor_suite"] as Record<string, unknown>[]).map((sensor) => ({
+        sensorType: String(sensor["sensor_type"] ?? ""),
+        maxRangeM: Number(sensor["max_range_m"] ?? 0),
+        targetStates: Array.isArray(sensor["target_states"]) ? (sensor["target_states"] as unknown[]).map(String) : [],
+        fireControl: Boolean(sensor["fire_control"]),
+      }))
+    : [];
   return {
     id:                 str("id"),
     name:               str("name"),
@@ -105,6 +113,7 @@ function rowToDef(r: Record<string, unknown>): UnitDefinitionDraft {
     sourceBasis: str("source_basis") || "heuristic",
     sourceNotes: str("source_notes"),
     sourceLinks: Array.isArray(r["source_links"]) ? (r["source_links"] as unknown[]).map(String) : [],
+    sensorSuite,
     defaultWeaponConfiguration: str("default_weapon_configuration"),
     weaponConfigurations,
   };

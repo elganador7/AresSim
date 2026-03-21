@@ -159,6 +159,12 @@ export interface UnitDefinitionDraft {
   sourceBasis: string;
   sourceNotes: string;
   sourceLinks: string[];
+  sensorSuite: {
+    sensorType: string;
+    maxRangeM: number;
+    targetStates: string[];
+    fireControl: boolean;
+  }[];
   defaultWeaponConfiguration: string;
   weaponConfigurations: WeaponConfigurationDraft[];
 }
