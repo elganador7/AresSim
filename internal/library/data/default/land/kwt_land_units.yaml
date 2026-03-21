@@ -28,6 +28,11 @@ definitions:
       max_range_km: 0
       survivability: 0.3
       detection_range_m: 15000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 120000
+          target_states: [airborne]
+          fire_control: false
       radar_cross_section_m2: 36
       fuel_capacity_liters: 0
       fuel_burn_rate_lph: 0

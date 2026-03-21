@@ -26,6 +26,18 @@ definitions:
       max_range_km: 2800
       survivability: 0.24
       detection_range_m: 220000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 220000
+          target_states: [airborne]
+          fire_control: false
+        - sensor_type: surface_search
+          max_range_m: 220000
+          target_states: [surface]
+          fire_control: true
+        - sensor_type: eo_ir
+          max_range_m: 30000
+          target_states: [surface, land]
       radar_cross_section_m2: 16
       fuel_capacity_liters: 10000
       fuel_burn_rate_lph: 2200

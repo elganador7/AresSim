@@ -736,6 +736,11 @@ definitions:
       max_range_km: 0
       survivability: 0.32
       detection_range_m: 180000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 180000
+          target_states: [airborne]
+          fire_control: true
       radar_cross_section_m2: 14
       fuel_capacity_liters: 0
       fuel_burn_rate_lph: 0
@@ -1039,6 +1044,14 @@ definitions:
       max_range_km: 0
       survivability: 0.34
       detection_range_m: 16000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 180000
+          target_states: [airborne]
+          fire_control: false
+        - sensor_type: surface_search
+          max_range_m: 90000
+          target_states: [surface]
       radar_cross_section_m2: 38
       fuel_capacity_liters: 0
       fuel_burn_rate_lph: 0

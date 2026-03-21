@@ -1,6 +1,10 @@
 package library
 
-import "testing"
+import (
+	"os"
+	"regexp"
+	"testing"
+)
 
 func TestLoadAllHasNoDuplicateDefinitionIDs(t *testing.T) {
 	defs, err := LoadAll("")
@@ -91,31 +95,26 @@ func TestDefinitionToRecordNormalizesSensorSuite(t *testing.T) {
 	}
 }
 
-func TestIranWarAnchorPlatformsHaveSensorSuites(t *testing.T) {
+func TestIranWarScenarioDefinitionsHaveSensorSuites(t *testing.T) {
 	defs, err := LoadAll("")
 	if err != nil {
 		t.Fatalf("LoadAll failed: %v", err)
 	}
 
-	required := map[string]struct{}{
-		"f35i-adir":              {},
-		"g550-eitam":             {},
-		"saar6-corvette":         {},
-		"dolphin-ii-submarine":   {},
-		"f35a-lightning":         {},
-		"f22a-raptor":            {},
-		"e2d-advanced-hawkeye":   {},
-		"ddg51-flight-iia":       {},
-		"virginia-block-v":       {},
-		"patriot-pac3-battery":   {},
-		"globaleye-uae":          {},
-		"doha-corvette-qatar":    {},
-		"s300pmu2-battery-iran":  {},
-		"bavar373-battery":       {},
-		"third-khordad-battery":  {},
-		"f14a-tomcat-iriaf":      {},
-		"p3f-orion-mpa-iran":     {},
-		"ghadir-midget-submarine": {},
+	src, err := os.ReadFile("../scenario/iran_coalition_war_skeleton.go")
+	if err != nil {
+		t.Fatalf("read scenario source: %v", err)
+	}
+	patterns := []*regexp.Regexp{
+		regexp.MustCompile(`scenarioUnit\([^\n]*?"[^"]+",\s*"[^"]+",\s*"[^"]+",\s*"[^"]+",\s*"([^"]+)"`),
+		regexp.MustCompile(`scenarioAircraft\([^\n]*?"[^"]+",\s*"[^"]+",\s*"[^"]+",\s*"[^"]+",\s*"([^"]+)"`),
+		regexp.MustCompile(`scenarioStrikeUnit\([^\n]*?"[^"]+",\s*"[^"]+",\s*"[^"]+",\s*"[^"]+",\s*"([^"]+)"`),
+	}
+	required := make(map[string]struct{})
+	for _, pattern := range patterns {
+		for _, match := range pattern.FindAllStringSubmatch(string(src), -1) {
+			required[match[1]] = struct{}{}
+		}
 	}
 
 	for _, def := range defs {
@@ -125,12 +124,12 @@ func TestIranWarAnchorPlatformsHaveSensorSuites(t *testing.T) {
 		rec := def.ToRecord()
 		suite, ok := rec["sensor_suite"].([]map[string]any)
 		if !ok || len(suite) == 0 {
-			t.Fatalf("definition %q is missing curated sensor_suite", def.ID)
+			t.Fatalf("scenario definition %q is missing curated sensor_suite", def.ID)
 		}
 		delete(required, def.ID)
 	}
 
 	for id := range required {
-		t.Fatalf("required curated sensor-suite definition %q not found", id)
+		t.Fatalf("scenario definition %q not found in library", id)
 	}
 }

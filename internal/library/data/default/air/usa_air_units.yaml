@@ -227,6 +227,10 @@ definitions:
       max_range_km: 12000
       survivability: 0.56
       detection_range_m: 260000
+      sensor_suite:
+        - sensor_type: eo_ir
+          max_range_m: 50000
+          target_states: [land, surface]
       radar_cross_section_m2: 24
       fuel_capacity_liters: 120000
       fuel_burn_rate_lph: 14000
@@ -338,6 +342,10 @@ definitions:
       max_range_km: 680
       survivability: 0.18
       detection_range_m: 7000
+      sensor_suite:
+        - sensor_type: visual
+          max_range_m: 12000
+          target_states: [airborne, land, surface]
       radar_cross_section_m2: 3.2
       fuel_capacity_liters: 1200
       fuel_burn_rate_lph: 360
@@ -375,6 +383,10 @@ definitions:
       max_range_km: 9000
       survivability: 0.14
       detection_range_m: 120000
+      sensor_suite:
+        - sensor_type: eo_ir
+          max_range_m: 15000
+          target_states: [airborne, land, surface]
       radar_cross_section_m2: 40
       fuel_capacity_liters: 90000
       fuel_burn_rate_lph: 9500
@@ -525,6 +537,10 @@ definitions:
       max_range_km: 10390
       survivability: 0.28
       detection_range_m: 5000
+      sensor_suite:
+        - sensor_type: visual
+          max_range_m: 12000
+          target_states: [airborne, land, surface]
       radar_cross_section_m2: 28
       fuel_capacity_liters: 102000
       fuel_burn_rate_lph: 9800
@@ -1779,6 +1795,14 @@ definitions:
       max_range_km: 2520
       survivability: 0.81
       detection_range_m: 345000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 345000
+          target_states: [airborne]
+          fire_control: true
+        - sensor_type: eo_ir
+          max_range_m: 45000
+          target_states: [airborne, land, surface]
       radar_cross_section_m2: 0.0015
       fuel_capacity_liters: 9070
       fuel_burn_rate_lph: 2900
@@ -1955,6 +1979,14 @@ definitions:
       max_range_km: 2600
       survivability: 0.24
       detection_range_m: 80000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 80000
+          target_states: [airborne]
+          fire_control: true
+        - sensor_type: eo_ir
+          max_range_m: 30000
+          target_states: [land, surface]
       radar_cross_section_m2: 18
       fuel_capacity_liters: 6500
       fuel_burn_rate_lph: 4300
@@ -2044,6 +2076,14 @@ definitions:
       max_range_km: 3300
       survivability: 0.58
       detection_range_m: 220000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 220000
+          target_states: [airborne]
+          fire_control: true
+        - sensor_type: eo_ir
+          max_range_m: 30000
+          target_states: [land, surface]
       radar_cross_section_m2: 3.5
       fuel_capacity_liters: 6600
       fuel_burn_rate_lph: 2700
@@ -2185,6 +2225,14 @@ definitions:
       max_range_km: 2346
       survivability: 0.62
       detection_range_m: 200000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 200000
+          target_states: [airborne]
+          fire_control: true
+        - sensor_type: eo_ir
+          max_range_m: 30000
+          target_states: [land, surface]
       radar_cross_section_m2: 6
       fuel_capacity_liters: 6531
       fuel_burn_rate_lph: 3200
@@ -2280,6 +2328,14 @@ definitions:
       max_range_km: 2346
       survivability: 0.62
       detection_range_m: 200000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 200000
+          target_states: [airborne]
+          fire_control: true
+        - sensor_type: eo_ir
+          max_range_m: 30000
+          target_states: [land, surface]
       radar_cross_section_m2: 6
       fuel_capacity_liters: 6531
       fuel_burn_rate_lph: 3200
@@ -2368,6 +2424,10 @@ definitions:
       max_range_km: 3800
       survivability: 0.2
       detection_range_m: 90000
+      sensor_suite:
+        - sensor_type: eo_ir
+          max_range_m: 15000
+          target_states: [airborne, land, surface]
       radar_cross_section_m2: 30
       fuel_capacity_liters: 30000
       fuel_burn_rate_lph: 5200
@@ -2411,6 +2471,10 @@ definitions:
       max_range_km: 11830
       survivability: 0.26
       detection_range_m: 180000
+      sensor_suite:
+        - sensor_type: eo_ir
+          max_range_m: 15000
+          target_states: [airborne, land, surface]
       radar_cross_section_m2: 32
       fuel_capacity_liters: 96000
       fuel_burn_rate_lph: 9000
@@ -2462,6 +2526,18 @@ definitions:
       max_range_km: 830
       survivability: 0.4
       detection_range_m: 180000
+      sensor_suite:
+        - sensor_type: surface_search
+          max_range_m: 180000
+          target_states: [surface]
+          fire_control: true
+        - sensor_type: sonar
+          max_range_m: 50000
+          target_states: [submerged]
+          fire_control: false
+        - sensor_type: visual
+          max_range_m: 18000
+          target_states: [airborne]
       radar_cross_section_m2: 4.5
       fuel_capacity_liters: 2230
       fuel_burn_rate_lph: 500
@@ -3027,6 +3103,14 @@ definitions:
       max_range_km: 3200
       survivability: 0.56
       detection_range_m: 150000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 150000
+          target_states: [airborne]
+          fire_control: true
+        - sensor_type: eo_ir
+          max_range_m: 25000
+          target_states: [land, surface]
       radar_cross_section_m2: 4
       fuel_capacity_liters: 3185
       fuel_burn_rate_lph: 2600
