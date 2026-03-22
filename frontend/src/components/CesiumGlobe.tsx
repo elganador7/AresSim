@@ -110,7 +110,7 @@ export default function CesiumGlobe() {
       style={{
         position: "absolute",
         inset: 0,
-        cursor: mapCommandMode.type === "target_pick" ? "crosshair" : mapCommandMode.type === "route" ? "copy" : "default",
+        cursor: mapCommandMode.type === "route" ? "copy" : "default",
       }}
     />
   );

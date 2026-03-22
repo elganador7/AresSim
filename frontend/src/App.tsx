@@ -4,6 +4,7 @@ import CesiumGlobe from "./components/CesiumGlobe";
 import ScenarioEditor from "./components/editor/ScenarioEditor";
 import EventLog from "./components/hud/EventLog";
 import ScenarioLoadModal from "./components/hud/ScenarioLoadModal";
+import TargetPanel from "./components/hud/TargetPanel";
 import TopBar from "./components/hud/TopBar";
 import UnitPanel from "./components/hud/UnitPanel";
 import { useSimStore } from "./store/simStore";
@@ -13,16 +14,6 @@ import "./app.css";
 function MapModeBanner() {
   const mapCommandMode = useSimStore((s) => s.mapCommandMode);
   const units = useSimStore((s) => s.units);
-
-  if (mapCommandMode.type === "target_pick" && mapCommandMode.unitId) {
-    const shooter = units.get(mapCommandMode.unitId);
-    return (
-      <div className="map-mode-banner">
-        Target Pick Mode
-        <span className="map-mode-banner-detail">Click an enemy unit for {shooter?.displayName ?? "selected unit"}</span>
-      </div>
-    );
-  }
 
   if (mapCommandMode.type === "route" && mapCommandMode.unitId) {
     const mover = units.get(mapCommandMode.unitId);
@@ -81,6 +72,7 @@ export default function App() {
         <MapModeBanner />
         <EventLog />
         <UnitPanel />
+        <TargetPanel />
         <ScenarioLoadModal open={scenarioLoadOpen} onClose={() => setScenarioLoadOpen(false)} />
       </div>
     </div>

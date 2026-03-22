@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PauseSim, SetHumanControlledTeam, SetSimSpeed } from "../../../wailsjs/go/main/App";
+import { PauseSim, RequestSync, SetHumanControlledTeam, SetSimSpeed } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
 import { formatSimTime } from "../../utils/formatters";
+import { selectedPlayerTeam } from "../../utils/playerTeam";
 import ObjectivePanel from "./ObjectivePanel";
 import RelationshipPanel from "./RelationshipPanel";
 import ViewSwitcher from "./ViewSwitcher";
@@ -85,14 +86,19 @@ export default function TopBar({
   };
 
   const handleHumanTeamChange = (teamId: string) => {
+    const normalizedTeam = selectedPlayerTeam(teamId);
+    const previousHumanTeam = humanControlledTeam;
+    setHumanControlledTeam(normalizedTeam);
+    setActiveView(normalizedTeam || "debug");
     SetHumanControlledTeam(teamId)
       .then((result) => {
         if (!result.success) {
           console.error(result.error || "failed to set human-controlled team");
+          setHumanControlledTeam(previousHumanTeam);
+          setActiveView(selectedPlayerTeam(previousHumanTeam) || "debug");
           return;
         }
-        setHumanControlledTeam(teamId);
-        setActiveView(teamId || "debug");
+        RequestSync().catch(console.error);
       })
       .catch(console.error);
   };

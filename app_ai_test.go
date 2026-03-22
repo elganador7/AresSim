@@ -12,6 +12,7 @@ import (
 func TestPlanMajorActorStrikesChoosesHigherPainTarget(t *testing.T) {
 	app := &App{ctx: context.Background()}
 	app.setSimSeconds(0)
+	app.setHumanControlledTeam("ISR")
 	app.currentScenario = &enginev1.Scenario{
 		Relationships: []*enginev1.CountryRelationship{
 			{FromCountry: "USA", ToCountry: "QAT", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
@@ -187,9 +188,102 @@ func TestPlanMajorActorStrikesSkipsHumanControlledTeam(t *testing.T) {
 	}
 }
 
+func TestPlanMajorActorStrikesWaitsForHumanTeamSelection(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.setSimSeconds(0)
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{
+			{FromCountry: "ISR", ToCountry: "IRN", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
+			{FromCountry: "USA", ToCountry: "IRN", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
+			{FromCountry: "IRN", ToCountry: "ISR", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
+		},
+		Units: []*enginev1.Unit{
+			{
+				Id:           "isr-airbase",
+				DisplayName:  "Hatzerim",
+				TeamId:       "ISR",
+				CoalitionId:  "Blue",
+				DefinitionId: "airbase",
+				BaseOps:      &enginev1.BaseOpsState{State: enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_USABLE},
+			},
+			{
+				Id:           "irn-airbase",
+				DisplayName:  "Esfahan",
+				TeamId:       "IRN",
+				CoalitionId:  "Red",
+				DefinitionId: "airbase",
+				BaseOps:      &enginev1.BaseOpsState{State: enginev1.FacilityOperationalState_FACILITY_OPERATIONAL_STATE_USABLE},
+			},
+			{
+				Id:                     "isr-striker",
+				DisplayName:            "Israeli Strike Jet",
+				TeamId:                 "ISR",
+				CoalitionId:            "Blue",
+				DefinitionId:           "fighter",
+				HostBaseId:             "isr-airbase",
+				Position:               &enginev1.Position{Lat: 31.3, Lon: 34.7, AltMsl: 0},
+				Status:                 &enginev1.OperationalStatus{IsActive: true, PersonnelStrength: 1},
+				Weapons:                []*enginev1.WeaponState{{WeaponId: "agm-158-jassm-er", CurrentQty: 2, MaxQty: 2}},
+				NextSortieReadySeconds: 0,
+			},
+			{
+				Id:           "irn-missile",
+				DisplayName:  "Kheibar Brigade",
+				TeamId:       "IRN",
+				CoalitionId:  "Red",
+				DefinitionId: "missile",
+				Position:     &enginev1.Position{Lat: 35.2, Lon: 46.98, AltMsl: 0},
+				Status:       &enginev1.OperationalStatus{IsActive: true, PersonnelStrength: 1},
+				Weapons:      []*enginev1.WeaponState{{WeaponId: "ssm-kheibar-shekan", CurrentQty: 2, MaxQty: 2}},
+			},
+			{
+				Id:           "isr-target",
+				DisplayName:  "Nevatim",
+				TeamId:       "ISR",
+				CoalitionId:  "Blue",
+				DefinitionId: "target",
+				Position:     &enginev1.Position{Lat: 31.21, Lon: 35.01},
+				Status:       &enginev1.OperationalStatus{IsActive: true, PersonnelStrength: 1},
+			},
+		},
+	}
+	app.defsCache = map[string]sim.DefStats{
+		"airbase": {AssetClass: "airbase", LaunchCapacityPerInterval: 3},
+		"fighter": {
+			Domain:              enginev1.UnitDomain_DOMAIN_AIR,
+			EmploymentRole:      "dual_use",
+			CruiseSpeedMps:      250,
+			AuthorizedPersonnel: 1,
+		},
+		"missile": {
+			Domain:              enginev1.UnitDomain_DOMAIN_LAND,
+			EmploymentRole:      "offensive",
+			GeneralType:         72,
+			AuthorizedPersonnel: 20,
+		},
+		"target": {
+			Domain:              enginev1.UnitDomain_DOMAIN_LAND,
+			AssetClass:          "airbase",
+			TargetClass:         "runway",
+			ReplacementCostUSD:  100_000_000,
+			StrategicValueUSD:   200_000_000,
+			AuthorizedPersonnel: 50,
+		},
+	}
+
+	app.planMajorActorStrikes(0)
+
+	for _, unit := range app.currentScenario.GetUnits() {
+		if unit.GetAttackOrder() != nil {
+			t.Fatalf("expected no AI strike orders before player team selection, got %s -> %s", unit.GetId(), unit.GetAttackOrder().GetTargetUnitId())
+		}
+	}
+}
+
 func TestPlanMajorActorStrikesDeconflictsAirAttackers(t *testing.T) {
 	app := &App{ctx: context.Background(), aiRand: rand.New(rand.NewSource(1))} //nolint:gosec
 	app.setSimSeconds(0)
+	app.setHumanControlledTeam("ISR")
 	app.currentScenario = &enginev1.Scenario{
 		Relationships: []*enginev1.CountryRelationship{
 			{FromCountry: "USA", ToCountry: "QAT", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
@@ -277,6 +371,7 @@ func TestPlanMajorActorStrikesDeconflictsAirAttackers(t *testing.T) {
 func TestPlanMajorActorStrikesAllowsStrategicRaidBatching(t *testing.T) {
 	app := &App{ctx: context.Background(), aiRand: rand.New(rand.NewSource(1))} //nolint:gosec
 	app.setSimSeconds(0)
+	app.setHumanControlledTeam("USA")
 	app.currentScenario = &enginev1.Scenario{
 		Relationships: []*enginev1.CountryRelationship{
 			{FromCountry: "IRN", ToCountry: "ISR", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
@@ -348,6 +443,7 @@ func TestPlanMajorActorStrikesAllowsStrategicRaidBatching(t *testing.T) {
 func TestPlanMajorActorStrikesIranPrioritizesAirbaseClosure(t *testing.T) {
 	app := &App{ctx: context.Background(), aiRand: rand.New(rand.NewSource(1))} //nolint:gosec
 	app.setSimSeconds(0)
+	app.setHumanControlledTeam("USA")
 	app.currentScenario = &enginev1.Scenario{
 		Relationships: []*enginev1.CountryRelationship{
 			{FromCountry: "IRN", ToCountry: "ISR", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
@@ -397,5 +493,46 @@ func TestPlanMajorActorStrikesIranPrioritizesAirbaseClosure(t *testing.T) {
 	}
 	if got := order.GetTargetUnitId(); got != "coalition-airbase" {
 		t.Fatalf("expected iranian planner to favor airbase closure, got %q", got)
+	}
+}
+
+func TestPlanMajorActorStrikesSkipsNavalLandTargets(t *testing.T) {
+	app := &App{ctx: context.Background(), aiRand: rand.New(rand.NewSource(1))} //nolint:gosec
+	app.setSimSeconds(0)
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{
+			{FromCountry: "IRN", ToCountry: "ISR", MaritimeTransitAllowed: true, MaritimeStrikeAllowed: true},
+		},
+		Units: []*enginev1.Unit{
+			{
+				Id:           "irn-sub",
+				DisplayName:  "Iranian Sub",
+				TeamId:       "IRN",
+				CoalitionId:  "Red",
+				DefinitionId: "sub",
+				Position:     &enginev1.Position{Lat: 26.0, Lon: 56.0, AltMsl: -30},
+				Status:       &enginev1.OperationalStatus{IsActive: true, PersonnelStrength: 1},
+				Weapons:      []*enginev1.WeaponState{{WeaponId: "ssm-tomahawk", CurrentQty: 2, MaxQty: 2}},
+			},
+			{
+				Id:           "isr-airbase",
+				DisplayName:  "Israeli Airbase",
+				TeamId:       "ISR",
+				CoalitionId:  "Blue",
+				DefinitionId: "airbase-target",
+				Position:     &enginev1.Position{Lat: 31.21, Lon: 35.01},
+				Status:       &enginev1.OperationalStatus{IsActive: true, PersonnelStrength: 1},
+			},
+		},
+	}
+	app.defsCache = map[string]sim.DefStats{
+		"sub":            {Domain: enginev1.UnitDomain_DOMAIN_SUBSURFACE, EmploymentRole: "offensive", GeneralType: 50, AuthorizedPersonnel: 20},
+		"airbase-target": {Domain: enginev1.UnitDomain_DOMAIN_LAND, AssetClass: "airbase", TargetClass: "runway", ReplacementCostUSD: 120_000_000, StrategicValueUSD: 700_000_000, AuthorizedPersonnel: 50},
+	}
+
+	app.planMajorActorStrikes(0)
+
+	if app.currentScenario.GetUnits()[0].GetAttackOrder() != nil {
+		t.Fatal("expected maritime AI shooter to skip land target")
 	}
 }

@@ -66,7 +66,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 			}
 
 			// ── Behavior reactions ────────────────────────────────────────
-			reactionDeltas := processBehaviorTick(units, defs, weapons)
+			reactionDeltas := processBehaviorTick(units, defs, weapons, simSeconds)
 			if len(reactionDeltas) > 0 {
 				emit("batch_update", &enginev1.BatchUnitUpdate{
 					Deltas:  reactionDeltas,
@@ -262,7 +262,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 	}
 }
 
-func processBehaviorTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats) []*enginev1.UnitDelta {
+func processBehaviorTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, simSeconds float64) []*enginev1.UnitDelta {
 	tracks := buildTrackPicture(units, defs, nil, nil, fixedRng(0))
 	unitByID := make(map[string]*enginev1.Unit, len(units))
 	for _, u := range units {
@@ -276,7 +276,8 @@ func processBehaviorTick(units []*enginev1.Unit, defs map[string]DefStats, weapo
 		}
 
 		if hasExplicitAttackOrder(u) {
-			target := unitByID[u.GetAttackOrder().GetTargetUnitId()]
+			order := u.GetAttackOrder()
+			target := unitByID[order.GetTargetUnitId()]
 			if target == nil || !unitIsAlive(target) || (u.GetAttackOrder().GetOrderType() == enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT &&
 				desiredEffectSatisfied(target, u.GetAttackOrder().GetDesiredEffect())) {
 				u.AttackOrder = nil
@@ -291,7 +292,14 @@ func processBehaviorTick(units []*enginev1.Unit, defs map[string]DefStats, weapo
 				})
 				continue
 			}
+			if tracks.unitHasTrack(u.Id, target.Id) {
+				order.LastKnownTargetPosition = clonePositionProto(target.GetPosition())
+				order.LastTrackUpdateSeconds = simSeconds
+			}
 			waypoint := computeAttackWaypoint(u, target, defs, weapons)
+			if waypoint == nil && order.GetLastKnownTargetPosition() != nil {
+				waypoint = computeAttackWaypointToPosition(u, order.GetLastKnownTargetPosition(), defs[target.DefinitionId].Domain, weapons)
+			}
 			if waypoint != nil {
 				if attackRouteNeedsUpdate(u, waypoint) {
 					order := &enginev1.MoveOrder{
@@ -344,11 +352,27 @@ func processBehaviorTick(units []*enginev1.Unit, defs map[string]DefStats, weapo
 	return deltas
 }
 
+func clonePositionProto(pos *enginev1.Position) *enginev1.Position {
+	if pos == nil {
+		return nil
+	}
+	return &enginev1.Position{
+		Lat:     pos.GetLat(),
+		Lon:     pos.GetLon(),
+		AltMsl:  pos.GetAltMsl(),
+		Heading: pos.GetHeading(),
+		Speed:   pos.GetSpeed(),
+	}
+}
+
 func ComputeAttackWaypointForOrder(shooter, target *enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats) *enginev1.Waypoint {
 	if shooter == nil || target == nil || shooter.GetPosition() == nil || target.GetPosition() == nil {
 		return nil
 	}
 	targetDef, ok := defs[target.DefinitionId]
+	if !ok {
+		targetDef, ok = defs[normalizeDefinitionID(target.DefinitionId)]
+	}
 	if !ok {
 		return nil
 	}
@@ -380,11 +404,43 @@ func ComputeAttackWaypointForOrder(shooter, target *enginev1.Unit, defs map[stri
 	}
 }
 
+func computeAttackWaypointToPosition(shooter *enginev1.Unit, targetPos *enginev1.Position, targetDomain enginev1.UnitDomain, weapons map[string]WeaponStats) *enginev1.Waypoint {
+	if shooter == nil || targetPos == nil || shooter.GetPosition() == nil {
+		return nil
+	}
+	_, weapon, hasWeapon := selectBestWeapon(shooter, targetDomain, weapons)
+	if !hasWeapon || weapon.RangeM <= 0 {
+		return nil
+	}
+	dist := haversineM(
+		shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(),
+		targetPos.GetLat(), targetPos.GetLon(),
+	)
+	desiredStandOff := weapon.RangeM * 0.85
+	if desiredStandOff <= 0 || dist <= desiredStandOff {
+		return nil
+	}
+	moveDist := dist - desiredStandOff
+	brng := bearingRad(
+		shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(),
+		targetPos.GetLat(), targetPos.GetLon(),
+	)
+	lat, lon := movePoint(shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(), brng, moveDist)
+	return &enginev1.Waypoint{
+		Lat:    lat,
+		Lon:    lon,
+		AltMsl: shooter.GetPosition().GetAltMsl(),
+	}
+}
+
 func CanUnitAttackTarget(shooter, target *enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats) bool {
 	if shooter == nil || target == nil || shooter.GetPosition() == nil || target.GetPosition() == nil {
 		return false
 	}
 	targetDef, ok := defs[target.DefinitionId]
+	if !ok {
+		targetDef, ok = defs[normalizeDefinitionID(target.DefinitionId)]
+	}
 	if !ok {
 		return false
 	}

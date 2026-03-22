@@ -40,6 +40,76 @@ export namespace main {
 	        this.maritimeStrikeAllowed = source["maritimeStrikeAllowed"];
 	    }
 	}
+	export class EngagementOptionPreview {
+	    targetUnitId: string;
+	    targetDisplayName: string;
+	    targetTeamId: string;
+	    readyToFire: boolean;
+	    canPursue: boolean;
+	    hasTrack: boolean;
+	    weaponId?: string;
+	    reason?: string;
+	    reasonCode?: string;
+	    rangeToTargetM?: number;
+	    weaponRangeM?: number;
+	    fireProbability?: number;
+	    desiredEffectSupport: boolean;
+	    inStrikeCooldown: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new EngagementOptionPreview(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.targetUnitId = source["targetUnitId"];
+	        this.targetDisplayName = source["targetDisplayName"];
+	        this.targetTeamId = source["targetTeamId"];
+	        this.readyToFire = source["readyToFire"];
+	        this.canPursue = source["canPursue"];
+	        this.hasTrack = source["hasTrack"];
+	        this.weaponId = source["weaponId"];
+	        this.reason = source["reason"];
+	        this.reasonCode = source["reasonCode"];
+	        this.rangeToTargetM = source["rangeToTargetM"];
+	        this.weaponRangeM = source["weaponRangeM"];
+	        this.fireProbability = source["fireProbability"];
+	        this.desiredEffectSupport = source["desiredEffectSupport"];
+	        this.inStrikeCooldown = source["inStrikeCooldown"];
+	    }
+	}
+	export class EngagementPreview {
+	    readyToFire: boolean;
+	    canPursue: boolean;
+	    hasTrack: boolean;
+	    weaponId?: string;
+	    reason?: string;
+	    reasonCode?: string;
+	    rangeToTargetM?: number;
+	    weaponRangeM?: number;
+	    fireProbability?: number;
+	    desiredEffectSupport: boolean;
+	    inStrikeCooldown: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new EngagementPreview(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.readyToFire = source["readyToFire"];
+	        this.canPursue = source["canPursue"];
+	        this.hasTrack = source["hasTrack"];
+	        this.weaponId = source["weaponId"];
+	        this.reason = source["reason"];
+	        this.reasonCode = source["reasonCode"];
+	        this.rangeToTargetM = source["rangeToTargetM"];
+	        this.weaponRangeM = source["weaponRangeM"];
+	        this.fireProbability = source["fireProbability"];
+	        this.desiredEffectSupport = source["desiredEffectSupport"];
+	        this.inStrikeCooldown = source["inStrikeCooldown"];
+	    }
+	}
 	export class PathViolationPreview {
 	    blocked: boolean;
 	    country?: string;
@@ -56,6 +126,56 @@ export namespace main {
 	        this.country = source["country"];
 	        this.legIndex = source["legIndex"];
 	        this.reason = source["reason"];
+	    }
+	}
+	export class TargetEngagementOptionPreview {
+	    shooterUnitId: string;
+	    shooterDisplayName: string;
+	    shooterTeamId: string;
+	    loadoutConfigurationId?: string;
+	    readyToFire: boolean;
+	    canPursue: boolean;
+	    hasTrack: boolean;
+	    weaponId?: string;
+	    reason?: string;
+	    reasonCode?: string;
+	    rangeToTargetM?: number;
+	    weaponRangeM?: number;
+	    fireProbability?: number;
+	    desiredEffectSupport: boolean;
+	    inStrikeCooldown: boolean;
+	    pathBlocked: boolean;
+	    pathReason?: string;
+	    engagementCostUsd?: number;
+	    expectedTargetValueUsd?: number;
+	    expectedValueExchangeUsd?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TargetEngagementOptionPreview(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.shooterUnitId = source["shooterUnitId"];
+	        this.shooterDisplayName = source["shooterDisplayName"];
+	        this.shooterTeamId = source["shooterTeamId"];
+	        this.loadoutConfigurationId = source["loadoutConfigurationId"];
+	        this.readyToFire = source["readyToFire"];
+	        this.canPursue = source["canPursue"];
+	        this.hasTrack = source["hasTrack"];
+	        this.weaponId = source["weaponId"];
+	        this.reason = source["reason"];
+	        this.reasonCode = source["reasonCode"];
+	        this.rangeToTargetM = source["rangeToTargetM"];
+	        this.weaponRangeM = source["weaponRangeM"];
+	        this.fireProbability = source["fireProbability"];
+	        this.desiredEffectSupport = source["desiredEffectSupport"];
+	        this.inStrikeCooldown = source["inStrikeCooldown"];
+	        this.pathBlocked = source["pathBlocked"];
+	        this.pathReason = source["pathReason"];
+	        this.engagementCostUsd = source["engagementCostUsd"];
+	        this.expectedTargetValueUsd = source["expectedTargetValueUsd"];
+	        this.expectedValueExchangeUsd = source["expectedValueExchangeUsd"];
 	    }
 	}
 

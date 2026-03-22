@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ListUnitDefinitions } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
+import { selectedPlayerTeam } from "../../utils/playerTeam";
 import { inferUnitTeamCode, type DefinitionTeamMeta } from "../../utils/unitTeams";
 
 export default function ViewSwitcher() {
@@ -44,7 +45,7 @@ export default function ViewSwitcher() {
   }, [definitionTeams, units]);
 
   const options = useMemo(() => {
-    const playerTeam = humanControlledTeam.trim().toUpperCase();
+    const playerTeam = selectedPlayerTeam(humanControlledTeam);
     if (playerTeam) {
       return ["debug", playerTeam];
     }
@@ -52,7 +53,7 @@ export default function ViewSwitcher() {
   }, [humanControlledTeam, teams]);
 
   useEffect(() => {
-    const playerTeam = humanControlledTeam.trim().toUpperCase();
+    const playerTeam = selectedPlayerTeam(humanControlledTeam);
     if (playerTeam && activeView !== "debug" && activeView !== playerTeam) {
       setActiveView(playerTeam);
     }

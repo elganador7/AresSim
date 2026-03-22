@@ -110,12 +110,20 @@ func detectionProbability(distanceM, effectiveRangeM float64, retained bool) flo
 		return 0
 	}
 	normalized := distanceM / effectiveRangeM
-	pDetect := 0.95 - (0.75 * normalized)
-	if pDetect < 0.20 {
-		pDetect = 0.20
+	// Initial acquisition should fall off sharply near the edge of coverage to
+	// avoid too many fringe-range detections from generic surveillance.
+	pDetect := 0.97 * math.Pow(1-normalized, 1.35)
+	if pDetect < 0.02 {
+		pDetect = 0.02
 	}
 	if retained {
-		return math.Min(0.99, pDetect+0.25)
+		// Once a track exists, retaining it should be noticeably easier than
+		// acquiring it, but still degrade with range.
+		pRetain := 0.58 + (0.37 * math.Pow(1-normalized, 0.85))
+		if pRetain < pDetect+0.15 {
+			pRetain = pDetect + 0.15
+		}
+		return math.Min(0.995, pRetain)
 	}
 	return pDetect
 }

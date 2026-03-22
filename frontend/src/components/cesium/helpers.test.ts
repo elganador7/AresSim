@@ -30,9 +30,10 @@ function makeUnit(id: string, teamId: string): Unit {
 }
 
 const defInfo: Record<string, DefInfo> = {
-  "usa-def": { generalType: 0, detectionRangeM: 0, shortName: "USA", teamCode: "USA" },
-  "isr-def": { generalType: 0, detectionRangeM: 0, shortName: "ISR", teamCode: "ISR" },
-  "irn-def": { generalType: 0, detectionRangeM: 0, shortName: "IRN", teamCode: "IRN" },
+  "usa-def": { generalType: 0, detectionRangeM: 0, shortName: "USA", teamCode: "USA", stationary: false, assetClass: "combat_unit" },
+  "isr-def": { generalType: 0, detectionRangeM: 0, shortName: "ISR", teamCode: "ISR", stationary: false, assetClass: "combat_unit" },
+  "irn-def": { generalType: 0, detectionRangeM: 0, shortName: "IRN", teamCode: "IRN", stationary: false, assetClass: "combat_unit" },
+  "irn-airbase-def": { generalType: 0, detectionRangeM: 0, shortName: "AB", teamCode: "IRN", stationary: true, assetClass: "airbase" },
 };
 
 describe("cesium visibility helpers", () => {
@@ -86,6 +87,16 @@ describe("cesium visibility helpers", () => {
     detections.set("USA", new Set(["irn"]));
     expect(isVisible(iranianUnit, "USA", detections, defInfo)).toBe(true);
     expect(isTrack(iranianUnit, "USA", defInfo)).toBe(true);
+  });
+
+  it("always shows stationary fixed sites to all players", () => {
+    const fixedSite = {
+      ...makeUnit("irn-airbase", "IRN"),
+      definitionId: "irn-airbase-def",
+    };
+    const detections = new Map<string, Set<string>>();
+    expect(isVisible(fixedSite, "USA", detections, defInfo)).toBe(true);
+    expect(isTrack(fixedSite, "USA", defInfo)).toBe(false);
   });
 
   it("resolves definition ids with record prefixes", () => {

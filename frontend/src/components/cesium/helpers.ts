@@ -11,6 +11,7 @@ import {
 } from "cesium";
 import type { ExplosionFx, Munition, Unit, WeaponDef } from "../../store/simStore";
 import { useSimStore } from "../../store/simStore";
+import { selectedPlayerTeam } from "../../utils/playerTeam";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
 import { inferUnitTeamCode } from "../../utils/unitTeams";
 import { areHostile } from "../../utils/allegiance";
@@ -22,6 +23,8 @@ export interface DefInfo {
   detectionRangeM: number;
   shortName: string;
   teamCode: string;
+  stationary?: boolean;
+  assetClass?: string;
   coalitionId?: string;
 }
 
@@ -101,7 +104,7 @@ function sharesIntelIntoView(sourceTeam: string, view: ActiveView): boolean {
 
 export function relationshipColorHex(unit: Unit, humanControlledTeam: string, units: Map<string, Unit>): string {
   const { activeView } = useSimStore.getState();
-  const playerTeam = (humanControlledTeam.trim() || (activeView !== "debug" ? activeView : "")).toUpperCase();
+  const playerTeam = selectedPlayerTeam(humanControlledTeam) || (activeView !== "debug" ? activeView.toUpperCase() : "");
   if (!playerTeam) {
     return "#94a3b8";
   }
@@ -120,6 +123,26 @@ export function routeColorForUnit(unit: Unit, humanControlledTeam: string, units
   return Color.fromCssColorString(relationshipColorHex(unit, humanControlledTeam, units));
 }
 
+function isAlwaysVisibleFixedSite(unit: Unit, defInfo: Record<string, DefInfo>): boolean {
+  const def = definitionInfoFor(defInfo, unit.definitionId);
+  if (!def?.stationary) {
+    return false;
+  }
+  switch (def.assetClass) {
+    case "airbase":
+    case "port":
+    case "c2_site":
+    case "radar_site":
+    case "oil_field":
+    case "pipeline_node":
+    case "desalination_plant":
+    case "power_plant":
+      return true;
+    default:
+      return false;
+  }
+}
+
 export function isVisible(
   unit: Unit,
   view: ActiveView,
@@ -127,6 +150,9 @@ export function isVisible(
   defInfo: Record<string, DefInfo>,
 ): boolean {
   if (view === "debug") return true;
+  if (isAlwaysVisibleFixedSite(unit, defInfo)) {
+    return true;
+  }
   const teamCode = teamForUnit(unit, defInfo);
   if (teamCode === view) {
     return true;
@@ -139,6 +165,9 @@ export function isVisible(
 
 export function isTrack(unit: Unit, view: ActiveView, defInfo: Record<string, DefInfo>): boolean {
   if (view === "debug") return false;
+  if (isAlwaysVisibleFixedSite(unit, defInfo)) {
+    return false;
+  }
   const teamCode = teamForUnit(unit, defInfo);
   if (teamCode === view) {
     return false;
@@ -148,7 +177,7 @@ export function isTrack(unit: Unit, view: ActiveView, defInfo: Record<string, De
 
 export function canMove(unit: Unit, view: ActiveView, defInfo: Record<string, DefInfo>): boolean {
   const { humanControlledTeam } = useSimStore.getState();
-  const controlTeam = (humanControlledTeam.trim() || (view !== "debug" ? view : "")).toUpperCase();
+  const controlTeam = selectedPlayerTeam(humanControlledTeam);
   if (!controlTeam) return view === "debug";
   return teamForUnit(unit, defInfo) === controlTeam;
 }
@@ -195,17 +224,13 @@ export function getExplosionBillboard(kind: ExplosionFx["kind"]): string {
 
 export function updateMapCursor(
   container: HTMLDivElement | null,
-  mapCommandMode: { type: "none" | "route" | "target_pick"; unitId: string | null },
+  mapCommandMode: { type: "none" | "route"; unitId: string | null },
   units: Map<string, Unit>,
   selectedId: string | null,
   view: ActiveView,
   defInfo: Record<string, DefInfo>,
 ) {
   if (!container) return;
-  if (mapCommandMode.type === "target_pick" && mapCommandMode.unitId) {
-    container.style.cursor = "crosshair";
-    return;
-  }
   if (mapCommandMode.type === "route" && mapCommandMode.unitId) {
     container.style.cursor = "copy";
     return;

@@ -58,6 +58,13 @@ export function setupCesiumStoreSync({
   containerRef,
   defInfoRef,
 }: SetupCesiumStoreSyncOptions) {
+  const activeViewContact = (view: ActiveView, unitId: string) => {
+    if (view === "debug") {
+      return undefined;
+    }
+    return useSimStore.getState().detectionContacts.get(view)?.get(unitId);
+  };
+
   const syncUnit = (
     unit: Unit,
     view: ActiveView,
@@ -71,6 +78,8 @@ export function setupCesiumStoreSync({
     const waypointPrefix = `${unit.id}_wp_`;
     const routeSegmentPrefix = `${unit.id}_route_seg_`;
     const strikeSegmentPrefix = `${unit.id}_strike_seg_`;
+    const targetMarkerId = `${unit.id}_target_marker`;
+    const lastKnownMarkerId = `${unit.id}_last_known_marker`;
 
     if (!unit.status.isActive) {
       viewer.entities.removeById(unit.id);
@@ -78,6 +87,8 @@ export function setupCesiumStoreSync({
       viewer.entities.removeById(destId);
       viewer.entities.removeById(rangeId);
       viewer.entities.removeById(sensorId);
+      viewer.entities.removeById(targetMarkerId);
+      viewer.entities.removeById(lastKnownMarkerId);
       Array.from(viewer.entities.values)
         .map((entity) => entity.id as string)
         .filter((id) => id.startsWith(waypointPrefix))
@@ -256,15 +267,22 @@ export function setupCesiumStoreSync({
       .map((entity) => entity.id as string)
       .filter((id) => id.startsWith(strikeSegmentPrefix))
       .forEach((id) => viewer.entities.removeById(id));
+    viewer.entities.removeById(targetMarkerId);
+    viewer.entities.removeById(lastKnownMarkerId);
 
     if (isSelected && visible && !track && unit.attackOrder?.targetUnitId) {
       const selectedStrikePreview = useSimStore.getState().selectedStrikePreview;
       const target = useSimStore.getState().units.get(unit.attackOrder.targetUnitId);
-      if (target && isVisible(target, view, detections, defInfoRef.current)) {
+      const visibleTarget = target && isVisible(target, view, detections, defInfoRef.current) ? target : null;
+      const sharedContact = activeViewContact(view, unit.attackOrder.targetUnitId);
+      const targetLabel = sharedContact?.shared
+        ? `Shared Track · ${sharedContact.sourceTeam}`
+        : (visibleTarget ? "Tracked Target" : "Last Known Target");
+      if (visibleTarget) {
         const pathPoints = [
           { lat: unit.position.lat, lon: unit.position.lon },
           ...(unit.moveOrder?.waypoints ?? []).map((wp) => ({ lat: wp.lat, lon: wp.lon })),
-          { lat: target.position.lat, lon: target.position.lon },
+          { lat: visibleTarget.position.lat, lon: visibleTarget.position.lon },
         ];
         for (let idx = 0; idx < pathPoints.length - 1; idx += 1) {
           const start = pathPoints[idx];
@@ -286,6 +304,77 @@ export function setupCesiumStoreSync({
             },
           }));
         }
+        viewer.entities.add(new Entity({
+          id: targetMarkerId,
+          show: true,
+          position: Cartesian3.fromDegrees(visibleTarget.position.lon, visibleTarget.position.lat, visibleTarget.position.altMsl),
+          point: {
+            pixelSize: 12,
+            color: STRIKE_PATH_COLOR.withAlpha(0.95),
+            outlineColor: Color.WHITE,
+            outlineWidth: 2,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+          label: {
+            text: targetLabel,
+            fillColor: Color.WHITE,
+            outlineColor: Color.BLACK,
+            outlineWidth: 2,
+            style: LabelStyle.FILL_AND_OUTLINE,
+            font: "12px sans-serif",
+            pixelOffset: new Cartesian2(0, -18),
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+        }));
+      } else if (unit.attackOrder.lastKnownTargetPosition) {
+        const lastKnown = unit.attackOrder.lastKnownTargetPosition;
+        const pathPoints = [
+          { lat: unit.position.lat, lon: unit.position.lon },
+          ...(unit.moveOrder?.waypoints ?? []).map((wp) => ({ lat: wp.lat, lon: wp.lon })),
+          { lat: lastKnown.lat, lon: lastKnown.lon },
+        ];
+        for (let idx = 0; idx < pathPoints.length - 1; idx += 1) {
+          const start = pathPoints[idx];
+          const end = pathPoints[idx + 1];
+          const blocked = isSelected && selectedStrikePreview?.blocked && selectedStrikePreview.legIndex === idx + 1;
+          viewer.entities.add(new Entity({
+            id: `${strikeSegmentPrefix}${idx}`,
+            show: true,
+            polyline: {
+              positions: new ConstantProperty([
+                Cartesian3.fromDegrees(start.lon, start.lat),
+                Cartesian3.fromDegrees(end.lon, end.lat),
+              ]),
+              width: blocked ? 3 : 2,
+              material: blocked
+                ? new PolylineDashMaterialProperty({ color: BLOCKED_ROUTE_COLOR.withAlpha(0.78), dashLength: 10 })
+                : new PolylineDashMaterialProperty({ color: STRIKE_PATH_COLOR.withAlpha(0.45), dashLength: 12 }),
+              clampToGround: false,
+            },
+          }));
+        }
+        viewer.entities.add(new Entity({
+          id: lastKnownMarkerId,
+          show: true,
+          position: Cartesian3.fromDegrees(lastKnown.lon, lastKnown.lat, lastKnown.altMsl),
+          point: {
+            pixelSize: 12,
+            color: Color.fromCssColorString("#facc15").withAlpha(0.95),
+            outlineColor: Color.WHITE,
+            outlineWidth: 2,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+          label: {
+            text: "Searching Last Known",
+            fillColor: Color.WHITE,
+            outlineColor: Color.BLACK,
+            outlineWidth: 2,
+            style: LabelStyle.FILL_AND_OUTLINE,
+            font: "12px sans-serif",
+            pixelOffset: new Cartesian2(0, -18),
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+        }));
       }
     }
 
@@ -365,6 +454,8 @@ export function setupCesiumStoreSync({
         !id.endsWith("_dest") &&
         !id.endsWith("_range") &&
         !id.endsWith("_sensor") &&
+        !id.endsWith("_target_marker") &&
+        !id.endsWith("_last_known_marker") &&
         !id.includes("_wp_") &&
         !id.includes("_route_seg_") &&
         !id.includes("_strike_seg_") &&
@@ -536,6 +627,8 @@ export function setupCesiumStoreSync({
             teamCode: Array.isArray(r["employed_by"]) && r["employed_by"].length > 0
               ? String(r["employed_by"][0]).trim().toUpperCase()
               : String(r["nation_of_origin"] ?? "").trim().toUpperCase(),
+            stationary: Boolean(r["stationary"]),
+            assetClass: String(r["asset_class"] ?? "").trim(),
           };
         });
         defInfoRef.current = map;
@@ -563,6 +656,7 @@ export function setupCesiumStoreSync({
 
   const unsubscribe = useSimStore.subscribe((state, prev) => {
     const unitsChanged = state.units !== prev.units;
+    const scenarioChanged = state.scenarioName !== prev.scenarioName;
     const viewChanged = state.activeView !== prev.activeView;
     const selectionChanged = state.selectedUnitId !== prev.selectedUnitId;
     const detectionsChanged = state.detections !== prev.detections;
@@ -574,6 +668,12 @@ export function setupCesiumStoreSync({
     const explosionsChanged = state.explosions !== prev.explosions;
     const munitionDetectChanged = state.munitionDetections !== prev.munitionDetections;
 
+    if (scenarioChanged) {
+      loadDefinitions();
+      syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
+      syncTrackLinks(state.units, state.selectedUnitId, state.activeView, state.detections, state.detectionContacts);
+      return;
+    }
     if (unitsChanged) {
       syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
       syncTrackLinks(state.units, state.selectedUnitId, state.activeView, state.detections, state.detectionContacts);

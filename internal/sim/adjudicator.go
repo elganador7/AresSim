@@ -104,6 +104,10 @@ func unitsAreHostile(a, b *enginev1.Unit) bool {
 	return true
 }
 
+func UnitsAreHostileForUI(a, b *enginev1.Unit) bool {
+	return unitsAreHostile(a, b)
+}
+
 func isUnauthorizedOverflight(defender, intruder *enginev1.Unit, defs map[string]DefStats, rules RelationshipRules) bool {
 	if defender == nil || intruder == nil {
 		return false
@@ -213,70 +217,59 @@ func adjudicateTickWithTracks(units []*enginev1.Unit, defs map[string]DefStats, 
 			if !unitCanOperate(b) {
 				continue
 			}
-			dist := haversineM(
-				a.GetPosition().GetLat(), a.GetPosition().GetLon(),
-				b.GetPosition().GetLat(), b.GetPosition().GetLon(),
-			)
-
 			defA := defs[a.DefinitionId]
 			defB := defs[b.DefinitionId]
 
-			wIDA, wA, hasWeapA := selectBestWeapon(a, defB.Domain, weapons)
-			wIDB, wB, hasWeapB := selectBestWeapon(b, defA.Domain, weapons)
-
-			aHasTrack := tracks.unitHasTrack(a.Id, b.Id)
-			bHasTrack := tracks.unitHasTrack(b.Id, a.Id)
 			aCanEngageB := unitsAreHostile(a, b) || (isUnauthorizedOverflight(a, b, defs, rules) && canPerformSovereignAirDefense(a, defA))
 			bCanEngageA := unitsAreHostile(a, b) || (isUnauthorizedOverflight(b, a, defs, rules) && canPerformSovereignAirDefense(b, defB))
+			var decisionA EngagementDecision
+			var decisionB EngagementDecision
+			aCanAct := aCanEngageB && !firedThisTick[a.Id] && !orderedUnits[a.Id]
+			bCanAct := bCanEngageA && !firedThisTick[b.Id] && !orderedUnits[b.Id]
+			if aCanAct {
+				decisionA = EvaluateAutonomousEngagementDecision(a, b, defs, weapons, tracks, simSeconds)
+			}
+			if bCanAct {
+				decisionB = EvaluateAutonomousEngagementDecision(b, a, defs, weapons, tracks, simSeconds)
+			}
 
-			aInRange := aCanEngageB && hasWeapA && aHasTrack && dist <= wA.RangeM && !firedThisTick[a.Id] && !orderedUnits[a.Id] && unitReadyToStrike(a, wA, simSeconds)
-			bInRange := bCanEngageA && hasWeapB && bHasTrack && dist <= wB.RangeM && !firedThisTick[b.Id] && !orderedUnits[b.Id] && unitReadyToStrike(b, wB, simSeconds)
-
-			if !aInRange && !bInRange {
+			if !decisionA.CanFire && !decisionB.CanFire {
 				continue
 			}
 
-			if aInRange {
-				prob := rangeDegradedPoh(wA.ProbabilityOfHit, dist, wA.RangeM)
-				aDetectedByB := dist <= effectiveDetectionRangeM(defB, defA)
-				if shouldAutonomouslyEngage(a, prob, aDetectedByB) {
-					miss := inFlightMissProb(inFlight, b.Id)
-					salvo := salvoToAchieveKillProb(miss, prob, 0.30)
-					salvo = capAtAmmo(a, wIDA, salvo)
-					if salvo > 0 {
-						decrementAmmo(a, wIDA, salvo)
-						applyStrikeCooldown(a, wA, simSeconds)
-						result.Shots = append(result.Shots, FiredShot{
-							Shooter:        a,
-							Target:         b,
-							WeaponID:       wIDA,
-							HitProbability: prob,
-							SalvoSize:      salvo,
-						})
-						firedThisTick[a.Id] = true
-					}
+			if decisionA.CanFire {
+				miss := inFlightMissProb(inFlight, b.Id)
+				salvo := salvoToAchieveKillProb(miss, decisionA.FireProbability, 0.30)
+				salvo = capAtAmmo(a, decisionA.WeaponID, salvo)
+				if salvo > 0 {
+					decrementAmmo(a, decisionA.WeaponID, salvo)
+					applyStrikeCooldown(a, decisionA.Weapon, simSeconds)
+					result.Shots = append(result.Shots, FiredShot{
+						Shooter:        a,
+						Target:         b,
+						WeaponID:       decisionA.WeaponID,
+						HitProbability: decisionA.FireProbability,
+						SalvoSize:      salvo,
+					})
+					firedThisTick[a.Id] = true
 				}
 			}
 
-			if bInRange {
-				prob := rangeDegradedPoh(wB.ProbabilityOfHit, dist, wB.RangeM)
-				bDetectedByA := dist <= effectiveDetectionRangeM(defA, defB)
-				if shouldAutonomouslyEngage(b, prob, bDetectedByA) {
-					miss := inFlightMissProb(inFlight, a.Id)
-					salvo := salvoToAchieveKillProb(miss, prob, 0.30)
-					salvo = capAtAmmo(b, wIDB, salvo)
-					if salvo > 0 {
-						decrementAmmo(b, wIDB, salvo)
-						applyStrikeCooldown(b, wB, simSeconds)
-						result.Shots = append(result.Shots, FiredShot{
-							Shooter:        b,
-							Target:         a,
-							WeaponID:       wIDB,
-							HitProbability: prob,
-							SalvoSize:      salvo,
-						})
-						firedThisTick[b.Id] = true
-					}
+			if decisionB.CanFire {
+				miss := inFlightMissProb(inFlight, a.Id)
+				salvo := salvoToAchieveKillProb(miss, decisionB.FireProbability, 0.30)
+				salvo = capAtAmmo(b, decisionB.WeaponID, salvo)
+				if salvo > 0 {
+					decrementAmmo(b, decisionB.WeaponID, salvo)
+					applyStrikeCooldown(b, decisionB.Weapon, simSeconds)
+					result.Shots = append(result.Shots, FiredShot{
+						Shooter:        b,
+						Target:         a,
+						WeaponID:       decisionB.WeaponID,
+						HitProbability: decisionB.FireProbability,
+						SalvoSize:      salvo,
+					})
+					firedThisTick[b.Id] = true
 				}
 			}
 
@@ -304,35 +297,18 @@ func tryFireAtTarget(
 	if firedThisTick[shooter.Id] || shooter == nil || target == nil {
 		return false
 	}
-	targetDef := defs[target.DefinitionId]
-	shooterDef := defs[shooter.DefinitionId]
-	weaponID, weapon, hasWeapon := selectBestWeapon(shooter, targetDef.Domain, weapons)
-	if !hasWeapon {
-		return false
-	}
-	if !tracks.unitHasTrack(shooter.Id, target.Id) && !canExecutePreplannedStrategicStrike(shooter, target, targetDef, weapon) {
-		return false
-	}
-	if !unitReadyToStrike(shooter, weapon, simSeconds) {
-		return false
-	}
-	dist := haversineM(
-		shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(),
-		target.GetPosition().GetLat(), target.GetPosition().GetLon(),
+	decision := EvaluateEngagementDecision(
+		shooter,
+		target,
+		defs,
+		weapons,
+		tracks,
+		desiredEffect,
+		requireDesiredEffect,
+		simSeconds,
+		shooter.GetAttackOrder() != nil && shooter.GetAttackOrder().GetLastKnownTargetPosition() != nil,
 	)
-	if dist > weapon.RangeM {
-		return false
-	}
-	prob := rangeDegradedPoh(weapon.ProbabilityOfHit, dist, weapon.RangeM)
-	detectedByTarget := dist <= effectiveDetectionRangeM(targetDef, shooterDef)
-	if !shouldExecuteManualAttack(shooter, prob, detectedByTarget) {
-		return false
-	}
-	outcome := resolveImpactOutcome(weapon.EffectType, targetDef.TargetClass)
-	if outcome == outcomeNoEffect {
-		return false
-	}
-	if requireDesiredEffect && !impactOutcomeSupportsDesiredEffect(outcome, desiredEffect) {
+	if !decision.CanFire {
 		return false
 	}
 	targetMissProb := 0.30
@@ -340,18 +316,18 @@ func tryFireAtTarget(
 		targetMissProb = 1.0 - float64(pkillThreshold)
 	}
 	miss := inFlightMissProb(inFlight, target.Id)
-	salvo := salvoToAchieveKillProb(miss, prob, targetMissProb)
-	salvo = capAtAmmo(shooter, weaponID, salvo)
+	salvo := salvoToAchieveKillProb(miss, decision.FireProbability, targetMissProb)
+	salvo = capAtAmmo(shooter, decision.WeaponID, salvo)
 	if salvo <= 0 {
 		return false
 	}
-	decrementAmmo(shooter, weaponID, salvo)
-	applyStrikeCooldown(shooter, weapon, simSeconds)
+	decrementAmmo(shooter, decision.WeaponID, salvo)
+	applyStrikeCooldown(shooter, decision.Weapon, simSeconds)
 	result.Shots = append(result.Shots, FiredShot{
 		Shooter:        shooter,
 		Target:         target,
-		WeaponID:       weaponID,
-		HitProbability: prob,
+		WeaponID:       decision.WeaponID,
+		HitProbability: decision.FireProbability,
 		SalvoSize:      salvo,
 	})
 	firedThisTick[shooter.Id] = true
@@ -407,6 +383,10 @@ func isFixedStrategicTarget(target *enginev1.Unit, def DefStats) bool {
 		return true
 	}
 	return false
+}
+
+func IsFixedStrategicTargetForUI(target *enginev1.Unit, def DefStats) bool {
+	return isFixedStrategicTarget(target, def)
 }
 
 func applyStrikeCooldown(unit *enginev1.Unit, weapon WeaponStats, simSeconds float64) {
@@ -734,6 +714,10 @@ func unitIsAlive(u *enginev1.Unit) bool {
 
 func unitCanOperate(u *enginev1.Unit) bool {
 	return unitIsAlive(u) && currentDamageState(u) != enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED
+}
+
+func UnitCanOperateForUI(u *enginev1.Unit) bool {
+	return unitCanOperate(u)
 }
 
 // killUnit marks u as destroyed and clears its move order in-place.

@@ -533,6 +533,50 @@ func TestAdjudicateTick_EnoughInFlight_NoAdditionalShot(t *testing.T) {
 	}
 }
 
+func TestEvaluateEngagementDecision_PrefersWeaponMatchingDesiredEffect(t *testing.T) {
+	shooter := makeUnit("shooter", "USA", "ship", 0, 0)
+	target := makeUnit("target", "IRN", "warship", 0, 0.05)
+	addWeapons(shooter, "long-strike", 4)
+	addWeapons(shooter, "anti-ship", 4)
+	defs := map[string]DefStats{
+		"ship":    {Domain: enginev1.UnitDomain_DOMAIN_SEA},
+		"warship": {Domain: enginev1.UnitDomain_DOMAIN_SEA, TargetClass: "surface_warship"},
+	}
+	weapons := map[string]WeaponStats{
+		"long-strike": {RangeM: 300_000, ProbabilityOfHit: 0.8, DomainTargets: []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_SEA}, EffectType: enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE},
+		"anti-ship":   {RangeM: 120_000, ProbabilityOfHit: 0.7, DomainTargets: []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_SEA}, EffectType: enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_SHIP},
+	}
+	tracks := buildTrackPicture([]*enginev1.Unit{shooter, target}, defs, nil, nil, fixedRng(0))
+
+	decision := EvaluateEngagementDecision(shooter, target, defs, weapons, tracks, enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL, true, 0, false)
+	if got := decision.WeaponID; got != "anti-ship" {
+		t.Fatalf("expected anti-ship weapon, got %q", got)
+	}
+}
+
+func TestEvaluateEngagementDecision_ReportsDoctrineThresholdBlock(t *testing.T) {
+	shooter := makeUnit("shooter", "USA", "fighter-shooter", 0, 0)
+	target := makeUnit("target", "IRN", "fighter-target", 0, 0.01)
+	shooter.EngagementPkillThreshold = 0.9
+	addWeapons(shooter, "missile", 4)
+	defs := map[string]DefStats{
+		"fighter-shooter": {Domain: enginev1.UnitDomain_DOMAIN_AIR, TargetClass: "aircraft", DetectionRangeM: 50_000},
+		"fighter-target":  {Domain: enginev1.UnitDomain_DOMAIN_AIR, TargetClass: "aircraft", DetectionRangeM: 0},
+	}
+	weapons := map[string]WeaponStats{
+		"missile": {RangeM: 120_000, ProbabilityOfHit: 0.55, DomainTargets: []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_AIR}, EffectType: enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_AIR},
+	}
+	tracks := buildTrackPicture([]*enginev1.Unit{shooter, target}, defs, nil, nil, fixedRng(0))
+
+	decision := EvaluateEngagementDecision(shooter, target, defs, weapons, tracks, enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY, false, 0, false)
+	if decision.Reason != EngagementReasonDoctrineThreshold {
+		t.Fatalf("expected doctrine threshold reason, got %q", decision.Reason)
+	}
+	if decision.CanFire {
+		t.Fatal("expected doctrine-threshold-blocked shot to not fire")
+	}
+}
+
 func TestAdjudicateTick_ConnectedSensorAllowsLauncherToFire(t *testing.T) {
 	parent := makeUnit("battery", "Blue", "command", 0, 0)
 	radar := makeChildUnit("radar", "Blue", "sensor", "battery", 0, 0)
@@ -1280,6 +1324,30 @@ func TestBuildTrackPicture_RetainProbabilityExceedsAcquireProbability(t *testing
 	}, &sequenceRng{values: []float64{0.50}})
 	if len(retained.BySide["ISR"]) != 1 || retained.BySide["ISR"][0] != "target" {
 		t.Fatalf("expected retained track to survive higher retain probability, got %v", retained.BySide["ISR"])
+	}
+}
+
+func TestDetectionProbability_DropsSharplyAtRangeEdge(t *testing.T) {
+	pMid := detectionProbability(50_000, 100_000, false)
+	pEdge := detectionProbability(99_000, 100_000, false)
+
+	if pMid <= 0.20 {
+		t.Fatalf("expected mid-range acquire probability to stay meaningful, got %f", pMid)
+	}
+	if pEdge >= 0.10 {
+		t.Fatalf("expected edge-of-range acquire probability to be low, got %f", pEdge)
+	}
+}
+
+func TestDetectionProbability_RetainStaysAboveAcquireAtSameRange(t *testing.T) {
+	acquire := detectionProbability(85_000, 100_000, false)
+	retain := detectionProbability(85_000, 100_000, true)
+
+	if retain <= acquire {
+		t.Fatalf("expected retained track probability %f to exceed acquire %f", retain, acquire)
+	}
+	if retain < 0.55 {
+		t.Fatalf("expected retained edge track to remain moderately sticky, got %f", retain)
 	}
 }
 

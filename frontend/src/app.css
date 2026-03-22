@@ -1033,6 +1033,22 @@ body,
   color: #d1d5db;
 }
 
+.target-panel {
+  position: absolute;
+  top: 88px;
+  left: 16px;
+  width: 360px;
+  max-height: calc(100vh - 116px);
+  overflow-y: auto;
+  background: rgba(15, 17, 21, 0.94);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: #d1d5db;
+}
+
 .unit-panel-header {
   display: flex;
   align-items: center;
@@ -1046,6 +1062,10 @@ body,
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+.target-indicator {
+  background: #ef4444;
 }
 
 .unit-display-name {
@@ -1094,6 +1114,75 @@ body,
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 3px;
   margin-bottom: 4px;
+}
+
+.target-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 14px;
+}
+
+.target-option-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.target-option-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.target-option-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f9fafb;
+}
+
+.target-option-subtitle {
+  margin-top: 2px;
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.target-option-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 8px;
+  font-size: 10px;
+  color: #cbd5e1;
+}
+
+.weapon-list-header-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.target-search-input {
+  width: 150px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.7);
+  color: #e5e7eb;
+  font-size: 11px;
+  font-family: var(--font-ui);
+}
+
+.target-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.target-search-input:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.55);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
 }
 
 .path-warning-note {

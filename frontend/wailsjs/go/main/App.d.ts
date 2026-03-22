@@ -26,6 +26,8 @@ export function MoveUnit(arg1:string,arg2:number,arg3:number):Promise<main.Bridg
 
 export function PauseSim(arg1:boolean):Promise<main.BridgeResult>;
 
+export function PreviewCurrentEngagement(arg1:string):Promise<main.EngagementPreview>;
+
 export function PreviewCurrentRelationships():Promise<Array<main.EffectiveRelationshipPreview>>;
 
 export function PreviewCurrentStrikePath(arg1:string):Promise<main.PathViolationPreview>;
@@ -39,6 +41,12 @@ export function PreviewDraftRelationships(arg1:string,arg2:string,arg3:string):P
 export function PreviewDraftStrikePath(arg1:string,arg2:boolean,arg3:string,arg4:string,arg5:string):Promise<main.PathViolationPreview>;
 
 export function PreviewDraftTransitPath(arg1:string,arg2:boolean,arg3:string,arg4:string,arg5:string):Promise<main.PathViolationPreview>;
+
+export function PreviewEngagementOptions(arg1:string):Promise<Array<main.EngagementOptionPreview>>;
+
+export function PreviewEngagementOptionsForLoadout(arg1:string,arg2:string):Promise<Array<main.EngagementOptionPreview>>;
+
+export function PreviewTargetEngagementOptions(arg1:string,arg2:string):Promise<Array<main.TargetEngagementOptionPreview>>;
 
 export function RemoveMoveWaypoint(arg1:string,arg2:number):Promise<main.BridgeResult>;
 
@@ -59,5 +67,7 @@ export function SetSimSpeed(arg1:number):Promise<main.BridgeResult>;
 export function SetUnitAttackOrder(arg1:string,arg2:number,arg3:string,arg4:number,arg5:number):Promise<main.BridgeResult>;
 
 export function SetUnitEngagement(arg1:string,arg2:number,arg3:number):Promise<main.BridgeResult>;
+
+export function SetUnitLoadoutConfiguration(arg1:string,arg2:string):Promise<main.BridgeResult>;
 
 export function UpdateMoveWaypoint(arg1:string,arg2:number,arg3:number,arg4:number):Promise<main.BridgeResult>;

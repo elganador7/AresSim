@@ -34,14 +34,6 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			},
 		},
 		Relationships: iranWarDayOneRelationships(),
-		OpeningStrikeActions: []*enginev1.OpeningStrikeAction{
-			openingStrike("isr-f35i-nevatim", "irn-s300-tehran", "air_superiority", enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL, "Israeli F-35I package opens the war against Tehran air defenses."),
-			openingStrike("isr-f15i-hatzor", "irn-qiam-central", "close_air_support", enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY, "Israeli F-15I strike package targets Iranian ballistic-missile forces."),
-			openingStrike("isr-f16i-ramon", "irn-bavar-esfahan", "sead", enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL, "Israeli F-16I SEAD package suppresses Esfahan air defenses."),
-			openingStrike("usa-f35a-al-udeid", "irn-khordad-bushehr", "air_superiority", enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL, "U.S. F-35A package attacks Bushehr-sector air defenses."),
-			openingStrike("usa-f15e-al-dhafra", "irn-paveh-south", "close_air_support", enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY, "U.S. F-15E package strikes southern Iranian cruise-missile forces."),
-			openingStrike("usa-b1b-diego-garcia", "irn-kheibar-west", "default", enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY, "U.S. B-1B long-range strike hits western Iranian missile brigades."),
-		},
 		Units: []*enginev1.Unit{
 			// Core airbases used for first-wave sortie generation and later turnaround.
 			scenarioUnit("isr-airbase-nevatim", "Nevatim AB", "Israeli Strategic Air Base - Nevatim", "Blue", "israel-strategic-airbase", 31.21, 35.01, 0, 0, 0),
@@ -188,17 +180,17 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			scenarioUnit("irn-s300-bandar-abbas", "S-300 Abbas", "S-300PMU-2 Battery - Bandar Abbas", "Red", "s300pmu2-battery-iran", 27.18, 56.25, 0, 0, 0),
 			scenarioUnit("irn-khordad-hormuz", "3rd Khordad Hormuz", "3rd Khordad Battery - Strait Sector", "Red", "third-khordad-battery", 27.05, 56.10, 0, 0, 0),
 			scenarioUnit("irn-raad-qeshm", "Raad Qeshm", "Raad Coastal Defense Battery - Qeshm Axis", "Red", "raad-coastal-battery", 26.80, 55.85, 0, 0, 0),
-			scenarioStrikeUnit("irn-qiam-central", "Qiam Brigade", "Qiam-1 Missile Brigade", "Red", "qiam1-missile-brigade", 34.10, 49.70, 0, 0, 0, 1200),
-			scenarioStrikeUnit("irn-qiam-northwest", "Qiam NW", "Qiam-1 Missile Brigade - Northwestern Sector", "Red", "qiam1-missile-brigade", 36.15, 47.65, 0, 0, 0, 1800),
-			scenarioStrikeUnit("irn-kheibar-west", "Kheibar Brigade", "Kheibar Shekan Brigade", "Red", "kheibar-shekan-brigade", 35.20, 46.98, 0, 0, 0, 2700),
-			scenarioStrikeUnit("irn-fateh-south", "Fateh Brigade", "Fateh-110 Brigade - Southern Theater", "Red", "fateh110-brigade", 29.30, 52.65, 0, 0, 0, 2400),
-			scenarioStrikeUnit("irn-paveh-south", "Paveh Regiment", "Paveh Cruise Missile Regiment", "Red", "paveh-cruise-missile-regiment", 27.90, 56.15, 0, 0, 0, 4500),
-			scenarioStrikeUnit("irn-sejjil-central", "Sejjil Brigade", "Sejjil Missile Brigade", "Red", "sejjil-missile-brigade", 33.05, 50.55, 0, 0, 0, 6000),
-			scenarioStrikeUnit("irn-shahed-central", "Shahed Grp", "Shahed-136 Strike Group", "Red", "shahed136-strike-group", 31.40, 54.50, 0, 0, 0, 5400),
-			scenarioStrikeUnit("irn-shahed-east", "Shahed East", "Shahed-136 Follow-on Strike Group", "Red", "shahed136-strike-group", 32.20, 55.10, 0, 0, 0, 6600),
-			scenarioStrikeUnit("irn-arash-west", "Arash-2", "Arash-2 Strike Group", "Red", "arash2-strike-group", 34.35, 47.20, 0, 0, 0, 7200),
-			scenarioStrikeUnit("irn-shahed129-central", "Shahed-129", "Shahed-129 Armed UAV Squadron", "Red", "shahed129-uav-squadron", 31.60, 54.20, 0, 0, 0, 3600),
-			scenarioStrikeUnit("irn-mohajer6-central", "Mohajer-6", "Mohajer-6 UAV Squadron", "Red", "mohajer6-uav-squadron", 31.58, 54.18, 0, 0, 0, 3000),
+			scenarioStrikeUnit("irn-qiam-central", "Qiam Brigade", "Qiam-1 Missile Brigade", "Red", "qiam1-missile-brigade", 34.10, 49.70, 0, 0, 0, 0),
+			scenarioStrikeUnit("irn-qiam-northwest", "Qiam NW", "Qiam-1 Missile Brigade - Northwestern Sector", "Red", "qiam1-missile-brigade", 36.15, 47.65, 0, 0, 0, 0),
+			scenarioStrikeUnit("irn-kheibar-west", "Kheibar Brigade", "Kheibar Shekan Brigade", "Red", "kheibar-shekan-brigade", 35.20, 46.98, 0, 0, 0, 0),
+			scenarioStrikeUnit("irn-fateh-south", "Fateh Brigade", "Fateh-110 Brigade - Southern Theater", "Red", "fateh110-brigade", 29.30, 52.65, 0, 0, 0, 0),
+			scenarioStrikeUnit("irn-paveh-south", "Paveh Regiment", "Paveh Cruise Missile Regiment", "Red", "paveh-cruise-missile-regiment", 27.90, 56.15, 0, 0, 0, 0),
+			scenarioStrikeUnit("irn-sejjil-central", "Sejjil Brigade", "Sejjil Missile Brigade", "Red", "sejjil-missile-brigade", 33.05, 50.55, 0, 0, 0, 0),
+			scenarioStrikeUnit("irn-shahed-central", "Shahed Grp", "Shahed-136 Strike Group", "Red", "shahed136-strike-group", 31.40, 54.50, 0, 0, 0, 0),
+			scenarioStrikeUnit("irn-shahed-east", "Shahed East", "Shahed-136 Follow-on Strike Group", "Red", "shahed136-strike-group", 32.20, 55.10, 0, 0, 0, 0),
+			scenarioStrikeUnit("irn-arash-west", "Arash-2", "Arash-2 Strike Group", "Red", "arash2-strike-group", 34.35, 47.20, 0, 0, 0, 0),
+			scenarioStrikeUnit("irn-shahed129-central", "Shahed-129", "Shahed-129 Armed UAV Squadron", "Red", "shahed129-uav-squadron", 31.60, 54.20, 0, 0, 0, 0),
+			scenarioStrikeUnit("irn-mohajer6-central", "Mohajer-6", "Mohajer-6 UAV Squadron", "Red", "mohajer6-uav-squadron", 31.58, 54.18, 0, 0, 0, 0),
 			scenarioAircraft("irn-f14-tehran", "F-14A Tehran", "F-14A Tomcat Interceptor Detachment", "Red", "f14a-tomcat-iriaf", "irn-airbase-tehran", 35.69, 51.31, 0, 250, 0),
 			scenarioAircraft("irn-f14-tehran-2", "F-14A Tehran 2", "F-14A Tomcat CAP Detachment", "Red", "f14a-tomcat-iriaf", "irn-airbase-tehran", 35.68, 51.30, 0, 250, 0),
 			scenarioAircraft("irn-f14-tabriz", "F-14A Tabriz", "F-14A Tomcat Northwestern Interceptor Detachment", "Red", "f14a-tomcat-iriaf", "irn-airbase-tabriz", 38.14, 46.25, 0, 110, 0),
@@ -222,16 +214,6 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			scenarioUnit("irn-ghadir-sub-2", "Ghadir Sub 2", "Ghadir Midget Submarine - Qeshm Ambush Line", "Red", "ghadir-midget-submarine", 26.78, 55.88, -20, 95, 4),
 			scenarioUnit("irn-fateh-sub-gulf", "Fateh Sub", "Fateh Coastal Submarine - Gulf of Oman Patrol", "Red", "fateh-submarine", 25.40, 58.65, -30, 100, 4),
 		},
-	}
-}
-
-func openingStrike(unitID, targetUnitID, loadoutID string, desiredEffect enginev1.DesiredEffect, narrative string) *enginev1.OpeningStrikeAction {
-	return &enginev1.OpeningStrikeAction{
-		UnitId:                 unitID,
-		TargetUnitId:           targetUnitID,
-		LoadoutConfigurationId: loadoutID,
-		DesiredEffect:          desiredEffect,
-		Narrative:              narrative,
 	}
 }
 

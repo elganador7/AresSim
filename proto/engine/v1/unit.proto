@@ -49,6 +49,8 @@ message AttackOrder {
   string target_unit_id = 2;
   DesiredEffect desired_effect = 3;
   float pkill_threshold = 4;
+  Position last_known_target_position = 5;
+  double last_track_update_seconds = 6;
 }
 
 message BaseOpsState {

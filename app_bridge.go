@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"slices"
+	"strings"
 
 	"github.com/aressim/internal/library"
 	"github.com/aressim/internal/scenario"
+	"google.golang.org/protobuf/proto"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
 )
@@ -126,19 +129,31 @@ func (a *App) ListWeaponDefinitions() ([]map[string]any, error) {
 
 // listWeaponDefsProto converts DB weapon definition rows into proto messages.
 func (a *App) listWeaponDefsProto() []*enginev1.WeaponDefinition {
+	defaults := scenario.DefaultWeaponDefinitions()
+	mergedByID := make(map[string]*enginev1.WeaponDefinition, len(defaults))
+	for _, wd := range defaults {
+		if wd == nil || strings.TrimSpace(wd.GetId()) == "" {
+			continue
+		}
+		mergedByID[wd.GetId()] = proto.Clone(wd).(*enginev1.WeaponDefinition)
+	}
 	if a.weaponDefRepo == nil {
-		return scenario.DefaultWeaponDefinitions()
+		return sortWeaponDefinitionRecords(mergedByID)
 	}
 	rows, err := a.weaponDefRepo.List(a.ctx)
 	if err != nil {
 		slog.Warn("listWeaponDefsProto: list", "err", err)
-		return scenario.DefaultWeaponDefinitions()
+		return sortWeaponDefinitionRecords(mergedByID)
 	}
-	out := make([]*enginev1.WeaponDefinition, 0, len(rows))
-	for _, row := range rows {
-		out = append(out, weaponDefinitionFromRow(row))
+	for _, row := range normalizeRecordIDs(rows) {
+		id := toString(row["id"])
+		if id == "" {
+			continue
+		}
+		base := mergedByID[id]
+		mergedByID[id] = mergeWeaponDefinitionWithRow(base, row)
 	}
-	return out
+	return sortWeaponDefinitionRecords(mergedByID)
 }
 
 // ListUnitDefinitions returns all unit definitions for the palette/editor.
@@ -300,4 +315,70 @@ func (a *App) DeleteUnitDefinition(id string) BridgeResult {
 func (a *App) SetHumanControlledTeam(teamID string) BridgeResult {
 	a.setHumanControlledTeam(teamID)
 	return ok()
+}
+
+func mergeWeaponDefinitionWithRow(base *enginev1.WeaponDefinition, row map[string]any) *enginev1.WeaponDefinition {
+	var merged *enginev1.WeaponDefinition
+	if base != nil {
+		merged = proto.Clone(base).(*enginev1.WeaponDefinition)
+	} else {
+		merged = &enginev1.WeaponDefinition{}
+	}
+	if id := extractRecordID(row["id"]); id != "" {
+		merged.Id = id
+	}
+	if name := toString(row["name"]); name != "" {
+		merged.Name = name
+	}
+	if description := toString(row["description"]); description != "" {
+		merged.Description = description
+	}
+	if speed := float32(toFloat64(row["speed_mps"])); speed > 0 {
+		merged.SpeedMps = speed
+	}
+	if rng := float32(toFloat64(row["range_m"])); rng > 0 {
+		merged.RangeM = rng
+	}
+	if poh := float32(toFloat64(row["probability_of_hit"])); poh > 0 {
+		merged.ProbabilityOfHit = poh
+	}
+	if guidance := enginev1.GuidanceType(int32(toFloat64(row["guidance"]))); guidance != 0 {
+		merged.Guidance = guidance
+	}
+	if effect := enginev1.WeaponEffectType(int32(toFloat64(row["effect_type"]))); effect != enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_UNSPECIFIED {
+		merged.EffectType = effect
+	}
+	if targets := weaponDomainTargetsFromRow(row["domain_targets"]); len(targets) > 0 {
+		merged.DomainTargets = targets
+	}
+	return merged
+}
+
+func weaponDomainTargetsFromRow(raw any) []enginev1.UnitDomain {
+	values, ok := raw.([]any)
+	if !ok {
+		return nil
+	}
+	targets := make([]enginev1.UnitDomain, 0, len(values))
+	for _, item := range values {
+		domain := enginev1.UnitDomain(int32(toFloat64(item)))
+		if domain == enginev1.UnitDomain_DOMAIN_UNSPECIFIED {
+			continue
+		}
+		targets = append(targets, domain)
+	}
+	return targets
+}
+
+func sortWeaponDefinitionRecords(defsByID map[string]*enginev1.WeaponDefinition) []*enginev1.WeaponDefinition {
+	out := make([]*enginev1.WeaponDefinition, 0, len(defsByID))
+	for _, wd := range defsByID {
+		if wd != nil {
+			out = append(out, wd)
+		}
+	}
+	slices.SortFunc(out, func(a, b *enginev1.WeaponDefinition) int {
+		return strings.Compare(a.GetName(), b.GetName())
+	})
+	return out
 }

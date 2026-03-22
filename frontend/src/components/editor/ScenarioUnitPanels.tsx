@@ -18,14 +18,25 @@ const BASE_OPS_STATE_LABEL: Record<number, string> = {
   3: "Closed",
 };
 
-function isHostPlatform(definition: UnitDefinitionDraft | undefined): boolean {
+function canHostAircraft(definition: UnitDefinitionDraft | undefined): boolean {
   if (!definition) return false;
-  return definition.assetClass === "airbase"
-    || definition.embarkedFixedWingCapacity > 0
+  return definition.embarkedFixedWingCapacity > 0
     || definition.embarkedRotaryWingCapacity > 0
     || definition.embarkedUavCapacity > 0
     || definition.launchCapacityPerInterval > 0
     || definition.recoveryCapacityPerInterval > 0;
+}
+
+function isFixedFacility(definition: UnitDefinitionDraft | undefined): boolean {
+  if (!definition) return false;
+  return definition.assetClass === "airbase"
+    || definition.assetClass === "port"
+    || definition.assetClass === "c2_site"
+    || definition.assetClass === "radar_site"
+    || definition.assetClass === "oil_field"
+    || definition.assetClass === "pipeline_node"
+    || definition.assetClass === "desalination_plant"
+    || definition.assetClass === "power_plant";
 }
 
 function InlineEditForm({
@@ -88,10 +99,11 @@ function InlineEditForm({
       return false;
     }
     const candidateDefinition = unitDefinitions.find((definition) => definition.id === candidate.definitionId);
-    return isHostPlatform(candidateDefinition);
+    return isFixedFacility(candidateDefinition) || canHostAircraft(candidateDefinition);
   });
   const canAssignHostBase = selectedDefinition?.domain === 2;
-  const isFacility = isHostPlatform(selectedDefinition);
+  const isFacility = isFixedFacility(selectedDefinition);
+  const canHost = canHostAircraft(selectedDefinition);
   const hostedUnits = units.filter((candidate) => candidate.hostBaseId === unit.id);
   const countryOptions = Array.from(
     new Set([
@@ -200,6 +212,29 @@ function InlineEditForm({
             </div>
           ) : (
             <div className="editor-hosted-empty">No units assigned to this base.</div>
+          )}
+        </div>
+      )}
+      {!isFacility && canHost && (
+        <div className="editor-facility-block">
+          <div className="editor-facility-meta">
+            <span className="editor-facility-tag">mobile host platform</span>
+          </div>
+          <div className="editor-facility-copy">
+            Mobile platform. It can host embarked aircraft, but it still behaves like a maneuver unit rather than a fixed installation.
+          </div>
+          <div className="editor-hosted-header">Embarked Units</div>
+          {hostedUnits.length > 0 ? (
+            <div className="editor-hosted-list">
+              {hostedUnits.map((hosted) => (
+                <div key={hosted.id} className="editor-hosted-row">
+                  <span>{hosted.displayName}</span>
+                  <span>{formatCountry(hosted.teamId || "UNK")}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="editor-hosted-empty">No embarked units assigned.</div>
           )}
         </div>
       )}

@@ -10,6 +10,7 @@ import (
 	"github.com/aressim/internal/sim"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
+	"google.golang.org/protobuf/proto"
 )
 
 type PathViolationPreview struct {
@@ -17,6 +18,170 @@ type PathViolationPreview struct {
 	Country  string `json:"country,omitempty"`
 	LegIndex int    `json:"legIndex,omitempty"`
 	Reason   string `json:"reason,omitempty"`
+}
+
+type EngagementPreview struct {
+	ReadyToFire          bool    `json:"readyToFire"`
+	CanPursue            bool    `json:"canPursue"`
+	HasTrack             bool    `json:"hasTrack"`
+	WeaponId             string  `json:"weaponId,omitempty"`
+	Reason               string  `json:"reason,omitempty"`
+	ReasonCode           string  `json:"reasonCode,omitempty"`
+	RangeToTargetM       float64 `json:"rangeToTargetM,omitempty"`
+	WeaponRangeM         float64 `json:"weaponRangeM,omitempty"`
+	FireProbability      float64 `json:"fireProbability,omitempty"`
+	DesiredEffectSupport bool    `json:"desiredEffectSupport"`
+	InStrikeCooldown     bool    `json:"inStrikeCooldown"`
+}
+
+type EngagementOptionPreview struct {
+	TargetUnitId         string  `json:"targetUnitId"`
+	TargetDisplayName    string  `json:"targetDisplayName"`
+	TargetTeamId         string  `json:"targetTeamId"`
+	ReadyToFire          bool    `json:"readyToFire"`
+	CanPursue            bool    `json:"canPursue"`
+	HasTrack             bool    `json:"hasTrack"`
+	WeaponId             string  `json:"weaponId,omitempty"`
+	Reason               string  `json:"reason,omitempty"`
+	ReasonCode           string  `json:"reasonCode,omitempty"`
+	RangeToTargetM       float64 `json:"rangeToTargetM,omitempty"`
+	WeaponRangeM         float64 `json:"weaponRangeM,omitempty"`
+	FireProbability      float64 `json:"fireProbability,omitempty"`
+	DesiredEffectSupport bool    `json:"desiredEffectSupport"`
+	InStrikeCooldown     bool    `json:"inStrikeCooldown"`
+}
+
+type TargetEngagementOptionPreview struct {
+	ShooterUnitId            string  `json:"shooterUnitId"`
+	ShooterDisplayName       string  `json:"shooterDisplayName"`
+	ShooterTeamId            string  `json:"shooterTeamId"`
+	LoadoutConfigurationId   string  `json:"loadoutConfigurationId,omitempty"`
+	ReadyToFire              bool    `json:"readyToFire"`
+	CanPursue                bool    `json:"canPursue"`
+	HasTrack                 bool    `json:"hasTrack"`
+	WeaponId                 string  `json:"weaponId,omitempty"`
+	Reason                   string  `json:"reason,omitempty"`
+	ReasonCode               string  `json:"reasonCode,omitempty"`
+	RangeToTargetM           float64 `json:"rangeToTargetM,omitempty"`
+	WeaponRangeM             float64 `json:"weaponRangeM,omitempty"`
+	FireProbability          float64 `json:"fireProbability,omitempty"`
+	DesiredEffectSupport     bool    `json:"desiredEffectSupport"`
+	InStrikeCooldown         bool    `json:"inStrikeCooldown"`
+	PathBlocked              bool    `json:"pathBlocked"`
+	PathReason               string  `json:"pathReason,omitempty"`
+	EngagementCostUsd        float64 `json:"engagementCostUsd,omitempty"`
+	ExpectedTargetValueUsd   float64 `json:"expectedTargetValueUsd,omitempty"`
+	ExpectedValueExchangeUsd float64 `json:"expectedValueExchangeUsd,omitempty"`
+}
+
+const targetEngagementReasonNotOperational = "not_operational"
+const targetEngagementReasonNotHostile = "not_hostile"
+
+func scenarioCoalitionByTeam(units []*enginev1.Unit) map[string]string {
+	coalitions := make(map[string]string, len(units))
+	for _, unit := range units {
+		if unit == nil {
+			continue
+		}
+		teamID := sim.CountryDisplayCode(unit.GetTeamId())
+		if teamID == "" {
+			continue
+		}
+		if coalitionID := sim.CountryDisplayCode(unit.GetCoalitionId()); coalitionID != "" {
+			coalitions[teamID] = coalitionID
+		}
+	}
+	return coalitions
+}
+
+func friendlyToPlayerTeam(unit *enginev1.Unit, playerTeam string, coalitionByTeam map[string]string) bool {
+	if unit == nil {
+		return false
+	}
+	unitTeam := sim.CountryDisplayCode(unit.GetTeamId())
+	if unitTeam == "" || playerTeam == "" {
+		return false
+	}
+	if unitTeam == playerTeam {
+		return true
+	}
+	playerCoalition := coalitionByTeam[playerTeam]
+	unitCoalition := coalitionByTeam[unitTeam]
+	return playerCoalition != "" && unitCoalition != "" && playerCoalition == unitCoalition
+}
+
+func estimateWeaponCostUSD(weaponID string) float64 {
+	weaponID = strings.TrimSpace(strings.ToLower(weaponID))
+	switch {
+	case strings.Contains(weaponID, "tomahawk"):
+		return 2_000_000
+	case strings.Contains(weaponID, "jassm"):
+		return 1_500_000
+	case strings.Contains(weaponID, "harpoon"):
+		return 1_400_000
+	case strings.Contains(weaponID, "amraam"), strings.Contains(weaponID, "aim120"):
+		return 1_200_000
+	case strings.Contains(weaponID, "phoenix"), strings.Contains(weaponID, "aim54"):
+		return 1_100_000
+	case strings.Contains(weaponID, "sparrow"), strings.Contains(weaponID, "aim7"):
+		return 500_000
+	case strings.Contains(weaponID, "sidewinder"), strings.Contains(weaponID, "aim9"):
+		return 450_000
+	case strings.Contains(weaponID, "pac3"), strings.Contains(weaponID, "patriot"):
+		return 4_000_000
+	case strings.Contains(weaponID, "thaad"), strings.Contains(weaponID, "arrow"):
+		return 3_000_000
+	case strings.Contains(weaponID, "torp"), strings.Contains(weaponID, "mk48"):
+		return 6_000_000
+	case strings.Contains(weaponID, "shahed"), strings.Contains(weaponID, "arash"), strings.Contains(weaponID, "uav"):
+		return 150_000
+	case strings.Contains(weaponID, "qiam"), strings.Contains(weaponID, "fateh"), strings.Contains(weaponID, "kheibar"), strings.Contains(weaponID, "sejjil"):
+		return 700_000
+	default:
+		return 1_000_000
+	}
+}
+
+func estimateUnitValueUSD(unit *enginev1.Unit, def sim.DefStats) float64 {
+	if unit == nil {
+		return 0
+	}
+	remainingFraction := 1.0 - damageLossFraction(unit.GetDamageState())
+	if remainingFraction < 0 {
+		remainingFraction = 0
+	}
+	human := float64(def.AuthorizedPersonnel) * casualtyFraction(def, enginev1.DamageState_DAMAGE_STATE_DESTROYED, unit.GetStatus().GetPersonnelStrength()) * valueOfStatisticalLifeUSD
+	return remainingFraction * (def.ReplacementCostUSD + def.StrategicValueUSD + def.EconomicValueUSD + human)
+}
+
+func (a *App) previewShooterWithLoadout(unitID string, loadoutConfigurationID string) (*enginev1.Unit, map[string]sim.DefStats, map[string]sim.WeaponStats, sim.RelationshipRules, error) {
+	if a.currentScenario == nil {
+		return nil, nil, nil, nil, fmt.Errorf("no scenario loaded")
+	}
+	var shooter *enginev1.Unit
+	for _, candidate := range a.currentScenario.GetUnits() {
+		if candidate.GetId() == unitID {
+			shooter = candidate
+			break
+		}
+	}
+	if shooter == nil {
+		return nil, nil, nil, nil, fmt.Errorf("unit %s not found", unitID)
+	}
+	previewShooter := proto.Clone(shooter).(*enginev1.Unit)
+	if strings.TrimSpace(loadoutConfigurationID) != "" && strings.TrimSpace(loadoutConfigurationID) != strings.TrimSpace(previewShooter.GetLoadoutConfigurationId()) {
+		def, found := a.libDefsCache[extractRecordID(previewShooter.GetDefinitionId())]
+		if !found {
+			return nil, nil, nil, nil, fmt.Errorf("unit definition not found")
+		}
+		selectedID, slots := selectWeaponConfiguration(def, loadoutConfigurationID)
+		if len(slots) == 0 {
+			return nil, nil, nil, nil, fmt.Errorf("selected loadout has no weapons")
+		}
+		previewShooter.LoadoutConfigurationId = selectedID
+		previewShooter.Weapons = loadoutToWeaponStates(slots)
+	}
+	return previewShooter, a.getCachedDefs(), a.buildWeaponCatalog(), a.relationshipRules(), nil
 }
 
 type EffectiveRelationshipPreview struct {
@@ -183,6 +348,25 @@ func previewStrikePath(ownerCountry string, maritime bool, points []geo.Point, r
 	if ownerCountry == "" || len(points) < 2 {
 		return nil
 	}
+	if maritime {
+		last := points[len(points)-1]
+		if geo.IsLandPoint(last) {
+			return &PathViolationPreview{
+				Blocked:  true,
+				LegIndex: len(points) - 1,
+				Reason:   fmt.Sprintf("%s naval units cannot target land positions", ownerCountry),
+			}
+		}
+		for idx := 1; idx < len(points); idx++ {
+			if geo.SegmentCrossesLand(points[idx-1], points[idx]) {
+				return &PathViolationPreview{
+					Blocked:  true,
+					LegIndex: idx,
+					Reason:   fmt.Sprintf("%s naval strike path crosses land", ownerCountry),
+				}
+			}
+		}
+	}
 	for idx, segment := range geo.SamplePath(points) {
 		var countries []string
 		if maritime {
@@ -240,14 +424,62 @@ func (a *App) validateTransit(ownerCountry string, domain enginev1.UnitDomain, s
 }
 
 func (a *App) validateStrike(shooter, target *enginev1.Unit) error {
+	return a.validateStrikeWithWeapon(shooter, target, "")
+}
+
+func (a *App) shooterCanUseBallisticStrikeWeapon(shooter, target *enginev1.Unit, preferredWeaponID string) bool {
 	if shooter == nil || target == nil {
+		return false
+	}
+	targetDef := a.getCachedDefs()[extractRecordID(target.GetDefinitionId())]
+	if targetDef.Domain == enginev1.UnitDomain_DOMAIN_UNSPECIFIED {
+		return false
+	}
+	weapons := a.buildWeaponCatalog()
+	preferredWeaponID = strings.TrimSpace(preferredWeaponID)
+	for _, ws := range shooter.GetWeapons() {
+		if ws.GetCurrentQty() <= 0 {
+			continue
+		}
+		if preferredWeaponID != "" && ws.GetWeaponId() != preferredWeaponID {
+			continue
+		}
+		weapon, ok := weapons[ws.GetWeaponId()]
+		if !ok {
+			continue
+		}
+		if weapon.EffectType != enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_BALLISTIC_STRIKE {
+			continue
+		}
+		if !weaponTargetsDomain(weapon.DomainTargets, targetDef.Domain) {
+			continue
+		}
+		return true
+	}
+	return false
+}
+
+func weaponTargetsDomain(targets []enginev1.UnitDomain, domain enginev1.UnitDomain) bool {
+	for _, candidate := range targets {
+		if candidate == domain {
+			return true
+		}
+	}
+	return false
+}
+
+func (a *App) validateStrikeWithWeapon(shooter, target *enginev1.Unit, weaponID string) error {
+	if shooter == nil || target == nil {
+		return nil
+	}
+	if a.shooterCanUseBallisticStrikeWeapon(shooter, target, weaponID) {
 		return nil
 	}
 	ownerCountry := unitCountryCode(shooter)
 	if ownerCountry == "" {
 		return nil
 	}
-	domain := a.getCachedDefs()[shooter.DefinitionId].Domain
+	domain := a.getCachedDefs()[extractRecordID(shooter.DefinitionId)].Domain
 	points := [][2]float64{{shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon()}}
 	for _, wp := range shooter.GetMoveOrder().GetWaypoints() {
 		points = append(points, [2]float64{wp.GetLat(), wp.GetLon()})
@@ -334,6 +566,278 @@ func (a *App) PreviewCurrentStrikePath(unitID string) (*PathViolationPreview, er
 		return &PathViolationPreview{Blocked: false}, nil
 	}
 	return violation, nil
+}
+
+func (a *App) PreviewCurrentEngagement(unitID string) (*EngagementPreview, error) {
+	shooter, _, _, _, err := a.previewShooterWithLoadout(unitID, "")
+	if err != nil {
+		return nil, err
+	}
+	order := shooter.GetAttackOrder()
+	if order == nil || order.GetTargetUnitId() == "" {
+		return &EngagementPreview{Reason: "No target assigned.", ReasonCode: string(sim.EngagementReasonNoTarget)}, nil
+	}
+	var target *enginev1.Unit
+	for _, candidate := range a.currentScenario.GetUnits() {
+		if candidate.GetId() == order.GetTargetUnitId() {
+			target = candidate
+			break
+		}
+	}
+	if target == nil {
+		return &EngagementPreview{Reason: "Assigned target no longer exists.", ReasonCode: string(sim.EngagementReasonNoTarget)}, nil
+	}
+	decision := sim.EvaluateCurrentEngagement(
+		shooter,
+		target,
+		a.currentScenario.GetUnits(),
+		a.getCachedDefs(),
+		a.buildWeaponCatalog(),
+		a.relationshipRules(),
+		order.GetDesiredEffect(),
+		order.GetOrderType() == enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT,
+		a.getSimSeconds(),
+		order.GetLastKnownTargetPosition() != nil,
+	)
+	return &EngagementPreview{
+		ReadyToFire:          decision.CanFire,
+		CanPursue:            decision.CanPursue,
+		HasTrack:             decision.HasTrack,
+		WeaponId:             decision.WeaponID,
+		Reason:               decision.ReasonText(),
+		ReasonCode:           string(decision.Reason),
+		RangeToTargetM:       decision.RangeToTargetM,
+		WeaponRangeM:         decision.WeaponRangeM,
+		FireProbability:      decision.FireProbability,
+		DesiredEffectSupport: decision.DesiredEffectSupport,
+		InStrikeCooldown:     decision.InStrikeCooldown,
+	}, nil
+}
+
+func (a *App) PreviewEngagementOptionsForLoadout(unitID string, loadoutConfigurationID string) ([]EngagementOptionPreview, error) {
+	shooter, defs, weapons, rules, err := a.previewShooterWithLoadout(unitID, loadoutConfigurationID)
+	if err != nil {
+		return nil, err
+	}
+	options := make([]EngagementOptionPreview, 0)
+	for _, target := range a.currentScenario.GetUnits() {
+		if target == nil || target.GetId() == shooter.GetId() || !sim.UnitCanOperateForUI(target) {
+			continue
+		}
+		if !sim.UnitsAreHostileForUI(shooter, target) {
+			continue
+		}
+		targetDef := defs[extractRecordID(target.GetDefinitionId())]
+		hasSharedTeamDetection := a.teamHasCurrentDetection(shooter.GetTeamId(), target.GetId())
+		decision := sim.EvaluateCurrentEngagement(
+			shooter,
+			target,
+			a.currentScenario.GetUnits(),
+			defs,
+			weapons,
+			rules,
+			enginev1.DesiredEffect_DESIRED_EFFECT_UNSPECIFIED,
+			false,
+			a.getSimSeconds(),
+			sim.IsFixedStrategicTargetForUI(target, targetDef),
+		)
+		if hasSharedTeamDetection && !decision.CanFire && !decision.CanPursue && decision.WeaponID != "" {
+			decision.CanPursue = true
+		}
+		options = append(options, EngagementOptionPreview{
+			TargetUnitId:         target.GetId(),
+			TargetDisplayName:    target.GetDisplayName(),
+			TargetTeamId:         sim.CountryDisplayCode(target.GetTeamId()),
+			ReadyToFire:          decision.CanFire,
+			CanPursue:            decision.CanPursue,
+			HasTrack:             decision.HasTrack,
+			WeaponId:             decision.WeaponID,
+			Reason:               decision.ReasonText(),
+			ReasonCode:           string(decision.Reason),
+			RangeToTargetM:       decision.RangeToTargetM,
+			WeaponRangeM:         decision.WeaponRangeM,
+			FireProbability:      decision.FireProbability,
+			DesiredEffectSupport: decision.DesiredEffectSupport,
+			InStrikeCooldown:     decision.InStrikeCooldown,
+		})
+	}
+	slices.SortFunc(options, func(a, b EngagementOptionPreview) int {
+		if a.ReadyToFire != b.ReadyToFire {
+			if a.ReadyToFire {
+				return -1
+			}
+			return 1
+		}
+		if a.CanPursue != b.CanPursue {
+			if a.CanPursue {
+				return -1
+			}
+			return 1
+		}
+		if a.TargetTeamId != b.TargetTeamId {
+			return strings.Compare(a.TargetTeamId, b.TargetTeamId)
+		}
+		return strings.Compare(a.TargetDisplayName, b.TargetDisplayName)
+	})
+	return options, nil
+}
+
+func (a *App) PreviewEngagementOptions(unitID string) ([]EngagementOptionPreview, error) {
+	return a.PreviewEngagementOptionsForLoadout(unitID, "")
+}
+
+func (a *App) PreviewTargetEngagementOptions(targetUnitID string, playerTeamID string) ([]TargetEngagementOptionPreview, error) {
+	if a.currentScenario == nil {
+		return nil, fmt.Errorf("no scenario loaded")
+	}
+	playerTeam := sim.CountryDisplayCode(playerTeamID)
+	if playerTeam == "" {
+		playerTeam = a.getHumanControlledTeam()
+	}
+	if playerTeam == "" {
+		return nil, fmt.Errorf("no player team selected")
+	}
+	var target *enginev1.Unit
+	for _, candidate := range a.currentScenario.GetUnits() {
+		if candidate.GetId() == targetUnitID {
+			target = candidate
+			break
+		}
+	}
+	if target == nil {
+		return nil, fmt.Errorf("target %s not found", targetUnitID)
+	}
+	defs := a.getCachedDefs()
+	targetDef := defs[extractRecordID(target.GetDefinitionId())]
+	weapons := a.buildWeaponCatalog()
+	rules := a.relationshipRules()
+	targetValue := estimateUnitValueUSD(target, targetDef)
+	coalitionByTeam := scenarioCoalitionByTeam(a.currentScenario.GetUnits())
+	options := make([]TargetEngagementOptionPreview, 0)
+	for _, shooter := range a.currentScenario.GetUnits() {
+		if shooter == nil || shooter.GetId() == target.GetId() {
+			continue
+		}
+		if !friendlyToPlayerTeam(shooter, playerTeam, coalitionByTeam) {
+			continue
+		}
+		if !sim.UnitsAreHostileForUI(shooter, target) {
+			options = append(options, TargetEngagementOptionPreview{
+				ShooterUnitId:          shooter.GetId(),
+				ShooterDisplayName:     shooter.GetDisplayName(),
+				ShooterTeamId:          sim.CountryDisplayCode(shooter.GetTeamId()),
+				LoadoutConfigurationId: shooter.GetLoadoutConfigurationId(),
+				Reason:                 "Target is not hostile to this unit.",
+				ReasonCode:             targetEngagementReasonNotHostile,
+				ExpectedTargetValueUsd: targetValue,
+			})
+			continue
+		}
+		if !sim.UnitCanOperateForUI(shooter) {
+			options = append(options, TargetEngagementOptionPreview{
+				ShooterUnitId:          shooter.GetId(),
+				ShooterDisplayName:     shooter.GetDisplayName(),
+				ShooterTeamId:          sim.CountryDisplayCode(shooter.GetTeamId()),
+				LoadoutConfigurationId: shooter.GetLoadoutConfigurationId(),
+				Reason:                 "Unit is not operational.",
+				ReasonCode:             targetEngagementReasonNotOperational,
+				ExpectedTargetValueUsd: targetValue,
+			})
+			continue
+		}
+		hasSharedTeamDetection := a.teamHasCurrentDetection(shooter.GetTeamId(), target.GetId())
+		decision := sim.EvaluateCurrentEngagement(
+			shooter,
+			target,
+			a.currentScenario.GetUnits(),
+			defs,
+			weapons,
+			rules,
+			enginev1.DesiredEffect_DESIRED_EFFECT_UNSPECIFIED,
+			false,
+			a.getSimSeconds(),
+			sim.IsFixedStrategicTargetForUI(target, targetDef),
+		)
+		if hasSharedTeamDetection && !decision.CanFire && !decision.CanPursue && decision.WeaponID != "" {
+			decision.CanPursue = true
+		}
+		pathBlocked := false
+		pathReason := ""
+		if decision.CanFire || decision.CanPursue {
+			if err := a.validateStrikeWithWeapon(shooter, target, decision.WeaponID); err != nil {
+				pathBlocked = true
+				pathReason = err.Error()
+			}
+		}
+		engagementCost := estimateWeaponCostUSD(decision.WeaponID)
+		expectedExchange := decision.FireProbability*targetValue - engagementCost
+		options = append(options, TargetEngagementOptionPreview{
+			ShooterUnitId:          shooter.GetId(),
+			ShooterDisplayName:     shooter.GetDisplayName(),
+			ShooterTeamId:          sim.CountryDisplayCode(shooter.GetTeamId()),
+			LoadoutConfigurationId: shooter.GetLoadoutConfigurationId(),
+			ReadyToFire:            decision.CanFire && !pathBlocked,
+			CanPursue:              decision.CanPursue && !pathBlocked,
+			HasTrack:               decision.HasTrack,
+			WeaponId:               decision.WeaponID,
+			Reason: func() string {
+				if pathBlocked {
+					return pathReason
+				}
+				return decision.ReasonText()
+			}(),
+			ReasonCode: func() string {
+				if pathBlocked {
+					return "path_blocked"
+				}
+				return string(decision.Reason)
+			}(),
+			RangeToTargetM:           decision.RangeToTargetM,
+			WeaponRangeM:             decision.WeaponRangeM,
+			FireProbability:          decision.FireProbability,
+			DesiredEffectSupport:     decision.DesiredEffectSupport,
+			InStrikeCooldown:         decision.InStrikeCooldown,
+			PathBlocked:              pathBlocked,
+			PathReason:               pathReason,
+			EngagementCostUsd:        engagementCost,
+			ExpectedTargetValueUsd:   targetValue,
+			ExpectedValueExchangeUsd: expectedExchange,
+		})
+	}
+	slices.SortFunc(options, func(a, b TargetEngagementOptionPreview) int {
+		if a.ReadyToFire != b.ReadyToFire {
+			if a.ReadyToFire {
+				return -1
+			}
+			return 1
+		}
+		if a.CanPursue != b.CanPursue {
+			if a.CanPursue {
+				return -1
+			}
+			return 1
+		}
+		if a.ReasonCode == targetEngagementReasonNotOperational && b.ReasonCode != targetEngagementReasonNotOperational {
+			return 1
+		}
+		if b.ReasonCode == targetEngagementReasonNotOperational && a.ReasonCode != targetEngagementReasonNotOperational {
+			return -1
+		}
+		if a.ReasonCode == targetEngagementReasonNotHostile && b.ReasonCode != targetEngagementReasonNotHostile {
+			return 1
+		}
+		if b.ReasonCode == targetEngagementReasonNotHostile && a.ReasonCode != targetEngagementReasonNotHostile {
+			return -1
+		}
+		if a.ExpectedValueExchangeUsd != b.ExpectedValueExchangeUsd {
+			if a.ExpectedValueExchangeUsd > b.ExpectedValueExchangeUsd {
+				return -1
+			}
+			return 1
+		}
+		return strings.Compare(a.ShooterDisplayName, b.ShooterDisplayName)
+	})
+	return options, nil
 }
 
 func parseDraftRelationshipRules(relationshipsJSON string) (sim.RelationshipRules, error) {

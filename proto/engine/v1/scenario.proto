@@ -16,14 +16,6 @@ message CountryRelationship {
   bool maritime_strike_allowed = 8;
 }
 
-message OpeningStrikeAction {
-  string unit_id = 1;
-  string target_unit_id = 2;
-  string loadout_configuration_id = 3;
-  DesiredEffect desired_effect = 4;
-  string narrative = 5;
-}
-
 message Scenario {
   string id             = 1; // UUID
   string name           = 2;
@@ -36,7 +28,6 @@ message Scenario {
   MapSettings        map      = 9;
   repeated Unit      units    = 11;
   repeated CountryRelationship relationships = 12;
-  repeated OpeningStrikeAction opening_strike_actions = 13;
 }
 
 message SimulationSettings {

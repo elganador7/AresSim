@@ -2,25 +2,37 @@ import { useEffect, useMemo, useState } from "react";
 import {
   CancelMoveOrder,
   ListUnitDefinitions,
+  PreviewCurrentEngagement,
   RemoveMoveWaypoint,
   RequestSync,
-  SetUnitAttackOrder,
   SetUnitEngagement,
+  SetUnitLoadoutConfiguration,
 } from "../../../wailsjs/go/main/App";
-import { useSimStore, type PathViolationPreview, type WeaponDef } from "../../store/simStore";
+import { useSimStore, type PathViolationPreview, type Unit, type WeaponDef } from "../../store/simStore";
 import { formatDist, formatETA } from "../../utils/formatters";
 import { haversineM } from "../../utils/geo";
-import { type UnitDefinitionTargetLite } from "../../utils/loadoutValidation";
+import { selectedPlayerTeam } from "../../utils/playerTeam";
 import { teamColorHex } from "../../utils/teamColors";
-import { ATTACK_ORDER_TYPES, DESIRED_EFFECTS, ENGAGEMENT_BEHAVIORS, filterValidLiveTargets } from "../../utils/tasking";
+import { ENGAGEMENT_BEHAVIORS } from "../../utils/tasking";
 
-type UnitDefinitionPanelMeta = UnitDefinitionTargetLite & {
+type UnitDefinitionPanelMeta = {
+  domain?: number;
+  targetClass?: string;
+  stationary?: boolean;
+  assetClass?: string;
   teamCode?: string;
   embarkedFixedWingCapacity?: number;
   embarkedRotaryWingCapacity?: number;
   embarkedUavCapacity?: number;
   launchCapacityPerInterval?: number;
   recoveryCapacityPerInterval?: number;
+  defaultWeaponConfiguration?: string;
+  weaponConfigurations?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    loadout: Array<{ weaponId: string; maxQty: number; initialQty: number }>;
+  }>;
 };
 
 const BASE_OPS_STATE_LABEL: Record<number, string> = {
@@ -52,22 +64,51 @@ function ensureSuccess(result: { success: boolean; error?: string }) {
   }
 }
 
-function isHostPlatform(definition: UnitDefinitionPanelMeta | undefined): boolean {
+function canHostAircraft(definition: UnitDefinitionPanelMeta | undefined): boolean {
   if (!definition) return false;
-  return definition.assetClass === "airbase"
-    || (definition.embarkedFixedWingCapacity ?? 0) > 0
+  return (definition.embarkedFixedWingCapacity ?? 0) > 0
     || (definition.embarkedRotaryWingCapacity ?? 0) > 0
     || (definition.embarkedUavCapacity ?? 0) > 0
     || (definition.launchCapacityPerInterval ?? 0) > 0
     || (definition.recoveryCapacityPerInterval ?? 0) > 0;
 }
 
+function isFixedFacility(definition: UnitDefinitionPanelMeta | undefined): boolean {
+  if (!definition) return false;
+  return definition.assetClass === "airbase"
+    || definition.assetClass === "port"
+    || definition.assetClass === "c2_site"
+    || definition.assetClass === "radar_site"
+    || definition.assetClass === "oil_field"
+    || definition.assetClass === "pipeline_node"
+    || definition.assetClass === "desalination_plant"
+    || definition.assetClass === "power_plant";
+}
+
+function normalizeDefinitionId(definitionId: string | undefined): string {
+  const raw = String(definitionId ?? "").trim();
+  const idx = raw.lastIndexOf(":");
+  return idx >= 0 ? raw.slice(idx + 1) : raw;
+}
+
+function isPreplannedTargetDefinition(definition: UnitDefinitionPanelMeta | undefined): boolean {
+  if (!definition) return false;
+  return definition.assetClass === "airbase"
+    || definition.assetClass === "port"
+    || definition.targetClass === "runway"
+    || definition.targetClass === "hardened_infrastructure"
+    || definition.targetClass === "soft_infrastructure"
+    || definition.targetClass === "civilian_energy"
+    || definition.targetClass === "civilian_water"
+    || definition.targetClass === "sam_battery";
+}
+
 export default function UnitPanel() {
   const selectedUnitId = useSimStore((s) => s.selectedUnitId);
   const units = useSimStore((s) => s.units);
   const weaponDefs = useSimStore((s) => s.weaponDefs);
-  const activeView = useSimStore((s) => s.activeView);
   const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
+  const simSeconds = useSimStore((s) => s.simSeconds);
   const selectUnit = useSimStore((s) => s.selectUnit);
   const routePreview = useSimStore((s) => s.selectedRoutePreview);
   const strikePreview = useSimStore((s) => s.selectedStrikePreview);
@@ -75,34 +116,24 @@ export default function UnitPanel() {
   const setStrikePreview = useSimStore((s) => s.setSelectedStrikePreview);
   const mapCommandMode = useSimStore((s) => s.mapCommandMode);
   const startRouteEdit = useSimStore((s) => s.startRouteEdit);
-  const startTargetPick = useSimStore((s) => s.startTargetPick);
   const clearMapCommandMode = useSimStore((s) => s.clearMapCommandMode);
-  const detectionContacts = useSimStore((s) => s.detectionContacts);
   const [definitionMap, setDefinitionMap] = useState<Map<string, UnitDefinitionPanelMeta>>(new Map());
 
   const unit = selectedUnitId ? units.get(selectedUnitId) : undefined;
-  const playerTeam = (humanControlledTeam.trim() || (activeView !== "debug" ? activeView : "")).toUpperCase();
+  const playerTeam = selectedPlayerTeam(humanControlledTeam);
   const ownedByPlayer = unit ? (unit.teamId ?? "").trim().toUpperCase() === playerTeam : false;
   const controllable = unit
     ? canControlUnit(unit.definitionId, unit.teamId, playerTeam, definitionMap)
     : false;
   const teamColor = teamColorHex(unit?.teamId);
-  const contactMeta = unit && activeView !== "debug"
-    ? detectionContacts.get(activeView)?.get(unit.id)
-    : undefined;
   const strength = unit ? Math.round(unit.status.combatEffectiveness * 100) : 0;
   const routeModeActive = mapCommandMode.type === "route" && mapCommandMode.unitId === unit?.id;
-  const targetPickActive = mapCommandMode.type === "target_pick" && mapCommandMode.unitId === unit?.id;
-  const validTargets = useMemo(() => {
-    if (!unit) {
-      return [];
-    }
-    return filterValidLiveTargets(unit, units, weaponDefs as Map<string, WeaponDef>, definitionMap);
-  }, [definitionMap, unit, units, weaponDefs]);
+  const [selectedLoadoutId, setSelectedLoadoutId] = useState(unit?.loadoutConfigurationId ?? "");
   const routeWarning = routePreview?.blocked ? (routePreview.reason ?? "Transit blocked.") : null;
   const strikeWarning = strikePreview?.blocked ? (strikePreview.reason ?? "Strike blocked.") : null;
-  const definition = unit ? definitionMap.get(unit.definitionId) : undefined;
-  const isFacility = isHostPlatform(definition);
+  const definition = unit ? definitionMap.get(normalizeDefinitionId(unit.definitionId)) : undefined;
+  const canHost = canHostAircraft(definition);
+  const isFacility = isFixedFacility(definition);
   const hostedUnits = useMemo(() => {
     if (!unit) {
       return [];
@@ -112,11 +143,20 @@ export default function UnitPanel() {
 
   const [engagementBehavior, setEngagementBehavior] = useState(unit?.engagementBehavior ?? 1);
   const [engagementPkillThreshold, setEngagementPkillThreshold] = useState(unit?.engagementPkillThreshold ?? 0.5);
-  const [attackOrderType, setAttackOrderType] = useState(unit?.attackOrder?.orderType ?? 0);
-  const [targetUnitId, setTargetUnitId] = useState(unit?.attackOrder?.targetUnitId ?? "");
-  const [desiredEffect, setDesiredEffect] = useState(unit?.attackOrder?.desiredEffect ?? 3);
-  const [pkillThreshold, setPkillThreshold] = useState(unit?.attackOrder?.pkillThreshold ?? 0.7);
   const [busy, setBusy] = useState(false);
+  const [engagementPreview, setEngagementPreview] = useState<null | {
+    readyToFire: boolean;
+    canPursue: boolean;
+    hasTrack: boolean;
+    weaponId?: string;
+    reason?: string;
+    reasonCode?: string;
+    rangeToTargetM?: number;
+    weaponRangeM?: number;
+    fireProbability?: number;
+    desiredEffectSupport: boolean;
+    inStrikeCooldown: boolean;
+  }>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,7 +171,8 @@ export default function UnitPanel() {
           if (!id) {
             continue;
           }
-          defs.set(id, {
+          const normalizedId = normalizeDefinitionId(id);
+          const meta = {
             domain: Number(row.domain ?? 0),
             targetClass: typeof row.target_class === "string" ? row.target_class : "",
             stationary: Boolean(row.stationary),
@@ -144,7 +185,24 @@ export default function UnitPanel() {
             teamCode: Array.isArray(row.employed_by) && row.employed_by.length > 0
               ? String(row.employed_by[0]).trim().toUpperCase()
               : String(row.nation_of_origin ?? "").trim().toUpperCase(),
-          });
+            defaultWeaponConfiguration: typeof row.default_weapon_configuration === "string" ? row.default_weapon_configuration : "",
+            weaponConfigurations: Array.isArray(row.weapon_configurations)
+              ? row.weapon_configurations.map((config: any) => ({
+                  id: String(config.id ?? ""),
+                  name: String(config.name ?? ""),
+                  description: String(config.description ?? ""),
+                  loadout: Array.isArray(config.loadout)
+                    ? config.loadout.map((slot: any) => ({
+                        weaponId: String(slot.weapon_id ?? ""),
+                        maxQty: Number(slot.max_qty ?? 0),
+                        initialQty: Number(slot.initial_qty ?? 0),
+                      }))
+                    : [],
+                })).filter((config) => config.id)
+              : [],
+          };
+          defs.set(id, meta);
+          defs.set(normalizedId, meta);
         }
         setDefinitionMap(defs);
       })
@@ -167,34 +225,8 @@ export default function UnitPanel() {
     }
     setEngagementBehavior(unit.engagementBehavior ?? 1);
     setEngagementPkillThreshold(unit.engagementPkillThreshold ?? 0.5);
-    setAttackOrderType(unit.attackOrder?.orderType ?? 0);
-    setTargetUnitId(unit.attackOrder?.targetUnitId ?? "");
-    setDesiredEffect(unit.attackOrder?.desiredEffect ?? 3);
-    setPkillThreshold(unit.attackOrder?.pkillThreshold ?? 0.7);
+    setSelectedLoadoutId(unit.loadoutConfigurationId ?? "");
   }, [unit?.id]);
-
-  useEffect(() => {
-    const onTargetPicked = (event: Event) => {
-      const custom = event as CustomEvent<{ shooterId: string; targetUnitId: string }>;
-      if (!unit || custom.detail?.shooterId !== unit.id) {
-        return;
-      }
-      setTargetUnitId(custom.detail.targetUnitId);
-      setAttackOrderType((current) => (current === 0 ? 1 : current));
-      clearMapCommandMode();
-    };
-    window.addEventListener("sim:target-picked", onTargetPicked);
-    return () => window.removeEventListener("sim:target-picked", onTargetPicked);
-  }, [clearMapCommandMode, unit]);
-
-  useEffect(() => {
-    if (!targetUnitId) {
-      return;
-    }
-    if (!validTargets.some((candidate) => candidate.id === targetUnitId)) {
-      setTargetUnitId("");
-    }
-  }, [targetUnitId, validTargets]);
 
   useEffect(() => {
     let cancelled = false;
@@ -219,6 +251,30 @@ export default function UnitPanel() {
       cancelled = true;
     };
   }, [setRoutePreview, unit?.id, unit?.moveOrder]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!unit?.id || !unit.attackOrder?.targetUnitId) {
+      setEngagementPreview(null);
+      return;
+    }
+    PreviewCurrentEngagement(unit.id)
+      .then((preview) => {
+        if (cancelled) {
+          return;
+        }
+        setEngagementPreview(preview ?? null);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          console.error(error);
+          setEngagementPreview(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [unit?.id, unit?.attackOrder]);
 
   useEffect(() => {
     let cancelled = false;
@@ -248,8 +304,10 @@ export default function UnitPanel() {
     if (!unit) return;
     setBusy(true);
     try {
+      if (selectedLoadoutId !== (unit.loadoutConfigurationId ?? "")) {
+        ensureSuccess(await SetUnitLoadoutConfiguration(unit.id, selectedLoadoutId));
+      }
       ensureSuccess(await SetUnitEngagement(unit.id, engagementBehavior, engagementPkillThreshold));
-      ensureSuccess(await SetUnitAttackOrder(unit.id, attackOrderType, targetUnitId, desiredEffect, pkillThreshold));
       ensureSuccess(await RequestSync());
     } catch (error) {
       console.error(error);
@@ -259,21 +317,23 @@ export default function UnitPanel() {
     }
   };
 
-  const clearAttackTask = async () => {
-    if (!unit) return;
-    setBusy(true);
-    try {
-      ensureSuccess(await SetUnitAttackOrder(unit.id, 0, "", desiredEffect, pkillThreshold));
-      ensureSuccess(await RequestSync());
-      setAttackOrderType(0);
-      setTargetUnitId("");
-    } catch (error) {
-      console.error(error);
-      alert(error instanceof Error ? error.message : String(error));
-    } finally {
-      setBusy(false);
-    }
-  };
+  const loadoutOptions = definition?.weaponConfigurations ?? [];
+  const canSelectLoadout = controllable
+    && !isFacility
+    && Boolean(unit?.hostBaseId)
+    && (unit?.position.altMsl ?? 0) <= 0
+    && loadoutOptions.length > 0;
+  const assignedTargetSearchingLastKnown = Boolean(
+    unit?.attackOrder?.targetUnitId
+      && unit.attackOrder.lastKnownTargetPosition
+      && !engagementPreview?.hasTrack
+      && !isPreplannedTargetDefinition(unit?.attackOrder?.targetUnitId
+        ? definitionMap.get(normalizeDefinitionId(units.get(unit.attackOrder.targetUnitId)?.definitionId ?? ""))
+        : undefined),
+  );
+  const lastTrackAgeSeconds = assignedTargetSearchingLastKnown && unit?.attackOrder?.lastTrackUpdateSeconds != null
+    ? Math.max(0, Math.round(simSeconds - unit.attackOrder.lastTrackUpdateSeconds))
+    : null;
 
   const removeWaypoint = async (index: number) => {
     if (!unit) return;
@@ -313,11 +373,6 @@ export default function UnitPanel() {
 
       <div className="unit-panel-body">
         <div className="unit-full-name">{unit.fullName}</div>
-        {!controllable && contactMeta && (
-          <div className="track-source-note">
-            {contactMeta.shared ? `Shared track from ${contactMeta.sourceTeam}` : "Locally detected track"}
-          </div>
-        )}
         {controllable && routeWarning && (
           <div className="path-warning-note">
             {routeWarning}
@@ -326,6 +381,11 @@ export default function UnitPanel() {
         {controllable && strikeWarning && (
           <div className="path-warning-note strike-warning-note">
             {strikeWarning}
+          </div>
+        )}
+        {controllable && assignedTargetSearchingLastKnown && (
+          <div className="track-source-note">
+            Searching last known area{lastTrackAgeSeconds != null ? ` · last contact ${lastTrackAgeSeconds}s ago` : ""}. Weapons will not fire again until the target is reacquired.
           </div>
         )}
 
@@ -437,6 +497,25 @@ export default function UnitPanel() {
           <div className="unit-command-section">
             <div className="unit-command-header">Commands</div>
             <div className="unit-command-row">
+              <label className="stat-label">Loadout</label>
+              <select
+                className="unit-panel-select"
+                value={selectedLoadoutId}
+                disabled={!canSelectLoadout}
+                onChange={(e) => setSelectedLoadoutId(e.target.value)}
+              >
+                <option value="">Current / Default</option>
+                {loadoutOptions.map((option) => (
+                  <option key={option.id} value={option.id}>{option.name || option.id}</option>
+                ))}
+              </select>
+            </div>
+            {canSelectLoadout && (
+              <div className="move-hint">
+                Loadout changes are only allowed while grounded at host base.
+              </div>
+            )}
+            <div className="unit-command-row">
               <label className="stat-label">Engagement</label>
               <select
                 className="unit-panel-select"
@@ -460,83 +539,31 @@ export default function UnitPanel() {
                 onChange={(e) => setEngagementPkillThreshold(Number(e.target.value))}
               />
             </div>
-            <div className="unit-command-row">
-              <label className="stat-label">Attack Task</label>
-              <select
-                className="unit-panel-select"
-                value={attackOrderType}
-                onChange={(e) => setAttackOrderType(Number(e.target.value))}
-              >
-                {ATTACK_ORDER_TYPES.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </div>
-            {attackOrderType !== 0 && (
+            {unit.attackOrder?.targetUnitId && (
               <>
                 <div className="unit-command-row">
-                  <label className="stat-label">Target</label>
-                  <select
-                    className="unit-panel-select"
-                    value={targetUnitId}
-                    onChange={(e) => setTargetUnitId(e.target.value)}
-                  >
-                    <option value="">Select target…</option>
-                    {validTargets.map((candidate) => (
-                      <option key={candidate.id} value={candidate.id}>
-                        {candidate.displayName} · {(candidate.teamId || "UNK")}
-                      </option>
-                    ))}
-                  </select>
+                  <label className="stat-label">Assigned Target</label>
+                  <span className="stat-value">
+                    {units.get(unit.attackOrder.targetUnitId)?.displayName ?? unit.attackOrder.targetUnitId}
+                  </span>
                 </div>
-                <div className="unit-command-buttons">
-                  <button
-                    className={`cancel-order-btn${targetPickActive ? " route-edit-active" : ""}`}
-                    onClick={() => (targetPickActive ? clearMapCommandMode() : startTargetPick(unit.id))}
-                  >
-                    {targetPickActive ? "Pick Enemy On Map" : "Pick Target On Map"}
-                  </button>
-                  {targetPickActive && (
-                    <button
-                      className="cancel-order-btn"
-                      onClick={() => clearMapCommandMode()}
-                    >
-                      Cancel Target Pick
-                    </button>
-                  )}
-                </div>
-                <div className="unit-command-row">
-                  <label className="stat-label">Effect</label>
-                  <select
-                    className="unit-panel-select"
-                    value={desiredEffect}
-                    onChange={(e) => setDesiredEffect(Number(e.target.value))}
-                  >
-                    {DESIRED_EFFECTS.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="unit-command-row">
-                  <label className="stat-label">Order Pkill</label>
-                  <input
-                    className="unit-panel-input"
-                    type="number"
-                    min={0.1}
-                    max={0.99}
-                    step={0.05}
-                    value={pkillThreshold}
-                    onChange={(e) => setPkillThreshold(Number(e.target.value))}
-                  />
-                </div>
+                {engagementPreview && (
+                  <div className="move-hint">
+                    Engagement: {engagementPreview.reason || "No preview."}
+                    {engagementPreview.weaponId ? ` Weapon ${engagementPreview.weaponId}.` : ""}
+                    {engagementPreview.rangeToTargetM && engagementPreview.weaponRangeM
+                      ? ` Range ${Math.round(engagementPreview.rangeToTargetM / 1000)} / ${Math.round(engagementPreview.weaponRangeM / 1000)} km.`
+                      : ""}
+                    {engagementPreview.fireProbability
+                      ? ` P-hit ${Math.round(engagementPreview.fireProbability * 100)}%.`
+                      : ""}
+                  </div>
+                )}
               </>
             )}
             <div className="unit-command-buttons">
               <button className="cancel-order-btn" disabled={busy} onClick={() => saveCommands().catch(console.error)}>
                 Apply Commands
-              </button>
-              <button className="cancel-order-btn" disabled={busy} onClick={() => clearAttackTask().catch(console.error)}>
-                Clear Task
               </button>
               <button
                 className={`cancel-order-btn${routeModeActive ? " route-edit-active" : ""}`}
@@ -592,6 +619,28 @@ export default function UnitPanel() {
           <>
             <div className="unit-stat-row">
               <span className="stat-label">Hosted Units</span>
+              <span className="stat-value">{hostedUnits.length}</span>
+            </div>
+            {hostedUnits.length > 0 && (
+              <div className="facility-hosted-list">
+                {hostedUnits.map((hosted) => (
+                  <button
+                    key={hosted.id}
+                    className="facility-hosted-row"
+                    onClick={() => selectUnit(hosted.id)}
+                  >
+                    <span>{hosted.displayName}</span>
+                    <span>{hosted.damageState === 4 ? "Destroyed" : hosted.nextSortieReadySeconds && hosted.nextSortieReadySeconds > 0 ? "Delayed" : "Ready"}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+        {!isFacility && canHost && (
+          <>
+            <div className="unit-stat-row">
+              <span className="stat-label">Embarked Units</span>
               <span className="stat-value">{hostedUnits.length}</span>
             </div>
             {hostedUnits.length > 0 && (

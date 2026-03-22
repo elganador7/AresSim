@@ -50,6 +50,10 @@ export function PauseSim(arg1) {
   return window['go']['main']['App']['PauseSim'](arg1);
 }
 
+export function PreviewCurrentEngagement(arg1) {
+  return window['go']['main']['App']['PreviewCurrentEngagement'](arg1);
+}
+
 export function PreviewCurrentRelationships() {
   return window['go']['main']['App']['PreviewCurrentRelationships']();
 }
@@ -76,6 +80,18 @@ export function PreviewDraftStrikePath(arg1, arg2, arg3, arg4, arg5) {
 
 export function PreviewDraftTransitPath(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['main']['App']['PreviewDraftTransitPath'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function PreviewEngagementOptions(arg1) {
+  return window['go']['main']['App']['PreviewEngagementOptions'](arg1);
+}
+
+export function PreviewEngagementOptionsForLoadout(arg1, arg2) {
+  return window['go']['main']['App']['PreviewEngagementOptionsForLoadout'](arg1, arg2);
+}
+
+export function PreviewTargetEngagementOptions(arg1, arg2) {
+  return window['go']['main']['App']['PreviewTargetEngagementOptions'](arg1, arg2);
 }
 
 export function RemoveMoveWaypoint(arg1, arg2) {
@@ -116,6 +132,10 @@ export function SetUnitAttackOrder(arg1, arg2, arg3, arg4, arg5) {
 
 export function SetUnitEngagement(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetUnitEngagement'](arg1, arg2, arg3);
+}
+
+export function SetUnitLoadoutConfiguration(arg1, arg2) {
+  return window['go']['main']['App']['SetUnitLoadoutConfiguration'](arg1, arg2);
 }
 
 export function UpdateMoveWaypoint(arg1, arg2, arg3, arg4) {

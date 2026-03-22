@@ -114,7 +114,7 @@ export interface TeamScore {
 }
 
 export interface MapCommandMode {
-  type: "none" | "route" | "target_pick";
+  type: "none" | "route";
   unitId: string | null;
 }
 
@@ -150,6 +150,8 @@ export interface Unit {
     targetUnitId: string;
     desiredEffect: number;
     pkillThreshold: number;
+    lastKnownTargetPosition?: Position;
+    lastTrackUpdateSeconds?: number;
   };
   position: Position;
   status: UnitStatus;
@@ -205,6 +207,7 @@ export interface SimStore {
 
   // ── Selection ────────────────────────────────────────────────────────────
   selectedUnitId: string | null;
+  selectedTargetId: string | null;
   mapCommandMode: MapCommandMode;
   selectedRoutePreview: PathViolationPreview | null;
   selectedStrikePreview: PathViolationPreview | null;
@@ -229,8 +232,8 @@ export interface SimStore {
   setSimTime: (seconds: number, tick: number) => void;
   appendEventLog: (entry: EventLogEntry) => void;
   selectUnit: (id: string | null) => void;
+  selectTarget: (id: string | null) => void;
   startRouteEdit: (id: string | null) => void;
-  startTargetPick: (id: string | null) => void;
   clearMapCommandMode: () => void;
   setSelectedRoutePreview: (preview: PathViolationPreview | null) => void;
   setSelectedStrikePreview: (preview: PathViolationPreview | null) => void;
@@ -268,6 +271,7 @@ export const useSimStore = create<SimStore>((set) => ({
   detections: new Map(),
   detectionContacts: new Map(),
   selectedUnitId: null,
+  selectedTargetId: null,
   mapCommandMode: { type: "none", unitId: null },
   selectedRoutePreview: null,
   selectedStrikePreview: null,
@@ -286,6 +290,7 @@ export const useSimStore = create<SimStore>((set) => ({
       scores: scores ?? state.scores,
       units: new Map(units.map((u) => [u.id, u])),
       selectedUnitId: null,
+      selectedTargetId: null,
       mapCommandMode: { type: "none", unitId: null },
       selectedRoutePreview: null,
       selectedStrikePreview: null,
@@ -352,9 +357,18 @@ export const useSimStore = create<SimStore>((set) => ({
       return { eventLog: log.length > MAX_EVENT_LOG ? log.slice(-MAX_EVENT_LOG) : log };
     }),
 
-  selectUnit: (selectedUnitId) => set({ selectedUnitId }),
+  selectUnit: (selectedUnitId) =>
+    set((state) => ({
+      selectedUnitId,
+      selectedTargetId: selectedUnitId ? null : state.selectedTargetId,
+    })),
+  selectTarget: (selectedTargetId) =>
+    set((state) => ({
+      selectedTargetId,
+      selectedUnitId: selectedTargetId ? null : state.selectedUnitId,
+      mapCommandMode: selectedTargetId ? { type: "none", unitId: null } : state.mapCommandMode,
+    })),
   startRouteEdit: (unitId) => set({ mapCommandMode: unitId ? { type: "route", unitId } : { type: "none", unitId: null } }),
-  startTargetPick: (unitId) => set({ mapCommandMode: unitId ? { type: "target_pick", unitId } : { type: "none", unitId: null } }),
   clearMapCommandMode: () => set({ mapCommandMode: { type: "none", unitId: null } }),
   setSelectedRoutePreview: (selectedRoutePreview) => set({ selectedRoutePreview }),
   setSelectedStrikePreview: (selectedStrikePreview) => set({ selectedStrikePreview }),

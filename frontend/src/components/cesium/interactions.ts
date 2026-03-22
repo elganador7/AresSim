@@ -11,6 +11,7 @@ import type { MutableRefObject } from "react";
 import { AppendMoveWaypoint, MoveUnit, UpdateMoveWaypoint } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
 import { areHostile } from "../../utils/allegiance";
+import { selectedPlayerTeam } from "../../utils/playerTeam";
 import type { DefInfo } from "./helpers";
 import { canMove, ensureBridgeSuccess } from "./helpers";
 
@@ -126,10 +127,12 @@ export function setupCesiumInteractions(
       const {
         units,
         selectedUnitId,
+        selectedTargetId,
         mapCommandMode,
         activeView,
         humanControlledTeam,
         selectUnit,
+        selectTarget,
         startRouteEdit,
         clearMapCommandMode,
       } = useSimStore.getState();
@@ -138,29 +141,24 @@ export function setupCesiumInteractions(
       if (picked?.id instanceof Entity) {
         const clickedId = (picked.id as Entity).id;
         if (units.has(clickedId)) {
-          if (mapCommandMode.type === "target_pick" && mapCommandMode.unitId && selectedUnitId) {
-            const shooter = units.get(mapCommandMode.unitId);
-            const clickedUnit = units.get(clickedId);
-            if (shooter && clickedUnit && shooter.id !== clickedUnit.id && areHostile(shooter, clickedUnit)) {
-              selectUnit(mapCommandMode.unitId);
-              clearMapCommandMode();
-              window.dispatchEvent(new CustomEvent("sim:target-picked", {
-                detail: {
-                  shooterId: mapCommandMode.unitId,
-                  targetUnitId: clickedId,
-                },
-              }));
-              return;
-            }
-          }
           const clickedUnit = units.get(clickedId);
-          const playerTeam = (humanControlledTeam.trim() || (activeView !== "debug" ? activeView : "")).toUpperCase();
+          const playerTeam = selectedPlayerTeam(humanControlledTeam);
+          if (!playerTeam) {
+            return;
+          }
           const ownsClickedUnit = clickedUnit && (clickedUnit.teamId ?? "").trim().toUpperCase() === playerTeam;
           if (!ownsClickedUnit) {
+            const playerReference = Array.from(units.values()).find((candidate) => (candidate.teamId ?? "").trim().toUpperCase() === playerTeam);
+            if (clickedUnit && playerReference && areHostile(playerReference, clickedUnit)) {
+              const nextSelectedTargetId = selectedTargetId === clickedId ? null : clickedId;
+              selectTarget(nextSelectedTargetId);
+              clearMapCommandMode();
+            }
             return;
           }
           const nextSelectedId = selectedUnitId === clickedId ? null : clickedId;
           selectUnit(nextSelectedId);
+          selectTarget(null);
           clearMapCommandMode();
           if (nextSelectedId && clickedUnit && canMove(clickedUnit, activeView, defInfoRef.current)) {
             startRouteEdit(nextSelectedId);
@@ -187,15 +185,11 @@ export function setupCesiumInteractions(
         return;
       }
 
-      if (mapCommandMode.type === "target_pick" && mapCommandMode.unitId === selectedUnitId) {
-        clearMapCommandMode();
-        return;
-      }
-
       MoveUnit(selectedUnitId, lat, lon)
         .then(ensureBridgeSuccess)
         .then(() => {
           selectUnit(null);
+          selectTarget(null);
         })
         .catch((error) => {
           console.error(error);
