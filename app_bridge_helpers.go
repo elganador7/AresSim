@@ -166,7 +166,9 @@ func unitRecord(u *enginev1.Unit) map[string]any {
 		"damage_state":               int32(u.GetDamageState()),
 		"engagement_behavior":        int32(u.GetEngagementBehavior()),
 		"engagement_pkill_threshold": u.GetEngagementPkillThreshold(),
-		"attack_order":               attackOrderRecord(u.GetAttackOrder()),
+	}
+	if attackOrder := attackOrderRecord(u.GetAttackOrder()); attackOrder != nil {
+		record["attack_order"] = attackOrder
 	}
 	return record
 }
@@ -175,23 +177,11 @@ func attackOrderRecord(order *enginev1.AttackOrder) map[string]any {
 	if order == nil {
 		return nil
 	}
-	var lastKnownTargetPosition any
-	if pos := order.GetLastKnownTargetPosition(); pos != nil {
-		lastKnownTargetPosition = map[string]any{
-			"lat":     pos.GetLat(),
-			"lon":     pos.GetLon(),
-			"alt_msl": pos.GetAltMsl(),
-			"heading": pos.GetHeading(),
-			"speed":   pos.GetSpeed(),
-		}
-	}
 	return map[string]any{
-		"order_type":                 int32(order.GetOrderType()),
-		"target_unit_id":             order.GetTargetUnitId(),
-		"desired_effect":             int32(order.GetDesiredEffect()),
-		"pkill_threshold":            order.GetPkillThreshold(),
-		"last_known_target_position": lastKnownTargetPosition,
-		"last_track_update_seconds":  order.GetLastTrackUpdateSeconds(),
+		"order_type":      int32(order.GetOrderType()),
+		"target_unit_id":  order.GetTargetUnitId(),
+		"desired_effect":  int32(order.GetDesiredEffect()),
+		"pkill_threshold": order.GetPkillThreshold(),
 	}
 }
 

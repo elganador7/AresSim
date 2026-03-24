@@ -141,16 +141,6 @@ export function protoUnitToStore(u: ProtoUnit): Unit {
           targetUnitId: u.attackOrder.targetUnitId,
           desiredEffect: u.attackOrder.desiredEffect,
           pkillThreshold: u.attackOrder.pkillThreshold,
-          lastKnownTargetPosition: u.attackOrder.lastKnownTargetPosition
-            ? {
-                lat: u.attackOrder.lastKnownTargetPosition.lat,
-                lon: u.attackOrder.lastKnownTargetPosition.lon,
-                altMsl: u.attackOrder.lastKnownTargetPosition.altMsl,
-                heading: u.attackOrder.lastKnownTargetPosition.heading,
-                speed: u.attackOrder.lastKnownTargetPosition.speed,
-              }
-            : undefined,
-          lastTrackUpdateSeconds: u.attackOrder.lastTrackUpdateSeconds || 0,
         }
       : undefined,
     position: {

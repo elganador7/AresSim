@@ -8,7 +8,7 @@ import {
 import { areFriendly } from "../../utils/allegiance";
 import { assessLoadoutAgainstTarget, type WeaponDefLite } from "../../utils/loadoutValidation";
 import { teamColorHex } from "../../utils/teamColors";
-import { ATTACK_ORDER_TYPES, DESIRED_EFFECTS, ENGAGEMENT_BEHAVIORS, filterValidEditorTargets } from "../../utils/tasking";
+import { ATTACK_ORDER_TYPES, DESIRED_EFFECTS, ENGAGEMENT_BEHAVIORS, filterValidEditorTargets } from "../../utils/editorTasking";
 import { formatCountry } from "./scenarioSerialization";
 
 const BASE_OPS_STATE_LABEL: Record<number, string> = {

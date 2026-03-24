@@ -12,8 +12,8 @@ import { useSimStore, type PathViolationPreview, type Unit, type WeaponDef } fro
 import { formatDist, formatETA } from "../../utils/formatters";
 import { haversineM } from "../../utils/geo";
 import { selectedPlayerTeam } from "../../utils/playerTeam";
+import { ENGAGEMENT_BEHAVIORS } from "../../utils/editorTasking";
 import { teamColorHex } from "../../utils/teamColors";
-import { ENGAGEMENT_BEHAVIORS } from "../../utils/tasking";
 
 type UnitDefinitionPanelMeta = {
   domain?: number;
@@ -91,24 +91,11 @@ function normalizeDefinitionId(definitionId: string | undefined): string {
   return idx >= 0 ? raw.slice(idx + 1) : raw;
 }
 
-function isPreplannedTargetDefinition(definition: UnitDefinitionPanelMeta | undefined): boolean {
-  if (!definition) return false;
-  return definition.assetClass === "airbase"
-    || definition.assetClass === "port"
-    || definition.targetClass === "runway"
-    || definition.targetClass === "hardened_infrastructure"
-    || definition.targetClass === "soft_infrastructure"
-    || definition.targetClass === "civilian_energy"
-    || definition.targetClass === "civilian_water"
-    || definition.targetClass === "sam_battery";
-}
-
 export default function UnitPanel() {
   const selectedUnitId = useSimStore((s) => s.selectedUnitId);
   const units = useSimStore((s) => s.units);
   const weaponDefs = useSimStore((s) => s.weaponDefs);
   const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
-  const simSeconds = useSimStore((s) => s.simSeconds);
   const selectUnit = useSimStore((s) => s.selectUnit);
   const routePreview = useSimStore((s) => s.selectedRoutePreview);
   const strikePreview = useSimStore((s) => s.selectedStrikePreview);
@@ -146,8 +133,7 @@ export default function UnitPanel() {
   const [busy, setBusy] = useState(false);
   const [engagementPreview, setEngagementPreview] = useState<null | {
     readyToFire: boolean;
-    canPursue: boolean;
-    hasTrack: boolean;
+    canAssign: boolean;
     weaponId?: string;
     reason?: string;
     reasonCode?: string;
@@ -323,18 +309,6 @@ export default function UnitPanel() {
     && Boolean(unit?.hostBaseId)
     && (unit?.position.altMsl ?? 0) <= 0
     && loadoutOptions.length > 0;
-  const assignedTargetSearchingLastKnown = Boolean(
-    unit?.attackOrder?.targetUnitId
-      && unit.attackOrder.lastKnownTargetPosition
-      && !engagementPreview?.hasTrack
-      && !isPreplannedTargetDefinition(unit?.attackOrder?.targetUnitId
-        ? definitionMap.get(normalizeDefinitionId(units.get(unit.attackOrder.targetUnitId)?.definitionId ?? ""))
-        : undefined),
-  );
-  const lastTrackAgeSeconds = assignedTargetSearchingLastKnown && unit?.attackOrder?.lastTrackUpdateSeconds != null
-    ? Math.max(0, Math.round(simSeconds - unit.attackOrder.lastTrackUpdateSeconds))
-    : null;
-
   const removeWaypoint = async (index: number) => {
     if (!unit) return;
     setBusy(true);
@@ -383,12 +357,6 @@ export default function UnitPanel() {
             {strikeWarning}
           </div>
         )}
-        {controllable && assignedTargetSearchingLastKnown && (
-          <div className="track-source-note">
-            Searching last known area{lastTrackAgeSeconds != null ? ` · last contact ${lastTrackAgeSeconds}s ago` : ""}. Weapons will not fire again until the target is reacquired.
-          </div>
-        )}
-
         {!isFacility && unit.moveOrder && unit.moveOrder.waypoints.length > 0 ? (() => {
           const waypoints = unit.moveOrder.waypoints;
           const last = waypoints[waypoints.length - 1];
@@ -556,6 +524,9 @@ export default function UnitPanel() {
                       : ""}
                     {engagementPreview.fireProbability
                       ? ` P-hit ${Math.round(engagementPreview.fireProbability * 100)}%.`
+                      : ""}
+                    {!engagementPreview.readyToFire && engagementPreview.canAssign
+                      ? " Unit can still be assigned and will move into launch position."
                       : ""}
                   </div>
                 )}

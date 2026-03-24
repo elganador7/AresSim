@@ -14,7 +14,9 @@ func makeMunition(id string, curLat, curLon, destLat, destLon, speedMps float64,
 		ID:            id,
 		WeaponID:      "test-weapon",
 		ShooterID:     "shooter",
-		TrackGroupID:  "BLUE|shooter",
+		LaunchLat:     curLat,
+		LaunchLon:     curLon,
+		MaxRangeM:     500_000,
 		CurLat:        curLat,
 		CurLon:        curLon,
 		DestLat:       destLat,
@@ -95,30 +97,28 @@ func TestAdvanceMunitions_MultipleOneMayArrive(t *testing.T) {
 	}
 }
 
-// ─── Guidance tracking ────────────────────────────────────────────────────────
+// ─── Direct chase / range escape ─────────────────────────────────────────────
 
-// makeTrackingMunition builds a munition with the given guidance type aimed at
-// a target that starts 1° north and moves to 1° north + 0.1° east each tick.
-func makeTrackingMunition(guidance enginev1.GuidanceType) (*InFlightMunition, *enginev1.Unit) {
+func makeTrackingMunition() (*InFlightMunition, *enginev1.Unit) {
 	target := makeUnit("tgt", "Red", "def", 1.0, 0.0)
 	m := &InFlightMunition{
-		ID:           "m1",
-		WeaponID:     "test",
-		ShooterID:    "shooter",
-		ShooterTeam:  "USA",
-		TrackGroupID: "BLUE|shooter",
-		TargetID:     "tgt",
-		CurLat:       0, CurLon: 0,
+		ID:          "m1",
+		WeaponID:    "test",
+		ShooterID:   "shooter",
+		ShooterTeam: "USA",
+		TargetID:    "tgt",
+		LaunchLat:   0,
+		LaunchLon:   0,
+		MaxRangeM:   500_000,
+		CurLat:      0, CurLon: 0,
 		DestLat: 1.0, DestLon: 0.0,
 		SpeedMps: 100,
-		Guidance: guidance,
 	}
 	return m, target
 }
 
-func TestAdvanceMunitions_IR_TracksMovingTarget(t *testing.T) {
-	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_IR)
-	// Move target to a new position not in the original bearing.
+func TestAdvanceMunitions_TracksMovingTargetDirectly(t *testing.T) {
+	m, target := makeTrackingMunition()
 	target.Position.Lon = 1.0
 	units := []*enginev1.Unit{target}
 
@@ -126,87 +126,20 @@ func TestAdvanceMunitions_IR_TracksMovingTarget(t *testing.T) {
 	if len(rem) == 0 {
 		t.Fatal("munition should still be in flight")
 	}
-	// Destination should have been updated to the target's new longitude.
 	if rem[0].DestLon != 1.0 {
-		t.Errorf("IR munition should track target: expected DestLon=1.0, got %.4f", rem[0].DestLon)
+		t.Errorf("munition should chase moving target: expected DestLon=1.0, got %.4f", rem[0].DestLon)
 	}
 }
 
-func TestAdvanceMunitions_GPS_DoesNotTrack(t *testing.T) {
-	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_GPS)
-	originalDestLon := m.DestLon
-	target.Position.Lon = 1.0 // target moves
+func TestAdvanceMunitions_DropsWhenTargetEscapesRange(t *testing.T) {
+	m, target := makeTrackingMunition()
+	m.MaxRangeM = 50_000
+	target.Position.Lat = 1.0
 	units := []*enginev1.Unit{target}
 
 	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, nil)
-	if len(rem) == 0 {
-		t.Fatal("munition should still be in flight")
-	}
-	if rem[0].DestLon != originalDestLon {
-		t.Errorf("GPS munition should not track: expected DestLon=%.4f, got %.4f", originalDestLon, rem[0].DestLon)
-	}
-}
-
-func TestAdvanceMunitions_Radar_TracksWhenLockHeld(t *testing.T) {
-	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_RADAR)
-	shooter := makeUnit("shooter", "Blue", "sensor", 0, 0)
-	target.Position.Lon = 1.0
-	units := []*enginev1.Unit{shooter, target}
-	defs := map[string]DefStats{
-		"sensor": {DetectionRangeM: 500_000, Domain: enginev1.UnitDomain_DOMAIN_AIR},
-		"def":    {Domain: enginev1.UnitDomain_DOMAIN_AIR},
-	}
-
-	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, defs)
-	if len(rem) == 0 {
-		t.Fatal("munition should still be in flight")
-	}
-	if rem[0].DestLon != 1.0 {
-		t.Errorf("radar munition should track when lock held: expected DestLon=1.0, got %.4f", rem[0].DestLon)
-	}
-}
-
-func TestAdvanceMunitions_Radar_FixedPointWhenLockLost(t *testing.T) {
-	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_RADAR)
-	originalDestLon := m.DestLon
-	shooter := makeUnit("shooter", "Blue", "sensor", 0, 0)
-	target.Position.Lon = 1.0
-	units := []*enginev1.Unit{shooter, target}
-	defs := map[string]DefStats{
-		"sensor": {DetectionRangeM: 10_000, Domain: enginev1.UnitDomain_DOMAIN_AIR},
-		"def":    {Domain: enginev1.UnitDomain_DOMAIN_AIR},
-	}
-
-	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, defs)
-	if len(rem) == 0 {
-		t.Fatal("munition should still be in flight")
-	}
-	if rem[0].DestLon != originalDestLon {
-		t.Errorf("radar munition should hold last known pos when lock lost: expected DestLon=%.4f, got %.4f", originalDestLon, rem[0].DestLon)
-	}
-}
-
-func TestAdvanceMunitions_Radar_TracksWhenSiblingSensorHoldsLock(t *testing.T) {
-	m, target := makeTrackingMunition(enginev1.GuidanceType_GUIDANCE_RADAR)
-	parent := makeUnit("battery", "Blue", "command", 0, 0)
-	shooter := makeChildUnit("shooter", "Blue", "launcher", "battery", 0, 0)
-	sensor := makeChildUnit("sensor", "Blue", "sensor", "battery", 0, 0)
-	m.TrackGroupID = "BLUE|battery"
-	target.Position.Lon = 1.0
-	units := []*enginev1.Unit{parent, shooter, sensor, target}
-	defs := map[string]DefStats{
-		"command":  {Domain: enginev1.UnitDomain_DOMAIN_LAND},
-		"launcher": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
-		"sensor":   {DetectionRangeM: 500_000, Domain: enginev1.UnitDomain_DOMAIN_AIR},
-		"def":      {Domain: enginev1.UnitDomain_DOMAIN_AIR},
-	}
-
-	rem, _ := AdvanceMunitions([]*InFlightMunition{m}, 1.0, units, defs)
-	if len(rem) == 0 {
-		t.Fatal("munition should still be in flight")
-	}
-	if rem[0].DestLon != 1.0 {
-		t.Errorf("radar munition should track from sibling sensor lock: expected DestLon=1.0, got %.4f", rem[0].DestLon)
+	if len(rem) != 0 {
+		t.Fatalf("expected munition to fail once target escapes weapon range, got %d remaining", len(rem))
 	}
 }
 

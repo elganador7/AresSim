@@ -11,7 +11,6 @@ type EngagementReason string
 const (
 	EngagementReasonNoTarget              EngagementReason = "no_target"
 	EngagementReasonNoWeapon              EngagementReason = "no_weapon"
-	EngagementReasonNoTrack               EngagementReason = "no_track"
 	EngagementReasonOutOfRange            EngagementReason = "out_of_range"
 	EngagementReasonStrikeCooldown        EngagementReason = "strike_cooldown"
 	EngagementReasonDesiredEffectMismatch EngagementReason = "desired_effect_mismatch"
@@ -26,11 +25,8 @@ type EngagementDecision struct {
 	RangeToTargetM       float64
 	WeaponRangeM         float64
 	FireProbability      float64
-	HasTrack             bool
-	DetectedByTarget     bool
 	DesiredEffectSupport bool
 	InStrikeCooldown     bool
-	CanPursue            bool
 	CanFire              bool
 	Reason               EngagementReason
 }
@@ -41,11 +37,6 @@ func (d EngagementDecision) ReasonText() string {
 		return "No target assigned."
 	case EngagementReasonNoWeapon:
 		return "No loaded weapon can effectively engage this target."
-	case EngagementReasonNoTrack:
-		if d.CanPursue {
-			return "Searching last known target position."
-		}
-		return "No current track on target."
 	case EngagementReasonOutOfRange:
 		return fmt.Sprintf("Target is outside weapon range (%.0f km / %.0f km).", d.RangeToTargetM/1000, d.WeaponRangeM/1000)
 	case EngagementReasonStrikeCooldown:
@@ -125,18 +116,15 @@ func EvaluateEngagementDecision(
 	shooter, target *enginev1.Unit,
 	defs map[string]DefStats,
 	weapons map[string]WeaponStats,
-	tracks trackPicture,
 	desiredEffect enginev1.DesiredEffect,
 	requireDesiredEffect bool,
 	simSeconds float64,
-	canPursueWithoutTrack bool,
 ) EngagementDecision {
 	decision := EngagementDecision{Reason: EngagementReasonNoTarget}
 	if shooter == nil || target == nil {
 		return decision
 	}
 	targetDef := definitionStatsFor(defs, target.DefinitionId)
-	shooterDef := definitionStatsFor(defs, shooter.DefinitionId)
 	weaponID, weapon, desiredEffectSupport, hasWeapon := selectWeaponForEngagement(shooter, targetDef, desiredEffect, weapons)
 	if !hasWeapon {
 		decision.Reason = EngagementReasonNoWeapon
@@ -146,12 +134,6 @@ func EvaluateEngagementDecision(
 	decision.Weapon = weapon
 	decision.WeaponRangeM = weapon.RangeM
 	decision.DesiredEffectSupport = desiredEffectSupport
-	decision.HasTrack = tracks.unitHasTrack(shooter.Id, target.Id)
-	decision.CanPursue = decision.HasTrack || canPursueWithoutTrack
-	if !decision.HasTrack && !canExecutePreplannedStrategicStrike(shooter, target, targetDef, weapon) && !canPursueWithoutTrack {
-		decision.Reason = EngagementReasonNoTrack
-		return decision
-	}
 	if !unitReadyToStrike(shooter, weapon, simSeconds) {
 		decision.InStrikeCooldown = true
 		decision.Reason = EngagementReasonStrikeCooldown
@@ -170,14 +152,10 @@ func EvaluateEngagementDecision(
 		decision.Reason = EngagementReasonOutOfRange
 		return decision
 	}
-	decision.FireProbability = rangeDegradedPoh(weapon.ProbabilityOfHit, dist, weapon.RangeM)
-	decision.DetectedByTarget = dist <= effectiveDetectionRangeM(targetDef, shooterDef)
-	if shooter.GetEngagementBehavior() == enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_HOLD_FIRE {
+	decision.FireProbability = launchKillProbability(weapon, targetDef, dist)
+	switch shooter.GetEngagementBehavior() {
+	case enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_HOLD_FIRE:
 		decision.Reason = EngagementReasonHoldFire
-		return decision
-	}
-	if !shouldExecuteManualAttack(shooter, decision.FireProbability, decision.DetectedByTarget) {
-		decision.Reason = EngagementReasonDoctrineThreshold
 		return decision
 	}
 	decision.CanFire = true
@@ -194,17 +172,16 @@ func EvaluateCurrentEngagement(
 	desiredEffect enginev1.DesiredEffect,
 	requireDesiredEffect bool,
 	simSeconds float64,
-	canPursueWithoutTrack bool,
 ) EngagementDecision {
-	tracks := buildTrackPicture(units, defs, rules, nil, fixedRng(0))
-	return EvaluateEngagementDecision(shooter, target, defs, weapons, tracks, desiredEffect, requireDesiredEffect, simSeconds, canPursueWithoutTrack)
+	_ = units
+	_ = rules
+	return EvaluateEngagementDecision(shooter, target, defs, weapons, desiredEffect, requireDesiredEffect, simSeconds)
 }
 
 func EvaluateAutonomousEngagementDecision(
 	shooter, target *enginev1.Unit,
 	defs map[string]DefStats,
 	weapons map[string]WeaponStats,
-	tracks trackPicture,
 	simSeconds float64,
 ) EngagementDecision {
 	decision := EngagementDecision{Reason: EngagementReasonNoTarget}
@@ -212,7 +189,6 @@ func EvaluateAutonomousEngagementDecision(
 		return decision
 	}
 	targetDef := definitionStatsFor(defs, target.DefinitionId)
-	shooterDef := definitionStatsFor(defs, shooter.DefinitionId)
 	weaponID, weapon, _, hasWeapon := selectWeaponForEngagement(shooter, targetDef, enginev1.DesiredEffect_DESIRED_EFFECT_UNSPECIFIED, weapons)
 	if !hasWeapon {
 		decision.Reason = EngagementReasonNoWeapon
@@ -221,11 +197,6 @@ func EvaluateAutonomousEngagementDecision(
 	decision.WeaponID = weaponID
 	decision.Weapon = weapon
 	decision.WeaponRangeM = weapon.RangeM
-	decision.HasTrack = tracks.unitHasTrack(shooter.Id, target.Id)
-	if !decision.HasTrack {
-		decision.Reason = EngagementReasonNoTrack
-		return decision
-	}
 	if !unitReadyToStrike(shooter, weapon, simSeconds) {
 		decision.InStrikeCooldown = true
 		decision.Reason = EngagementReasonStrikeCooldown
@@ -240,14 +211,13 @@ func EvaluateAutonomousEngagementDecision(
 		decision.Reason = EngagementReasonOutOfRange
 		return decision
 	}
-	decision.FireProbability = rangeDegradedPoh(weapon.ProbabilityOfHit, dist, weapon.RangeM)
-	decision.DetectedByTarget = dist <= effectiveDetectionRangeM(targetDef, shooterDef)
-	if shooter.GetEngagementBehavior() == enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_HOLD_FIRE {
+	decision.FireProbability = launchKillProbability(weapon, targetDef, dist)
+	switch shooter.GetEngagementBehavior() {
+	case enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_HOLD_FIRE,
+		enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_ASSIGNED_TARGETS_ONLY,
+		enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_SHADOW_CONTACT,
+		enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_WITHDRAW_ON_DETECT:
 		decision.Reason = EngagementReasonHoldFire
-		return decision
-	}
-	if !shouldAutonomouslyEngage(shooter, decision.FireProbability, decision.DetectedByTarget) {
-		decision.Reason = EngagementReasonDoctrineThreshold
 		return decision
 	}
 	decision.CanFire = true

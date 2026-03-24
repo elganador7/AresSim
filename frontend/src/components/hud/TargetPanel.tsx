@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ListUnitDefinitions,
   PreviewTargetEngagementOptions,
+  PreviewTargetEngagementSummary,
   RequestSync,
   SetUnitAttackOrder,
 } from "../../../wailsjs/go/main/App";
@@ -42,7 +43,7 @@ function formatUsd(value: number | undefined): string {
   }).format(amount);
 }
 
-function trackStatusForTarget(
+function visibilityStatusForTarget(
   target: Unit | undefined,
   playerTeam: string,
   activeView: string,
@@ -50,14 +51,15 @@ function trackStatusForTarget(
   detectionContacts: Map<string, Map<string, { shared: boolean; sourceTeam: string }>>,
 ): string {
   if (!target) return "Unknown";
+  if ((target.damageState ?? 1) === 4) return "Destroyed target";
   const contact = activeView !== "debug" ? detectionContacts.get(playerTeam)?.get(target.id) : undefined;
   if (contact?.shared) {
-    return `Shared track · ${contact.sourceTeam}`;
+    return "Visible target";
   }
   if (activeView === "debug" || detections.get(playerTeam)?.has(target.id)) {
-    return "Tracked";
+    return "Visible target";
   }
-  return "Last Known";
+  return "Visible location";
 }
 
 export default function TargetPanel() {
@@ -81,8 +83,7 @@ export default function TargetPanel() {
     shooterTeamId: string;
     loadoutConfigurationId?: string;
     readyToFire: boolean;
-    canPursue: boolean;
-    hasTrack: boolean;
+    canAssign: boolean;
     weaponId?: string;
     reason?: string;
     reasonCode?: string;
@@ -97,6 +98,17 @@ export default function TargetPanel() {
     expectedTargetValueUsd?: number;
     expectedValueExchangeUsd?: number;
   }>>([]);
+  const [summary, setSummary] = useState<null | {
+    playerTeam: string;
+    targetUnitId: string;
+    targetDisplayName: string;
+    friendlyUnitCount: number;
+    readyShooterCount: number;
+    assignableShooterCount: number;
+    blockedShooterCount: number;
+    nonOperationalCount: number;
+    nonHostileCount: number;
+  }>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -126,23 +138,30 @@ export default function TargetPanel() {
     let cancelled = false;
     if (!selectedTargetId) {
       setOptions([]);
+      setSummary(null);
       setError("");
       return;
     }
     if (!playerTeam) {
       setOptions([]);
+      setSummary(null);
       setError("Select a PLAYER before evaluating shooters for this target.");
       return;
     }
-    PreviewTargetEngagementOptions(selectedTargetId, playerTeam)
-      .then((rows) => {
+    Promise.all([
+      PreviewTargetEngagementOptions(selectedTargetId, playerTeam),
+      PreviewTargetEngagementSummary(selectedTargetId, playerTeam),
+    ])
+      .then(([rows, debugSummary]) => {
         if (cancelled) return;
         setOptions(rows ?? []);
+        setSummary(debugSummary ?? null);
         setError("");
       })
       .catch((err) => {
         if (cancelled) return;
         setOptions([]);
+        setSummary(null);
         setError(err instanceof Error ? err.message : String(err));
       });
     return () => {
@@ -155,8 +174,8 @@ export default function TargetPanel() {
   }, [selectedTargetId]);
 
   const targetDefinition = target ? definitionMap.get(normalizeDefinitionId(target.definitionId)) : undefined;
-  const targetTrackStatus = useMemo(
-    () => trackStatusForTarget(target, playerTeam, playerTeam ? playerTeam : "debug", detections, detectionContacts),
+  const targetVisibilityStatus = useMemo(
+    () => visibilityStatusForTarget(target, playerTeam, playerTeam ? playerTeam : "debug", detections, detectionContacts),
     [detectionContacts, detections, playerTeam, target],
   );
   const playerReference = useMemo(
@@ -230,7 +249,7 @@ export default function TargetPanel() {
       </div>
       <div className="unit-panel-body">
         <div className="unit-full-name">{target.fullName}</div>
-        <div className="track-source-note">{targetTrackStatus}</div>
+        <div className="track-source-note">{targetVisibilityStatus}</div>
         <div className="target-summary-grid">
           <div className="unit-stat-row">
             <span className="stat-label">Country</span>
@@ -262,6 +281,25 @@ export default function TargetPanel() {
           </div>
         )}
         {error && <div className="path-warning-note strike-warning-note">{error}</div>}
+        {summary && (
+          <div className="weapon-list">
+            <div className="weapon-list-header">Evaluation Summary</div>
+            <div className="target-option-metrics">
+              <span>Player {summary.playerTeam}</span>
+              <span>Friendly {summary.friendlyUnitCount}</span>
+              <span>Ready {summary.readyShooterCount}</span>
+              <span>Assignable {summary.assignableShooterCount}</span>
+              <span>Blocked {summary.blockedShooterCount}</span>
+            </div>
+            {(summary.nonOperationalCount > 0 || summary.nonHostileCount > 0) && (
+              <div className="move-hint">
+                {summary.nonOperationalCount > 0 ? `${summary.nonOperationalCount} non-operational` : ""}
+                {summary.nonOperationalCount > 0 && summary.nonHostileCount > 0 ? " · " : ""}
+                {summary.nonHostileCount > 0 ? `${summary.nonHostileCount} non-hostile` : ""}
+              </div>
+            )}
+          </div>
+        )}
         <div className="weapon-list">
           <div className="weapon-list-header-row">
             <div className="weapon-list-header">Friendly Shooters</div>
@@ -277,7 +315,7 @@ export default function TargetPanel() {
           {options.length === 0 ? (
             <div className="move-hint">
               {playerTeam
-                ? `No friendly shooters were found for PLAYER ${playerTeam} against this target.`
+                ? `No friendly shooters are currently launch-capable or assignable for PLAYER ${playerTeam} against this target.`
                 : "Select a PLAYER before evaluating shooters for this target."}
             </div>
           ) : filteredOptions.length === 0 ? (
@@ -295,14 +333,14 @@ export default function TargetPanel() {
                 </div>
                 <button
                   className="cancel-order-btn"
-                  disabled={busy || (!option.readyToFire && !option.canPursue) || option.pathBlocked}
+                  disabled={busy || !option.canAssign || option.pathBlocked}
                   onClick={() => engage(option.shooterUnitId).catch(console.error)}
                 >
-                  {option.readyToFire ? "Engage" : option.canPursue ? "Pursue" : "Blocked"}
+                  {option.readyToFire ? "Launch" : option.canAssign ? "Assign" : "Blocked"}
                 </button>
               </div>
               <div className="target-option-metrics">
-                <span>{option.readyToFire ? "Ready" : option.canPursue ? "Can Pursue" : option.reason || "Blocked"}</span>
+                <span>{option.readyToFire ? "Ready now" : option.canAssign ? "Can assign" : option.reason || "Blocked"}</span>
                 <span>Pk {Math.round((option.fireProbability ?? 0) * 100)}%</span>
                 <span>Cost {formatUsd(option.engagementCostUsd)}</span>
                 <span>Value Exchange {formatUsd(option.expectedValueExchangeUsd)}</span>

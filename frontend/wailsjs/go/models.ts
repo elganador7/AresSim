@@ -45,8 +45,7 @@ export namespace main {
 	    targetDisplayName: string;
 	    targetTeamId: string;
 	    readyToFire: boolean;
-	    canPursue: boolean;
-	    hasTrack: boolean;
+	    canAssign: boolean;
 	    weaponId?: string;
 	    reason?: string;
 	    reasonCode?: string;
@@ -66,8 +65,7 @@ export namespace main {
 	        this.targetDisplayName = source["targetDisplayName"];
 	        this.targetTeamId = source["targetTeamId"];
 	        this.readyToFire = source["readyToFire"];
-	        this.canPursue = source["canPursue"];
-	        this.hasTrack = source["hasTrack"];
+	        this.canAssign = source["canAssign"];
 	        this.weaponId = source["weaponId"];
 	        this.reason = source["reason"];
 	        this.reasonCode = source["reasonCode"];
@@ -80,8 +78,7 @@ export namespace main {
 	}
 	export class EngagementPreview {
 	    readyToFire: boolean;
-	    canPursue: boolean;
-	    hasTrack: boolean;
+	    canAssign: boolean;
 	    weaponId?: string;
 	    reason?: string;
 	    reasonCode?: string;
@@ -98,8 +95,7 @@ export namespace main {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.readyToFire = source["readyToFire"];
-	        this.canPursue = source["canPursue"];
-	        this.hasTrack = source["hasTrack"];
+	        this.canAssign = source["canAssign"];
 	        this.weaponId = source["weaponId"];
 	        this.reason = source["reason"];
 	        this.reasonCode = source["reasonCode"];
@@ -128,14 +124,41 @@ export namespace main {
 	        this.reason = source["reason"];
 	    }
 	}
+	export class TargetEngagementDebugSummary {
+	    playerTeam: string;
+	    targetUnitId: string;
+	    targetDisplayName: string;
+	    friendlyUnitCount: number;
+	    readyShooterCount: number;
+	    assignableShooterCount: number;
+	    blockedShooterCount: number;
+	    nonOperationalCount: number;
+	    nonHostileCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TargetEngagementDebugSummary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.playerTeam = source["playerTeam"];
+	        this.targetUnitId = source["targetUnitId"];
+	        this.targetDisplayName = source["targetDisplayName"];
+	        this.friendlyUnitCount = source["friendlyUnitCount"];
+	        this.readyShooterCount = source["readyShooterCount"];
+	        this.assignableShooterCount = source["assignableShooterCount"];
+	        this.blockedShooterCount = source["blockedShooterCount"];
+	        this.nonOperationalCount = source["nonOperationalCount"];
+	        this.nonHostileCount = source["nonHostileCount"];
+	    }
+	}
 	export class TargetEngagementOptionPreview {
 	    shooterUnitId: string;
 	    shooterDisplayName: string;
 	    shooterTeamId: string;
 	    loadoutConfigurationId?: string;
 	    readyToFire: boolean;
-	    canPursue: boolean;
-	    hasTrack: boolean;
+	    canAssign: boolean;
 	    weaponId?: string;
 	    reason?: string;
 	    reasonCode?: string;
@@ -161,8 +184,7 @@ export namespace main {
 	        this.shooterTeamId = source["shooterTeamId"];
 	        this.loadoutConfigurationId = source["loadoutConfigurationId"];
 	        this.readyToFire = source["readyToFire"];
-	        this.canPursue = source["canPursue"];
-	        this.hasTrack = source["hasTrack"];
+	        this.canAssign = source["canAssign"];
 	        this.weaponId = source["weaponId"];
 	        this.reason = source["reason"];
 	        this.reasonCode = source["reasonCode"];
@@ -180,4 +202,3 @@ export namespace main {
 	}
 
 }
-

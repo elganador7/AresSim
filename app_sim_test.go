@@ -225,7 +225,7 @@ func TestMergeDefStatsWithRowPreservesLibraryTargetMetadataWhenDbRowIsPartial(t 
 	}
 
 	merged := mergeDefStatsWithRow(base, map[string]any{
-		"id":                 "israel-strategic-airbase",
+		"id":                  "israel-strategic-airbase",
 		"strategic_value_usd": 200_000_000,
 	})
 
@@ -342,7 +342,7 @@ func TestSetUnitAttackOrder_AllowsUndetectedFixedStrategicTarget(t *testing.T) {
 				Position:     &enginev1.Position{Lat: 0, Lon: 0, AltMsl: 10_000},
 				Status:       &enginev1.OperationalStatus{IsActive: true, CombatEffectiveness: 1},
 				Weapons: []*enginev1.WeaponState{
-					{WeaponId: "bomb", CurrentQty: 2, MaxQty: 2},
+					{WeaponId: "agm-158-jassm-er", CurrentQty: 2, MaxQty: 2},
 				},
 			},
 			{
@@ -563,8 +563,8 @@ func TestPreviewTargetEngagementOptions_AllowsPrefixedDefinitionIdsForFixedTarge
 	if len(options) != 1 {
 		t.Fatalf("expected one shooter option, got %d", len(options))
 	}
-	if !options[0].CanPursue {
-		t.Fatalf("expected fixed airbase target to be pursuable with prefixed definition ids, got %+v", options[0])
+	if !options[0].CanAssign {
+		t.Fatalf("expected fixed airbase target to be assignable with prefixed definition ids, got %+v", options[0])
 	}
 	if options[0].WeaponId != "agm-158-jassm-er" {
 		t.Fatalf("expected jassm-er to be selected, got %q", options[0].WeaponId)
@@ -602,8 +602,8 @@ func TestPreviewTargetEngagementOptions_IncludesIranianMissileShootersForCoaliti
 			if option.WeaponId == "" {
 				t.Fatalf("expected Iranian missile shooter %s to have a selected weapon", option.ShooterUnitId)
 			}
-			if !option.CanPursue && !option.ReadyToFire {
-				t.Fatalf("expected Iranian missile shooter %s to be at least pursuable against a fixed airbase, got %+v", option.ShooterUnitId, option)
+			if !option.CanAssign && !option.ReadyToFire {
+				t.Fatalf("expected Iranian missile shooter %s to be assignable against a fixed airbase, got %+v", option.ShooterUnitId, option)
 			}
 		}
 	}
@@ -640,7 +640,7 @@ func TestPreviewTargetEngagementOptions_IncludesKheibarBrigadeForFixedAirbaseTar
 		if option.WeaponId != "ssm-kheibar-shekan" {
 			t.Fatalf("expected Kheibar Brigade to use ssm-kheibar-shekan, got %q", option.WeaponId)
 		}
-		if !option.CanPursue && !option.ReadyToFire {
+		if !option.CanAssign && !option.ReadyToFire {
 			t.Fatalf("expected Kheibar Brigade to be eligible against fixed airbase target, got %+v", option)
 		}
 		return
@@ -705,12 +705,111 @@ func TestPreviewTargetEngagementOptions_IncludesKheibarBrigadeForNevatimAirbase(
 		if option.WeaponId != "ssm-kheibar-shekan" {
 			t.Fatalf("expected Kheibar Brigade to use ssm-kheibar-shekan against Nevatim, got %q", option.WeaponId)
 		}
-		if !option.CanPursue && !option.ReadyToFire {
+		if !option.CanAssign && !option.ReadyToFire {
 			t.Fatalf("expected Kheibar Brigade to be eligible against Nevatim, got %+v", option)
 		}
 		return
 	}
 	t.Fatal("expected Kheibar Brigade to appear in Nevatim target engagement options")
+}
+
+func TestPreviewTargetEngagementOptions_UsesSelectedHumanTeamAsAuthority(t *testing.T) {
+	defs, err := library.LoadAll("")
+	if err != nil {
+		t.Fatalf("LoadAll failed: %v", err)
+	}
+	defsByID := make(map[string]library.Definition, len(defs))
+	for _, def := range defs {
+		defsByID[def.ID] = def
+	}
+
+	app := &App{
+		ctx:          context.Background(),
+		libDefsCache: defsByID,
+	}
+	scen := scenario.IranCoalitionWarSkeleton()
+	app.loadScenario(scen)
+	app.setHumanControlledTeam("IRN")
+
+	options, err := app.PreviewTargetEngagementOptions("isr-airbase-nevatim", "USA")
+	if err != nil {
+		t.Fatalf("PreviewTargetEngagementOptions failed: %v", err)
+	}
+	for _, option := range options {
+		if option.ShooterUnitId == "irn-kheibar-west" {
+			return
+		}
+	}
+	t.Fatal("expected selected human team IRN to override mismatched explicit preview team")
+}
+
+func TestPreviewTargetEngagementSummary_NevatimForIran(t *testing.T) {
+	defs, err := library.LoadAll("")
+	if err != nil {
+		t.Fatalf("LoadAll failed: %v", err)
+	}
+	defsByID := make(map[string]library.Definition, len(defs))
+	for _, def := range defs {
+		defsByID[def.ID] = def
+	}
+
+	app := &App{
+		ctx:          context.Background(),
+		libDefsCache: defsByID,
+	}
+	scen := scenario.IranCoalitionWarSkeleton()
+	app.loadScenario(scen)
+	app.setHumanControlledTeam("IRN")
+
+	summary, err := app.PreviewTargetEngagementSummary("isr-airbase-nevatim", "")
+	if err != nil {
+		t.Fatalf("PreviewTargetEngagementSummary failed: %v", err)
+	}
+	if summary.PlayerTeam != "IRN" {
+		t.Fatalf("expected IRN player team, got %q", summary.PlayerTeam)
+	}
+	if summary.FriendlyUnitCount == 0 {
+		t.Fatal("expected at least one Iranian friendly unit to be evaluated for Nevatim")
+	}
+	if summary.ReadyShooterCount+summary.AssignableShooterCount == 0 {
+		t.Fatalf("expected at least one Iranian shooter to be able to fire or pursue Nevatim, got %+v", summary)
+	}
+}
+
+func TestUnitRecord_OmitsNilAttackOrder(t *testing.T) {
+	record := unitRecord(&enginev1.Unit{
+		Id:           "u-1",
+		DisplayName:  "Unit",
+		FullName:     "Unit Full",
+		DefinitionId: "fighter",
+		TeamId:       "USA",
+		Position:     &enginev1.Position{},
+		Status:       &enginev1.OperationalStatus{},
+	})
+	if _, ok := record["attack_order"]; ok {
+		t.Fatal("expected nil attack order to be omitted from unit record")
+	}
+}
+
+func TestUnitRecord_IncludesAttackOrderWhenPresent(t *testing.T) {
+	record := unitRecord(&enginev1.Unit{
+		Id:           "u-1",
+		DisplayName:  "Unit",
+		FullName:     "Unit Full",
+		DefinitionId: "fighter",
+		TeamId:       "USA",
+		Position:     &enginev1.Position{},
+		Status:       &enginev1.OperationalStatus{},
+		AttackOrder: &enginev1.AttackOrder{
+			OrderType:      enginev1.AttackOrderType_ATTACK_ORDER_TYPE_ATTACK_ASSIGNED_TARGET,
+			TargetUnitId:   "target-1",
+			DesiredEffect:  enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY,
+			PkillThreshold: 0.7,
+		},
+	})
+	if _, ok := record["attack_order"]; !ok {
+		t.Fatal("expected present attack order to be included in unit record")
+	}
 }
 
 func TestPreviewTargetEngagementOptions_IncludesNonOperationalFriendlyShooterWithReason(t *testing.T) {
@@ -847,7 +946,7 @@ func TestPreviewEngagementOptionsTreatsSharedTeamDetectionAsPursuable(t *testing
 	if len(options) != 1 {
 		t.Fatalf("expected 1 engagement option, got %d", len(options))
 	}
-	if !options[0].CanPursue {
-		t.Fatal("expected shared team detection to make target pursuable")
+	if !options[0].CanAssign {
+		t.Fatal("expected target to remain assignable")
 	}
 }

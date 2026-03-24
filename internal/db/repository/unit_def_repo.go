@@ -24,7 +24,7 @@ func NewUnitDefRepo(db *surrealdb.DB) *UnitDefRepo {
 // Save writes or updates a unit definition record.
 func (r *UnitDefRepo) Save(ctx context.Context, id string, record UnitDefRecord) error {
 	rid := models.RecordID{Table: "unit_definition", ID: id}
-	if _, err := surrealdb.Upsert[UnitDefRecord](ctx, r.db, rid, record); err != nil {
+	if _, err := surrealdb.Upsert[UnitDefRecord](ctx, r.db, rid, sanitizeRecord(record)); err != nil {
 		return fmt.Errorf("save unit_definition %s: %w", id, err)
 	}
 	return nil

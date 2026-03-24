@@ -150,8 +150,6 @@ export interface Unit {
     targetUnitId: string;
     desiredEffect: number;
     pkillThreshold: number;
-    lastKnownTargetPosition?: Position;
-    lastTrackUpdateSeconds?: number;
   };
   position: Position;
   status: UnitStatus;

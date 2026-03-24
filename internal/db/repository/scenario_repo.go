@@ -26,7 +26,7 @@ func NewScenarioRepo(db *surrealdb.DB) *ScenarioRepo {
 // containing the proto-marshaled Scenario message.
 func (r *ScenarioRepo) Save(ctx context.Context, scenarioID string, record ScenarioRecord) error {
 	rid := models.RecordID{Table: "scenario", ID: scenarioID}
-	if _, err := surrealdb.Upsert[ScenarioRecord](ctx, r.db, rid, record); err != nil {
+	if _, err := surrealdb.Upsert[ScenarioRecord](ctx, r.db, rid, sanitizeRecord(record)); err != nil {
 		return fmt.Errorf("save scenario %s: %w", scenarioID, err)
 	}
 	return nil
@@ -62,10 +62,10 @@ func (r *ScenarioRepo) UpdateProgress(ctx context.Context, scenarioID string, ti
 	_, err := surrealdb.Merge[ScenarioRecord](
 		ctx, r.db,
 		models.RecordID{Table: "scenario", ID: scenarioID},
-		map[string]any{
+		sanitizeRecord(map[string]any{
 			"last_tick":        tick,
 			"last_sim_seconds": simSeconds,
-		},
+		}),
 	)
 	if err != nil {
 		return fmt.Errorf("update scenario progress %s: %w", scenarioID, err)
@@ -77,12 +77,12 @@ func (r *ScenarioRepo) UpdateProgress(ctx context.Context, scenarioID string, ti
 func (r *ScenarioRepo) WriteCheckpointMarker(ctx context.Context, scenarioID string, tick int64, simSeconds, wallTime float64) error {
 	markerID := fmt.Sprintf("%s_tick_%d", scenarioID, tick)
 	rid := models.RecordID{Table: "checkpoint", ID: markerID}
-	_, err := surrealdb.Create[ScenarioRecord](ctx, r.db, rid, map[string]any{
+	_, err := surrealdb.Create[ScenarioRecord](ctx, r.db, rid, sanitizeRecord(map[string]any{
 		"scenario_id": scenarioID,
 		"tick_number": tick,
 		"sim_seconds": simSeconds,
 		"wall_time":   wallTime,
-	})
+	}))
 	if err != nil {
 		return fmt.Errorf("write checkpoint marker tick %d: %w", tick, err)
 	}

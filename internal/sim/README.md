@@ -2,9 +2,10 @@
 
 This folder contains the core simulation engine.
 
-- `adjudicator.go`: detection, target selection, engagement, and kill logic.
+- `adjudicator.go`: launch authorization, autonomous engagement, and impact resolution.
 - `munitions.go`: in-flight weapon updates and arrival resolution.
 - `mock.go`: event generation and integration glue for the mock sim loop.
+- `detection.go`: visibility and shared-intel picture generation.
 - `*_test.go`: behavioral coverage for sim rules.
 
 This is the highest-leverage area for gameplay changes. Keep rules here data-driven where possible, because scenario complexity is growing quickly.

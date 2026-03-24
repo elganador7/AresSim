@@ -11,7 +11,7 @@ These components should stay compositional and presentation-focused. Keep the au
 
 ## Review Notes
 
-- Resolved in part: the live HUD now uses the shared `utils/tasking.ts` helpers instead of carrying its own copy of tasking constants and target-filtering rules.
+- Simplified: live HUD targeting no longer depends on frontend tasking helpers. Engagement eligibility is backend-owned and the HUD now renders backend results.
 - Resolved in part: live map interaction now runs through a single command-mode object in the sim store instead of separate route-edit and target-pick flags spread across HUD and map code.
 - Remaining cleanup: `UnitPanel.tsx` still owns a lot of workflow orchestration and backend command plumbing. It is more stable now, but it should eventually lose more of that responsibility to smaller tasking components or store actions.
 - Resolved in part: the country-relationship matrix now lives in `RelationshipPanel.tsx` instead of being embedded directly inside `TopBar.tsx`, so sim controls and diplomacy/access controls are no longer coupled in one component.

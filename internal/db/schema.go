@@ -12,7 +12,7 @@ import (
 // this constant, the database is wiped and rebuilt from scratch. This is
 // acceptable for a single-player desktop application where the database is
 // purely derived state (the authoritative record lives in scenario files).
-const schemaVersion = 21
+const schemaVersion = 1
 
 // SchemaVersion returns the current schema version for logging.
 func SchemaVersion() int { return schemaVersion }

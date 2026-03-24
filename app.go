@@ -47,10 +47,12 @@ type App struct {
 	aiRandMu        sync.Mutex
 	aiRand          *rand.Rand
 
-	// defsCache caches the result of buildDefs() so we don't re-query SurrealDB
-	// on every MoveUnit call. Invalidated when a unit definition is saved or deleted.
+	// defsCache caches the merged combat definition model and
+	// weaponCatalogCache caches the paired merged combat weapon model.
+	// Both are invalidated together when authored data changes.
 	defsCacheMu sync.RWMutex
 	defsCache   map[string]sim.DefStats
+	weaponCatalogCache map[string]sim.WeaponStats
 
 	// lastDetections stores the most recent DetectionSet emitted by SensorTick.
 	// RequestSync re-emits these so reconnecting frontends see current contacts.

@@ -148,21 +148,11 @@ func canPerformSovereignAirDefense(unit *enginev1.Unit, def DefStats) bool {
 // each unit that meets the engagement criteria. Each unit fires at most one
 // salvo per tick (at its highest-priority target).
 //
-// Fire conditions — a unit fires only when EITHER:
-//   - The range-degraded probability of hit exceeds 50 %, OR
-//   - The shooter is already within the target's detection range (stealth is
-//     already compromised, so there is nothing to gain by holding fire).
-//
 // Salvo sizing — the minimum number of rounds N such that the cumulative
 // kill probability of all munitions (in-flight + new salvo) exceeds 70 %.
 // Already in-flight munitions targeting the same unit are counted, so platforms
 // do not keep firing after enough rounds are already on the way.
 func AdjudicateTick(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, inFlight []*InFlightMunition, rules RelationshipRules, simSeconds float64) AdjudicateResult {
-	tracks := buildTrackPicture(units, defs, rules, nil, fixedRng(0))
-	return adjudicateTickWithTracks(units, defs, weapons, inFlight, tracks, rules, simSeconds)
-}
-
-func adjudicateTickWithTracks(units []*enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats, inFlight []*InFlightMunition, tracks trackPicture, rules RelationshipRules, simSeconds float64) AdjudicateResult {
 	firedThisTick := make(map[string]bool)
 	orderedUnits := make(map[string]bool)
 	var result AdjudicateResult
@@ -194,7 +184,6 @@ func adjudicateTickWithTracks(units []*enginev1.Unit, defs map[string]DefStats, 
 			defs,
 			weapons,
 			inFlight,
-			tracks,
 			firedThisTick,
 			order.GetPkillThreshold(),
 			order.GetDesiredEffect(),
@@ -227,10 +216,10 @@ func adjudicateTickWithTracks(units []*enginev1.Unit, defs map[string]DefStats, 
 			aCanAct := aCanEngageB && !firedThisTick[a.Id] && !orderedUnits[a.Id]
 			bCanAct := bCanEngageA && !firedThisTick[b.Id] && !orderedUnits[b.Id]
 			if aCanAct {
-				decisionA = EvaluateAutonomousEngagementDecision(a, b, defs, weapons, tracks, simSeconds)
+				decisionA = EvaluateAutonomousEngagementDecision(a, b, defs, weapons, simSeconds)
 			}
 			if bCanAct {
-				decisionB = EvaluateAutonomousEngagementDecision(b, a, defs, weapons, tracks, simSeconds)
+				decisionB = EvaluateAutonomousEngagementDecision(b, a, defs, weapons, simSeconds)
 			}
 
 			if !decisionA.CanFire && !decisionB.CanFire {
@@ -286,7 +275,6 @@ func tryFireAtTarget(
 	defs map[string]DefStats,
 	weapons map[string]WeaponStats,
 	inFlight []*InFlightMunition,
-	tracks trackPicture,
 	firedThisTick map[string]bool,
 	pkillThreshold float32,
 	desiredEffect enginev1.DesiredEffect,
@@ -302,11 +290,9 @@ func tryFireAtTarget(
 		target,
 		defs,
 		weapons,
-		tracks,
 		desiredEffect,
 		requireDesiredEffect,
 		simSeconds,
-		shooter.GetAttackOrder() != nil && shooter.GetAttackOrder().GetLastKnownTargetPosition() != nil,
 	)
 	if !decision.CanFire {
 		return false

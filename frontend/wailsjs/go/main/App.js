@@ -94,6 +94,10 @@ export function PreviewTargetEngagementOptions(arg1, arg2) {
   return window['go']['main']['App']['PreviewTargetEngagementOptions'](arg1, arg2);
 }
 
+export function PreviewTargetEngagementSummary(arg1, arg2) {
+  return window['go']['main']['App']['PreviewTargetEngagementSummary'](arg1, arg2);
+}
+
 export function RemoveMoveWaypoint(arg1, arg2) {
   return window['go']['main']['App']['RemoveMoveWaypoint'](arg1, arg2);
 }

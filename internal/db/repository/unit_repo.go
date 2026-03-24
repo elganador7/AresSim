@@ -33,7 +33,7 @@ func NewUnitRepo(db *surrealdb.DB) *UnitRepo {
 // The record must include an "id" field of type models.RecordID.
 func (r *UnitRepo) Upsert(ctx context.Context, unitID string, record UnitRecord) error {
 	rid := models.RecordID{Table: "unit", ID: unitID}
-	if _, err := surrealdb.Upsert[UnitRecord](ctx, r.db, rid, record); err != nil {
+	if _, err := surrealdb.Upsert[UnitRecord](ctx, r.db, rid, sanitizeRecord(record)); err != nil {
 		return fmt.Errorf("upsert unit %s: %w", unitID, err)
 	}
 	return nil
@@ -65,14 +65,17 @@ func (r *UnitRepo) UpsertBatch(ctx context.Context, units []UnitRecord) error {
 		params[idKey] = rid.ID
 
 		// Remove the id from the data payload — the UPSERT target is the rid.
+		// We write a full canonical unit row on each checkpoint, so use CONTENT
+		// rather than MERGE. This avoids SurrealDB retaining or synthesizing NULL
+		// for omitted option<T> fields like attack_order.
 		data := make(UnitRecord, len(u))
 		for k, v := range u {
 			if k != "id" {
 				data[k] = v
 			}
 		}
-		params[paramKey] = data
-		query += fmt.Sprintf("UPSERT type::record('unit', $%s) MERGE $%s;\n", idKey, paramKey)
+		params[paramKey] = sanitizeRecord(data)
+		query += fmt.Sprintf("UPSERT type::record('unit', $%s) CONTENT $%s;\n", idKey, paramKey)
 	}
 	query += "COMMIT TRANSACTION;"
 
@@ -127,7 +130,7 @@ func (r *UnitRepo) UpdateStatus(ctx context.Context, unitID string, status map[s
 	_, err := surrealdb.Merge[UnitRecord](
 		ctx, r.db,
 		models.RecordID{Table: "unit", ID: unitID},
-		status,
+		sanitizeRecord(status),
 	)
 	if err != nil {
 		return fmt.Errorf("update status for unit %s: %w", unitID, err)

@@ -24,7 +24,7 @@ func NewWeaponDefRepo(db *surrealdb.DB) *WeaponDefRepo {
 // Save writes or updates a weapon definition record.
 func (r *WeaponDefRepo) Save(ctx context.Context, id string, record WeaponDefRecord) error {
 	rid := models.RecordID{Table: "weapon_definition", ID: id}
-	if _, err := surrealdb.Upsert[WeaponDefRecord](ctx, r.db, rid, record); err != nil {
+	if _, err := surrealdb.Upsert[WeaponDefRecord](ctx, r.db, rid, sanitizeRecord(record)); err != nil {
 		return fmt.Errorf("save weapon_definition %s: %w", id, err)
 	}
 	return nil

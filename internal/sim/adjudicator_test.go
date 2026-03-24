@@ -408,7 +408,7 @@ func TestAdjudicateTick_DestroyedUnit_NoShots(t *testing.T) {
 	}
 }
 
-func TestAdjudicateTick_LowPkillOutsideSensors_HoldsFire(t *testing.T) {
+func TestAdjudicateTick_LowPkillOutsideSensors_StillFiresInRange(t *testing.T) {
 	a := makeUnit("a", "Blue", "def-a", 0, 0)
 	b := makeUnit("b", "Red", "def-b", 0, 0.01)
 	addWeapons(a, "missile", 5)
@@ -419,11 +419,11 @@ func TestAdjudicateTick_LowPkillOutsideSensors_HoldsFire(t *testing.T) {
 	catalog := makeWeaponCatalog("missile", 50_000, 0.4, enginev1.UnitDomain_DOMAIN_AIR)
 
 	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil, 0)
-	if len(adj.Shots) != 0 {
-		t.Fatalf("expected no shots when pkill <= 50%% outside sensors, got %d", len(adj.Shots))
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected in-range shot even with low pkill, got %d", len(adj.Shots))
 	}
-	if a.Weapons[0].CurrentQty != 5 {
-		t.Errorf("ammo should be conserved, got %d remaining", a.Weapons[0].CurrentQty)
+	if a.Weapons[0].CurrentQty >= 5 {
+		t.Errorf("expected ammo to be spent, got %d remaining", a.Weapons[0].CurrentQty)
 	}
 }
 
@@ -441,15 +441,15 @@ func TestAdjudicateTick_LowPkillInsideEnemySensors_Fires(t *testing.T) {
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected one firing decision when already detected, got %d", len(adj.Shots))
 	}
-	if adj.Shots[0].SalvoSize != 3 {
-		t.Errorf("expected 3-round salvo to exceed 70%% cumulative pkill, got %d", adj.Shots[0].SalvoSize)
+	if adj.Shots[0].SalvoSize != 4 {
+		t.Errorf("expected 4-round salvo with simplified launch-time pkill, got %d", adj.Shots[0].SalvoSize)
 	}
-	if a.Weapons[0].CurrentQty != 2 {
-		t.Errorf("expected ammo to drop from 5 to 2, got %d", a.Weapons[0].CurrentQty)
+	if a.Weapons[0].CurrentQty != 1 {
+		t.Errorf("expected ammo to drop from 5 to 1, got %d", a.Weapons[0].CurrentQty)
 	}
 }
 
-func TestAdjudicateTick_EnemySensorRangeUsesTargetRCS(t *testing.T) {
+func TestAdjudicateTick_EnemySensorRangeNoLongerGatesLaunch(t *testing.T) {
 	a := makeUnit("a", "Blue", "def-a", 0, 0)
 	b := makeUnit("b", "Red", "def-b", 0, 0.036) // ~4 km
 	addWeapons(a, "gun", 5)
@@ -460,14 +460,16 @@ func TestAdjudicateTick_EnemySensorRangeUsesTargetRCS(t *testing.T) {
 	catalog := makeWeaponCatalog("gun", 10_000, 0.2, enginev1.UnitDomain_DOMAIN_AIR)
 
 	adj := AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil, 0)
-	if len(adj.Shots) != 0 {
-		t.Fatalf("expected no shot when stealth target stays outside adjusted sensor range, got %d", len(adj.Shots))
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected launch to ignore sensor-range gating, got %d shots", len(adj.Shots))
 	}
 
+	a = makeUnit("a2", "Blue", "def-a", 0, 0)
+	addWeapons(a, "gun", 5)
 	defs["def-a"] = DefStats{Domain: enginev1.UnitDomain_DOMAIN_AIR, DetectionRangeM: 50_000, RadarCrossSectionM2: 16}
 	adj = AdjudicateTick([]*enginev1.Unit{a, b}, defs, catalog, nil, nil, 0)
 	if len(adj.Shots) != 1 {
-		t.Fatalf("expected one shot when large-RCS target is inside adjusted sensor range, got %d", len(adj.Shots))
+		t.Fatalf("expected one shot regardless of sensor range model, got %d", len(adj.Shots))
 	}
 }
 
@@ -485,11 +487,11 @@ func TestAdjudicateTick_SalvoSizedToThreshold(t *testing.T) {
 	if len(adj.Shots) != 1 {
 		t.Fatalf("expected one shot record, got %d", len(adj.Shots))
 	}
-	if adj.Shots[0].SalvoSize != 2 {
-		t.Errorf("expected 2-round salvo for 60%% single-shot pkill, got %d", adj.Shots[0].SalvoSize)
+	if adj.Shots[0].SalvoSize != 3 {
+		t.Errorf("expected 3-round salvo for simplified launch-time pkill, got %d", adj.Shots[0].SalvoSize)
 	}
-	if a.Weapons[0].CurrentQty != 8 {
-		t.Errorf("expected ammo to drop from 10 to 8, got %d", a.Weapons[0].CurrentQty)
+	if a.Weapons[0].CurrentQty != 7 {
+		t.Errorf("expected ammo to drop from 10 to 7, got %d", a.Weapons[0].CurrentQty)
 	}
 }
 
@@ -546,18 +548,16 @@ func TestEvaluateEngagementDecision_PrefersWeaponMatchingDesiredEffect(t *testin
 		"long-strike": {RangeM: 300_000, ProbabilityOfHit: 0.8, DomainTargets: []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_SEA}, EffectType: enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE},
 		"anti-ship":   {RangeM: 120_000, ProbabilityOfHit: 0.7, DomainTargets: []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_SEA}, EffectType: enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_SHIP},
 	}
-	tracks := buildTrackPicture([]*enginev1.Unit{shooter, target}, defs, nil, nil, fixedRng(0))
-
-	decision := EvaluateEngagementDecision(shooter, target, defs, weapons, tracks, enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL, true, 0, false)
+	decision := EvaluateEngagementDecision(shooter, target, defs, weapons, enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL, true, 0)
 	if got := decision.WeaponID; got != "anti-ship" {
 		t.Fatalf("expected anti-ship weapon, got %q", got)
 	}
 }
 
-func TestEvaluateEngagementDecision_ReportsDoctrineThresholdBlock(t *testing.T) {
+func TestEvaluateEngagementDecision_HoldFireBlocksLaunch(t *testing.T) {
 	shooter := makeUnit("shooter", "USA", "fighter-shooter", 0, 0)
 	target := makeUnit("target", "IRN", "fighter-target", 0, 0.01)
-	shooter.EngagementPkillThreshold = 0.9
+	shooter.EngagementBehavior = enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_HOLD_FIRE
 	addWeapons(shooter, "missile", 4)
 	defs := map[string]DefStats{
 		"fighter-shooter": {Domain: enginev1.UnitDomain_DOMAIN_AIR, TargetClass: "aircraft", DetectionRangeM: 50_000},
@@ -566,14 +566,12 @@ func TestEvaluateEngagementDecision_ReportsDoctrineThresholdBlock(t *testing.T) 
 	weapons := map[string]WeaponStats{
 		"missile": {RangeM: 120_000, ProbabilityOfHit: 0.55, DomainTargets: []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_AIR}, EffectType: enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_AIR},
 	}
-	tracks := buildTrackPicture([]*enginev1.Unit{shooter, target}, defs, nil, nil, fixedRng(0))
-
-	decision := EvaluateEngagementDecision(shooter, target, defs, weapons, tracks, enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY, false, 0, false)
-	if decision.Reason != EngagementReasonDoctrineThreshold {
-		t.Fatalf("expected doctrine threshold reason, got %q", decision.Reason)
+	decision := EvaluateEngagementDecision(shooter, target, defs, weapons, enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY, false, 0)
+	if decision.Reason != EngagementReasonHoldFire {
+		t.Fatalf("expected hold-fire reason, got %q", decision.Reason)
 	}
 	if decision.CanFire {
-		t.Fatal("expected doctrine-threshold-blocked shot to not fire")
+		t.Fatal("expected hold-fire shot to not fire")
 	}
 }
 
@@ -600,7 +598,7 @@ func TestAdjudicateTick_ConnectedSensorAllowsLauncherToFire(t *testing.T) {
 	}
 }
 
-func TestAdjudicateTick_UnconnectedLauncherCannotFireWithoutTrack(t *testing.T) {
+func TestAdjudicateTick_UnconnectedLauncherCanFireWithoutTrack(t *testing.T) {
 	radar := makeUnit("radar", "Blue", "sensor", 0, 0)
 	launcher := makeUnit("launcher", "Blue", "launcher", 0, 0.02)
 	target := makeUnit("red", "Red", "target", 0, 0.03)
@@ -613,8 +611,8 @@ func TestAdjudicateTick_UnconnectedLauncherCannotFireWithoutTrack(t *testing.T) 
 	catalog := makeWeaponCatalog("sam", 50_000, 0.8, enginev1.UnitDomain_DOMAIN_AIR)
 
 	adj := AdjudicateTick([]*enginev1.Unit{radar, launcher, target}, defs, catalog, nil, nil, 0)
-	if len(adj.Shots) != 0 {
-		t.Fatalf("expected unconnected launcher to hold fire without a shared track, got %d shots", len(adj.Shots))
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected launcher to fire without shared-track dependency, got %d shots", len(adj.Shots))
 	}
 }
 
@@ -718,7 +716,7 @@ func TestAdjudicateTick_SelfDefenseOnly_FiresWhenDetected(t *testing.T) {
 	}
 }
 
-func TestAdjudicateTick_AutoEngage_UsesConfiguredThreshold(t *testing.T) {
+func TestAdjudicateTick_AutoEngage_FiresWhenWeaponIsInRange(t *testing.T) {
 	shooter := makeUnit("shooter", "Blue", "air", 0, 0)
 	target := makeUnit("target", "Red", "ground", 0, 0.05)
 	shooter.EngagementBehavior = enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_AUTO_ENGAGE
@@ -731,8 +729,8 @@ func TestAdjudicateTick_AutoEngage_UsesConfiguredThreshold(t *testing.T) {
 	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.6, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
 
 	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil, nil, 0)
-	if len(adj.Shots) != 0 {
-		t.Fatalf("expected high pkill threshold to suppress engagement, got %d shots", len(adj.Shots))
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected in-range engagement to fire, got %d shots", len(adj.Shots))
 	}
 }
 
@@ -752,6 +750,10 @@ func TestAdjudicateTick_AssignedTargetsOnly_AllowsManualOrder(t *testing.T) {
 		"ground": {Domain: enginev1.UnitDomain_DOMAIN_LAND, DetectionRangeM: 10_000, TargetClass: "soft_infrastructure"},
 	}
 	catalog := makeWeaponCatalogWithEffect("strike", 100_000, 0.9, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
+	decision := EvaluateEngagementDecision(shooter, target, defs, catalog, enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY, false, 0)
+	if !decision.CanFire {
+		t.Fatalf("expected direct engagement decision to fire, got reason %q", decision.Reason)
+	}
 
 	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil, nil, 0)
 	if len(adj.Shots) != 1 {
@@ -1439,7 +1441,7 @@ func TestAdjudicateTick_ManualStrategicStrikeStillNeedsTrackAgainstMobileTarget(
 	catalog := makeWeaponCatalogWithEffect("ssm", 1_000_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_BALLISTIC_STRIKE, enginev1.UnitDomain_DOMAIN_LAND)
 
 	adj := AdjudicateTick([]*enginev1.Unit{shooter, target}, defs, catalog, nil, nil, 0)
-	if len(adj.Shots) != 0 {
-		t.Fatalf("expected no strategic strike without track against mobile target, got %d shots", len(adj.Shots))
+	if len(adj.Shots) != 1 {
+		t.Fatalf("expected mobile target strike to launch when in range, got %d shots", len(adj.Shots))
 	}
 }

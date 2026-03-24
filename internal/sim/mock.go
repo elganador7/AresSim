@@ -90,9 +90,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 			detections := ApplyIntelSharing(baseDetections, rules)
 			detectionContacts := BuildDetectionContacts(baseDetections, rules)
 
-			adj := adjudicateTickWithTracks(units, defs, weapons, inFlight, basePicture, rules, simSeconds)
-			trackGroups := basePicture.GroupForUnit
-
+			adj := AdjudicateTick(units, defs, weapons, inFlight, rules, simSeconds)
 			// Emit a weapon-state delta for every unit that fired this tick
 			// so the frontend can update ammo counters in real time.
 			fired := make(map[string]bool)
@@ -127,9 +125,11 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 							WeaponID:       shot.WeaponID,
 							ShooterID:      shot.Shooter.Id,
 							ShooterTeam:    unitTeamID(shot.Shooter),
-							TrackGroupID:   trackGroups[shot.Shooter.Id],
 							TargetID:       shot.Target.Id,
 							HitProbability: shot.HitProbability,
+							LaunchLat:      shot.Shooter.GetPosition().GetLat(),
+							LaunchLon:      shot.Shooter.GetPosition().GetLon(),
+							MaxRangeM:      ws.RangeM,
 							CurLat:         shot.Shooter.GetPosition().GetLat(),
 							CurLon:         shot.Shooter.GetPosition().GetLon(),
 							CurAltMsl:      shot.Shooter.GetPosition().GetAltMsl(),
@@ -138,7 +138,6 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 							DestAltMsl:     shot.Target.GetPosition().GetAltMsl(),
 							SpeedMps:       ws.SpeedMps,
 							TargetDomains:  ws.DomainTargets,
-							Guidance:       ws.Guidance,
 						})
 					}
 				}
@@ -146,39 +145,14 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 
 			// ── Move in-flight munitions ───────────────────────────────────
 			var arrived []*InFlightMunition
-			inFlight, arrived = advanceMunitionsWithTracks(inFlight, timeScale, units, basePicture.ByGroup)
-
-			// ── Munition detection / interception (post-advance positions) ─
-			munitionDets := DetectMunitions(units, defs, inFlight)
-			inFlight, interceptShots := InterceptMunitionsTick(units, defs, weapons, inFlight, munitionDets, rng)
-			munitionDets = DetectMunitions(units, defs, inFlight)
-
-			for _, shot := range interceptShots {
-				states := make([]*enginev1.WeaponState, len(shot.Defender.Weapons))
-				for i, ws := range shot.Defender.Weapons {
-					states[i] = &enginev1.WeaponState{
-						WeaponId:   ws.WeaponId,
-						CurrentQty: ws.CurrentQty,
-						MaxQty:     ws.MaxQty,
-					}
-				}
-				emit("batch_update", &enginev1.BatchUnitUpdate{
-					Deltas: []*enginev1.UnitDelta{{
-						UnitId:  shot.Defender.Id,
-						Weapons: states,
-					}},
-				})
-			}
+			inFlight, arrived = AdvanceMunitions(inFlight, timeScale, units, defs)
 
 			// ── Resolve kills for munitions that arrived this tick ─────────
 			hits := ResolveArrivals(arrived, units, defs, weapons, rng)
 
 			// Emit per-side detection updates, merging unit and munition contacts.
-			activeSides := make(map[string]bool, len(detections)+len(munitionDets))
+			activeSides := make(map[string]bool, len(detections))
 			for side := range detections {
-				activeSides[side] = true
-			}
-			for side := range munitionDets {
 				activeSides[side] = true
 			}
 			for side := range activeSides {
@@ -194,7 +168,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 				emit("detection_update", &enginev1.DetectionUpdate{
 					DetectingTeam:       side,
 					DetectedUnitIds:     detections[side],
-					DetectedMunitionIds: munitionDets[side],
+					DetectedMunitionIds: nil,
 					UnitContacts:        protoContacts,
 				})
 			}
@@ -292,14 +266,7 @@ func processBehaviorTick(units []*enginev1.Unit, defs map[string]DefStats, weapo
 				})
 				continue
 			}
-			if tracks.unitHasTrack(u.Id, target.Id) {
-				order.LastKnownTargetPosition = clonePositionProto(target.GetPosition())
-				order.LastTrackUpdateSeconds = simSeconds
-			}
 			waypoint := computeAttackWaypoint(u, target, defs, weapons)
-			if waypoint == nil && order.GetLastKnownTargetPosition() != nil {
-				waypoint = computeAttackWaypointToPosition(u, order.GetLastKnownTargetPosition(), defs[target.DefinitionId].Domain, weapons)
-			}
 			if waypoint != nil {
 				if attackRouteNeedsUpdate(u, waypoint) {
 					order := &enginev1.MoveOrder{
@@ -352,19 +319,6 @@ func processBehaviorTick(units []*enginev1.Unit, defs map[string]DefStats, weapo
 	return deltas
 }
 
-func clonePositionProto(pos *enginev1.Position) *enginev1.Position {
-	if pos == nil {
-		return nil
-	}
-	return &enginev1.Position{
-		Lat:     pos.GetLat(),
-		Lon:     pos.GetLon(),
-		AltMsl:  pos.GetAltMsl(),
-		Heading: pos.GetHeading(),
-		Speed:   pos.GetSpeed(),
-	}
-}
-
 func ComputeAttackWaypointForOrder(shooter, target *enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats) *enginev1.Waypoint {
 	if shooter == nil || target == nil || shooter.GetPosition() == nil || target.GetPosition() == nil {
 		return nil
@@ -395,35 +349,6 @@ func ComputeAttackWaypointForOrder(shooter, target *enginev1.Unit, defs map[stri
 	brng := bearingRad(
 		shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(),
 		target.GetPosition().GetLat(), target.GetPosition().GetLon(),
-	)
-	lat, lon := movePoint(shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(), brng, moveDist)
-	return &enginev1.Waypoint{
-		Lat:    lat,
-		Lon:    lon,
-		AltMsl: shooter.GetPosition().GetAltMsl(),
-	}
-}
-
-func computeAttackWaypointToPosition(shooter *enginev1.Unit, targetPos *enginev1.Position, targetDomain enginev1.UnitDomain, weapons map[string]WeaponStats) *enginev1.Waypoint {
-	if shooter == nil || targetPos == nil || shooter.GetPosition() == nil {
-		return nil
-	}
-	_, weapon, hasWeapon := selectBestWeapon(shooter, targetDomain, weapons)
-	if !hasWeapon || weapon.RangeM <= 0 {
-		return nil
-	}
-	dist := haversineM(
-		shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(),
-		targetPos.GetLat(), targetPos.GetLon(),
-	)
-	desiredStandOff := weapon.RangeM * 0.85
-	if desiredStandOff <= 0 || dist <= desiredStandOff {
-		return nil
-	}
-	moveDist := dist - desiredStandOff
-	brng := bearingRad(
-		shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(),
-		targetPos.GetLat(), targetPos.GetLon(),
 	)
 	lat, lon := movePoint(shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(), brng, moveDist)
 	return &enginev1.Waypoint{

@@ -277,7 +277,7 @@ func (a *App) planMajorActorStrikes(simSeconds float64) []*enginev1.UnitDelta {
 		return nil
 	}
 	defs := a.getCachedDefs()
-	weapons := a.buildWeaponCatalog()
+	weapons := a.getCachedWeaponCatalog()
 	assignedTargets := buildAssignedTargets(a.currentScenario.GetUnits())
 	targets := make([]*enginev1.Unit, 0, len(a.currentScenario.GetUnits()))
 	for _, candidate := range a.currentScenario.GetUnits() {

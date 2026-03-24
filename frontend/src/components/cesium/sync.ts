@@ -79,7 +79,7 @@ export function setupCesiumStoreSync({
     const routeSegmentPrefix = `${unit.id}_route_seg_`;
     const strikeSegmentPrefix = `${unit.id}_strike_seg_`;
     const targetMarkerId = `${unit.id}_target_marker`;
-    const lastKnownMarkerId = `${unit.id}_last_known_marker`;
+    const assignedTargetMarkerId = `${unit.id}_assigned_target_marker`;
 
     if (!unit.status.isActive) {
       viewer.entities.removeById(unit.id);
@@ -88,7 +88,7 @@ export function setupCesiumStoreSync({
       viewer.entities.removeById(rangeId);
       viewer.entities.removeById(sensorId);
       viewer.entities.removeById(targetMarkerId);
-      viewer.entities.removeById(lastKnownMarkerId);
+      viewer.entities.removeById(assignedTargetMarkerId);
       Array.from(viewer.entities.values)
         .map((entity) => entity.id as string)
         .filter((id) => id.startsWith(waypointPrefix))
@@ -268,7 +268,7 @@ export function setupCesiumStoreSync({
       .filter((id) => id.startsWith(strikeSegmentPrefix))
       .forEach((id) => viewer.entities.removeById(id));
     viewer.entities.removeById(targetMarkerId);
-    viewer.entities.removeById(lastKnownMarkerId);
+    viewer.entities.removeById(assignedTargetMarkerId);
 
     if (isSelected && visible && !track && unit.attackOrder?.targetUnitId) {
       const selectedStrikePreview = useSimStore.getState().selectedStrikePreview;
@@ -276,8 +276,8 @@ export function setupCesiumStoreSync({
       const visibleTarget = target && isVisible(target, view, detections, defInfoRef.current) ? target : null;
       const sharedContact = activeViewContact(view, unit.attackOrder.targetUnitId);
       const targetLabel = sharedContact?.shared
-        ? `Shared Track · ${sharedContact.sourceTeam}`
-        : (visibleTarget ? "Tracked Target" : "Last Known Target");
+        ? `Assigned Target · shared by ${sharedContact.sourceTeam}`
+        : (visibleTarget ? "Assigned Target" : "Assigned Target Area");
       if (visibleTarget) {
         const pathPoints = [
           { lat: unit.position.lat, lon: unit.position.lon },
@@ -317,55 +317,6 @@ export function setupCesiumStoreSync({
           },
           label: {
             text: targetLabel,
-            fillColor: Color.WHITE,
-            outlineColor: Color.BLACK,
-            outlineWidth: 2,
-            style: LabelStyle.FILL_AND_OUTLINE,
-            font: "12px sans-serif",
-            pixelOffset: new Cartesian2(0, -18),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-          },
-        }));
-      } else if (unit.attackOrder.lastKnownTargetPosition) {
-        const lastKnown = unit.attackOrder.lastKnownTargetPosition;
-        const pathPoints = [
-          { lat: unit.position.lat, lon: unit.position.lon },
-          ...(unit.moveOrder?.waypoints ?? []).map((wp) => ({ lat: wp.lat, lon: wp.lon })),
-          { lat: lastKnown.lat, lon: lastKnown.lon },
-        ];
-        for (let idx = 0; idx < pathPoints.length - 1; idx += 1) {
-          const start = pathPoints[idx];
-          const end = pathPoints[idx + 1];
-          const blocked = isSelected && selectedStrikePreview?.blocked && selectedStrikePreview.legIndex === idx + 1;
-          viewer.entities.add(new Entity({
-            id: `${strikeSegmentPrefix}${idx}`,
-            show: true,
-            polyline: {
-              positions: new ConstantProperty([
-                Cartesian3.fromDegrees(start.lon, start.lat),
-                Cartesian3.fromDegrees(end.lon, end.lat),
-              ]),
-              width: blocked ? 3 : 2,
-              material: blocked
-                ? new PolylineDashMaterialProperty({ color: BLOCKED_ROUTE_COLOR.withAlpha(0.78), dashLength: 10 })
-                : new PolylineDashMaterialProperty({ color: STRIKE_PATH_COLOR.withAlpha(0.45), dashLength: 12 }),
-              clampToGround: false,
-            },
-          }));
-        }
-        viewer.entities.add(new Entity({
-          id: lastKnownMarkerId,
-          show: true,
-          position: Cartesian3.fromDegrees(lastKnown.lon, lastKnown.lat, lastKnown.altMsl),
-          point: {
-            pixelSize: 12,
-            color: Color.fromCssColorString("#facc15").withAlpha(0.95),
-            outlineColor: Color.WHITE,
-            outlineWidth: 2,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-          },
-          label: {
-            text: "Searching Last Known",
             fillColor: Color.WHITE,
             outlineColor: Color.BLACK,
             outlineWidth: 2,
@@ -455,7 +406,7 @@ export function setupCesiumStoreSync({
         !id.endsWith("_range") &&
         !id.endsWith("_sensor") &&
         !id.endsWith("_target_marker") &&
-        !id.endsWith("_last_known_marker") &&
+        !id.endsWith("_assigned_target_marker") &&
         !id.includes("_wp_") &&
         !id.includes("_route_seg_") &&
         !id.includes("_strike_seg_") &&

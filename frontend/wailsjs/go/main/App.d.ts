@@ -48,6 +48,8 @@ export function PreviewEngagementOptionsForLoadout(arg1:string,arg2:string):Prom
 
 export function PreviewTargetEngagementOptions(arg1:string,arg2:string):Promise<Array<main.TargetEngagementOptionPreview>>;
 
+export function PreviewTargetEngagementSummary(arg1:string,arg2:string):Promise<main.TargetEngagementDebugSummary>;
+
 export function RemoveMoveWaypoint(arg1:string,arg2:number):Promise<main.BridgeResult>;
 
 export function RequestSync():Promise<main.BridgeResult>;

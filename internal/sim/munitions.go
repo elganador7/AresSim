@@ -16,15 +16,17 @@ import (
 // roll can be made on arrival.
 //
 // Guidance determines whether the munition updates its destination each tick
-// (tracking) or flies to the fixed point set at launch.
+// or flies to the target's current position each tick.
 type InFlightMunition struct {
 	ID             string
 	WeaponID       string
 	ShooterID      string
 	ShooterTeam    string // firing team / country code
-	TrackGroupID   string // shared sensor / fire-control group that can maintain radar track
 	TargetID       string // unit ID of the intended target
 	HitProbability float64
+	LaunchLat      float64
+	LaunchLon      float64
+	MaxRangeM      float64
 	CurLat         float64
 	CurLon         float64
 	CurAltMsl      float64
@@ -33,7 +35,6 @@ type InFlightMunition struct {
 	DestAltMsl     float64
 	SpeedMps       float64 // metres per sim-second
 	TargetDomains  []enginev1.UnitDomain
-	Guidance       enginev1.GuidanceType
 }
 
 type InterceptShot struct {
@@ -51,11 +52,9 @@ func NextMunitionID() string {
 
 // AdvanceMunitions moves each munition one tick toward its destination.
 //
-// For tracking guidance types (IR, wire, sonar), the destination is updated
-// each tick to the target's current position. For radar-guided munitions, the
-// destination is only updated while the shooter's connected fire-control group
-// still detects the target. GPS, laser, unguided, and unspecified
-// munitions fly to a fixed point set at launch time.
+// All munitions directly chase the target's current position while it remains
+// within the weapon's maximum range from the launch point. This intentionally
+// avoids simulating seeker-management complexity.
 //
 // Munitions that have arrived (distance ≤ this tick's travel) are removed and
 // returned as the second value.
@@ -65,28 +64,28 @@ func AdvanceMunitions(
 	units []*enginev1.Unit,
 	defs map[string]DefStats,
 ) (remaining, arrived []*InFlightMunition) {
-	tracks := buildTrackPicture(units, defs, nil, nil, fixedRng(0))
-	return advanceMunitionsWithTracks(munitions, timeScale, units, tracks.ByGroup)
-}
-
-func advanceMunitionsWithTracks(
-	munitions []*InFlightMunition,
-	timeScale float64,
-	units []*enginev1.Unit,
-	groupTracks detectionIndex,
-) (remaining, arrived []*InFlightMunition) {
 	if len(munitions) == 0 {
 		return
 	}
 
-	// Build O(1) lookup helpers only when there are tracking munitions.
 	unitByID := make(map[string]*enginev1.Unit, len(units))
 	for _, u := range units {
 		unitByID[u.Id] = u
 	}
 
 	for _, m := range munitions {
-		updateMunitionDestination(m, unitByID, groupTracks)
+		if target := unitByID[m.TargetID]; target != nil && unitIsAlive(target) {
+			targetPos := target.GetPosition()
+			m.DestLat = targetPos.GetLat()
+			m.DestLon = targetPos.GetLon()
+			m.DestAltMsl = targetPos.GetAltMsl()
+			if m.MaxRangeM > 0 {
+				targetFromLaunch := haversineM(m.LaunchLat, m.LaunchLon, targetPos.GetLat(), targetPos.GetLon())
+				if targetFromLaunch > m.MaxRangeM {
+					continue
+				}
+			}
+		}
 
 		dist := haversineM(m.CurLat, m.CurLon, m.DestLat, m.DestLon)
 		canMove := m.SpeedMps * timeScale
@@ -106,52 +105,11 @@ func advanceMunitionsWithTracks(
 	return
 }
 
-// updateMunitionDestination updates the destination of a tracking munition.
-//
-//   - RADAR: tracks while the shooter's connected fire-control group maintains
-//     detection of the target.
-//     If lock is lost the munition continues to the last known position.
-//   - IR, WIRE, SONAR: always update to the current target position (fire-and-forget
-//     or self-guided seekers cannot be jammed by radar-off manoeuvres).
-//   - GPS, LASER, UNGUIDED, UNSPECIFIED: fixed-point — no update.
-func updateMunitionDestination(
-	m *InFlightMunition,
-	unitByID map[string]*enginev1.Unit,
-	groupTracks detectionIndex,
-) {
-	switch m.Guidance {
-	case enginev1.GuidanceType_GUIDANCE_IR,
-		enginev1.GuidanceType_GUIDANCE_WIRE,
-		enginev1.GuidanceType_GUIDANCE_SONAR:
-		// Always track — update to target's current position.
-		if t := unitByID[m.TargetID]; t != nil && unitIsAlive(t) {
-			m.DestLat = t.GetPosition().GetLat()
-			m.DestLon = t.GetPosition().GetLon()
-			m.DestAltMsl = t.GetPosition().GetAltMsl()
-		}
-
-	case enginev1.GuidanceType_GUIDANCE_RADAR:
-		// Track only while the firing unit's connected sensor / launcher group
-		// still has a detection on the target.
-		if groupTracks[m.TrackGroupID][m.TargetID] {
-			if t := unitByID[m.TargetID]; t != nil && unitIsAlive(t) {
-				m.DestLat = t.GetPosition().GetLat()
-				m.DestLon = t.GetPosition().GetLon()
-				m.DestAltMsl = t.GetPosition().GetAltMsl()
-			}
-		}
-		// Lock lost → fly to last known position (no update).
-
-	default:
-		// UNSPECIFIED, UNGUIDED, GPS, LASER — fixed point, nothing to update.
-	}
-}
-
 // DetectMunitions determines which in-flight munitions each team can currently
 // detect. A platform can detect a munition when:
 //  1. The platform's domain is one of the munition's target domains (sensors
 //     appropriate for that type of threat), and
-//  2. The munition is within the platform's detection range.
+//  2. The munition is within the platform's defensive engagement range.
 //
 // Returns a map of team → deduplicated slice of detected munition IDs.
 func DetectMunitions(units []*enginev1.Unit, defs map[string]DefStats, munitions []*InFlightMunition) map[string][]string {
