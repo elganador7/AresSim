@@ -298,7 +298,7 @@ func processBehaviorTick(units []*enginev1.Unit, defs map[string]DefStats, weapo
 			waypoint = &enginev1.Waypoint{
 				Lat:    target.GetPosition().GetLat(),
 				Lon:    target.GetPosition().GetLon(),
-				AltMsl: target.GetPosition().GetAltMsl(),
+				AltMsl: TravelAltitudeM(u, defs[u.DefinitionId]),
 			}
 		case enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_WITHDRAW_ON_DETECT:
 			waypoint = computeWithdrawWaypoint(u, target, defs[u.DefinitionId])
@@ -351,10 +351,11 @@ func ComputeAttackWaypointForOrder(shooter, target *enginev1.Unit, defs map[stri
 		target.GetPosition().GetLat(), target.GetPosition().GetLon(),
 	)
 	lat, lon := movePoint(shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(), brng, moveDist)
+	shooterDef := defs[normalizeDefinitionID(shooter.DefinitionId)]
 	return &enginev1.Waypoint{
 		Lat:    lat,
 		Lon:    lon,
-		AltMsl: shooter.GetPosition().GetAltMsl(),
+		AltMsl: TravelAltitudeM(shooter, shooterDef),
 	}
 }
 
@@ -482,7 +483,8 @@ func processTick(units []*enginev1.Unit, defs map[string]DefStats, timeScale flo
 		pos := u.GetPosition()
 		wp := order.Waypoints[0]
 
-		cruiseSpeed := defs[u.DefinitionId].CruiseSpeedMps
+		def := defs[u.DefinitionId]
+		cruiseSpeed := def.CruiseSpeedMps
 		if cruiseSpeed <= 0 {
 			cruiseSpeed = 10 // m/s fallback
 		}
@@ -532,7 +534,7 @@ func processTick(units []*enginev1.Unit, defs map[string]DefStats, timeScale flo
 		u.Position = &enginev1.Position{
 			Lat:     newLat,
 			Lon:     newLon,
-			AltMsl:  pos.AltMsl,
+			AltMsl:  TravelAltitudeM(u, def),
 			Heading: newHeading,
 			Speed:   newSpeed,
 		}
@@ -609,7 +611,7 @@ func computeWithdrawWaypoint(unit, threat *enginev1.Unit, def DefStats) *enginev
 	return &enginev1.Waypoint{
 		Lat:    lat,
 		Lon:    lon,
-		AltMsl: unit.GetPosition().GetAltMsl(),
+		AltMsl: TravelAltitudeM(unit, def),
 	}
 }
 

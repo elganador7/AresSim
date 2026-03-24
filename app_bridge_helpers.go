@@ -142,12 +142,13 @@ func unitRecord(u *enginev1.Unit) map[string]any {
 		"full_name":        u.GetFullName(),
 		"team_id":          strings.TrimSpace(u.GetTeamId()),
 		"coalition_id":     strings.TrimSpace(u.GetCoalitionId()),
+		"operator_team_id": strings.TrimSpace(u.GetOperatorTeamId()),
 		"nato_symbol_sidc": u.GetNatoSymbolSidc(),
 		"definition_id":    strings.TrimSpace(u.GetDefinitionId()),
 		"posture":          int32(u.GetPosture()),
-		"position": map[string]any{
-			"type":        "Point",
-			"coordinates": []float64{pos.GetLon(), pos.GetLat()},
+		"position": models.GeometryPoint{
+			Longitude: pos.GetLon(),
+			Latitude:  pos.GetLat(),
 		},
 		"alt_msl":                    pos.GetAltMsl(),
 		"heading":                    pos.GetHeading(),

@@ -160,51 +160,7 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 
 	a.currentScenario = scen
 	a.setHumanControlledTeam("")
-	a.defsCacheMu.Lock()
-	a.defsCache = a.buildDefs()
-	a.weaponCatalogCache = a.buildWeaponCatalog()
-	a.defsCacheMu.Unlock()
-	defs := a.getCachedDefs()
-	for _, u := range scen.Units {
-		ensureUnitOpsState(u, defs[u.DefinitionId])
-	}
-
-	generalTypeByDefID := map[string]int32{}
-	if a.unitDefRepo != nil {
-		unitDefs, _ := a.unitDefRepo.List(a.ctx)
-		generalTypeByDefID = make(map[string]int32, len(unitDefs))
-		for _, row := range unitDefs {
-			id := extractRecordID(row["id"])
-			if gt, ok := row["general_type"]; ok {
-				generalTypeByDefID[id] = int32(toFloat64(gt))
-			}
-		}
-	}
-
-	for _, u := range scen.Units {
-		if len(u.Weapons) != 0 {
-			continue
-		}
-		defID := extractRecordID(u.DefinitionId)
-		if def, ok := a.libDefsCache[defID]; ok {
-			loadoutID, slots := selectWeaponConfiguration(def, u.GetLoadoutConfigurationId())
-			if len(slots) > 0 {
-				u.LoadoutConfigurationId = loadoutID
-				u.Weapons = loadoutToWeaponStates(slots)
-				slog.Info("weapon loadout from library", "unit", u.DisplayName, "def", defID, "config", loadoutID, "weapons", len(u.Weapons))
-				continue
-			}
-		}
-		if def, ok := a.libDefsCache[defID]; ok && len(def.DefaultLoadout) > 0 {
-			u.LoadoutConfigurationId = "default"
-			u.Weapons = loadoutToWeaponStates(def.DefaultLoadout)
-			slog.Info("weapon loadout from legacy default", "unit", u.DisplayName, "def", defID, "weapons", len(u.Weapons))
-			continue
-		}
-		gt := generalTypeByDefID[defID]
-		u.Weapons = scenario.InitUnitWeapons(u, gt)
-		slog.Info("weapon loadout from defaults", "unit", u.DisplayName, "def", defID, "general_type", gt, "weapons", len(u.Weapons))
-	}
+	defs := a.prepareScenarioForSimulation(scen)
 	if a.unitRepo != nil {
 		if err := a.unitRepo.DeleteAll(a.ctx); err != nil {
 			slog.Warn("clear unit table", "err", err)
@@ -259,6 +215,52 @@ func (a *App) loadScenario(scen *enginev1.Scenario) {
 		a.makeEmitFn(),
 	)
 	slog.Info("scenario loaded", "name", scen.Name, "units", len(scen.Units))
+}
+
+func (a *App) prepareScenarioForSimulation(scen *enginev1.Scenario) map[string]sim.DefStats {
+	a.defsCacheMu.Lock()
+	a.defsCache = a.buildDefs()
+	a.weaponCatalogCache = a.buildWeaponCatalog()
+	a.defsCacheMu.Unlock()
+	defs := a.getCachedDefs()
+	for _, u := range scen.Units {
+		ensureUnitOpsState(u, defs[u.DefinitionId])
+	}
+
+	generalTypeByDefID := map[string]int32{}
+	if a.unitDefRepo != nil {
+		unitDefs, _ := a.unitDefRepo.List(a.ctx)
+		generalTypeByDefID = make(map[string]int32, len(unitDefs))
+		for _, row := range unitDefs {
+			id := extractRecordID(row["id"])
+			if gt, ok := row["general_type"]; ok {
+				generalTypeByDefID[id] = int32(toFloat64(gt))
+			}
+		}
+	}
+
+	for _, u := range scen.Units {
+		if len(u.Weapons) != 0 {
+			continue
+		}
+		defID := extractRecordID(u.DefinitionId)
+		if def, ok := a.libDefsCache[defID]; ok {
+			loadoutID, slots := selectWeaponConfiguration(def, u.GetLoadoutConfigurationId())
+			if len(slots) > 0 {
+				u.LoadoutConfigurationId = loadoutID
+				u.Weapons = loadoutToWeaponStates(slots)
+				continue
+			}
+		}
+		if def, ok := a.libDefsCache[defID]; ok && len(def.DefaultLoadout) > 0 {
+			u.LoadoutConfigurationId = "default"
+			u.Weapons = loadoutToWeaponStates(def.DefaultLoadout)
+			continue
+		}
+		gt := generalTypeByDefID[defID]
+		u.Weapons = scenario.InitUnitWeapons(u, gt)
+	}
+	return defs
 }
 
 func ensureUnitOpsState(u *enginev1.Unit, def sim.DefStats) {
@@ -384,6 +386,8 @@ func (a *App) validateAndConsumeLaunch(u *enginev1.Unit, def sim.DefStats) error
 		return fmt.Errorf("%s launch window unavailable until T+%.0fs", base.GetDisplayName(), base.GetBaseOps().GetNextLaunchAvailableSeconds())
 	}
 	syncUnitPositionToHostBase(u, base)
+	u.Position.AltMsl = sim.DefaultAirborneAltitudeM(def)
+	u.Position.Speed = 0
 	spacingSeconds := 0.0
 	if baseDef.LaunchCapacityPerInterval > 0 {
 		spacingSeconds = 900.0 / float64(baseDef.LaunchCapacityPerInterval)
@@ -416,6 +420,10 @@ func syncUnitPositionToHostBase(u, base *enginev1.Unit) {
 	u.Position.Lat = base.GetPosition().GetLat()
 	u.Position.Lon = base.GetPosition().GetLon()
 	u.Position.AltMsl = base.GetPosition().GetAltMsl()
+}
+
+func unitTravelAltitudeM(u *enginev1.Unit, def sim.DefStats) float64 {
+	return sim.TravelAltitudeM(u, def)
 }
 
 func selectWeaponConfiguration(def library.Definition, preferredID string) (string, []library.LoadoutSlot) {
@@ -521,14 +529,16 @@ func (a *App) MoveUnit(unitID string, lat, lon float64) BridgeResult {
 			slog.Warn("MoveUnit: target coordinates out of range", "id", unitID, "lat", lat, "lon", lon)
 			return failMsg("target coordinates out of range")
 		}
-		if err := a.validateTransit(unitCountryCode(u), defs[u.DefinitionId].Domain, oldPos.GetLat(), oldPos.GetLon(), lat, lon); err != nil {
+		def := defs[u.DefinitionId]
+		if err := a.validateTransit(unitCountryCode(u), def.Domain, oldPos.GetLat(), oldPos.GetLon(), lat, lon); err != nil {
 			return failMsg(err.Error())
 		}
-		if err := a.validateAndConsumeLaunch(u, defs[u.DefinitionId]); err != nil {
+		if err := a.validateAndConsumeLaunch(u, def); err != nil {
 			return failMsg(err.Error())
 		}
+		travelAlt := unitTravelAltitudeM(u, def)
 
-		cruiseSpeed := defs[u.DefinitionId].CruiseSpeedMps
+		cruiseSpeed := def.CruiseSpeedMps
 		if cruiseSpeed <= 0 {
 			cruiseSpeed = 10
 		}
@@ -536,14 +546,14 @@ func (a *App) MoveUnit(unitID string, lat, lon float64) BridgeResult {
 		newPos := &enginev1.Position{
 			Lat:     oldPos.GetLat(),
 			Lon:     oldPos.GetLon(),
-			AltMsl:  oldPos.GetAltMsl(),
+			AltMsl:  travelAlt,
 			Heading: heading,
 			Speed:   cruiseSpeed,
 		}
 		newOrder := &enginev1.MoveOrder{
 			AutoGenerated: false,
 			Waypoints: []*enginev1.Waypoint{{
-				Lat: lat, Lon: lon, AltMsl: oldPos.GetAltMsl(),
+				Lat: lat, Lon: lon, AltMsl: travelAlt,
 			}},
 		}
 		u.Position = newPos
@@ -616,11 +626,13 @@ func (a *App) AppendMoveWaypoint(unitID string, lat, lon float64) BridgeResult {
 			startLat, startLon = last.GetLat(), last.GetLon()
 		}
 		hadWaypoints := u.GetMoveOrder() != nil && len(u.GetMoveOrder().GetWaypoints()) > 0
-		routePoints := []geo.Point{{Lat: lat, Lon: lon, AltMsl: pos.GetAltMsl()}}
-		if isMaritimeDomain(defs[u.DefinitionId].Domain) {
+		def := defs[u.DefinitionId]
+		travelAlt := unitTravelAltitudeM(u, def)
+		routePoints := []geo.Point{{Lat: lat, Lon: lon, AltMsl: travelAlt}}
+		if isMaritimeDomain(def.Domain) {
 			rerouted, ok := geo.BuildMaritimeRoute(
-				geo.Point{Lat: startLat, Lon: startLon, AltMsl: pos.GetAltMsl()},
-				geo.Point{Lat: lat, Lon: lon, AltMsl: pos.GetAltMsl()},
+				geo.Point{Lat: startLat, Lon: startLon, AltMsl: travelAlt},
+				geo.Point{Lat: lat, Lon: lon, AltMsl: travelAlt},
 			)
 			if !ok {
 				return failMsg(fmt.Sprintf("%s naval units cannot route onto land", unitCountryCode(u)))
@@ -633,14 +645,15 @@ func (a *App) AppendMoveWaypoint(unitID string, lat, lon float64) BridgeResult {
 				legStartLat = routePoints[idx-1].Lat
 				legStartLon = routePoints[idx-1].Lon
 			}
-			if err := a.validateTransit(unitCountryCode(u), defs[u.DefinitionId].Domain, legStartLat, legStartLon, routePoint.Lat, routePoint.Lon); err != nil {
+			if err := a.validateTransit(unitCountryCode(u), def.Domain, legStartLat, legStartLon, routePoint.Lat, routePoint.Lon); err != nil {
 				return failMsg(err.Error())
 			}
 		}
-		if (u.GetMoveOrder() == nil || len(u.GetMoveOrder().GetWaypoints()) == 0) && shouldInitiateLaunch(u, defs[u.DefinitionId]) {
-			if err := a.validateAndConsumeLaunch(u, defs[u.DefinitionId]); err != nil {
+		if (u.GetMoveOrder() == nil || len(u.GetMoveOrder().GetWaypoints()) == 0) && shouldInitiateLaunch(u, def) {
+			if err := a.validateAndConsumeLaunch(u, def); err != nil {
 				return failMsg(err.Error())
 			}
+			travelAlt = unitTravelAltitudeM(u, def)
 		}
 		var newOrder *enginev1.MoveOrder
 		if current := u.GetMoveOrder(); current != nil {
@@ -651,7 +664,7 @@ func (a *App) AppendMoveWaypoint(unitID string, lat, lon float64) BridgeResult {
 		newOrder.AutoGenerated = false
 		for _, routePoint := range routePoints {
 			newOrder.Waypoints = append(newOrder.Waypoints, &enginev1.Waypoint{
-				Lat: routePoint.Lat, Lon: routePoint.Lon, AltMsl: pos.GetAltMsl(),
+				Lat: routePoint.Lat, Lon: routePoint.Lon, AltMsl: travelAlt,
 			})
 		}
 		u.MoveOrder = newOrder
@@ -659,7 +672,7 @@ func (a *App) AppendMoveWaypoint(unitID string, lat, lon float64) BridgeResult {
 		newPos := u.GetPosition()
 		if !hadWaypoints && len(newOrder.Waypoints) > 0 {
 			first := newOrder.Waypoints[0]
-			cruiseSpeed := defs[u.DefinitionId].CruiseSpeedMps
+			cruiseSpeed := def.CruiseSpeedMps
 			if cruiseSpeed <= 0 {
 				cruiseSpeed = 10
 			}
@@ -667,7 +680,7 @@ func (a *App) AppendMoveWaypoint(unitID string, lat, lon float64) BridgeResult {
 			newPos = &enginev1.Position{
 				Lat:     pos.GetLat(),
 				Lon:     pos.GetLon(),
-				AltMsl:  pos.GetAltMsl(),
+				AltMsl:  travelAlt,
 				Heading: heading,
 				Speed:   cruiseSpeed,
 			}
@@ -865,8 +878,9 @@ func (a *App) SetUnitAttackOrder(unitID string, orderType int32, targetUnitID st
 		if err := a.validateStrikeWithWeapon(shooter, target, weaponID); err != nil {
 			return failMsg(err.Error())
 		}
+		shooterDef := defs[extractRecordID(u.DefinitionId)]
 		if current := u.GetMoveOrder(); current == nil || len(current.GetWaypoints()) == 0 {
-			if err := a.validateAndConsumeLaunch(u, defs[extractRecordID(u.DefinitionId)]); err != nil {
+			if err := a.validateAndConsumeLaunch(u, shooterDef); err != nil {
 				return failMsg(err.Error())
 			}
 		}
@@ -879,7 +893,7 @@ func (a *App) SetUnitAttackOrder(unitID string, orderType int32, targetUnitID st
 		if current := u.GetMoveOrder(); current == nil || len(current.GetWaypoints()) == 0 || current.GetAutoGenerated() {
 			if waypoint := sim.ComputeAttackWaypointForOrder(u, target, a.getCachedDefs(), a.getCachedWeaponCatalog()); waypoint != nil {
 				waypoints := []*enginev1.Waypoint{waypoint}
-				if isMaritimeDomain(defs[extractRecordID(u.DefinitionId)].Domain) {
+				if isMaritimeDomain(shooterDef.Domain) {
 					rerouted, ok := geo.BuildMaritimeRoute(
 						geo.Point{Lat: u.GetPosition().GetLat(), Lon: u.GetPosition().GetLon(), AltMsl: u.GetPosition().GetAltMsl()},
 						geo.Point{Lat: waypoint.GetLat(), Lon: waypoint.GetLon(), AltMsl: waypoint.GetAltMsl()},
@@ -1074,6 +1088,7 @@ func defStatsFromLibraryDefinition(def library.Definition) sim.DefStats {
 	return sim.DefStats{
 		CruiseSpeedMps:              float64(def.CruiseSpeedMps),
 		BaseStrength:                float64(def.BaseStrength),
+		Accuracy:                    float64(def.Accuracy),
 		DetectionRangeM:             float64(def.DetectionRangeM),
 		RadarCrossSectionM2:         rcs,
 		SensorSuite:                 sensorSuiteFromRecord(def.ToRecord()["sensor_suite"]),
@@ -1182,6 +1197,7 @@ func mergeDefStatsWithRow(base sim.DefStats, row map[string]any) sim.DefStats {
 	return sim.DefStats{
 		CruiseSpeedMps:              cruiseSpeed,
 		BaseStrength:                baseStrength,
+		Accuracy:                    defaultIfZero(toFloat64(row["accuracy"]), base.Accuracy),
 		DetectionRangeM:             detectionRange,
 		RadarCrossSectionM2:         rcs,
 		SensorSuite:                 sensorSuite,

@@ -9,6 +9,7 @@ import (
 	"github.com/aressim/internal/library"
 	scenario "github.com/aressim/internal/scenario"
 	"github.com/aressim/internal/sim"
+	"github.com/surrealdb/surrealdb.go/pkg/models"
 )
 
 func TestEnsureUnitOpsStateInitializesAirbaseOps(t *testing.T) {
@@ -170,6 +171,9 @@ func TestValidateAndConsumeLaunchSnapsAircraftToHostBase(t *testing.T) {
 	}
 	if got := app.currentScenario.Units[1].GetPosition().GetLon(); got != 36.9 {
 		t.Fatalf("expected aircraft lon to snap to host base, got %v", got)
+	}
+	if got := app.currentScenario.Units[1].GetPosition().GetAltMsl(); got <= 0 {
+		t.Fatalf("expected launched aircraft to climb above ground level, got %v", got)
 	}
 }
 
@@ -368,6 +372,106 @@ func TestSetUnitAttackOrder_AllowsUndetectedFixedStrategicTarget(t *testing.T) {
 	order := app.currentScenario.GetUnits()[0].GetAttackOrder()
 	if order == nil || order.GetTargetUnitId() != "airbase-1" {
 		t.Fatalf("expected airbase attack order, got %+v", order)
+	}
+}
+
+func TestValidateStrikeWithWeapon_AllowsDefensiveAirInterceptWithoutStrikePermission(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{
+			{
+				FromCountry:                 "USA",
+				ToCountry:                   "JOR",
+				AirspaceTransitAllowed:      true,
+				AirspaceStrikeAllowed:       false,
+				DefensivePositioningAllowed: true,
+			},
+		},
+		Units: []*enginev1.Unit{
+			{
+				Id:           "usa-fighter",
+				DisplayName:  "USA Fighter",
+				DefinitionId: "fighter",
+				TeamId:       "USA",
+				Position:     &enginev1.Position{Lat: 31.8, Lon: 36.0, AltMsl: 9_000},
+				Weapons:      []*enginev1.WeaponState{{WeaponId: "aam-aim120c", CurrentQty: 2, MaxQty: 2}},
+			},
+			{
+				Id:           "irn-fighter",
+				DisplayName:  "Iran Fighter",
+				DefinitionId: "fighter",
+				TeamId:       "IRN",
+				Position:     &enginev1.Position{Lat: 31.9, Lon: 36.4, AltMsl: 9_000},
+			},
+		},
+	}
+	app.defsCache = map[string]sim.DefStats{
+		"fighter": {Domain: enginev1.UnitDomain_DOMAIN_AIR, TargetClass: "aircraft"},
+	}
+	app.weaponCatalogCache = map[string]sim.WeaponStats{
+		"aam-aim120c": {
+			RangeM:           100_000,
+			ProbabilityOfHit: 0.7,
+			DomainTargets:    []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_AIR},
+			EffectType:       enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_AIR,
+		},
+	}
+
+	err := app.validateStrikeWithWeapon(app.currentScenario.Units[0], app.currentScenario.Units[1], "aam-aim120c")
+	if err != nil {
+		t.Fatalf("expected defensive intercept to be allowed, got %v", err)
+	}
+}
+
+func TestValidateStrikeWithWeapon_BlocksOffensiveStrikeWithoutStrikePermission(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{
+			{
+				FromCountry:                 "USA",
+				ToCountry:                   "JOR",
+				AirspaceTransitAllowed:      true,
+				AirspaceStrikeAllowed:       false,
+				DefensivePositioningAllowed: true,
+			},
+		},
+		Units: []*enginev1.Unit{
+			{
+				Id:           "usa-striker",
+				DisplayName:  "USA Striker",
+				DefinitionId: "fighter",
+				TeamId:       "USA",
+				Position:     &enginev1.Position{Lat: 31.8, Lon: 36.0, AltMsl: 9_000},
+				Weapons:      []*enginev1.WeaponState{{WeaponId: "agm-158-jassm-er", CurrentQty: 2, MaxQty: 2}},
+			},
+			{
+				Id:           "irn-airbase",
+				DisplayName:  "Iran Airbase",
+				DefinitionId: "airbase",
+				TeamId:       "IRN",
+				Position:     &enginev1.Position{Lat: 31.9, Lon: 36.4, AltMsl: 0},
+			},
+		},
+	}
+	app.defsCache = map[string]sim.DefStats{
+		"fighter": {Domain: enginev1.UnitDomain_DOMAIN_AIR, TargetClass: "aircraft"},
+		"airbase": {Domain: enginev1.UnitDomain_DOMAIN_LAND, AssetClass: "airbase", TargetClass: "runway"},
+	}
+	app.weaponCatalogCache = map[string]sim.WeaponStats{
+		"agm-158-jassm-er": {
+			RangeM:           400_000,
+			ProbabilityOfHit: 0.7,
+			DomainTargets:    []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_LAND},
+			EffectType:       enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE,
+		},
+	}
+
+	err := app.validateStrikeWithWeapon(app.currentScenario.Units[0], app.currentScenario.Units[1], "agm-158-jassm-er")
+	if err == nil {
+		t.Fatal("expected offensive strike to be blocked without strike permission")
+	}
+	if !strings.Contains(err.Error(), "strike operations") {
+		t.Fatalf("expected strike permission error, got %v", err)
 	}
 }
 
@@ -809,6 +913,28 @@ func TestUnitRecord_IncludesAttackOrderWhenPresent(t *testing.T) {
 	})
 	if _, ok := record["attack_order"]; !ok {
 		t.Fatal("expected present attack order to be included in unit record")
+	}
+}
+
+func TestUnitRecord_UsesGeometryPointForPosition(t *testing.T) {
+	record := unitRecord(&enginev1.Unit{
+		Id:           "u-1",
+		DisplayName:  "Unit",
+		FullName:     "Unit Full",
+		DefinitionId: "fighter",
+		TeamId:       "USA",
+		Position: &enginev1.Position{
+			Lat: 25.12,
+			Lon: 51.31,
+		},
+		Status: &enginev1.OperationalStatus{},
+	})
+	position, ok := record["position"].(models.GeometryPoint)
+	if !ok {
+		t.Fatalf("expected geometry point position, got %T", record["position"])
+	}
+	if position.Latitude != 25.12 || position.Longitude != 51.31 {
+		t.Fatalf("unexpected geometry point coordinates: %+v", position)
 	}
 }
 

@@ -551,6 +551,38 @@ func previewStrikePath(ownerCountry string, maritime bool, points []geo.Point, r
 	return nil
 }
 
+func previewDefensiveAirPath(ownerCountry string, points []geo.Point, rules sim.RelationshipRules, countryCoalitions map[string]string) *PathViolationPreview {
+	ownerCountry = sim.CountryDisplayCode(ownerCountry)
+	if ownerCountry == "" || len(points) < 2 {
+		return nil
+	}
+	for idx, segment := range geo.SamplePath(points) {
+		for _, country := range segment.AirspaceOwners {
+			if country == "" || country == ownerCountry {
+				continue
+			}
+			rule := sim.GetRelationshipRuleWithCoalitions(rules, countryCoalitions, ownerCountry, country)
+			if !rule.AirspaceTransitAllowed {
+				return &PathViolationPreview{
+					Blocked:  true,
+					Country:  country,
+					LegIndex: idx + 1,
+					Reason:   fmt.Sprintf("%s cannot transit %s airspace", ownerCountry, country),
+				}
+			}
+			if !rule.DefensivePositioningAllowed {
+				return &PathViolationPreview{
+					Blocked:  true,
+					Country:  country,
+					LegIndex: idx + 1,
+					Reason:   fmt.Sprintf("%s cannot conduct defensive air operations in %s airspace", ownerCountry, country),
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (a *App) validateTransit(ownerCountry string, domain enginev1.UnitDomain, startLat, startLon, endLat, endLon float64) error {
 	if violation := previewTransitPath(
 		ownerCountry,
@@ -609,6 +641,26 @@ func weaponTargetsDomain(targets []enginev1.UnitDomain, domain enginev1.UnitDoma
 	return false
 }
 
+func weaponStatsForID(weapons map[string]sim.WeaponStats, weaponID string) (sim.WeaponStats, bool) {
+	weaponID = strings.TrimSpace(weaponID)
+	if weaponID == "" {
+		return sim.WeaponStats{}, false
+	}
+	weapon, ok := weapons[weaponID]
+	return weapon, ok
+}
+
+func isDefensiveAirInterceptMission(targetDef sim.DefStats, weapon sim.WeaponStats) bool {
+	if targetDef.Domain == enginev1.UnitDomain_DOMAIN_UNSPECIFIED {
+		return false
+	}
+	if weapon.EffectType != enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_AIR &&
+		weapon.EffectType != enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_INTERCEPTOR {
+		return false
+	}
+	return targetDef.Domain == enginev1.UnitDomain_DOMAIN_AIR
+}
+
 func (a *App) validateStrikeWithWeapon(shooter, target *enginev1.Unit, weaponID string) error {
 	if shooter == nil || target == nil {
 		return nil
@@ -621,6 +673,7 @@ func (a *App) validateStrikeWithWeapon(shooter, target *enginev1.Unit, weaponID 
 		return nil
 	}
 	domain := a.getCachedDefs()[extractRecordID(shooter.DefinitionId)].Domain
+	targetDef := a.getCachedDefs()[extractRecordID(target.DefinitionId)]
 	points := [][2]float64{{shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon()}}
 	for _, wp := range shooter.GetMoveOrder().GetWaypoints() {
 		points = append(points, [2]float64{wp.GetLat(), wp.GetLon()})
@@ -629,6 +682,13 @@ func (a *App) validateStrikeWithWeapon(shooter, target *enginev1.Unit, weaponID 
 	pathPoints := make([]geo.Point, 0, len(points))
 	for _, point := range points {
 		pathPoints = append(pathPoints, geo.Point{Lat: point[0], Lon: point[1]})
+	}
+	weapons := a.getCachedWeaponCatalog()
+	if weapon, ok := weaponStatsForID(weapons, weaponID); ok && isDefensiveAirInterceptMission(targetDef, weapon) {
+		if violation := previewDefensiveAirPath(ownerCountry, pathPoints, a.relationshipRules(), a.countryCoalitions()); violation != nil {
+			return fmt.Errorf("%s", violation.Reason)
+		}
+		return nil
 	}
 	if violation := previewStrikePath(ownerCountry, isMaritimeDomain(domain), pathPoints, a.relationshipRules(), a.countryCoalitions()); violation != nil {
 		return fmt.Errorf("%s", violation.Reason)
@@ -702,7 +762,23 @@ func (a *App) PreviewCurrentStrikePath(unitID string) (*PathViolationPreview, er
 		points = append(points, geo.Point{Lat: wp.GetLat(), Lon: wp.GetLon()})
 	}
 	points = append(points, geo.Point{Lat: target.GetPosition().GetLat(), Lon: target.GetPosition().GetLon()})
-	violation := previewStrikePath(unitCountryCode(unit), isMaritimeDomain(domain), points, a.relationshipRules(), a.countryCoalitions())
+	decision := sim.EvaluateCurrentEngagement(
+		unit,
+		target,
+		a.currentScenario.GetUnits(),
+		a.getCachedDefs(),
+		a.getCachedWeaponCatalog(),
+		a.relationshipRules(),
+		unit.GetAttackOrder().GetDesiredEffect(),
+		unit.GetAttackOrder().GetOrderType() == enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT,
+		a.getSimSeconds(),
+	)
+	var violation *PathViolationPreview
+	if weapon, ok := weaponStatsForID(a.getCachedWeaponCatalog(), decision.WeaponID); ok && isDefensiveAirInterceptMission(a.getCachedDefs()[extractRecordID(target.DefinitionId)], weapon) {
+		violation = previewDefensiveAirPath(unitCountryCode(unit), points, a.relationshipRules(), a.countryCoalitions())
+	} else {
+		violation = previewStrikePath(unitCountryCode(unit), isMaritimeDomain(domain), points, a.relationshipRules(), a.countryCoalitions())
+	}
 	if violation == nil {
 		return &PathViolationPreview{Blocked: false}, nil
 	}

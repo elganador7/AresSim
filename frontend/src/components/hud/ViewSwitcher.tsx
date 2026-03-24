@@ -35,7 +35,8 @@ export default function ViewSwitcher() {
   const teams = useMemo(() => {
     const codes = new Set<string>();
     units.forEach((unit) => {
-      const code = (unit.teamId?.trim().toUpperCase())
+      const code = (unit.operatorTeamId?.trim().toUpperCase())
+        || (unit.teamId?.trim().toUpperCase())
         || inferUnitTeamCode(unit.id, definitionTeams.get(unit.definitionId)?.teamCode ?? "");
       if (/^[A-Z]{3}$/.test(code)) {
         codes.add(code);

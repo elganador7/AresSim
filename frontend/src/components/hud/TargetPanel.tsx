@@ -179,7 +179,7 @@ export default function TargetPanel() {
     [detectionContacts, detections, playerTeam, target],
   );
   const playerReference = useMemo(
-    () => Array.from(units.values()).find((unit) => (unit.teamId ?? "").trim().toUpperCase() === playerTeam),
+    () => Array.from(units.values()).find((unit) => ((unit.operatorTeamId ?? unit.teamId) ?? "").trim().toUpperCase() === playerTeam),
     [playerTeam, units],
   );
   const currentAttackers = useMemo(
@@ -188,8 +188,8 @@ export default function TargetPanel() {
         if (!target || !playerReference) return false;
         return unit.attackOrder?.targetUnitId === target.id
           && areFriendly(
-            { teamId: unit.teamId, coalitionId: unit.coalitionId },
-            { teamId: playerReference.teamId, coalitionId: playerReference.coalitionId },
+            { teamId: unit.teamId, operatorTeamId: unit.operatorTeamId, coalitionId: unit.coalitionId },
+            { teamId: playerReference.teamId, operatorTeamId: playerReference.operatorTeamId, coalitionId: playerReference.coalitionId },
           );
       })
       .sort((a, b) => a.displayName.localeCompare(b.displayName)),
@@ -253,8 +253,14 @@ export default function TargetPanel() {
         <div className="target-summary-grid">
           <div className="unit-stat-row">
             <span className="stat-label">Country</span>
-            <span className="stat-value">{target.teamId || "UNK"}</span>
+            <span className="stat-value">{target.operatorTeamId || target.teamId || "UNK"}</span>
           </div>
+          {target.operatorTeamId && target.teamId && target.operatorTeamId !== target.teamId && (
+            <div className="unit-stat-row">
+              <span className="stat-label">Host Nation</span>
+              <span className="stat-value">{target.teamId}</span>
+            </div>
+          )}
           <div className="unit-stat-row">
             <span className="stat-label">Damage</span>
             <span className="stat-value">{target.damageState === 4 ? "Destroyed" : target.damageState === 3 ? "Mission Killed" : target.damageState === 2 ? "Damaged" : "Operational"}</span>

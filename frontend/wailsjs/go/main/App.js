@@ -106,6 +106,10 @@ export function RequestSync() {
   return window['go']['main']['App']['RequestSync']();
 }
 
+export function RunProvingGroundScenario(arg1, arg2) {
+  return window['go']['main']['App']['RunProvingGroundScenario'](arg1, arg2);
+}
+
 export function SaveScenario(arg1) {
   return window['go']['main']['App']['SaveScenario'](arg1);
 }

@@ -149,7 +149,7 @@ definitions:
       source_notes: Modeled as a modern Iranian MRBM unit for strategic fixed-target strike against regional bases and infrastructure.
       service_entry_year: 2022
       base_strength: 0.62
-      accuracy: 0.64
+      accuracy: 0.72
       max_speed_mps: 15
       cruise_speed_mps: 9
       max_range_km: 900

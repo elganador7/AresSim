@@ -12,6 +12,7 @@ import (
 type DefStats struct {
 	CruiseSpeedMps              float64
 	BaseStrength                float64
+	Accuracy                    float64
 	DetectionRangeM             float64
 	RadarCrossSectionM2         float64
 	SensorSuite                 []SensorCapability
@@ -531,7 +532,7 @@ func ResolveArrivals(arrived []*InFlightMunition, units []*enginev1.Unit, defs m
 			continue // already destroyed before munition arrived
 		}
 		if rng.Float64() < m.HitProbability {
-			outcome := resolveImpactOutcome(weapons[m.WeaponID].EffectType, defs[target.DefinitionId].TargetClass)
+			outcome := resolveImpactOutcome(weapons[m.WeaponID].EffectType, effectiveTargetClass(definitionStatsFor(defs, target.DefinitionId)))
 			if outcome == outcomeNoEffect {
 				continue
 			}

@@ -51,7 +51,7 @@ export default function TopBar({
   const controllableTeams = useMemo(() => {
     const present = new Set<string>();
     units.forEach((unit) => {
-      const code = unit.teamId?.trim().toUpperCase() ?? "";
+      const code = (unit.operatorTeamId ?? unit.teamId)?.trim().toUpperCase() ?? "";
       if (code === "USA" || code === "ISR" || code === "IRN") {
         present.add(code);
       }

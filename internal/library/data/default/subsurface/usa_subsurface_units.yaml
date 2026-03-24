@@ -54,7 +54,7 @@ definitions:
         - USA
       service_entry_year: 2006
       base_strength: 0.94
-      accuracy: 0.9
+      accuracy: 0.92
       max_speed_mps: 13.4
       cruise_speed_mps: 7.7
       max_range_km: 999999

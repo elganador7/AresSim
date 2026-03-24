@@ -69,11 +69,11 @@ func parseWeaponEffectType(raw string) (enginev1.WeaponEffectType, error) {
 	return enginev1.WeaponEffectType(value), nil
 }
 
-func launchKillProbability(weapon WeaponStats, targetDef DefStats, distM float64) float64 {
+func launchKillProbability(shooterDef DefStats, weapon WeaponStats, targetDef DefStats, distM float64) float64 {
 	if weapon.RangeM <= 0 || distM > weapon.RangeM {
 		return 0
 	}
-	base := weapon.ProbabilityOfHit * weaponEffectivenessMultiplier(weapon.EffectType, targetDef)
+	base := weapon.ProbabilityOfHit * shooterAccuracyFactor(shooterDef) * weaponEffectivenessMultiplier(weapon.EffectType, targetDef)
 	if base <= 0 {
 		return 0
 	}
@@ -84,15 +84,44 @@ func launchKillProbability(weapon WeaponStats, targetDef DefStats, distM float64
 	return base * rangeFactor
 }
 
-func weaponEffectivenessMultiplier(effectType enginev1.WeaponEffectType, targetDef DefStats) float64 {
+func shooterAccuracyFactor(def DefStats) float64 {
+	if def.Accuracy <= 0 {
+		return 1.0
+	}
+	factor := 0.35 + 0.65*def.Accuracy
+	if factor < 0.4 {
+		return 0.4
+	}
+	if factor > 1.0 {
+		return 1.0
+	}
+	return factor
+}
+
+func effectiveTargetClass(targetDef DefStats) string {
 	targetClass := strings.TrimSpace(targetDef.TargetClass)
 	if targetClass == "" {
 		targetClass = strings.TrimSpace(targetDef.AssetClass)
 	}
 	if targetClass == "" {
-		targetClass = strings.ToLower(targetDef.Domain.String())
+		switch targetDef.Domain {
+		case enginev1.UnitDomain_DOMAIN_AIR:
+			targetClass = "aircraft"
+		case enginev1.UnitDomain_DOMAIN_SEA:
+			targetClass = "surface_warship"
+		case enginev1.UnitDomain_DOMAIN_SUBSURFACE:
+			targetClass = "submarine"
+		case enginev1.UnitDomain_DOMAIN_LAND:
+			targetClass = "soft_infrastructure"
+		default:
+			targetClass = strings.ToLower(targetDef.Domain.String())
+		}
 	}
-	targetClass = strings.ToLower(targetClass)
+	return strings.ToLower(targetClass)
+}
+
+func weaponEffectivenessMultiplier(effectType enginev1.WeaponEffectType, targetDef DefStats) float64 {
+	targetClass := effectiveTargetClass(targetDef)
 	if v, ok := loadWeaponTargetEffectiveness()[targetClassEffectivenessKey{effectType: effectType, targetClass: targetClass}]; ok {
 		return v
 	}

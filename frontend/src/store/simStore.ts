@@ -131,6 +131,7 @@ export interface Unit {
   fullName: string;
   teamId?: string;
   coalitionId?: string;
+  operatorTeamId?: string;
   natoPendingSymbol: string;  // NATO APP-6D SIDC code
   definitionId: string;
   hostBaseId?: string;

@@ -102,6 +102,7 @@ var schemaStatements = []string{
 	`DEFINE FIELD IF NOT EXISTS full_name         ON unit TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS team_id           ON unit TYPE option<string>`,
 	`DEFINE FIELD IF NOT EXISTS coalition_id      ON unit TYPE option<string>`,
+	`DEFINE FIELD IF NOT EXISTS operator_team_id  ON unit TYPE option<string>`,
 	`DEFINE FIELD IF NOT EXISTS nato_symbol_sidc  ON unit TYPE string`,
 	`DEFINE FIELD IF NOT EXISTS definition_id     ON unit TYPE option<string>`,
 

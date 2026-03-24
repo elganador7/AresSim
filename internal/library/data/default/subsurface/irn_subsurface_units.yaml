@@ -23,11 +23,11 @@ definitions:
       source_notes: Modeled as an Iranian coastal sea-denial submarine with limited blue-water endurance and uncertain combat proficiency.
       service_entry_year: 2019
       base_strength: 0.42
-      accuracy: 0.5
+      accuracy: 0.36
       max_speed_mps: 8
       cruise_speed_mps: 4.5
       max_range_km: 3500
-      survivability: 0.4
+      survivability: 0.34
       detection_range_m: 70000
       radar_cross_section_m2: 0.18
       sensor_suite:
@@ -45,7 +45,7 @@ definitions:
       recovery_capacity_per_interval: 0
       sortie_interval_minutes: 0
       default_loadout:
-        - weapon_id: torp-mk48
+        - weapon_id: torp-valfajr
           max_qty: 4
           initial_qty: 4
       default_weapon_configuration: ""
@@ -90,7 +90,7 @@ definitions:
       recovery_capacity_per_interval: 0
       sortie_interval_minutes: 0
       default_loadout:
-        - weapon_id: torp-mk48
+        - weapon_id: torp-valfajr
           max_qty: 2
           initial_qty: 2
       default_weapon_configuration: ""

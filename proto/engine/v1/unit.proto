@@ -65,6 +65,7 @@ message Unit {
   string definition_id = 5; // References UnitDefinition.id slug
   string team_id      = 6; // Owning team / nation, e.g. "ISR", "USA", "IRN"
   string coalition_id = 7; // Friendly grouping used for combat / detection sharing
+  string operator_team_id = 31; // Optional operating tenant for joint / host-nation facilities
 
   // Geospatial
   Position position = 10;

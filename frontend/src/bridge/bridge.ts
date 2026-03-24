@@ -119,6 +119,7 @@ export function protoUnitToStore(u: ProtoUnit): Unit {
     fullName: u.fullName,
     teamId: u.teamId || undefined,
     coalitionId: u.coalitionId || undefined,
+    operatorTeamId: u.operatorTeamId || undefined,
     natoPendingSymbol: u.natoSymbolSidc,
     definitionId: u.definitionId,
     hostBaseId: u.hostBaseId || undefined,

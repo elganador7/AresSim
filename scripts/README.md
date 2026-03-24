@@ -14,3 +14,6 @@ and should stay out of version control; the generated JSON in
 `internal/geo/data/` is the tracked artifact.
 
 Scripts here should be safe to rerun and should encode repo conventions instead of relying on one-off manual steps.
+
+Headless proving-ground calibration now lives at:
+- `go run ./cmd/proving-ground --scenario all --trials 25`

@@ -951,6 +951,20 @@
     "effect_type": 9
   },
   {
+    "id": "torp-valfajr",
+    "name": "Valfajr Torpedo",
+    "description": "Iranian heavyweight submarine torpedo modeled as a shorter-range, less reliable littoral weapon than Mk 48-class systems.",
+    "domain_targets": [
+      3,
+      4
+    ],
+    "speed_mps": 24,
+    "range_m": 32000,
+    "probability_of_hit": 0.62,
+    "guidance": 7,
+    "effect_type": 9
+  },
+  {
     "id": "torp-mk54",
     "name": "Mk 54 LHT Torpedo",
     "description": "Lightweight hybrid torpedo for surface ships and aircraft",
@@ -1026,7 +1040,7 @@
     ],
     "speed_mps": 1800,
     "range_m": 1450000,
-    "probability_of_hit": 0.72,
+    "probability_of_hit": 0.78,
     "guidance": 2,
     "effect_type": 6
   },

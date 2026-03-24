@@ -108,11 +108,12 @@ export default function UnitPanel() {
 
   const unit = selectedUnitId ? units.get(selectedUnitId) : undefined;
   const playerTeam = selectedPlayerTeam(humanControlledTeam);
-  const ownedByPlayer = unit ? (unit.teamId ?? "").trim().toUpperCase() === playerTeam : false;
+  const effectiveTeamId = unit ? ((unit.operatorTeamId ?? unit.teamId) ?? "").trim().toUpperCase() : "";
+  const ownedByPlayer = unit ? effectiveTeamId === playerTeam : false;
   const controllable = unit
-    ? canControlUnit(unit.definitionId, unit.teamId, playerTeam, definitionMap)
+    ? canControlUnit(unit.definitionId, unit.operatorTeamId ?? unit.teamId, playerTeam, definitionMap)
     : false;
-  const teamColor = teamColorHex(unit?.teamId);
+  const teamColor = teamColorHex(unit?.operatorTeamId ?? unit?.teamId);
   const strength = unit ? Math.round(unit.status.combatEffectiveness * 100) : 0;
   const routeModeActive = mapCommandMode.type === "route" && mapCommandMode.unitId === unit?.id;
   const [selectedLoadoutId, setSelectedLoadoutId] = useState(unit?.loadoutConfigurationId ?? "");
@@ -550,7 +551,7 @@ export default function UnitPanel() {
         <div className="unit-stat-row">
           <span className="stat-label">Country</span>
           <span className="stat-value" style={{ color: teamColor }}>
-            {unit.teamId || "UNK"}
+            {unit.operatorTeamId || unit.teamId || "UNK"}
           </span>
         </div>
         {unit.coalitionId && (

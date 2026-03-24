@@ -94,7 +94,7 @@ func selectWeaponForEngagement(unit *enginev1.Unit, targetDef DefStats, desiredE
 		if !ok || !canTargetDomain(wdef.DomainTargets, targetDef.Domain) {
 			continue
 		}
-		outcome := resolveImpactOutcome(wdef.EffectType, targetDef.TargetClass)
+		outcome := resolveImpactOutcome(wdef.EffectType, effectiveTargetClass(targetDef))
 		score := scoreWeaponCandidate(wdef, outcome, desiredEffect)
 		if score < 0 {
 			continue
@@ -130,6 +130,7 @@ func EvaluateEngagementDecision(
 		decision.Reason = EngagementReasonNoWeapon
 		return decision
 	}
+	shooterDef := definitionStatsFor(defs, shooter.DefinitionId)
 	decision.WeaponID = weaponID
 	decision.Weapon = weapon
 	decision.WeaponRangeM = weapon.RangeM
@@ -152,7 +153,7 @@ func EvaluateEngagementDecision(
 		decision.Reason = EngagementReasonOutOfRange
 		return decision
 	}
-	decision.FireProbability = launchKillProbability(weapon, targetDef, dist)
+	decision.FireProbability = launchKillProbability(shooterDef, weapon, targetDef, dist)
 	switch shooter.GetEngagementBehavior() {
 	case enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_HOLD_FIRE:
 		decision.Reason = EngagementReasonHoldFire
@@ -194,6 +195,7 @@ func EvaluateAutonomousEngagementDecision(
 		decision.Reason = EngagementReasonNoWeapon
 		return decision
 	}
+	shooterDef := definitionStatsFor(defs, shooter.DefinitionId)
 	decision.WeaponID = weaponID
 	decision.Weapon = weapon
 	decision.WeaponRangeM = weapon.RangeM
@@ -211,7 +213,7 @@ func EvaluateAutonomousEngagementDecision(
 		decision.Reason = EngagementReasonOutOfRange
 		return decision
 	}
-	decision.FireProbability = launchKillProbability(weapon, targetDef, dist)
+	decision.FireProbability = launchKillProbability(shooterDef, weapon, targetDef, dist)
 	switch shooter.GetEngagementBehavior() {
 	case enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_HOLD_FIRE,
 		enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_ASSIGNED_TARGETS_ONLY,

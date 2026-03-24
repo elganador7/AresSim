@@ -10,6 +10,7 @@ import (
 
 	"github.com/aressim/internal/library"
 	"github.com/aressim/internal/scenario"
+	"github.com/aressim/internal/sim"
 	"google.golang.org/protobuf/proto"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
@@ -47,7 +48,21 @@ func (a *App) ListScenarios() ([]map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return normalizeRecordIDs(rows), nil
+	normalized := normalizeRecordIDs(rows)
+	specs := scenario.ProvingGroundSpecs()
+	for _, row := range normalized {
+		id := toString(row["id"])
+		spec, ok := specs[id]
+		if !ok {
+			continue
+		}
+		row["scenario_kind"] = "proving_ground"
+		row["proving_ground_category"] = spec.Category
+		row["proving_ground_purpose"] = spec.Purpose
+		row["proving_ground_expected"] = spec.ExpectedSummary
+		row["recommended_trials"] = spec.RecommendedTrials
+	}
+	return normalized, nil
 }
 
 // LoadScenarioFromProto accepts a base64-encoded serialized Scenario proto.
@@ -102,6 +117,64 @@ func (a *App) GetScenario(id string) (string, error) {
 		return "", fmt.Errorf("unexpected scenario_pb type %T", rawAny)
 	}
 	return base64.StdEncoding.EncodeToString(raw), nil
+}
+
+func (a *App) RunProvingGroundScenario(id string, trials int) (map[string]any, error) {
+	_, spec, err := a.prepareProvingGroundScenario(id)
+	if err != nil {
+		return nil, err
+	}
+	if trials <= 0 {
+		trials = spec.RecommendedTrials
+	}
+	results := make([]sim.ProvingGroundTrialResult, 0, trials)
+	for i := 0; i < trials; i++ {
+		if _, _, err := a.prepareProvingGroundScenario(spec.ScenarioID); err != nil {
+			return nil, err
+		}
+		if err := a.applyProvingGroundSetup(spec); err != nil {
+			return nil, err
+		}
+		results = append(results, a.runPreparedProvingGroundTrial(spec, int64(i+1)))
+	}
+	aggregate := sim.AggregateProvingGroundResults(results, spec.FocusTeam)
+	pass := true
+	if spec.MinFocusWinRate > 0 && aggregate.FocusWinRate < spec.MinFocusWinRate {
+		pass = false
+	}
+	if spec.MaxFocusWinRate > 0 && aggregate.FocusWinRate > spec.MaxFocusWinRate {
+		pass = false
+	}
+	if spec.MinTargetMissionKillRate > 0 && aggregate.TargetMissionKillRate < spec.MinTargetMissionKillRate {
+		pass = false
+	}
+	if spec.MaxTargetMissionKillRate > 0 && aggregate.TargetMissionKillRate > spec.MaxTargetMissionKillRate {
+		pass = false
+	}
+	return map[string]any{
+		"scenarioId":               spec.ScenarioID,
+		"category":                 spec.Category,
+		"purpose":                  spec.Purpose,
+		"expectedSummary":          spec.ExpectedSummary,
+		"trials":                   aggregate.Trials,
+		"focusTeam":                aggregate.FocusTeam,
+		"focusWinRate":             aggregate.FocusWinRate,
+		"targetMissionKillRate":    aggregate.TargetMissionKillRate,
+		"targetDestroyedRate":      aggregate.TargetDestroyedRate,
+		"meanElapsedSeconds":       aggregate.MeanElapsedSeconds,
+		"meanFirstShotSeconds":     aggregate.MeanFirstShotSeconds,
+		"meanShotsFired":           aggregate.MeanShotsFired,
+		"meanHitsScored":           aggregate.MeanHitsScored,
+		"meanFocusLosses":          aggregate.MeanFocusLosses,
+		"meanOpposingLosses":       aggregate.MeanOpposingLosses,
+		"terminalReasons":          aggregate.TerminalReasons,
+		"sampleEvents":             aggregate.SampleEvents,
+		"pass":                     pass,
+		"minFocusWinRate":          spec.MinFocusWinRate,
+		"maxFocusWinRate":          spec.MaxFocusWinRate,
+		"minTargetMissionKillRate": spec.MinTargetMissionKillRate,
+		"maxTargetMissionKillRate": spec.MaxTargetMissionKillRate,
+	}, nil
 }
 
 // DeleteScenario removes a scenario and its checkpoint history from the database.

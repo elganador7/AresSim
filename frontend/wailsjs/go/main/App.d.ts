@@ -54,6 +54,8 @@ export function RemoveMoveWaypoint(arg1:string,arg2:number):Promise<main.BridgeR
 
 export function RequestSync():Promise<main.BridgeResult>;
 
+export function RunProvingGroundScenario(arg1:string,arg2:number):Promise<Record<string, any>>;
+
 export function SaveScenario(arg1:string):Promise<main.BridgeResult>;
 
 export function SaveUnitDefinition(arg1:string):Promise<main.BridgeResult>;

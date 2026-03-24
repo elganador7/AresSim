@@ -15,3 +15,36 @@ func TestWeaponEffectivenessTableLoadsAuthoredData(t *testing.T) {
 		t.Fatalf("expected authored ballistic-vs-airbase multiplier, got %f", got)
 	}
 }
+
+func TestEffectiveTargetClassFallsBackByDomain(t *testing.T) {
+	got := effectiveTargetClass(DefStats{Domain: enginev1.UnitDomain_DOMAIN_SEA})
+	if got != "surface_warship" {
+		t.Fatalf("expected sea-domain fallback target class, got %q", got)
+	}
+}
+
+func TestSelectWeaponForEngagementUsesFallbackTargetClass(t *testing.T) {
+	shooter := &enginev1.Unit{
+		Id: "shooter",
+		Weapons: []*enginev1.WeaponState{{
+			WeaponId:   "asm-nsm",
+			CurrentQty: 1,
+			MaxQty:     1,
+		}},
+	}
+	weaponID, _, _, found := selectWeaponForEngagement(
+		shooter,
+		DefStats{Domain: enginev1.UnitDomain_DOMAIN_SEA},
+		enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY,
+		map[string]WeaponStats{
+			"asm-nsm": {
+				DomainTargets: []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_SEA},
+				EffectType:    enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_SHIP,
+				RangeM:        100_000,
+			},
+		},
+	)
+	if !found || weaponID != "asm-nsm" {
+		t.Fatalf("expected anti-ship weapon to be selected with sea-domain fallback, got found=%v weapon=%q", found, weaponID)
+	}
+}

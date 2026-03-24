@@ -1,6 +1,7 @@
 export interface AllegianceLike {
   teamId?: string;
   coalitionId?: string;
+  operatorTeamId?: string;
 }
 
 function normalize(value: string | undefined | null): string {
@@ -8,8 +9,8 @@ function normalize(value: string | undefined | null): string {
 }
 
 export function sameTeam(a: AllegianceLike, b: AllegianceLike): boolean {
-  const aTeam = normalize(a.teamId);
-  const bTeam = normalize(b.teamId);
+  const aTeam = normalize(a.operatorTeamId || a.teamId);
+  const bTeam = normalize(b.operatorTeamId || b.teamId);
   return aTeam !== "" && aTeam === bTeam;
 }
 
@@ -24,8 +25,8 @@ export function areFriendly(a: AllegianceLike, b: AllegianceLike): boolean {
 }
 
 export function areHostile(a: AllegianceLike, b: AllegianceLike): boolean {
-  const aTeam = normalize(a.teamId);
-  const bTeam = normalize(b.teamId);
+  const aTeam = normalize(a.operatorTeamId || a.teamId);
+  const bTeam = normalize(b.operatorTeamId || b.teamId);
   if (aTeam === "" || bTeam === "" || aTeam === bTeam) {
     return false;
   }

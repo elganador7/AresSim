@@ -42,10 +42,10 @@ func IranCoalitionWarSkeleton() *enginev1.Scenario {
 			scenarioUnit("isr-airbase-palmachim", "Palmachim AB", "Israeli Strategic Air Base - Palmachim", "Blue", "israel-strategic-airbase", 31.89, 34.69, 0, 0, 0),
 			scenarioUnit("isr-airbase-telnof", "Tel Nof AB", "Israeli Strategic Air Base - Tel Nof", "Blue", "israel-strategic-airbase", 31.84, 34.82, 0, 0, 0),
 			scenarioUnit("isr-airbase-ramat-david", "Ramat David AB", "Israeli Strategic Air Base - Ramat David", "Blue", "israel-strategic-airbase", 32.67, 35.18, 0, 0, 0),
-			scenarioUnit("qat-airbase-al-udeid", "Al Udeid AB", "Qatari Expeditionary Air Base - Al Udeid", "Blue", "qatari-expeditionary-airbase", 25.12, 51.31, 0, 0, 0),
-			scenarioUnit("uae-airbase-al-dhafra", "Al Dhafra AB", "Emirati Strategic Air Base - Al Dhafra", "Blue", "emirati-strategic-airbase", 24.25, 54.55, 0, 0, 0),
+			scenarioUnitWithOperator("qat-airbase-al-udeid", "Al Udeid AB", "Qatari Expeditionary Air Base - Al Udeid", "Blue", "qatari-expeditionary-airbase", "USA", 25.12, 51.31, 0, 0, 0),
+			scenarioUnitWithOperator("uae-airbase-al-dhafra", "Al Dhafra AB", "Emirati Strategic Air Base - Al Dhafra", "Blue", "emirati-strategic-airbase", "USA", 24.25, 54.55, 0, 0, 0),
 			scenarioUnit("sau-airbase-khamis", "Khamis Mushait AB", "Saudi Strategic Air Base - Khamis Mushait", "Blue", "saudi-strategic-airbase", 18.30, 42.80, 0, 0, 0),
-			scenarioUnit("sau-airbase-prince-sultan", "Prince Sultan AB", "Saudi Strategic Air Base - Prince Sultan", "Blue", "saudi-strategic-airbase", 24.06, 47.58, 0, 0, 0),
+			scenarioUnitWithOperator("sau-airbase-prince-sultan", "Prince Sultan AB", "Saudi Strategic Air Base - Prince Sultan", "Blue", "saudi-strategic-airbase", "USA", 24.06, 47.58, 0, 0, 0),
 			scenarioUnit("omn-airbase-seeb", "Seeb AB", "Omani Maritime Air Base - Seeb", "Blue", "omani-maritime-airbase", 23.59, 58.28, 0, 0, 0),
 			scenarioUnit("bhr-airbase-isa", "Isa AB", "Bahraini Air Base - Isa", "Blue", "bahraini-airbase", 26.27, 50.63, 0, 0, 0),
 			scenarioUnit("kwt-airbase-ahmad", "Ahmad al-Jaber AB", "Kuwaiti Air Base - Ahmad al-Jaber", "Blue", "kuwaiti-airbase", 29.22, 47.98, 0, 0, 0),
@@ -287,6 +287,12 @@ func scenarioUnit(id, displayName, fullName, coalitionHint, definitionID string,
 			IsActive:            true,
 		},
 	}
+}
+
+func scenarioUnitWithOperator(id, displayName, fullName, coalitionHint, definitionID, operatorTeamID string, lat, lon, altMsl, heading, speed float64) *enginev1.Unit {
+	u := scenarioUnit(id, displayName, fullName, coalitionHint, definitionID, lat, lon, altMsl, heading, speed)
+	u.OperatorTeamId = strings.TrimSpace(strings.ToUpper(operatorTeamID))
+	return u
 }
 
 func inferScenarioTeamID(id, side string) string {

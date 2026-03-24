@@ -89,7 +89,8 @@ export function definitionInfoFor(defInfo: Record<string, DefInfo>, definitionId
 }
 
 export function teamForUnit(unit: Unit, defInfo: Record<string, DefInfo>): string {
-  return unit.teamId?.trim().toUpperCase()
+  return unit.operatorTeamId?.trim().toUpperCase()
+    || unit.teamId?.trim().toUpperCase()
     || inferUnitTeamCode(unit.id, definitionInfoFor(defInfo, unit.definitionId)?.teamCode ?? "");
 }
 
@@ -108,11 +109,11 @@ export function relationshipColorHex(unit: Unit, humanControlledTeam: string, un
   if (!playerTeam) {
     return "#94a3b8";
   }
-  const unitTeam = (unit.teamId ?? "").trim().toUpperCase();
+  const unitTeam = (unit.operatorTeamId ?? unit.teamId ?? "").trim().toUpperCase();
   if (unitTeam === playerTeam) {
     return "#3b82f6";
   }
-  const playerReference = Array.from(units.values()).find((candidate) => (candidate.teamId ?? "").trim().toUpperCase() === playerTeam);
+  const playerReference = Array.from(units.values()).find((candidate) => ((candidate.operatorTeamId ?? candidate.teamId) ?? "").trim().toUpperCase() === playerTeam);
   if (!playerReference) {
     return "#94a3b8";
   }
