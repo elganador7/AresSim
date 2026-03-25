@@ -41,6 +41,7 @@ type InterceptShot struct {
 	Defender *enginev1.Unit
 	Munition *InFlightMunition
 	WeaponID string
+	Success  bool
 }
 
 var munitionSeq atomic.Int64
@@ -124,7 +125,7 @@ func DetectMunitions(units []*enginev1.Unit, defs map[string]DefStats, munitions
 		if !unitCanOperate(detector) {
 			continue
 		}
-		def := defs[detector.DefinitionId]
+		def := defs[normalizeDefinitionID(detector.DefinitionId)]
 		if def.DetectionRangeM <= 0 {
 			continue
 		}
@@ -181,11 +182,15 @@ func InterceptMunitionsTick(units []*enginev1.Unit, defs map[string]DefStats, we
 			if !unitCanOperate(defender) {
 				continue
 			}
+			def := defs[normalizeDefinitionID(defender.DefinitionId)]
 			side := unitTeamID(defender)
 			if side == "" {
 				continue
 			}
-			if !canPerformSovereignAirDefense(defender, defs[defender.DefinitionId]) {
+			if !canPerformSovereignAirDefense(defender, def) {
+				continue
+			}
+			if !canTargetDomain(m.TargetDomains, def.Domain) {
 				continue
 			}
 			if side == unitTeamID(unitByID[m.ShooterID]) {
@@ -197,7 +202,7 @@ func InterceptMunitionsTick(units []*enginev1.Unit, defs map[string]DefStats, we
 			if !munitionThreatensSide(side, m, target) {
 				continue
 			}
-			weaponID, weapon, ok := selectBestWeapon(defender, enginev1.UnitDomain_DOMAIN_AIR, weapons)
+			weaponID, weapon, ok := selectBestInterceptorWeapon(defender, weapons)
 			if !ok {
 				continue
 			}
@@ -210,15 +215,18 @@ func InterceptMunitionsTick(units []*enginev1.Unit, defs map[string]DefStats, we
 				continue
 			}
 			decrementAmmo(defender, weaponID, salvo)
+			success := false
+			prob := rangeDegradedPoh(weapon.ProbabilityOfHit, dist, weapon.RangeM)
+			if rng.Float64() < prob {
+				intercepted = true
+				success = true
+			}
 			shots = append(shots, InterceptShot{
 				Defender: defender,
 				Munition: m,
 				WeaponID: weaponID,
+				Success:  success,
 			})
-			prob := rangeDegradedPoh(weapon.ProbabilityOfHit, dist, weapon.RangeM)
-			if rng.Float64() < prob {
-				intercepted = true
-			}
 			break
 		}
 		if !intercepted {
@@ -226,6 +234,32 @@ func InterceptMunitionsTick(units []*enginev1.Unit, defs map[string]DefStats, we
 		}
 	}
 	return remaining, shots
+}
+
+func selectBestInterceptorWeapon(unit *enginev1.Unit, catalog map[string]WeaponStats) (weaponID string, stats WeaponStats, found bool) {
+	bestRange := -1.0
+	for _, ws := range unit.Weapons {
+		if ws.CurrentQty <= 0 {
+			continue
+		}
+		wdef, ok := catalog[ws.WeaponId]
+		if !ok {
+			continue
+		}
+		if wdef.EffectType != enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_INTERCEPTOR {
+			continue
+		}
+		if !canTargetDomain(wdef.DomainTargets, enginev1.UnitDomain_DOMAIN_AIR) {
+			continue
+		}
+		if wdef.RangeM > bestRange {
+			bestRange = wdef.RangeM
+			weaponID = ws.WeaponId
+			stats = wdef
+			found = true
+		}
+	}
+	return
 }
 
 func munitionThreatensSide(side string, m *InFlightMunition, target *enginev1.Unit) bool {

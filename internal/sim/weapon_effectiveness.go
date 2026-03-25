@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"math"
 	"strings"
 	"sync"
 
@@ -73,7 +74,10 @@ func launchKillProbability(shooterDef DefStats, weapon WeaponStats, targetDef De
 	if weapon.RangeM <= 0 || distM > weapon.RangeM {
 		return 0
 	}
-	base := weapon.ProbabilityOfHit * shooterAccuracyFactor(shooterDef) * weaponEffectivenessMultiplier(weapon.EffectType, targetDef)
+	base := weapon.ProbabilityOfHit *
+		shooterAccuracyFactor(shooterDef) *
+		weaponEffectivenessMultiplier(weapon.EffectType, targetDef) *
+		lowObservableEngagementFactor(weapon, targetDef)
 	if base <= 0 {
 		return 0
 	}
@@ -82,6 +86,44 @@ func launchKillProbability(shooterDef DefStats, weapon WeaponStats, targetDef De
 		rangeFactor = 0.25
 	}
 	return base * rangeFactor
+}
+
+func lowObservableEngagementFactor(weapon WeaponStats, targetDef DefStats) float64 {
+	if targetDef.Domain != enginev1.UnitDomain_DOMAIN_AIR {
+		return 1.0
+	}
+	switch weapon.EffectType {
+	case enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_AIR,
+		enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_INTERCEPTOR:
+	default:
+		return 1.0
+	}
+	rcs := targetDef.RadarCrossSectionM2
+	if rcs <= 0 {
+		return 1.0
+	}
+	factor := 0.25 + 0.75*clampPow(rcs, 0.2)
+	if factor < 0.2 {
+		return 0.2
+	}
+	if factor > 1.0 {
+		return 1.0
+	}
+	return factor
+}
+
+func clampPow(v, exp float64) float64 {
+	if v <= 0 {
+		return 0
+	}
+	result := math.Pow(v, exp)
+	if result < 0 {
+		return 0
+	}
+	if result > 1 {
+		return 1
+	}
+	return result
 }
 
 func shooterAccuracyFactor(def DefStats) float64 {

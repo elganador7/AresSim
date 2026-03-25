@@ -20,15 +20,15 @@ definitions:
         - IRN
       data_confidence: medium
       source_basis: estimated
-      source_notes: System performance claims vary; modeled as Iran's best indigenous long-range SAM with conservative effectiveness.
+      source_notes: System performance claims vary widely; modeled as Iran's best indigenous long-range SAM, but with reduced effectiveness against low-observable aircraft due to the lack of verified public evidence of full-fidelity anti-stealth performance.
       service_entry_year: 2019
       base_strength: 0.66
-      accuracy: 0.72
+      accuracy: 0.62
       max_speed_mps: 0
       cruise_speed_mps: 0
       max_range_km: 0
       survivability: 0.34
-      detection_range_m: 260000
+      detection_range_m: 220000
       radar_cross_section_m2: 18
       sensor_suite:
         - sensor_type: air_search
@@ -148,6 +148,8 @@ definitions:
       source_basis: reputable_analysis
       source_notes: Modeled as a modern Iranian MRBM unit for strategic fixed-target strike against regional bases and infrastructure.
       service_entry_year: 2022
+      asset_class: launcher
+      target_class: launcher
       base_strength: 0.62
       accuracy: 0.72
       max_speed_mps: 15
@@ -229,6 +231,8 @@ definitions:
       source_basis: estimated
       source_notes: Public evidence supports a long-range land-attack cruise missile capability, but regiment scale and salvo depth remain uncertain.
       service_entry_year: 2023
+      asset_class: launcher
+      target_class: launcher
       base_strength: 0.54
       accuracy: 0.7
       max_speed_mps: 14
@@ -254,6 +258,167 @@ definitions:
         - weapon_id: ssm-paveh
           max_qty: 8
           initial_qty: 8
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: missile-brigade-command-post
+      name: Missile Brigade Command Post
+      description: Mobile command post for coordinating ballistic and cruise-missile launch units, salvo timing, and dispersal control.
+      domain: 1
+      form: 31
+      general_type: 93
+      specific_type: Missile Brigade Command Post
+      short_name: Missile C2
+      asset_class: c2_site
+      target_class: hardened_infrastructure
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Represents mobile IRGC Aerospace Force command-and-control support for dispersed missile brigades.
+      service_entry_year: 2010
+      base_strength: 0.34
+      accuracy: 0.12
+      max_speed_mps: 14
+      cruise_speed_mps: 8
+      max_range_km: 600
+      survivability: 0.22
+      detection_range_m: 6000
+      sensor_suite:
+        - sensor_type: ground_search
+          max_range_m: 25000
+          target_states: [land]
+          fire_control: false
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 380
+      fuel_burn_rate_lph: 70
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: missile-support-column
+      name: Missile Support Column
+      description: Mobile support convoy for fueling, reload handling, and sustainment of dispersed missile launcher elements.
+      domain: 1
+      form: 31
+      general_type: 91
+      specific_type: Missile Support Column
+      short_name: Missile LOG
+      asset_class: hardened_infrastructure
+      target_class: soft_infrastructure
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Abstracted reload and sustainment column supporting regional missile operations without modeling individual reload vehicles.
+      service_entry_year: 2010
+      base_strength: 0.28
+      accuracy: 0.08
+      max_speed_mps: 14
+      cruise_speed_mps: 8
+      max_range_km: 600
+      survivability: 0.2
+      detection_range_m: 1000
+      radar_cross_section_m2: 7
+      fuel_capacity_liters: 800
+      fuel_burn_rate_lph: 90
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: missile-reload-transporter
+      name: Missile Reload Transporter
+      description: Road-mobile transporter carrying reserve missile rounds and reload equipment for dispersed ballistic and cruise-missile launch elements.
+      domain: 1
+      form: 31
+      general_type: 91
+      specific_type: Missile Reload Transporter
+      short_name: Reload TEL
+      asset_class: launcher
+      target_class: soft_infrastructure
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      data_confidence: medium
+      source_basis: estimated
+      source_notes: Abstracted reload and missile-transporter support element for missile regiments without modeling one transporter per launcher.
+      service_entry_year: 2010
+      base_strength: 0.24
+      accuracy: 0.06
+      max_speed_mps: 14
+      cruise_speed_mps: 8
+      max_range_km: 600
+      survivability: 0.18
+      detection_range_m: 800
+      radar_cross_section_m2: 9
+      fuel_capacity_liters: 600
+      fuel_burn_rate_lph: 88
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: missile-decoy-detachment
+      name: Missile Decoy Detachment
+      description: Mobile decoy and camouflage detachment emplacing signature-mimicking launch positions to complicate counterstrike targeting.
+      domain: 1
+      form: 31
+      general_type: 91
+      specific_type: Missile Decoy Detachment
+      short_name: Decoy Team
+      asset_class: launcher
+      target_class: soft_infrastructure
+      nation_of_origin: IRN
+      operators:
+        - IRN
+      employed_by:
+        - IRN
+      data_confidence: low
+      source_basis: estimated
+      source_notes: Represents field-expedient decoy, concealment, and deception support commonly associated with mobile missile operations.
+      service_entry_year: 2010
+      base_strength: 0.16
+      accuracy: 0.04
+      max_speed_mps: 14
+      cruise_speed_mps: 8
+      max_range_km: 500
+      survivability: 0.14
+      detection_range_m: 500
+      radar_cross_section_m2: 5
+      fuel_capacity_liters: 280
+      fuel_burn_rate_lph: 55
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
       default_weapon_configuration: ""
       weapon_configurations: []
     - id: qiam1-missile-brigade

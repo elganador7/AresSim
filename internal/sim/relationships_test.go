@@ -21,11 +21,46 @@ func TestGetRelationshipRuleWithCoalitionsDefaultsHostileCountriesToTransitAndSt
 	if !rule.MaritimeTransitAllowed || !rule.MaritimeStrikeAllowed {
 		t.Fatal("expected hostile-country fallback to allow maritime transit and strike")
 	}
-	if rule.DefensivePositioningAllowed {
-		t.Fatal("expected hostile-country fallback to keep defensive positioning disabled")
+	if !rule.DefensivePositioningAllowed {
+		t.Fatal("expected hostile-country fallback to allow defensive positioning")
 	}
 	if rule.ShareIntel {
 		t.Fatal("expected hostile-country fallback to keep intel sharing disabled")
+	}
+}
+
+func TestGetRelationshipRuleWithCoalitionsOverridesExplicitRestrictionsForHostileCountries(t *testing.T) {
+	rule := GetRelationshipRuleWithCoalitions(
+		RelationshipRules{
+			"USA": {
+				"IRN": {
+					ShareIntel:                  false,
+					AirspaceTransitAllowed:      false,
+					AirspaceStrikeAllowed:       false,
+					DefensivePositioningAllowed: false,
+					MaritimeTransitAllowed:      false,
+					MaritimeStrikeAllowed:       false,
+				},
+			},
+		},
+		map[string]string{
+			"USA": "BLUE",
+			"IRN": "RED",
+		},
+		"USA",
+		"IRN",
+	)
+	if !rule.AirspaceTransitAllowed || !rule.AirspaceStrikeAllowed {
+		t.Fatal("expected hostile-country override to allow air transit and strike")
+	}
+	if !rule.DefensivePositioningAllowed {
+		t.Fatal("expected hostile-country override to allow defensive positioning")
+	}
+	if !rule.MaritimeTransitAllowed || !rule.MaritimeStrikeAllowed {
+		t.Fatal("expected hostile-country override to allow maritime transit and strike")
+	}
+	if rule.ShareIntel {
+		t.Fatal("expected hostile-country override to preserve non-shared intel state")
 	}
 }
 

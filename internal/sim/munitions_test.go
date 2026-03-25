@@ -304,7 +304,7 @@ func TestInterceptMunitionsTick_InterceptsThreatToSide(t *testing.T) {
 		"sam":  {Domain: enginev1.UnitDomain_DOMAIN_LAND},
 		"base": {Domain: enginev1.UnitDomain_DOMAIN_LAND},
 	}
-	weapons := makeWeaponCatalog("sam-shot", 100_000, 1.0, enginev1.UnitDomain_DOMAIN_AIR)
+	weapons := makeWeaponCatalogWithEffect("sam-shot", 100_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_INTERCEPTOR, enginev1.UnitDomain_DOMAIN_AIR)
 
 	remaining, shots := InterceptMunitionsTick(
 		[]*enginev1.Unit{defender, target},
@@ -320,7 +320,82 @@ func TestInterceptMunitionsTick_InterceptsThreatToSide(t *testing.T) {
 	if len(shots) != 1 || shots[0].Defender.Id != "qat-sam" {
 		t.Fatalf("expected one interceptor shot from qat-sam, got %+v", shots)
 	}
+	if !shots[0].Success {
+		t.Fatal("expected interceptor shot to be marked successful")
+	}
 	if defender.Weapons[0].CurrentQty != 1 {
 		t.Fatalf("expected interceptor ammo to decrement, got %d", defender.Weapons[0].CurrentQty)
+	}
+}
+
+func TestInterceptMunitionsTick_AircraftDoNotInterceptLandTargetingMissiles(t *testing.T) {
+	defender := makeUnit("fighter", "Blue", "fighter", 25.12, 51.31)
+	defender.TeamId = "ISR"
+	addWeapons(defender, "aam-shot", 2)
+	m := &InFlightMunition{
+		ID:            "m1",
+		WeaponID:      "raid",
+		ShooterID:     "irn-launcher",
+		ShooterTeam:   "IRN",
+		TargetID:      "isr-base",
+		CurLat:        25.20,
+		CurLon:        51.31,
+		CurAltMsl:     1500,
+		TargetDomains: []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_LAND},
+	}
+	defs := map[string]DefStats{
+		"fighter": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+	}
+	weapons := makeWeaponCatalogWithEffect("aam-shot", 100_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_AIR, enginev1.UnitDomain_DOMAIN_AIR)
+
+	remaining, shots := InterceptMunitionsTick(
+		[]*enginev1.Unit{defender},
+		defs,
+		weapons,
+		[]*InFlightMunition{m},
+		map[string][]string{"ISR": {"m1"}},
+		alwaysHit,
+	)
+	if len(shots) != 0 {
+		t.Fatalf("expected no interceptor shots from aircraft against land-targeting missile, got %+v", shots)
+	}
+	if len(remaining) != 1 {
+		t.Fatalf("expected missile to remain in flight, got %d remaining", len(remaining))
+	}
+}
+
+func TestInterceptMunitionsTick_AircraftDoNotInterceptAirTargetingMissilesWithoutInterceptorWeapons(t *testing.T) {
+	defender := makeUnit("fighter", "Blue", "fighter", 25.12, 51.31)
+	defender.TeamId = "USA"
+	addWeapons(defender, "aam-shot", 2)
+	m := &InFlightMunition{
+		ID:            "m1",
+		WeaponID:      "sam-raid",
+		ShooterID:     "irn-sam",
+		ShooterTeam:   "IRN",
+		TargetID:      "usa-awacs",
+		CurLat:        25.20,
+		CurLon:        51.31,
+		CurAltMsl:     9000,
+		TargetDomains: []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_AIR},
+	}
+	defs := map[string]DefStats{
+		"fighter": {Domain: enginev1.UnitDomain_DOMAIN_AIR},
+	}
+	weapons := makeWeaponCatalogWithEffect("aam-shot", 100_000, 1.0, enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_ANTI_AIR, enginev1.UnitDomain_DOMAIN_AIR)
+
+	remaining, shots := InterceptMunitionsTick(
+		[]*enginev1.Unit{defender},
+		defs,
+		weapons,
+		[]*InFlightMunition{m},
+		map[string][]string{"USA": {"m1"}},
+		alwaysHit,
+	)
+	if len(shots) != 0 {
+		t.Fatalf("expected no interceptor shots from aircraft with AAMs, got %+v", shots)
+	}
+	if len(remaining) != 1 {
+		t.Fatalf("expected missile to remain in flight, got %d remaining", len(remaining))
 	}
 }

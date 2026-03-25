@@ -170,23 +170,32 @@ func GetRelationshipRuleWithCoalitions(rules RelationshipRules, countryCoalition
 			MaritimeStrikeAllowed:       true,
 		}
 	}
-	if recipients, ok := rules[from]; ok {
-		if rule, ok := recipients[to]; ok {
-			return rule
-		}
-	}
+	hostileByCoalition := false
 	if countryCoalitions != nil {
 		fromCoalition := strings.TrimSpace(strings.ToUpper(countryCoalitions[from]))
 		toCoalition := strings.TrimSpace(strings.ToUpper(countryCoalitions[to]))
-		if fromCoalition != "" && toCoalition != "" && fromCoalition != toCoalition {
-			return CountryRelationshipRule{
-				ShareIntel:                  false,
-				AirspaceTransitAllowed:      true,
-				AirspaceStrikeAllowed:       true,
-				DefensivePositioningAllowed: false,
-				MaritimeTransitAllowed:      true,
-				MaritimeStrikeAllowed:       true,
+		hostileByCoalition = fromCoalition != "" && toCoalition != "" && fromCoalition != toCoalition
+	}
+	if recipients, ok := rules[from]; ok {
+		if rule, ok := recipients[to]; ok {
+			if hostileByCoalition {
+				rule.AirspaceTransitAllowed = true
+				rule.AirspaceStrikeAllowed = true
+				rule.DefensivePositioningAllowed = true
+				rule.MaritimeTransitAllowed = true
+				rule.MaritimeStrikeAllowed = true
 			}
+			return rule
+		}
+	}
+	if hostileByCoalition {
+		return CountryRelationshipRule{
+			ShareIntel:                  false,
+			AirspaceTransitAllowed:      true,
+			AirspaceStrikeAllowed:       true,
+			DefensivePositioningAllowed: true,
+			MaritimeTransitAllowed:      true,
+			MaritimeStrikeAllowed:       true,
 		}
 	}
 	return CountryRelationshipRule{}

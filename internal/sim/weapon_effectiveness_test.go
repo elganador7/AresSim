@@ -48,3 +48,56 @@ func TestSelectWeaponForEngagementUsesFallbackTargetClass(t *testing.T) {
 		t.Fatalf("expected anti-ship weapon to be selected with sea-domain fallback, got found=%v weapon=%q", found, weaponID)
 	}
 }
+
+func TestLaunchKillProbability_StealthAircraftReduceAntiAirEffectiveness(t *testing.T) {
+	shooter := DefStats{Accuracy: 0.62}
+	weapon := WeaponStats{
+		RangeM:           300_000,
+		ProbabilityOfHit: 0.77,
+		EffectType:       enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_INTERCEPTOR,
+	}
+	stealth := DefStats{
+		Domain:              enginev1.UnitDomain_DOMAIN_AIR,
+		TargetClass:         "aircraft",
+		RadarCrossSectionM2: 0.0015,
+	}
+	conventional := DefStats{
+		Domain:              enginev1.UnitDomain_DOMAIN_AIR,
+		TargetClass:         "aircraft",
+		RadarCrossSectionM2: 5,
+	}
+
+	stealthPk := launchKillProbability(shooter, weapon, stealth, 120_000)
+	conventionalPk := launchKillProbability(shooter, weapon, conventional, 120_000)
+	if stealthPk >= conventionalPk {
+		t.Fatalf("expected stealth aircraft to reduce anti-air pk: stealth=%f conventional=%f", stealthPk, conventionalPk)
+	}
+	if stealthPk <= 0 {
+		t.Fatalf("expected reduced but nonzero pk against stealth target, got %f", stealthPk)
+	}
+}
+
+func TestLaunchKillProbability_LandStrikeIgnoresStealthFactor(t *testing.T) {
+	shooter := DefStats{Accuracy: 0.7}
+	weapon := WeaponStats{
+		RangeM:           300_000,
+		ProbabilityOfHit: 0.8,
+		EffectType:       enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE,
+	}
+	lowRCS := DefStats{
+		Domain:              enginev1.UnitDomain_DOMAIN_AIR,
+		TargetClass:         "aircraft",
+		RadarCrossSectionM2: 0.0015,
+	}
+	highRCS := DefStats{
+		Domain:              enginev1.UnitDomain_DOMAIN_AIR,
+		TargetClass:         "aircraft",
+		RadarCrossSectionM2: 10,
+	}
+
+	gotLow := launchKillProbability(shooter, weapon, lowRCS, 100_000)
+	gotHigh := launchKillProbability(shooter, weapon, highRCS, 100_000)
+	if gotLow != gotHigh {
+		t.Fatalf("expected non-air-defense effects to ignore stealth factor: %f vs %f", gotLow, gotHigh)
+	}
+}
