@@ -10,6 +10,7 @@ import (
 	"github.com/aressim/internal/db"
 	"github.com/aressim/internal/db/repository"
 	"github.com/aressim/internal/library"
+	"github.com/aressim/internal/routing"
 	"github.com/aressim/internal/sim"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
@@ -50,9 +51,12 @@ type App struct {
 	// defsCache caches the merged combat definition model and
 	// weaponCatalogCache caches the paired merged combat weapon model.
 	// Both are invalidated together when authored data changes.
-	defsCacheMu sync.RWMutex
-	defsCache   map[string]sim.DefStats
+	defsCacheMu        sync.RWMutex
+	defsCache          map[string]sim.DefStats
 	weaponCatalogCache map[string]sim.WeaponStats
+
+	routeCacheMu sync.RWMutex
+	routeCache   map[string]routing.Result
 
 	// lastDetections stores the most recent DetectionSet emitted by SensorTick.
 	// RequestSync re-emits these so reconnecting frontends see current contacts.

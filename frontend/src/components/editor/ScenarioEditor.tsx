@@ -172,7 +172,7 @@ export default function ScenarioEditor({
   ): Promise<string> => {
     const preview = await ((window as any).go?.main?.App?.PreviewDraftTransitPath?.(
       ownerCountry,
-      maritime,
+      maritime ? 3 : 1,
       relationshipsJSON,
       countryCoalitionsJSON,
       draftPointsJSON(points),

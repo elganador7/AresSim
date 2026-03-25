@@ -136,18 +136,19 @@ export function setupCesiumStoreSync({
     }
 
     const order = unit.moveOrder;
-    if (!track && order && order.waypoints.length > 0) {
-      const { humanControlledTeam, units } = useSimStore.getState();
+    const { humanControlledTeam, units, selectedRoutePreview } = useSimStore.getState();
+    const renderedWaypoints = order?.waypoints ?? [];
+    if (!track && renderedWaypoints.length > 0) {
       const routeColor = routeColorForUnit(unit, humanControlledTeam, units);
       const positions: Cartesian3[] = [
         Cartesian3.fromDegrees(unit.position.lon, unit.position.lat),
-        ...order.waypoints.map((wp) => Cartesian3.fromDegrees(wp.lon, wp.lat)),
+        ...renderedWaypoints.map((wp) => Cartesian3.fromDegrees(wp.lon, wp.lat)),
       ];
       const points = [
         { lat: unit.position.lat, lon: unit.position.lon },
-        ...order.waypoints.map((wp) => ({ lat: wp.lat, lon: wp.lon })),
+        ...renderedWaypoints.map((wp) => ({ lat: wp.lat, lon: wp.lon })),
       ];
-      const last = order.waypoints[order.waypoints.length - 1];
+      const last = renderedWaypoints[renderedWaypoints.length - 1];
       const destPos = Cartesian3.fromDegrees(last.lon, last.lat);
 
       const routeEntity = viewer.entities.getById(routeId);
@@ -173,7 +174,6 @@ export function setupCesiumStoreSync({
         .filter((id) => id.startsWith(routeSegmentPrefix))
         .forEach((id) => viewer.entities.removeById(id));
 
-      const selectedRoutePreview = useSimStore.getState().selectedRoutePreview;
       for (let idx = 0; idx < points.length - 1; idx += 1) {
         const start = points[idx];
         const end = points[idx + 1];
@@ -221,7 +221,7 @@ export function setupCesiumStoreSync({
         .forEach((id) => viewer.entities.removeById(id));
 
       if (isSelected) {
-        order.waypoints.forEach((wp, idx) => {
+        renderedWaypoints.forEach((wp, idx) => {
           viewer.entities.add(new Entity({
             id: `${waypointPrefix}${idx}`,
             show: visible,
@@ -279,10 +279,15 @@ export function setupCesiumStoreSync({
         ? `Assigned Target · shared by ${sharedContact.sourceTeam}`
         : (visibleTarget ? "Assigned Target" : "Assigned Target Area");
       if (visibleTarget) {
+        const routedStrikePoints = selectedStrikePreview?.routePoints && selectedStrikePreview.routePoints.length > 0
+          ? selectedStrikePreview.routePoints
+          : [
+            ...(unit.moveOrder?.waypoints ?? []).map((wp) => ({ lat: wp.lat, lon: wp.lon })),
+            { lat: visibleTarget.position.lat, lon: visibleTarget.position.lon },
+          ];
         const pathPoints = [
           { lat: unit.position.lat, lon: unit.position.lon },
-          ...(unit.moveOrder?.waypoints ?? []).map((wp) => ({ lat: wp.lat, lon: wp.lon })),
-          { lat: visibleTarget.position.lat, lon: visibleTarget.position.lon },
+          ...routedStrikePoints,
         ];
         for (let idx = 0; idx < pathPoints.length - 1; idx += 1) {
           const start = pathPoints[idx];
@@ -573,6 +578,7 @@ export function setupCesiumStoreSync({
             || String(r["name"] ?? "").trim();
           map[id] = {
             generalType: numeric(r["general_type"]),
+            domain: numeric(r["domain"]),
             detectionRangeM: numeric(r["detection_range_m"]),
             shortName,
             teamCode: Array.isArray(r["employed_by"]) && r["employed_by"].length > 0

@@ -20,6 +20,7 @@ export type ActiveView = string;
 
 export interface DefInfo {
   generalType: number;
+  domain?: number;
   detectionRangeM: number;
   shortName: string;
   teamCode: string;

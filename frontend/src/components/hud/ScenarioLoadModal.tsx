@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GetScenario, ListScenarios, LoadScenarioFromProto, RunProvingGroundScenario } from "../../../wailsjs/go/main/App";
 
 type ScenarioRow = Record<string, any>;
@@ -16,6 +16,7 @@ export default function ScenarioLoadModal({
   const [runningId, setRunningId] = useState("");
   const [error, setError] = useState("");
   const [benchmarkResults, setBenchmarkResults] = useState<Record<string, Record<string, any>>>({});
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!open) {
@@ -44,6 +45,30 @@ export default function ScenarioLoadModal({
       cancelled = true;
     };
   }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      setSearchQuery("");
+    }
+  }, [open]);
+
+  const filteredItems = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return items;
+    }
+    return items.filter((row) => {
+      const haystack = [
+        String(row.name ?? ""),
+        String(row.author ?? ""),
+        String(row.description ?? ""),
+        String(row.proving_ground_purpose ?? ""),
+        String(row.proving_ground_expected ?? ""),
+        String(row.proving_ground_category ?? ""),
+      ].join(" ").toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [items, searchQuery]);
 
   const handleOpen = async (id: string) => {
     setOpeningId(id);
@@ -87,13 +112,25 @@ export default function ScenarioLoadModal({
           <button className="modal-close" onClick={onClose}>✕</button>
         </div>
         {error && <div className="scenario-quickload-error">{error}</div>}
+        <div className="scenario-modal-search-row">
+          <input
+            className="scenario-modal-search-input"
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search scenarios"
+            aria-label="Search scenarios"
+          />
+        </div>
         {busy ? (
           <div className="modal-empty">Loading…</div>
         ) : items.length === 0 ? (
           <div className="modal-empty">No saved scenarios.</div>
+        ) : filteredItems.length === 0 ? (
+          <div className="modal-empty">No scenarios match that search.</div>
         ) : (
           <div className="modal-body">
-            {items.map((row) => {
+            {filteredItems.map((row) => {
               const id = String(row.id ?? "");
               const name = String(row.name ?? "Untitled");
               const author = String(row.author ?? "Unknown author");
@@ -128,6 +165,8 @@ export default function ScenarioLoadModal({
                         {Number(benchmark.meanFirstShotSeconds ?? -1) >= 0 ? `First shot ${(Number(benchmark.meanFirstShotSeconds) / 60).toFixed(1)} min` : "No shots fired"}
                         {` · shots ${Number(benchmark.meanShotsFired ?? 0).toFixed(1)}`}
                         {` · hits ${Number(benchmark.meanHitsScored ?? 0).toFixed(1)}`}
+                        {Number(benchmark.meanFuelExhaustions ?? 0) > 0 ? ` · fuel outs ${Number(benchmark.meanFuelExhaustions ?? 0).toFixed(1)}` : ""}
+                        {Number(benchmark.meanReplenishments ?? 0) > 0 ? ` · replens ${Number(benchmark.meanReplenishments ?? 0).toFixed(1)}` : ""}
                         {` · losses ${Number(benchmark.meanFocusLosses ?? 0).toFixed(1)} / ${Number(benchmark.meanOpposingLosses ?? 0).toFixed(1)}`}
                       </div>
                     )}

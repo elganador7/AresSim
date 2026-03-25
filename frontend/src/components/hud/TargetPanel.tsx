@@ -77,6 +77,7 @@ export default function TargetPanel() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<"summary" | "shooters">("shooters");
   const [options, setOptions] = useState<Array<{
     shooterUnitId: string;
     shooterDisplayName: string;
@@ -171,6 +172,7 @@ export default function TargetPanel() {
 
   useEffect(() => {
     setSearchQuery("");
+    setActiveTab("shooters");
   }, [selectedTargetId]);
 
   const targetDefinition = target ? definitionMap.get(normalizeDefinitionId(target.definitionId)) : undefined;
@@ -250,6 +252,13 @@ export default function TargetPanel() {
       <div className="unit-panel-body">
         <div className="unit-full-name">{target.fullName}</div>
         <div className="track-source-note">{targetVisibilityStatus}</div>
+        <div className="panel-tabs" role="tablist" aria-label="Target panel sections">
+          <button className={`panel-tab${activeTab === "summary" ? " active" : ""}`} onClick={() => setActiveTab("summary")}>Summary</button>
+          <button className={`panel-tab${activeTab === "shooters" ? " active" : ""}`} onClick={() => setActiveTab("shooters")}>Shooters</button>
+        </div>
+        <div className="panel-tab-content">
+        {activeTab === "summary" ? (
+          <>
         <div className="target-summary-grid">
           <div className="unit-stat-row">
             <span className="stat-label">Country</span>
@@ -286,7 +295,6 @@ export default function TargetPanel() {
             </div>
           </div>
         )}
-        {error && <div className="path-warning-note strike-warning-note">{error}</div>}
         {summary && (
           <div className="weapon-list">
             <div className="weapon-list-header">Evaluation Summary</div>
@@ -306,7 +314,11 @@ export default function TargetPanel() {
             )}
           </div>
         )}
-        <div className="weapon-list">
+          </>
+        ) : null}
+        {error && <div className="path-warning-note strike-warning-note">{error}</div>}
+        {activeTab === "shooters" ? (
+          <div className="weapon-list">
           <div className="weapon-list-header-row">
             <div className="weapon-list-header">Friendly Shooters</div>
             <input
@@ -358,6 +370,8 @@ export default function TargetPanel() {
               )}
             </div>
           ))}
+        </div>
+        ) : null}
         </div>
       </div>
     </div>

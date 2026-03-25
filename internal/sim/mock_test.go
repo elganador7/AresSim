@@ -290,6 +290,272 @@ func TestProcessTick_MultipleWaypoints_AdvancesThrough(t *testing.T) {
 	}
 }
 
+func TestProcessTick_BurnsFuelWhileMoving(t *testing.T) {
+	u := makeMovingUnit("u1", "Blue", "fast", 0, 0, 1, 0)
+	u.Status.FuelLevelLiters = 1000
+	defs := map[string]DefStats{
+		"fast": {
+			CruiseSpeedMps:    100,
+			FuelBurnRateLph:   360,
+			FuelCapacityLiters: 1000,
+		},
+	}
+
+	deltas := processTick([]*enginev1.Unit{u}, defs, 1.0)
+	if len(deltas) != 1 {
+		t.Fatalf("expected one delta, got %d", len(deltas))
+	}
+	if got := u.GetStatus().GetFuelLevelLiters(); math.Abs(float64(got-999.9)) > 0.01 {
+		t.Fatalf("expected fuel burn to reduce level to about 999.9, got %v", got)
+	}
+	if deltas[0].GetStatus() == nil {
+		t.Fatal("expected status delta when fuel changes")
+	}
+}
+
+func TestProcessTick_AircraftRunningOutOfFuelMissionKillsUnit(t *testing.T) {
+	u := makeMovingUnit("u1", "Blue", "fighter", 0, 0, 1, 0)
+	u.Position.AltMsl = 9000
+	u.Status.FuelLevelLiters = 0.05
+	u.Status.CombatEffectiveness = 1
+	defs := map[string]DefStats{
+		"fighter": {
+			Domain:             enginev1.UnitDomain_DOMAIN_AIR,
+			CruiseSpeedMps:     100,
+			FuelBurnRateLph:    360,
+			FuelCapacityLiters: 1000,
+		},
+	}
+
+	deltas := processTick([]*enginev1.Unit{u}, defs, 1.0)
+	if len(deltas) != 1 {
+		t.Fatalf("expected one delta, got %d", len(deltas))
+	}
+	if u.GetDamageState() != enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED {
+		t.Fatalf("expected mission-killed aircraft on fuel exhaustion, got %v", u.GetDamageState())
+	}
+	if u.GetStatus().GetIsActive() {
+		t.Fatal("expected fuel-exhausted aircraft to become inactive")
+	}
+	if u.GetMoveOrder() != nil && len(u.GetMoveOrder().GetWaypoints()) > 0 {
+		t.Fatal("expected fuel-exhausted aircraft move order to be cleared")
+	}
+	if deltas[0].GetDamageState() != enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED {
+		t.Fatalf("expected damage-state delta to reflect fuel exhaustion, got %v", deltas[0].GetDamageState())
+	}
+}
+
+func TestProcessTick_AirborneAircraftBurnsFuelWhileLoitering(t *testing.T) {
+	u := makeUnit("u1", "Blue", "fighter", 0, 0)
+	u.Position.AltMsl = 9000
+	u.Status.FuelLevelLiters = 1000
+	defs := map[string]DefStats{
+		"fighter": {
+			Domain:             enginev1.UnitDomain_DOMAIN_AIR,
+			CruiseSpeedMps:     250,
+			FuelBurnRateLph:    360,
+			FuelCapacityLiters: 1000,
+		},
+	}
+
+	deltas := processTick([]*enginev1.Unit{u}, defs, 1.0)
+	if len(deltas) != 1 {
+		t.Fatalf("expected one delta, got %d", len(deltas))
+	}
+	if got := u.GetStatus().GetFuelLevelLiters(); math.Abs(float64(got-999.9)) > 0.01 {
+		t.Fatalf("expected loiter burn to reduce fuel level to about 999.9, got %v", got)
+	}
+}
+
+func TestProcessBehaviorTick_FuelBingoIssuesReturnToBase(t *testing.T) {
+	base := makeUnit("base", "Blue", "airbase", 0, 0)
+	aircraft := makeUnit("fighter", "Blue", "fighter", 0, 1.0)
+	target := makeUnit("target", "Red", "ground", 0, 2.0)
+	aircraft.HostBaseId = "base"
+	aircraft.Position.AltMsl = 9000
+	aircraft.Status.FuelLevelLiters = 200
+	aircraft.AttackOrder = &enginev1.AttackOrder{
+		OrderType:    enginev1.AttackOrderType_ATTACK_ORDER_TYPE_ATTACK_ASSIGNED_TARGET,
+		TargetUnitId: target.Id,
+	}
+	defs := map[string]DefStats{
+		"fighter": {
+			Domain:             enginev1.UnitDomain_DOMAIN_AIR,
+			CruiseSpeedMps:     250,
+			FuelBurnRateLph:    5000,
+			FuelCapacityLiters: 5000,
+		},
+		"airbase": {
+			Domain: enginev1.UnitDomain_DOMAIN_LAND,
+		},
+		"ground": {
+			Domain: enginev1.UnitDomain_DOMAIN_LAND,
+		},
+	}
+
+	deltas := processBehaviorTick([]*enginev1.Unit{base, aircraft, target}, defs, nil, 0)
+	if len(deltas) != 1 {
+		t.Fatalf("expected one bingo-fuel delta, got %d", len(deltas))
+	}
+	if aircraft.GetAttackOrder() != nil {
+		t.Fatal("expected bingo fuel logic to clear attack order")
+	}
+	if aircraft.GetMoveOrder() == nil || len(aircraft.GetMoveOrder().GetWaypoints()) != 1 {
+		t.Fatal("expected bingo fuel logic to issue a return-to-base route")
+	}
+	wp := aircraft.GetMoveOrder().GetWaypoints()[0]
+	if math.Abs(wp.GetLat()-base.GetPosition().GetLat()) > 0.0001 || math.Abs(wp.GetLon()-base.GetPosition().GetLon()) > 0.0001 {
+		t.Fatalf("expected return waypoint at host base, got (%f,%f)", wp.GetLat(), wp.GetLon())
+	}
+}
+
+func TestProcessBehaviorTick_PrimaryWeaponDepletionIssuesReturnToBase(t *testing.T) {
+	base := makeUnit("base", "Blue", "airbase", 0, 0)
+	aircraft := makeUnit("fighter", "Blue", "fighter", 0, 1.0)
+	target := makeUnit("target", "Red", "ground", 0, 2.0)
+	aircraft.HostBaseId = "base"
+	aircraft.Position.AltMsl = 9000
+	aircraft.Status.FuelLevelLiters = 4000
+	aircraft.Weapons = []*enginev1.WeaponState{
+		{WeaponId: "primary", CurrentQty: 0, MaxQty: 4},
+		{WeaponId: "secondary", CurrentQty: 2, MaxQty: 2},
+	}
+	aircraft.AttackOrder = &enginev1.AttackOrder{
+		OrderType:    enginev1.AttackOrderType_ATTACK_ORDER_TYPE_ATTACK_ASSIGNED_TARGET,
+		TargetUnitId: target.Id,
+	}
+	defs := map[string]DefStats{
+		"fighter": {
+			Domain:             enginev1.UnitDomain_DOMAIN_AIR,
+			CruiseSpeedMps:     250,
+			FuelBurnRateLph:    5000,
+			FuelCapacityLiters: 5000,
+		},
+		"airbase": {
+			Domain: enginev1.UnitDomain_DOMAIN_LAND,
+		},
+		"ground": {
+			Domain: enginev1.UnitDomain_DOMAIN_LAND,
+		},
+	}
+
+	deltas := processBehaviorTick([]*enginev1.Unit{base, aircraft, target}, defs, nil, 0)
+	if len(deltas) != 1 {
+		t.Fatalf("expected one weapon-depletion delta, got %d", len(deltas))
+	}
+	if aircraft.GetAttackOrder() != nil {
+		t.Fatal("expected weapon depletion logic to clear attack order")
+	}
+	if aircraft.GetMoveOrder() == nil || len(aircraft.GetMoveOrder().GetWaypoints()) != 1 {
+		t.Fatal("expected weapon depletion logic to issue a return-to-base route")
+	}
+	wp := aircraft.GetMoveOrder().GetWaypoints()[0]
+	if math.Abs(wp.GetLat()-base.GetPosition().GetLat()) > 0.0001 || math.Abs(wp.GetLon()-base.GetPosition().GetLon()) > 0.0001 {
+		t.Fatalf("expected return waypoint at host base, got (%f,%f)", wp.GetLat(), wp.GetLon())
+	}
+}
+
+func TestProcessTick_ReturningAircraftLandsAtHostBase(t *testing.T) {
+	base := makeUnit("base", "Blue", "airbase", 0, 0)
+	aircraft := makeMovingUnit("fighter", "Blue", "fighter", 0, 0.0005, 0, 0)
+	aircraft.HostBaseId = "base"
+	aircraft.Position.AltMsl = 9000
+	aircraft.Status.FuelLevelLiters = 1000
+	defs := map[string]DefStats{
+		"fighter": {
+			Domain:             enginev1.UnitDomain_DOMAIN_AIR,
+			CruiseSpeedMps:     250,
+			FuelBurnRateLph:    360,
+			FuelCapacityLiters: 1000,
+		},
+		"airbase": {
+			Domain: enginev1.UnitDomain_DOMAIN_LAND,
+		},
+	}
+
+	deltas := processTick([]*enginev1.Unit{base, aircraft}, defs, 1.0)
+	if len(deltas) == 0 {
+		t.Fatal("expected a delta for returning aircraft")
+	}
+	if aircraft.GetPosition().GetAltMsl() != 0 {
+		t.Fatalf("expected returning aircraft to land at host base, got altitude %v", aircraft.GetPosition().GetAltMsl())
+	}
+	if aircraft.GetPosition().GetSpeed() != 0 {
+		t.Fatalf("expected landed aircraft speed to be 0, got %v", aircraft.GetPosition().GetSpeed())
+	}
+}
+
+func TestProcessReplenishmentTick_AircraftAtHostBaseStartsAndCompletesReplenishment(t *testing.T) {
+	base := makeUnit("base", "Blue", "airbase", 0, 0)
+	aircraft := makeUnit("fighter", "Blue", "fighter", 0, 0)
+	aircraft.HostBaseId = "base"
+	aircraft.Status.FuelLevelLiters = 200
+	aircraft.Weapons = []*enginev1.WeaponState{{WeaponId: "aam", CurrentQty: 1, MaxQty: 4}}
+	defs := map[string]DefStats{
+		"fighter": {
+			Domain:               enginev1.UnitDomain_DOMAIN_AIR,
+			FuelCapacityLiters:   1000,
+			SortieIntervalMinutes: 30,
+		},
+		"airbase": {Domain: enginev1.UnitDomain_DOMAIN_LAND, AssetClass: "airbase"},
+	}
+
+	start := processReplenishmentTick([]*enginev1.Unit{base, aircraft}, defs, 0)
+	if len(start) != 1 {
+		t.Fatalf("expected one replenish-start delta, got %d", len(start))
+	}
+	if aircraft.GetStatus().GetIsActive() {
+		t.Fatal("expected aircraft to become inactive while replenishing")
+	}
+	if aircraft.GetNextSortieReadySeconds() != 1800 {
+		t.Fatalf("expected replenish timer at 1800s, got %v", aircraft.GetNextSortieReadySeconds())
+	}
+
+	complete := processReplenishmentTick([]*enginev1.Unit{base, aircraft}, defs, 1800)
+	if len(complete) != 1 {
+		t.Fatalf("expected one replenish-complete delta, got %d", len(complete))
+	}
+	if !aircraft.GetStatus().GetIsActive() {
+		t.Fatal("expected aircraft to reactivate after replenishment")
+	}
+	if aircraft.GetStatus().GetFuelLevelLiters() != 1000 {
+		t.Fatalf("expected full fuel after replenishment, got %v", aircraft.GetStatus().GetFuelLevelLiters())
+	}
+	if aircraft.GetWeapons()[0].GetCurrentQty() != 4 {
+		t.Fatalf("expected rearmed weapon qty 4, got %v", aircraft.GetWeapons()[0].GetCurrentQty())
+	}
+}
+
+func TestProcessReplenishmentTick_GroundUnitNearLogisticsProviderReplenishes(t *testing.T) {
+	logistics := makeUnit("logi", "Blue", "logistics", 0, 0)
+	ground := makeUnit("armor", "Blue", "armor", 0, 0.005)
+	ground.Status.FuelLevelLiters = 50
+	ground.Weapons = []*enginev1.WeaponState{{WeaponId: "gun", CurrentQty: 1, MaxQty: 3}}
+	defs := map[string]DefStats{
+		"logistics": {Domain: enginev1.UnitDomain_DOMAIN_LAND, GeneralType: int32(enginev1.UnitGeneralType_GENERAL_TYPE_LOGISTICS)},
+		"armor":     {Domain: enginev1.UnitDomain_DOMAIN_LAND, FuelCapacityLiters: 300},
+	}
+
+	start := processReplenishmentTick([]*enginev1.Unit{logistics, ground}, defs, 0)
+	if len(start) != 1 {
+		t.Fatalf("expected one replenish-start delta, got %d", len(start))
+	}
+	if ground.GetStatus().GetIsActive() {
+		t.Fatal("expected ground unit to become inactive while replenishing")
+	}
+
+	complete := processReplenishmentTick([]*enginev1.Unit{logistics, ground}, defs, 3600)
+	if len(complete) != 1 {
+		t.Fatalf("expected one replenish-complete delta, got %d", len(complete))
+	}
+	if ground.GetStatus().GetFuelLevelLiters() != 300 {
+		t.Fatalf("expected ground unit fuel restored, got %v", ground.GetStatus().GetFuelLevelLiters())
+	}
+	if ground.GetWeapons()[0].GetCurrentQty() != 3 {
+		t.Fatalf("expected ground unit ammo restored, got %v", ground.GetWeapons()[0].GetCurrentQty())
+	}
+}
+
 func TestProcessBehaviorTick_ShadowContact_IssuesMoveOrder(t *testing.T) {
 	shadow := makeUnit("shadow", "Blue", "air", 0, 0)
 	target := makeUnit("target", "Red", "ground", 0, 0.1)

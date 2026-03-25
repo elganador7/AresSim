@@ -594,6 +594,31 @@ body,
   font-size: 12px;
 }
 
+.scenario-modal-search-row {
+  padding: 0 16px 12px;
+}
+
+.scenario-modal-search-input {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.7);
+  color: #e5e7eb;
+  font-size: 12px;
+  font-family: var(--font-ui);
+}
+
+.scenario-modal-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.scenario-modal-search-input:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.55);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
+}
+
 .modal-scenario-copy {
   display: flex;
   flex-direction: column;
@@ -1024,6 +1049,7 @@ body,
   top: 88px;
   right: 16px;
   width: 260px;
+  max-height: calc(100vh - 116px);
   background: rgba(15, 17, 21, 0.92);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1031,6 +1057,8 @@ body,
   font-family: var(--font-ui);
   font-size: 12px;
   color: #d1d5db;
+  display: flex;
+  flex-direction: column;
 }
 
 .target-panel {
@@ -1047,6 +1075,8 @@ body,
   font-family: var(--font-ui);
   font-size: 12px;
   color: #d1d5db;
+  display: flex;
+  flex-direction: column;
 }
 
 .unit-panel-header {
@@ -1097,6 +1127,47 @@ body,
   display: flex;
   flex-direction: column;
   gap: 6px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.panel-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 2px 0 6px;
+  flex-wrap: wrap;
+}
+
+.panel-tab {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #9ca3af;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.panel-tab:hover {
+  color: #e5e7eb;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.panel-tab.active {
+  color: #f8fafc;
+  background: rgba(59, 130, 246, 0.16);
+  border-color: rgba(59, 130, 246, 0.32);
+}
+
+.panel-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
 }
 
 .unit-full-name {
@@ -1191,6 +1262,16 @@ body,
   padding: 4px 6px;
   background: rgba(245, 158, 11, 0.08);
   border: 1px solid rgba(245, 158, 11, 0.22);
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+
+.replenishment-note {
+  font-size: 10px;
+  color: #bfdbfe;
+  padding: 4px 6px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.22);
   border-radius: 3px;
   margin-bottom: 4px;
 }

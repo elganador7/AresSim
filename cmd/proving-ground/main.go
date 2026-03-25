@@ -31,6 +31,8 @@ type runSummary struct {
 	MeanFirstShotSeconds     float64                  `json:"meanFirstShotSeconds"`
 	MeanShotsFired           float64                  `json:"meanShotsFired"`
 	MeanHitsScored           float64                  `json:"meanHitsScored"`
+	MeanFuelExhaustions      float64                  `json:"meanFuelExhaustions"`
+	MeanReplenishments       float64                  `json:"meanReplenishments"`
 	MeanFocusLosses          float64                  `json:"meanFocusLosses"`
 	MeanOpposingLosses       float64                  `json:"meanOpposingLosses"`
 	Pass                     bool                     `json:"pass"`
@@ -121,6 +123,8 @@ func main() {
 			MeanFirstShotSeconds:     aggregate.MeanFirstShotSeconds,
 			MeanShotsFired:           aggregate.MeanShotsFired,
 			MeanHitsScored:           aggregate.MeanHitsScored,
+			MeanFuelExhaustions:      aggregate.MeanFuelExhaustions,
+			MeanReplenishments:       aggregate.MeanReplenishments,
 			MeanFocusLosses:          aggregate.MeanFocusLosses,
 			MeanOpposingLosses:       aggregate.MeanOpposingLosses,
 			Pass:                     passesExpectedBands(aggregate, spec),
@@ -299,6 +303,8 @@ func defStatsFromLibraryDefinition(def library.Definition) sim.DefStats {
 		Accuracy:                    float64(def.Accuracy),
 		DetectionRangeM:             float64(def.DetectionRangeM),
 		RadarCrossSectionM2:         float64(def.RadarCrossSectionM2),
+		FuelCapacityLiters:          float64(def.FuelCapacityLiters),
+		FuelBurnRateLph:             float64(def.FuelBurnRateLph),
 		GeneralType:                 int32(def.GeneralType),
 		EmploymentRole:              strings.TrimSpace(def.EmploymentRole),
 		ReplacementCostUSD:          def.ReplacementCostUSD,

@@ -88,10 +88,11 @@ export function setupCesiumInteractions(
   viewer.screenSpaceEventHandler.setInputAction(
     (evt: { endPosition: Cartesian2 }) => {
       const drag = draggingWaypointRef.current;
-      if (!drag) return;
       const next = pickLatLon(viewer, evt.endPosition);
       if (!next) return;
-      previewDraggedWaypoint(viewer, drag.unitId, drag.waypointIndex, next.lat, next.lon);
+      if (drag) {
+        previewDraggedWaypoint(viewer, drag.unitId, drag.waypointIndex, next.lat, next.lon);
+      }
     },
     ScreenSpaceEventType.MOUSE_MOVE,
   );
@@ -135,6 +136,7 @@ export function setupCesiumInteractions(
         selectTarget,
         startRouteEdit,
         clearMapCommandMode,
+        setSelectedRoutePreview,
       } = useSimStore.getState();
 
       const picked = viewer.scene.pick(evt.position);
@@ -153,6 +155,7 @@ export function setupCesiumInteractions(
               const nextSelectedTargetId = selectedTargetId === clickedId ? null : clickedId;
               selectTarget(nextSelectedTargetId);
               clearMapCommandMode();
+              setSelectedRoutePreview(null);
             }
             return;
           }
@@ -160,6 +163,7 @@ export function setupCesiumInteractions(
           selectUnit(nextSelectedId);
           selectTarget(null);
           clearMapCommandMode();
+          setSelectedRoutePreview(null);
           if (nextSelectedId && clickedUnit && canMove(clickedUnit, activeView, defInfoRef.current)) {
             startRouteEdit(nextSelectedId);
           }
@@ -178,6 +182,7 @@ export function setupCesiumInteractions(
       if (mapCommandMode.type === "route" && mapCommandMode.unitId === selectedUnitId) {
         AppendMoveWaypoint(selectedUnitId, lat, lon)
           .then(ensureBridgeSuccess)
+          .then(() => setSelectedRoutePreview(null))
           .catch((error) => {
             console.error(error);
             alert(error instanceof Error ? error.message : String(error));
@@ -188,6 +193,7 @@ export function setupCesiumInteractions(
       MoveUnit(selectedUnitId, lat, lon)
         .then(ensureBridgeSuccess)
         .then(() => {
+          setSelectedRoutePreview(null);
           selectUnit(null);
           selectTarget(null);
         })

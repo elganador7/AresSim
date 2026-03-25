@@ -91,6 +91,17 @@ func TestLookupPointInternationalWaters(t *testing.T) {
 	}
 }
 
+func TestLookupPointHormuzTransitPassage(t *testing.T) {
+	point := Point{Lat: 26.22, Lon: 56.30}
+	ctx := LookupPoint(point)
+	if !ctx.IsTransitPassage {
+		t.Fatal("expected Hormuz point to be marked as transit passage")
+	}
+	if IsLandPoint(point) {
+		t.Fatal("expected Hormuz transit-passage point to remain water")
+	}
+}
+
 func TestIsLandPoint(t *testing.T) {
 	if !IsLandPoint(Point{Lat: 32.08, Lon: 34.78}) {
 		t.Fatal("expected Tel Aviv point to be land")
@@ -112,6 +123,15 @@ func TestSegmentCrossesLand(t *testing.T) {
 		Point{Lat: 25.30, Lon: 52.20},
 	) {
 		t.Fatal("expected open-water segment not to cross land")
+	}
+}
+
+func TestIsNearLand(t *testing.T) {
+	if !IsNearLand(Point{Lat: 25.53, Lon: 51.24}, 0.03) {
+		t.Fatal("expected near-coast maritime point to be near land")
+	}
+	if IsNearLand(Point{Lat: 25.30, Lon: 52.20}, 0.03) {
+		t.Fatal("expected open-water Gulf point not to be near land")
 	}
 }
 

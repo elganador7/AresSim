@@ -18,6 +18,7 @@ type ProvingGroundTrialResult struct {
 	FirstShotSeconds            float64
 	ShotsFired                  int
 	HitsScored                  int
+	FuelExhaustions             int
 	FocusLosses                 int
 	OpposingLosses              int
 	TerminalReason              string
@@ -36,6 +37,8 @@ type ProvingGroundAggregate struct {
 	MeanFirstShotSeconds  float64
 	MeanShotsFired        float64
 	MeanHitsScored        float64
+	MeanFuelExhaustions   float64
+	MeanReplenishments    float64
 	MeanFocusLosses       float64
 	MeanOpposingLosses    float64
 	TerminalReasons       map[string]int
@@ -74,10 +77,64 @@ func RunProvingGroundTrial(
 		TargetMissionKillTimeSecond: -1,
 		TargetDestroyedTimeSecond:   -1,
 	}
+	fuelExhaustedSeen := map[string]bool{}
+	replenishingState := map[string]bool{}
+	for _, unit := range units {
+		if unit == nil {
+			continue
+		}
+		replenishingState[unit.GetId()] = unitIsReplenishing(unit, simSeconds)
+	}
 
 	for simSeconds < maxSimSeconds {
 		processBehaviorTick(units, defs, weapons, simSeconds)
-		processTick(units, defs, 1.0)
+		moveDeltas := processTick(units, defs, 1.0)
+		for _, delta := range moveDeltas {
+			if delta == nil || delta.GetStatus() == nil {
+				continue
+			}
+			if fuelExhaustedSeen[delta.GetUnitId()] {
+				continue
+			}
+			if delta.GetStatus().GetFuelLevelLiters() > 0 {
+				continue
+			}
+			if delta.GetDamageState() != enginev1.DamageState_DAMAGE_STATE_MISSION_KILLED {
+				continue
+			}
+			fuelExhaustedSeen[delta.GetUnitId()] = true
+			result.FuelExhaustions++
+			result.Events = append(result.Events, ProvingGroundEvent{
+				TimeSeconds: simSeconds,
+				Type:        "fuel_exhausted",
+				ActorUnitID: delta.GetUnitId(),
+				Detail:      "unit exhausted fuel and became mission-killed",
+			})
+		}
+		for _, unit := range units {
+			if unit == nil {
+				continue
+			}
+			replenishingNow := unitIsReplenishing(unit, simSeconds)
+			replenishingBefore := replenishingState[unit.GetId()]
+			switch {
+			case replenishingNow && !replenishingBefore:
+				result.Events = append(result.Events, ProvingGroundEvent{
+					TimeSeconds: simSeconds,
+					Type:        "replenishment_started",
+					ActorUnitID: unit.GetId(),
+					Detail:      "unit entered refuel/rearm cycle",
+				})
+			case !replenishingNow && replenishingBefore:
+				result.Events = append(result.Events, ProvingGroundEvent{
+					TimeSeconds: simSeconds,
+					Type:        "replenishment_complete",
+					ActorUnitID: unit.GetId(),
+					Detail:      "unit completed refuel/rearm cycle",
+				})
+			}
+			replenishingState[unit.GetId()] = replenishingNow
+		}
 
 		adj := AdjudicateTick(units, defs, weapons, inFlight, rules, simSeconds)
 		for _, shot := range adj.Shots {
@@ -229,7 +286,7 @@ func AggregateProvingGroundResults(results []ProvingGroundTrialResult, focusTeam
 		return ProvingGroundAggregate{FocusTeam: focusTeam}
 	}
 	var wins, missionKills, destroyed int
-	var elapsed, firstShot, shotsFired, hitsScored, focusLosses, opposingLosses float64
+	var elapsed, firstShot, shotsFired, hitsScored, fuelExhaustions, replenishments, focusLosses, opposingLosses float64
 	var firstShotObserved int
 	terminalReasons := map[string]int{}
 	var sampleEvents []ProvingGroundEvent
@@ -246,6 +303,8 @@ func AggregateProvingGroundResults(results []ProvingGroundTrialResult, focusTeam
 		elapsed += result.ElapsedSeconds
 		shotsFired += float64(result.ShotsFired)
 		hitsScored += float64(result.HitsScored)
+		fuelExhaustions += float64(result.FuelExhaustions)
+		replenishments += float64(countEventType(result.Events, "replenishment_started"))
 		focusLosses += float64(result.FocusLosses)
 		opposingLosses += float64(result.OpposingLosses)
 		if result.FirstShotSeconds >= 0 {
@@ -274,6 +333,8 @@ func AggregateProvingGroundResults(results []ProvingGroundTrialResult, focusTeam
 		MeanFirstShotSeconds:  meanFirstShot,
 		MeanShotsFired:        shotsFired / n,
 		MeanHitsScored:        hitsScored / n,
+		MeanFuelExhaustions:   fuelExhaustions / n,
+		MeanReplenishments:    replenishments / n,
 		MeanFocusLosses:       focusLosses / n,
 		MeanOpposingLosses:    opposingLosses / n,
 		TerminalReasons:       terminalReasons,
@@ -388,4 +449,24 @@ func findUnitByID(units []*enginev1.Unit, id string) *enginev1.Unit {
 		}
 	}
 	return nil
+}
+
+func unitIsReplenishing(unit *enginev1.Unit, simSeconds float64) bool {
+	if unit == nil || unit.GetStatus() == nil {
+		return false
+	}
+	if unit.GetStatus().GetIsActive() {
+		return false
+	}
+	return unit.GetNextSortieReadySeconds() > simSeconds
+}
+
+func countEventType(events []ProvingGroundEvent, eventType string) int {
+	count := 0
+	for _, event := range events {
+		if event.Type == eventType {
+			count++
+		}
+	}
+	return count
 }

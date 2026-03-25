@@ -165,6 +165,8 @@ func (a *App) RunProvingGroundScenario(id string, trials int) (map[string]any, e
 		"meanFirstShotSeconds":     aggregate.MeanFirstShotSeconds,
 		"meanShotsFired":           aggregate.MeanShotsFired,
 		"meanHitsScored":           aggregate.MeanHitsScored,
+		"meanFuelExhaustions":      aggregate.MeanFuelExhaustions,
+		"meanReplenishments":       aggregate.MeanReplenishments,
 		"meanFocusLosses":          aggregate.MeanFocusLosses,
 		"meanOpposingLosses":       aggregate.MeanOpposingLosses,
 		"terminalReasons":          aggregate.TerminalReasons,

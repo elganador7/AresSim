@@ -40,7 +40,7 @@ export function PreviewDraftRelationships(arg1:string,arg2:string,arg3:string):P
 
 export function PreviewDraftStrikePath(arg1:string,arg2:boolean,arg3:string,arg4:string,arg5:string):Promise<main.PathViolationPreview>;
 
-export function PreviewDraftTransitPath(arg1:string,arg2:boolean,arg3:string,arg4:string,arg5:string):Promise<main.PathViolationPreview>;
+export function PreviewDraftTransitPath(arg1:string,arg2:number,arg3:string,arg4:string,arg5:string):Promise<main.PathViolationPreview>;
 
 export function PreviewEngagementOptions(arg1:string):Promise<Array<main.EngagementOptionPreview>>;
 
@@ -53,6 +53,8 @@ export function PreviewTargetEngagementSummary(arg1:string,arg2:string):Promise<
 export function RemoveMoveWaypoint(arg1:string,arg2:number):Promise<main.BridgeResult>;
 
 export function RequestSync():Promise<main.BridgeResult>;
+
+export function ReturnUnitToBase(arg1:string):Promise<main.BridgeResult>;
 
 export function RunProvingGroundScenario(arg1:string,arg2:number):Promise<Record<string, any>>;
 

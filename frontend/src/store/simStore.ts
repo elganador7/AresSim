@@ -123,6 +123,7 @@ export interface PathViolationPreview {
   country?: string;
   legIndex?: number;
   reason?: string;
+  routePoints?: { lat: number; lon: number }[];
 }
 
 export interface Unit {

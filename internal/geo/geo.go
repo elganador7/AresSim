@@ -37,6 +37,7 @@ type GeoContext struct {
 	SeaZoneType             SeaZoneType
 	IsInternationalWaters   bool
 	IsInternationalAirspace bool
+	IsTransitPassage        bool
 }
 
 type GeoSegmentContext struct {
@@ -73,6 +74,11 @@ type maritimePolygon struct {
 	shape    polygonShape
 }
 
+type transitPassagePolygon struct {
+	name  string
+	shape polygonShape
+}
+
 //go:embed data/world_borders.json
 var worldBordersJSON []byte
 
@@ -86,6 +92,7 @@ var (
 	worldMaritimePolygons []maritimePolygon
 	loadMaritimeOnce      sync.Once
 	loadMaritimeErr       error
+	worldTransitPassages  []transitPassagePolygon
 )
 
 type featureCollectionJSON struct {
@@ -202,11 +209,19 @@ func LookupPoint(p Point) GeoContext {
 				ctx.AirspaceType = RegionTypeNationalAirspace
 				ctx.IsInternationalAirspace = false
 			}
-			return ctx
+			break
 		}
 	}
 
-	if !ctx.IsInternationalAirspace {
+	for _, passage := range worldTransitPassages {
+		if pointInPolygon(p.Lon, p.Lat, passage.shape) &&
+			(ctx.SeaZoneType != SeaZoneTypeNone || ctx.IsInternationalWaters) {
+			ctx.IsTransitPassage = true
+			break
+		}
+	}
+
+	if !ctx.IsInternationalAirspace && ctx.SeaZoneOwner == "" {
 		ctx.SeaZoneType = SeaZoneTypeNone
 		ctx.IsInternationalWaters = false
 	}
@@ -231,6 +246,29 @@ func IsLandPoint(p Point) bool {
 		ctx.SeaZoneOwner == "" &&
 		ctx.SeaZoneType == SeaZoneTypeNone &&
 		!ctx.IsInternationalAirspace
+}
+
+func IsNearLand(p Point, radiusDeg float64) bool {
+	if radiusDeg <= 0 {
+		return IsLandPoint(p)
+	}
+	samples := []Point{
+		p,
+		{Lat: p.Lat + radiusDeg, Lon: p.Lon},
+		{Lat: p.Lat - radiusDeg, Lon: p.Lon},
+		{Lat: p.Lat, Lon: p.Lon + radiusDeg},
+		{Lat: p.Lat, Lon: p.Lon - radiusDeg},
+		{Lat: p.Lat + radiusDeg*0.707, Lon: p.Lon + radiusDeg*0.707},
+		{Lat: p.Lat + radiusDeg*0.707, Lon: p.Lon - radiusDeg*0.707},
+		{Lat: p.Lat - radiusDeg*0.707, Lon: p.Lon + radiusDeg*0.707},
+		{Lat: p.Lat - radiusDeg*0.707, Lon: p.Lon - radiusDeg*0.707},
+	}
+	for _, sample := range samples {
+		if IsLandPoint(sample) {
+			return true
+		}
+	}
+	return false
 }
 
 func SegmentCrossesLand(start, end Point) bool {
@@ -314,6 +352,40 @@ func BuildMaritimeRoute(start, end Point) ([]Point, bool) {
 	}
 
 	return nil, false
+}
+
+func init() {
+	worldTransitPassages = []transitPassagePolygon{
+		{
+			name: "Strait of Hormuz",
+			shape: mustPolygonShape([][][2]float64{
+				{
+					{55.70, 26.75},
+					{57.05, 26.75},
+					{57.05, 25.55},
+					{55.70, 25.55},
+					{55.70, 26.75},
+				},
+			}),
+		},
+	}
+}
+
+func mustPolygonShape(rings [][][2]float64) polygonShape {
+	if len(rings) == 0 || len(rings[0]) < 3 {
+		panic("invalid transit passage polygon")
+	}
+	shape := polygonShape{
+		Exterior: rings[0],
+		Holes:    make([][][2]float64, 0, maxInt(len(rings)-1, 0)),
+		Bounds:   computeBounds(rings[0]),
+	}
+	for _, hole := range rings[1:] {
+		if len(hole) >= 3 {
+			shape.Holes = append(shape.Holes, hole)
+		}
+	}
+	return shape
 }
 
 func sampleSegment(start, end Point) GeoSegmentContext {

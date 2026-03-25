@@ -106,6 +106,10 @@ export function RequestSync() {
   return window['go']['main']['App']['RequestSync']();
 }
 
+export function ReturnUnitToBase(arg1) {
+  return window['go']['main']['App']['ReturnUnitToBase'](arg1);
+}
+
 export function RunProvingGroundScenario(arg1, arg2) {
   return window['go']['main']['App']['RunProvingGroundScenario'](arg1, arg2);
 }

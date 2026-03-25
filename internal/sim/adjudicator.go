@@ -15,6 +15,8 @@ type DefStats struct {
 	Accuracy                    float64
 	DetectionRangeM             float64
 	RadarCrossSectionM2         float64
+	FuelCapacityLiters          float64
+	FuelBurnRateLph             float64
 	SensorSuite                 []SensorCapability
 	GeneralType                 int32
 	EmploymentRole              string

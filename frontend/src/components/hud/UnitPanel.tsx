@@ -5,6 +5,7 @@ import {
   PreviewCurrentEngagement,
   RemoveMoveWaypoint,
   RequestSync,
+  ReturnUnitToBase,
   SetUnitEngagement,
   SetUnitLoadoutConfiguration,
 } from "../../../wailsjs/go/main/App";
@@ -91,11 +92,22 @@ function normalizeDefinitionId(definitionId: string | undefined): string {
   return idx >= 0 ? raw.slice(idx + 1) : raw;
 }
 
+function isHostedAtBase(host: Unit, candidate: Unit): boolean {
+  if (candidate.hostBaseId !== host.id) {
+    return false;
+  }
+  if ((candidate.position.altMsl ?? 0) > 50) {
+    return false;
+  }
+  return true;
+}
+
 export default function UnitPanel() {
   const selectedUnitId = useSimStore((s) => s.selectedUnitId);
   const units = useSimStore((s) => s.units);
   const weaponDefs = useSimStore((s) => s.weaponDefs);
   const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
+  const simSeconds = useSimStore((s) => s.simSeconds);
   const selectUnit = useSimStore((s) => s.selectUnit);
   const routePreview = useSimStore((s) => s.selectedRoutePreview);
   const strikePreview = useSimStore((s) => s.selectedStrikePreview);
@@ -105,6 +117,7 @@ export default function UnitPanel() {
   const startRouteEdit = useSimStore((s) => s.startRouteEdit);
   const clearMapCommandMode = useSimStore((s) => s.clearMapCommandMode);
   const [definitionMap, setDefinitionMap] = useState<Map<string, UnitDefinitionPanelMeta>>(new Map());
+  const [activeTab, setActiveTab] = useState<"overview" | "commands" | "status" | "armament">("overview");
 
   const unit = selectedUnitId ? units.get(selectedUnitId) : undefined;
   const playerTeam = selectedPlayerTeam(humanControlledTeam);
@@ -122,12 +135,22 @@ export default function UnitPanel() {
   const definition = unit ? definitionMap.get(normalizeDefinitionId(unit.definitionId)) : undefined;
   const canHost = canHostAircraft(definition);
   const isFacility = isFixedFacility(definition);
+  const isStationary = Boolean(definition?.stationary) || isFacility;
+  const nextReadySeconds = unit?.nextSortieReadySeconds ?? 0;
+  const readyInSeconds = Math.max(0, nextReadySeconds - simSeconds);
+  const replenishing = Boolean(unit && !unit.status.isActive && unit.damageState === 1 && nextReadySeconds > simSeconds);
   const hostedUnits = useMemo(() => {
     if (!unit) {
       return [];
     }
-    return Array.from(units.values()).filter((candidate) => candidate.hostBaseId === unit.id);
+    return Array.from(units.values()).filter((candidate) => isHostedAtBase(unit, candidate));
   }, [unit, units]);
+  const hostBase = useMemo(() => {
+    if (!unit?.hostBaseId) {
+      return undefined;
+    }
+    return units.get(unit.hostBaseId);
+  }, [unit?.hostBaseId, units]);
 
   const [engagementBehavior, setEngagementBehavior] = useState(unit?.engagementBehavior ?? 1);
   const [engagementPkillThreshold, setEngagementPkillThreshold] = useState(unit?.engagementPkillThreshold ?? 0.5);
@@ -213,6 +236,10 @@ export default function UnitPanel() {
     setEngagementBehavior(unit.engagementBehavior ?? 1);
     setEngagementPkillThreshold(unit.engagementPkillThreshold ?? 0.5);
     setSelectedLoadoutId(unit.loadoutConfigurationId ?? "");
+  }, [unit?.id]);
+
+  useEffect(() => {
+    setActiveTab("overview");
   }, [unit?.id]);
 
   useEffect(() => {
@@ -306,15 +333,35 @@ export default function UnitPanel() {
 
   const loadoutOptions = definition?.weaponConfigurations ?? [];
   const canSelectLoadout = controllable
-    && !isFacility
+    && !isStationary
     && Boolean(unit?.hostBaseId)
     && (unit?.position.altMsl ?? 0) <= 0
     && loadoutOptions.length > 0;
+  const canReturnToBase = controllable
+    && !isStationary
+    && Boolean(unit?.hostBaseId)
+    && !!hostBase
+    && !!unit
+    && !isHostedAtBase(hostBase!, unit);
   const removeWaypoint = async (index: number) => {
     if (!unit) return;
     setBusy(true);
     try {
       ensureSuccess(await RemoveMoveWaypoint(unit.id, index));
+      ensureSuccess(await RequestSync());
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : String(error));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const returnToBase = async () => {
+    if (!unit) return;
+    setBusy(true);
+    try {
+      ensureSuccess(await ReturnUnitToBase(unit.id));
       ensureSuccess(await RequestSync());
     } catch (error) {
       console.error(error);
@@ -348,6 +395,11 @@ export default function UnitPanel() {
 
       <div className="unit-panel-body">
         <div className="unit-full-name">{unit.fullName}</div>
+        {replenishing && (
+          <div className="replenishment-note">
+            Replenishing. Ready in {formatETA(readyInSeconds)}.
+          </div>
+        )}
         {controllable && routeWarning && (
           <div className="path-warning-note">
             {routeWarning}
@@ -358,7 +410,18 @@ export default function UnitPanel() {
             {strikeWarning}
           </div>
         )}
-        {!isFacility && unit.moveOrder && unit.moveOrder.waypoints.length > 0 ? (() => {
+        <div className="panel-tabs" role="tablist" aria-label="Unit panel sections">
+          <button className={`panel-tab${activeTab === "overview" ? " active" : ""}`} onClick={() => setActiveTab("overview")}>Overview</button>
+          {controllable && !isStationary ? (
+            <button className={`panel-tab${activeTab === "commands" ? " active" : ""}`} onClick={() => setActiveTab("commands")}>Commands</button>
+          ) : null}
+          <button className={`panel-tab${activeTab === "status" ? " active" : ""}`} onClick={() => setActiveTab("status")}>Status</button>
+          <button className={`panel-tab${activeTab === "armament" ? " active" : ""}`} onClick={() => setActiveTab("armament")}>Armament</button>
+        </div>
+        <div className="panel-tab-content">
+        {activeTab === "overview" ? (
+          <>
+        {!isStationary && unit.moveOrder && unit.moveOrder.waypoints.length > 0 ? (() => {
           const waypoints = unit.moveOrder.waypoints;
           const last = waypoints[waypoints.length - 1];
           const points = [
@@ -383,6 +446,12 @@ export default function UnitPanel() {
                 <span className="stat-label">Waypoints</span>
                 <span className="stat-value">{waypoints.length}</span>
               </div>
+              {routePreview?.routePoints && routePreview.routePoints.length > 0 ? (
+                <div className="move-order-row">
+                  <span className="stat-label">Routed Legs</span>
+                  <span className="stat-value">{Math.max(routePreview.routePoints.length - 1, 0)}</span>
+                </div>
+              ) : null}
               <div className="move-order-row">
                 <span className="stat-label">Distance</span>
                 <span className="stat-value">{formatDist(totalM)}</span>
@@ -434,7 +503,7 @@ export default function UnitPanel() {
               )}
             </div>
           );
-        })() : !isFacility ? (
+        })() : !isStationary ? (
           <div className={`move-hint ${controllable ? "" : "move-hint-locked"}`}>
             {controllable
               ? routeModeActive
@@ -459,10 +528,43 @@ export default function UnitPanel() {
             <div className="facility-summary-copy">
               Fixed installation. Base operations and hosted-unit readiness matter here, not movement or onboard fuel.
             </div>
+            <div className="facility-summary-row">
+              <span className="stat-label">Hosted Units</span>
+              <span className="stat-value">{hostedUnits.length}</span>
+            </div>
+            {hostedUnits.length > 0 && (
+              <div className="facility-hosted-list">
+                {hostedUnits.map((hosted) => (
+                  (() => {
+                    const hostedReadyAt = hosted.nextSortieReadySeconds ?? 0;
+                    return (
+                      <button
+                        key={hosted.id}
+                        className="facility-hosted-row"
+                        onClick={() => selectUnit(hosted.id)}
+                      >
+                        <span>{hosted.displayName}</span>
+                        <span>
+                          {hosted.damageState === 4
+                            ? "Destroyed"
+                            : (!hosted.status.isActive && hosted.damageState === 1 && hostedReadyAt > simSeconds)
+                              ? "Replenishing"
+                              : hostedReadyAt > simSeconds
+                                ? `Ready ${formatETA(hostedReadyAt - simSeconds)}`
+                                : "Ready"}
+                        </span>
+                      </button>
+                    );
+                  })()
+                ))}
+              </div>
+            )}
           </div>
         )}
+          </>
+        ) : null}
 
-        {controllable && !isFacility && (
+        {activeTab === "commands" && controllable && !isStationary && (
           <div className="unit-command-section">
             <div className="unit-command-header">Commands</div>
             <div className="unit-command-row">
@@ -537,6 +639,11 @@ export default function UnitPanel() {
               <button className="cancel-order-btn" disabled={busy} onClick={() => saveCommands().catch(console.error)}>
                 Apply Commands
               </button>
+              {canReturnToBase && (
+                <button className="cancel-order-btn" disabled={busy} onClick={() => returnToBase().catch(console.error)}>
+                  Return to Base
+                </button>
+              )}
               <button
                 className={`cancel-order-btn${routeModeActive ? " route-edit-active" : ""}`}
                 disabled={busy}
@@ -548,6 +655,8 @@ export default function UnitPanel() {
           </div>
         )}
 
+        {activeTab === "status" ? (
+          <>
         <div className="unit-stat-row">
           <span className="stat-label">Country</span>
           <span className="stat-value" style={{ color: teamColor }}>
@@ -560,7 +669,7 @@ export default function UnitPanel() {
             <span className="stat-value">{unit.coalitionId}</span>
           </div>
         )}
-        {!isFacility ? (
+        {!isStationary ? (
           <>
             <div className="unit-stat-row">
               <span className="stat-label">Effectiveness</span>
@@ -579,6 +688,12 @@ export default function UnitPanel() {
               <span className="stat-value">{Math.round(unit.status.fuelLevelLiters)}</span>
             </div>
             <div className="unit-stat-row">
+              <span className="stat-label">Readiness</span>
+              <span className="stat-value">
+                {nextReadySeconds > simSeconds ? `Ready in ${formatETA(readyInSeconds)}` : "Ready"}
+              </span>
+            </div>
+            <div className="unit-stat-row">
               <span className="stat-label">Morale</span>
               <span className="stat-value">{Math.round(unit.status.morale * 100)}%</span>
             </div>
@@ -589,27 +704,10 @@ export default function UnitPanel() {
           </>
         ) : (
           <>
-            <div className="unit-stat-row">
-              <span className="stat-label">Hosted Units</span>
-              <span className="stat-value">{hostedUnits.length}</span>
-            </div>
-            {hostedUnits.length > 0 && (
-              <div className="facility-hosted-list">
-                {hostedUnits.map((hosted) => (
-                  <button
-                    key={hosted.id}
-                    className="facility-hosted-row"
-                    onClick={() => selectUnit(hosted.id)}
-                  >
-                    <span>{hosted.displayName}</span>
-                    <span>{hosted.damageState === 4 ? "Destroyed" : hosted.nextSortieReadySeconds && hosted.nextSortieReadySeconds > 0 ? "Delayed" : "Ready"}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="move-hint">Hosted-aircraft readiness is shown on the Overview tab.</div>
           </>
         )}
-        {!isFacility && canHost && (
+        {!isStationary && canHost && (
           <>
             <div className="unit-stat-row">
               <span className="stat-label">Embarked Units</span>
@@ -618,20 +716,37 @@ export default function UnitPanel() {
             {hostedUnits.length > 0 && (
               <div className="facility-hosted-list">
                 {hostedUnits.map((hosted) => (
-                  <button
-                    key={hosted.id}
-                    className="facility-hosted-row"
-                    onClick={() => selectUnit(hosted.id)}
-                  >
-                    <span>{hosted.displayName}</span>
-                    <span>{hosted.damageState === 4 ? "Destroyed" : hosted.nextSortieReadySeconds && hosted.nextSortieReadySeconds > 0 ? "Delayed" : "Ready"}</span>
-                  </button>
+                  (() => {
+                    const hostedReadyAt = hosted.nextSortieReadySeconds ?? 0;
+                    return (
+                      <button
+                        key={hosted.id}
+                        className="facility-hosted-row"
+                        onClick={() => selectUnit(hosted.id)}
+                      >
+                        <span>{hosted.displayName}</span>
+                        <span>
+                          {hosted.damageState === 4
+                            ? "Destroyed"
+                            : (!hosted.status.isActive && hosted.damageState === 1 && hostedReadyAt > simSeconds)
+                              ? "Replenishing"
+                              : hostedReadyAt > simSeconds
+                                ? `Ready ${formatETA(hostedReadyAt - simSeconds)}`
+                                : "Ready"}
+                        </span>
+                      </button>
+                    );
+                  })()
                 ))}
               </div>
             )}
           </>
         )}
+          </>
+        ) : null}
 
+        {activeTab === "armament" ? (
+          <>
         <div className="unit-position">
           <span className="stat-label">Position</span>
           <span className="stat-value position-value">
@@ -666,6 +781,9 @@ export default function UnitPanel() {
             })}
           </div>
         )}
+          </>
+        ) : null}
+        </div>
       </div>
     </div>
   );

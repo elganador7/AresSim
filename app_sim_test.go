@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"math"
 	"strings"
 	"testing"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
+	"github.com/aressim/internal/geo"
 	"github.com/aressim/internal/library"
+	"github.com/aressim/internal/routing"
 	scenario "github.com/aressim/internal/scenario"
 	"github.com/aressim/internal/sim"
 	"github.com/surrealdb/surrealdb.go/pkg/models"
@@ -215,6 +218,530 @@ func TestValidateAndConsumeLaunch_DegradedBaseSlowsLaunchAndSortieWindows(t *tes
 	}
 	if got := app.currentScenario.Units[1].GetNextSortieReadySeconds(); got != 7500 {
 		t.Fatalf("expected degraded sortie ready time 7500, got %v", got)
+	}
+}
+
+func TestMoveUnit_SurfaceShipBlockedByForeignTerritorialWaters(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"surface-ship": {
+			Domain:         enginev1.UnitDomain_DOMAIN_SEA,
+			CruiseSpeedMps: 12,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Units: []*enginev1.Unit{{
+			Id:           "ship-1",
+			TeamId:       "USA",
+			DefinitionId: "surface-ship",
+			Position:     &enginev1.Position{Lat: 25.30, Lon: 51.80, Speed: 12},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.MoveUnit("ship-1", 25.44547, 51.66943)
+	if result.Success {
+		t.Fatal("expected surface ship move into foreign territorial waters to be blocked")
+	}
+	if !strings.Contains(result.Error, "territorial waters") {
+		t.Fatalf("expected territorial waters error, got %q", result.Error)
+	}
+}
+
+func TestMoveUnit_SurfaceShipAllowedWithMaritimeTransitPermission(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"surface-ship": {
+			Domain:         enginev1.UnitDomain_DOMAIN_SEA,
+			CruiseSpeedMps: 12,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{{
+			FromCountry:            "USA",
+			ToCountry:              "QAT",
+			MaritimeTransitAllowed: true,
+		}},
+		Units: []*enginev1.Unit{{
+			Id:           "ship-1",
+			TeamId:       "USA",
+			DefinitionId: "surface-ship",
+			Position:     &enginev1.Position{Lat: 25.30, Lon: 51.80, Speed: 12},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.MoveUnit("ship-1", 25.44547, 51.66943)
+	if !result.Success {
+		t.Fatalf("expected surface ship move with maritime transit permission to succeed, got %q", result.Error)
+	}
+}
+
+func TestAppendMoveWaypoint_SubsurfaceCanTransitForeignTerritorialWaters(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"attack-sub": {
+			Domain:         enginev1.UnitDomain_DOMAIN_SUBSURFACE,
+			CruiseSpeedMps: 7,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Units: []*enginev1.Unit{{
+			Id:           "sub-1",
+			TeamId:       "USA",
+			DefinitionId: "attack-sub",
+			Position:     &enginev1.Position{Lat: 25.30, Lon: 51.80, Speed: 7},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.AppendMoveWaypoint("sub-1", 25.44547, 51.66943)
+	if !result.Success {
+		t.Fatalf("expected subsurface waypoint into foreign territorial waters to succeed, got %q", result.Error)
+	}
+}
+
+func TestMoveUnit_AirUnitBlockedByForeignAirspaceWithoutTransitPermission(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"fighter": {
+			Domain:         enginev1.UnitDomain_DOMAIN_AIR,
+			CruiseSpeedMps: 250,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{{
+			FromCountry:            "USA",
+			ToCountry:              "QAT",
+			AirspaceTransitAllowed: true,
+		}},
+		Units: []*enginev1.Unit{{
+			Id:           "air-1",
+			TeamId:       "USA",
+			DefinitionId: "fighter",
+			Position:     &enginev1.Position{Lat: 25.12, Lon: 51.31, AltMsl: 9000, Speed: 250},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.MoveUnit("air-1", 28.95, 50.83)
+	if result.Success {
+		t.Fatal("expected air move into foreign airspace without transit permission to be blocked")
+	}
+	if !strings.Contains(result.Error, "airspace") {
+		t.Fatalf("expected airspace error, got %q", result.Error)
+	}
+}
+
+func TestMoveUnit_AirUnitAllowedWithTransitPermission(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"fighter": {
+			Domain:         enginev1.UnitDomain_DOMAIN_AIR,
+			CruiseSpeedMps: 250,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{
+			{
+				FromCountry:            "USA",
+				ToCountry:              "QAT",
+				AirspaceTransitAllowed: true,
+			},
+			{
+				FromCountry:            "USA",
+				ToCountry:              "IRN",
+				AirspaceTransitAllowed: true,
+			},
+		},
+		Units: []*enginev1.Unit{{
+			Id:           "air-1",
+			TeamId:       "USA",
+			DefinitionId: "fighter",
+			Position:     &enginev1.Position{Lat: 25.12, Lon: 51.31, AltMsl: 9000, Speed: 250},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.MoveUnit("air-1", 28.95, 50.83)
+	if !result.Success {
+		t.Fatalf("expected air move with transit permission to succeed, got %q", result.Error)
+	}
+}
+
+func TestMoveUnit_LandUnitBlockedByForeignBorder(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"ground-unit": {
+			Domain:         enginev1.UnitDomain_DOMAIN_LAND,
+			CruiseSpeedMps: 15,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{{
+			FromCountry:            "USA",
+			ToCountry:              "IRQ",
+			AirspaceTransitAllowed: true,
+		}},
+		Units: []*enginev1.Unit{{
+			Id:           "land-1",
+			TeamId:       "USA",
+			DefinitionId: "ground-unit",
+			Position:     &enginev1.Position{Lat: 30.50, Lon: 47.70, Speed: 15},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.MoveUnit("land-1", 30.40, 48.20)
+	if result.Success {
+		t.Fatal("expected land move across closed foreign border to be blocked")
+	}
+	if !strings.Contains(result.Error, "land border") {
+		t.Fatalf("expected land border error, got %q", result.Error)
+	}
+}
+
+func TestMoveUnit_LandUnitAllowedWithBorderPermission(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"ground-unit": {
+			Domain:         enginev1.UnitDomain_DOMAIN_LAND,
+			CruiseSpeedMps: 15,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{
+			{
+				FromCountry:            "USA",
+				ToCountry:              "IRQ",
+				AirspaceTransitAllowed: true,
+			},
+			{
+				FromCountry:            "USA",
+				ToCountry:              "IRN",
+				AirspaceTransitAllowed: true,
+			},
+		},
+		Units: []*enginev1.Unit{{
+			Id:           "land-1",
+			TeamId:       "USA",
+			DefinitionId: "ground-unit",
+			Position:     &enginev1.Position{Lat: 30.50, Lon: 47.70, Speed: 15},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.MoveUnit("land-1", 30.40, 48.20)
+	if !result.Success {
+		t.Fatalf("expected land move with border permission to succeed, got %q", result.Error)
+	}
+}
+
+func TestMoveUnit_StationaryUnitRejected(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"airbase": {
+			Domain:         enginev1.UnitDomain_DOMAIN_LAND,
+			CruiseSpeedMps: 0,
+			AssetClass:     "airbase",
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Units: []*enginev1.Unit{{
+			Id:           "base-1",
+			TeamId:       "USA",
+			DefinitionId: "airbase",
+			Position:     &enginev1.Position{Lat: 25.12, Lon: 51.31},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.MoveUnit("base-1", 25.20, 51.40)
+	if result.Success {
+		t.Fatal("expected stationary unit move to be rejected")
+	}
+}
+
+func TestAppendMoveWaypoint_StationaryUnitRejected(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"airbase": {
+			Domain:         enginev1.UnitDomain_DOMAIN_LAND,
+			CruiseSpeedMps: 0,
+			AssetClass:     "airbase",
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Units: []*enginev1.Unit{{
+			Id:           "base-1",
+			TeamId:       "USA",
+			DefinitionId: "airbase",
+			Position:     &enginev1.Position{Lat: 25.12, Lon: 51.31},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.AppendMoveWaypoint("base-1", 25.20, 51.40)
+	if result.Success {
+		t.Fatal("expected stationary unit waypoint append to be rejected")
+	}
+}
+
+func TestMoveUnit_SurfaceShipReroutesAroundQatar(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"surface-ship": {
+			Domain:         enginev1.UnitDomain_DOMAIN_SEA,
+			CruiseSpeedMps: 12,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{
+			{FromCountry: "USA", ToCountry: "SAU", MaritimeTransitAllowed: true},
+			{FromCountry: "USA", ToCountry: "ARE", MaritimeTransitAllowed: true},
+			{FromCountry: "USA", ToCountry: "BHR", MaritimeTransitAllowed: true},
+		},
+		Units: []*enginev1.Unit{{
+			Id:           "ship-1",
+			TeamId:       "USA",
+			DefinitionId: "surface-ship",
+			Position:     &enginev1.Position{Lat: 24.90, Lon: 50.30, Speed: 12},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.MoveUnit("ship-1", 24.80, 52.30)
+	if !result.Success {
+		t.Fatalf("expected rerouted surface move to succeed, got %q", result.Error)
+	}
+	waypoints := app.currentScenario.GetUnits()[0].GetMoveOrder().GetWaypoints()
+	if len(waypoints) < 2 {
+		t.Fatalf("expected rerouted maritime move order with intermediate waypoints, got %d", len(waypoints))
+	}
+}
+
+func TestMoveUnit_SurfaceShipCanTransitHormuzPassage(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"surface-ship": {
+			Domain:         enginev1.UnitDomain_DOMAIN_SEA,
+			CruiseSpeedMps: 12,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Units: []*enginev1.Unit{{
+			Id:           "ship-1",
+			TeamId:       "USA",
+			DefinitionId: "surface-ship",
+			Position:     &enginev1.Position{Lat: 25.86, Lon: 55.18, Speed: 12},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.MoveUnit("ship-1", 26.34, 56.82)
+	if !result.Success {
+		t.Fatalf("expected Hormuz transit move to succeed, got %q", result.Error)
+	}
+	waypoints := app.currentScenario.GetUnits()[0].GetMoveOrder().GetWaypoints()
+	if len(waypoints) == 0 {
+		t.Fatal("expected routed Hormuz move order")
+	}
+}
+
+func TestMoveUnit_AirUnitReroutesAroundDeniedQatariAirspace(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"fighter": {
+			Domain:         enginev1.UnitDomain_DOMAIN_AIR,
+			CruiseSpeedMps: 250,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{
+			{FromCountry: "USA", ToCountry: "SAU", AirspaceTransitAllowed: true},
+			{FromCountry: "USA", ToCountry: "ARE", AirspaceTransitAllowed: true},
+			{FromCountry: "USA", ToCountry: "BHR", AirspaceTransitAllowed: true},
+		},
+		Units: []*enginev1.Unit{{
+			Id:           "air-1",
+			TeamId:       "USA",
+			DefinitionId: "fighter",
+			Position:     &enginev1.Position{Lat: 24.90, Lon: 50.30, AltMsl: 9000, Speed: 250},
+			Status:       &enginev1.OperationalStatus{IsActive: true},
+		}},
+	}
+
+	result := app.MoveUnit("air-1", 24.80, 53.30)
+	if !result.Success {
+		t.Fatalf("expected rerouted air move to succeed, got %q", result.Error)
+	}
+	waypoints := app.currentScenario.GetUnits()[0].GetMoveOrder().GetWaypoints()
+	if len(waypoints) < 2 {
+		t.Fatalf("expected rerouted air move order with intermediate waypoints, got %d", len(waypoints))
+	}
+}
+
+func TestReturnUnitToBase_ClearsAttackAndIssuesHomeRoute(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"fighter": {
+			Domain:         enginev1.UnitDomain_DOMAIN_AIR,
+			CruiseSpeedMps: 250,
+		},
+		"airbase": {
+			Domain: enginev1.UnitDomain_DOMAIN_LAND,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{
+			{FromCountry: "USA", ToCountry: "QAT", AirspaceTransitAllowed: true},
+		},
+		Units: []*enginev1.Unit{
+			{
+				Id:           "base-1",
+				TeamId:       "USA",
+				DefinitionId: "airbase",
+				Position:     &enginev1.Position{Lat: 25.12, Lon: 51.31},
+				Status:       &enginev1.OperationalStatus{IsActive: true},
+			},
+			{
+				Id:           "air-1",
+				TeamId:       "USA",
+				DefinitionId: "fighter",
+				HostBaseId:   "base-1",
+				Position:     &enginev1.Position{Lat: 25.80, Lon: 52.20, AltMsl: 9000, Speed: 250},
+				Status:       &enginev1.OperationalStatus{IsActive: true},
+				AttackOrder: &enginev1.AttackOrder{
+					OrderType:    enginev1.AttackOrderType_ATTACK_ORDER_TYPE_ATTACK_ASSIGNED_TARGET,
+					TargetUnitId: "target-1",
+				},
+			},
+		},
+	}
+
+	result := app.ReturnUnitToBase("air-1")
+	if !result.Success {
+		t.Fatalf("expected return-to-base to succeed, got %q", result.Error)
+	}
+	aircraft := app.currentScenario.GetUnits()[1]
+	if aircraft.GetAttackOrder() != nil {
+		t.Fatal("expected return-to-base to clear attack order")
+	}
+	if aircraft.GetMoveOrder() == nil || len(aircraft.GetMoveOrder().GetWaypoints()) == 0 {
+		t.Fatal("expected return-to-base to issue a route home")
+	}
+	last := aircraft.GetMoveOrder().GetWaypoints()[len(aircraft.GetMoveOrder().GetWaypoints())-1]
+	if math.Abs(last.GetLat()-25.12) > 0.0001 || math.Abs(last.GetLon()-51.31) > 0.0001 {
+		t.Fatalf("expected final waypoint at host base, got (%f,%f)", last.GetLat(), last.GetLon())
+	}
+}
+
+func TestPreviewCurrentStrikePath_AirStrikeUsesRoutedPreview(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.defsCache = map[string]sim.DefStats{
+		"strike-aircraft": {
+			Domain:         enginev1.UnitDomain_DOMAIN_AIR,
+			CruiseSpeedMps: 250,
+		},
+		"target-site": {
+			Domain:      enginev1.UnitDomain_DOMAIN_LAND,
+			AssetClass:  "airbase",
+			TargetClass: "runway",
+		},
+	}
+	app.weaponCatalogCache = map[string]sim.WeaponStats{
+		"agm-158-jassm-er": {
+			RangeM:           900_000,
+			SpeedMps:         250,
+			ProbabilityOfHit: 0.8,
+			DomainTargets:    []enginev1.UnitDomain{enginev1.UnitDomain_DOMAIN_LAND},
+			EffectType:       enginev1.WeaponEffectType_WEAPON_EFFECT_TYPE_LAND_STRIKE,
+		},
+	}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{
+			{FromCountry: "USA", ToCountry: "SAU", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
+			{FromCountry: "USA", ToCountry: "QAT", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
+			{FromCountry: "USA", ToCountry: "ARE", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
+			{FromCountry: "USA", ToCountry: "BHR", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
+		},
+		Units: []*enginev1.Unit{
+			{
+				Id:           "air-1",
+				TeamId:       "USA",
+				DefinitionId: "strike-aircraft",
+				Position:     &enginev1.Position{Lat: 24.90, Lon: 50.30, AltMsl: 9000, Speed: 250},
+				Status:       &enginev1.OperationalStatus{IsActive: true, CombatEffectiveness: 1},
+				Weapons: []*enginev1.WeaponState{
+					{WeaponId: "agm-158-jassm-er", CurrentQty: 2, MaxQty: 2},
+				},
+			},
+			{
+				Id:           "target-1",
+				TeamId:       "IRN",
+				DefinitionId: "target-site",
+				Position:     &enginev1.Position{Lat: 24.80, Lon: 53.30},
+				Status:       &enginev1.OperationalStatus{IsActive: true, CombatEffectiveness: 1},
+			},
+		},
+	}
+	app.lastDetections = map[string][]string{
+		"USA": {"target-1"},
+	}
+
+	app.currentScenario.GetUnits()[0].AttackOrder = &enginev1.AttackOrder{
+		OrderType:     enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT,
+		TargetUnitId:  "target-1",
+		DesiredEffect: enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL,
+	}
+
+	preview, err := app.PreviewCurrentStrikePath("air-1")
+	if err != nil {
+		t.Fatalf("PreviewCurrentStrikePath failed: %v", err)
+	}
+	if preview.Blocked {
+		t.Fatalf("expected routed strike preview to succeed, got %q", preview.Reason)
+	}
+	if len(preview.RoutePoints) == 0 {
+		t.Fatal("expected routed strike preview points")
+	}
+}
+
+func TestRouteCacheInvalidatesAfterRelationshipChange(t *testing.T) {
+	app := &App{ctx: context.Background()}
+	app.currentScenario = &enginev1.Scenario{
+		Relationships: []*enginev1.CountryRelationship{},
+	}
+
+	blocked := app.cachedBuildRoute(routing.Request{
+		OwnerCountry:      "USA",
+		Domain:            enginev1.UnitDomain_DOMAIN_SEA,
+		Purpose:           routing.PurposeMove,
+		Start:             geo.Point{Lat: 25.30, Lon: 51.80},
+		End:               geo.Point{Lat: 25.44547, Lon: 51.66943},
+		RelationshipRules: app.relationshipRules(),
+		CountryCoalitions: app.countryCoalitions(),
+	})
+	if !blocked.Blocked {
+		t.Fatal("expected initial route to be blocked")
+	}
+
+	result := app.SetCountryRelationship("USA", "QAT", false, false, false, false, true, false)
+	if !result.Success {
+		t.Fatalf("SetCountryRelationship failed: %q", result.Error)
+	}
+
+	allowed := app.cachedBuildRoute(routing.Request{
+		OwnerCountry:      "USA",
+		Domain:            enginev1.UnitDomain_DOMAIN_SEA,
+		Purpose:           routing.PurposeMove,
+		Start:             geo.Point{Lat: 25.30, Lon: 51.80},
+		End:               geo.Point{Lat: 25.44547, Lon: 51.66943},
+		RelationshipRules: app.relationshipRules(),
+		CountryCoalitions: app.countryCoalitions(),
+	})
+	if allowed.Blocked {
+		t.Fatalf("expected cached route to be invalidated after relationship change, got %q", allowed.Reason)
 	}
 }
 

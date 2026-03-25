@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aressim/internal/geo"
+	"github.com/aressim/internal/routing"
 	"github.com/aressim/internal/sim"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
@@ -14,10 +15,11 @@ import (
 )
 
 type PathViolationPreview struct {
-	Blocked  bool   `json:"blocked"`
-	Country  string `json:"country,omitempty"`
-	LegIndex int    `json:"legIndex,omitempty"`
-	Reason   string `json:"reason,omitempty"`
+	Blocked     bool              `json:"blocked"`
+	Country     string            `json:"country,omitempty"`
+	LegIndex    int               `json:"legIndex,omitempty"`
+	Reason      string            `json:"reason,omitempty"`
+	RoutePoints []draftPointInput `json:"routePoints,omitempty"`
 }
 
 type EngagementPreview struct {
@@ -352,6 +354,10 @@ func isMaritimeDomain(domain enginev1.UnitDomain) bool {
 	return domain == enginev1.UnitDomain_DOMAIN_SEA || domain == enginev1.UnitDomain_DOMAIN_SUBSURFACE
 }
 
+func isSubsurfaceDomain(domain enginev1.UnitDomain) bool {
+	return domain == enginev1.UnitDomain_DOMAIN_SUBSURFACE
+}
+
 type draftRelationshipInput struct {
 	FromCountry                 string `json:"fromCountry"`
 	ToCountry                   string `json:"toCountry"`
@@ -430,11 +436,12 @@ func currentScenarioCountries(scen *enginev1.Scenario) []string {
 	return countries
 }
 
-func previewTransitPath(ownerCountry string, maritime bool, points []geo.Point, rules sim.RelationshipRules, countryCoalitions map[string]string) *PathViolationPreview {
+func previewTransitPath(ownerCountry string, domain enginev1.UnitDomain, points []geo.Point, rules sim.RelationshipRules, countryCoalitions map[string]string) *PathViolationPreview {
 	ownerCountry = sim.CountryDisplayCode(ownerCountry)
 	if ownerCountry == "" || len(points) < 2 {
 		return nil
 	}
+	maritime := isMaritimeDomain(domain)
 	if maritime {
 		for idx := 1; idx < len(points); idx++ {
 			if geo.IsLandPoint(points[idx]) {
@@ -452,6 +459,9 @@ func previewTransitPath(ownerCountry string, maritime bool, points []geo.Point, 
 				}
 			}
 		}
+	}
+	if isSubsurfaceDomain(domain) {
+		return nil
 	}
 	for idx, segment := range geo.SamplePath(points) {
 		var countries []string
@@ -584,14 +594,17 @@ func previewDefensiveAirPath(ownerCountry string, points []geo.Point, rules sim.
 }
 
 func (a *App) validateTransit(ownerCountry string, domain enginev1.UnitDomain, startLat, startLon, endLat, endLon float64) error {
-	if violation := previewTransitPath(
-		ownerCountry,
-		isMaritimeDomain(domain),
-		[]geo.Point{{Lat: startLat, Lon: startLon}, {Lat: endLat, Lon: endLon}},
-		a.relationshipRules(),
-		a.countryCoalitions(),
-	); violation != nil {
-		return fmt.Errorf("%s", violation.Reason)
+	result := a.cachedBuildRoute(routing.Request{
+		OwnerCountry:      ownerCountry,
+		Domain:            domain,
+		Purpose:           routing.PurposeMove,
+		Start:             geo.Point{Lat: startLat, Lon: startLon},
+		End:               geo.Point{Lat: endLat, Lon: endLon},
+		RelationshipRules: a.relationshipRules(),
+		CountryCoalitions: a.countryCoalitions(),
+	})
+	if result.Blocked {
+		return fmt.Errorf("%s", result.Reason)
 	}
 	return nil
 }
@@ -661,6 +674,13 @@ func isDefensiveAirInterceptMission(targetDef sim.DefStats, weapon sim.WeaponSta
 	return targetDef.Domain == enginev1.UnitDomain_DOMAIN_AIR
 }
 
+func routePurposeForStrikeMission(targetDef sim.DefStats, weapon sim.WeaponStats) routing.Purpose {
+	if isDefensiveAirInterceptMission(targetDef, weapon) {
+		return routing.PurposeDefensiveAir
+	}
+	return routing.PurposeStrike
+}
+
 func (a *App) validateStrikeWithWeapon(shooter, target *enginev1.Unit, weaponID string) error {
 	if shooter == nil || target == nil {
 		return nil
@@ -674,23 +694,18 @@ func (a *App) validateStrikeWithWeapon(shooter, target *enginev1.Unit, weaponID 
 	}
 	domain := a.getCachedDefs()[extractRecordID(shooter.DefinitionId)].Domain
 	targetDef := a.getCachedDefs()[extractRecordID(target.DefinitionId)]
-	points := [][2]float64{{shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon()}}
-	for _, wp := range shooter.GetMoveOrder().GetWaypoints() {
-		points = append(points, [2]float64{wp.GetLat(), wp.GetLon()})
-	}
-	points = append(points, [2]float64{target.GetPosition().GetLat(), target.GetPosition().GetLon()})
-	pathPoints := make([]geo.Point, 0, len(points))
-	for _, point := range points {
-		pathPoints = append(pathPoints, geo.Point{Lat: point[0], Lon: point[1]})
-	}
 	weapons := a.getCachedWeaponCatalog()
+	points := []geo.Point{
+		{Lat: shooter.GetPosition().GetLat(), Lon: shooter.GetPosition().GetLon(), AltMsl: shooter.GetPosition().GetAltMsl()},
+		{Lat: target.GetPosition().GetLat(), Lon: target.GetPosition().GetLon(), AltMsl: target.GetPosition().GetAltMsl()},
+	}
 	if weapon, ok := weaponStatsForID(weapons, weaponID); ok && isDefensiveAirInterceptMission(targetDef, weapon) {
-		if violation := previewDefensiveAirPath(ownerCountry, pathPoints, a.relationshipRules(), a.countryCoalitions()); violation != nil {
+		if violation := previewDefensiveAirPath(ownerCountry, points, a.relationshipRules(), a.countryCoalitions()); violation != nil && violation.Blocked {
 			return fmt.Errorf("%s", violation.Reason)
 		}
 		return nil
 	}
-	if violation := previewStrikePath(ownerCountry, isMaritimeDomain(domain), pathPoints, a.relationshipRules(), a.countryCoalitions()); violation != nil {
+	if violation := previewStrikePath(ownerCountry, isMaritimeDomain(domain), points, a.relationshipRules(), a.countryCoalitions()); violation != nil && violation.Blocked {
 		return fmt.Errorf("%s", violation.Reason)
 	}
 	return nil
@@ -719,10 +734,14 @@ func (a *App) PreviewCurrentTransitPath(unitID string) (*PathViolationPreview, e
 	for _, wp := range unit.GetMoveOrder().GetWaypoints() {
 		points = append(points, geo.Point{Lat: wp.GetLat(), Lon: wp.GetLon()})
 	}
-	violation := previewTransitPath(unitCountryCode(unit), isMaritimeDomain(domain), points, a.relationshipRules(), a.countryCoalitions())
+	violation := previewTransitPath(unitCountryCode(unit), domain, points, a.relationshipRules(), a.countryCoalitions())
 	if violation == nil {
-		return &PathViolationPreview{Blocked: false}, nil
+		return &PathViolationPreview{
+			Blocked:     false,
+			RoutePoints: pointsToDraftInputs(points),
+		}, nil
 	}
+	violation.RoutePoints = pointsToDraftInputs(points)
 	return violation, nil
 }
 
@@ -773,6 +792,34 @@ func (a *App) PreviewCurrentStrikePath(unitID string) (*PathViolationPreview, er
 		unit.GetAttackOrder().GetOrderType() == enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT,
 		a.getSimSeconds(),
 	)
+	ownerCountry := unitCountryCode(unit)
+	if ownerCountry != "" && (unit.GetMoveOrder() == nil || len(unit.GetMoveOrder().GetWaypoints()) == 0 || unit.GetMoveOrder().GetAutoGenerated()) {
+		if a.shooterCanUseBallisticStrikeWeapon(unit, target, decision.WeaponID) {
+			return &PathViolationPreview{
+				Blocked:     false,
+				RoutePoints: pointsToDraftInputs([]geo.Point{{Lat: target.GetPosition().GetLat(), Lon: target.GetPosition().GetLon()}}),
+			}, nil
+		}
+		purpose := routing.PurposeStrike
+		if weapon, ok := weaponStatsForID(a.getCachedWeaponCatalog(), decision.WeaponID); ok {
+			purpose = routePurposeForStrikeMission(a.getCachedDefs()[extractRecordID(target.DefinitionId)], weapon)
+		}
+		result := a.cachedBuildRoute(routing.Request{
+			OwnerCountry:      ownerCountry,
+			Domain:            domain,
+			Purpose:           purpose,
+			Start:             geo.Point{Lat: unit.GetPosition().GetLat(), Lon: unit.GetPosition().GetLon(), AltMsl: unit.GetPosition().GetAltMsl()},
+			End:               geo.Point{Lat: target.GetPosition().GetLat(), Lon: target.GetPosition().GetLon(), AltMsl: target.GetPosition().GetAltMsl()},
+			RelationshipRules: a.relationshipRules(),
+			CountryCoalitions: a.countryCoalitions(),
+		})
+		return &PathViolationPreview{
+			Blocked:     result.Blocked,
+			Country:     result.Country,
+			Reason:      result.Reason,
+			RoutePoints: pointsToDraftInputs(result.Points),
+		}, nil
+	}
 	var violation *PathViolationPreview
 	if weapon, ok := weaponStatsForID(a.getCachedWeaponCatalog(), decision.WeaponID); ok && isDefensiveAirInterceptMission(a.getCachedDefs()[extractRecordID(target.DefinitionId)], weapon) {
 		violation = previewDefensiveAirPath(unitCountryCode(unit), points, a.relationshipRules(), a.countryCoalitions())
@@ -780,8 +827,9 @@ func (a *App) PreviewCurrentStrikePath(unitID string) (*PathViolationPreview, er
 		violation = previewStrikePath(unitCountryCode(unit), isMaritimeDomain(domain), points, a.relationshipRules(), a.countryCoalitions())
 	}
 	if violation == nil {
-		return &PathViolationPreview{Blocked: false}, nil
+		return &PathViolationPreview{Blocked: false, RoutePoints: pointsToDraftInputs(points[1:])}, nil
 	}
+	violation.RoutePoints = pointsToDraftInputs(points[1:])
 	return violation, nil
 }
 
@@ -1044,7 +1092,7 @@ func parseDraftCountries(countriesJSON string) ([]string, error) {
 	return countries, nil
 }
 
-func (a *App) PreviewDraftTransitPath(ownerCountry string, maritime bool, relationshipsJSON, countryCoalitionsJSON, pointsJSON string) (*PathViolationPreview, error) {
+func (a *App) PreviewDraftTransitPath(ownerCountry string, domainValue int32, relationshipsJSON, countryCoalitionsJSON, pointsJSON string) (*PathViolationPreview, error) {
 	rules, err := parseDraftRelationshipRules(relationshipsJSON)
 	if err != nil {
 		return nil, err
@@ -1057,11 +1105,26 @@ func (a *App) PreviewDraftTransitPath(ownerCountry string, maritime bool, relati
 	if err != nil {
 		return nil, err
 	}
-	violation := previewTransitPath(ownerCountry, maritime, points, rules, countryCoalitions)
-	if violation == nil {
+	domain := enginev1.UnitDomain(domainValue)
+	if domain == enginev1.UnitDomain_DOMAIN_UNSPECIFIED {
+		domain = enginev1.UnitDomain_DOMAIN_LAND
+	}
+	if len(points) == 0 {
 		return &PathViolationPreview{Blocked: false}, nil
 	}
-	return violation, nil
+	result := a.cachedBuildRoute(routing.Request{
+		OwnerCountry:      ownerCountry,
+		Domain:            domain,
+		Purpose:           routing.PurposeMove,
+		Start:             points[0],
+		End:               points[len(points)-1],
+		RelationshipRules: rules,
+		CountryCoalitions: countryCoalitions,
+	})
+	if !result.Blocked {
+		return &PathViolationPreview{Blocked: false, RoutePoints: pointsToDraftInputs(result.Points)}, nil
+	}
+	return &PathViolationPreview{Blocked: true, Country: result.Country, Reason: result.Reason, RoutePoints: pointsToDraftInputs(result.Points)}, nil
 }
 
 func (a *App) PreviewDraftStrikePath(ownerCountry string, maritime bool, relationshipsJSON, countryCoalitionsJSON, pointsJSON string) (*PathViolationPreview, error) {
@@ -1082,6 +1145,17 @@ func (a *App) PreviewDraftStrikePath(ownerCountry string, maritime bool, relatio
 		return &PathViolationPreview{Blocked: false}, nil
 	}
 	return violation, nil
+}
+
+func pointsToDraftInputs(points []geo.Point) []draftPointInput {
+	if len(points) == 0 {
+		return nil
+	}
+	out := make([]draftPointInput, 0, len(points))
+	for _, point := range points {
+		out = append(out, draftPointInput{Lat: point.Lat, Lon: point.Lon})
+	}
+	return out
 }
 
 func (a *App) PreviewDraftPlacement(ownerCountry string, maritime bool, employmentRole, relationshipsJSON, countryCoalitionsJSON string, lat, lon float64) (*PathViolationPreview, error) {

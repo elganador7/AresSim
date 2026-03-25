@@ -106,11 +106,26 @@ export namespace main {
 	        this.inStrikeCooldown = source["inStrikeCooldown"];
 	    }
 	}
+	export class draftPointInput {
+	    lat: number;
+	    lon: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new draftPointInput(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.lat = source["lat"];
+	        this.lon = source["lon"];
+	    }
+	}
 	export class PathViolationPreview {
 	    blocked: boolean;
 	    country?: string;
 	    legIndex?: number;
 	    reason?: string;
+	    routePoints?: draftPointInput[];
 	
 	    static createFrom(source: any = {}) {
 	        return new PathViolationPreview(source);
@@ -122,7 +137,26 @@ export namespace main {
 	        this.country = source["country"];
 	        this.legIndex = source["legIndex"];
 	        this.reason = source["reason"];
+	        this.routePoints = this.convertValues(source["routePoints"], draftPointInput);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class TargetEngagementDebugSummary {
 	    playerTeam: string;
