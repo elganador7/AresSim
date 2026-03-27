@@ -151,6 +151,24 @@ func (a *App) RunProvingGroundScenario(id string, trials int) (map[string]any, e
 	if spec.MaxTargetMissionKillRate > 0 && aggregate.TargetMissionKillRate > spec.MaxTargetMissionKillRate {
 		pass = false
 	}
+	if spec.MinInterceptionRate > 0 && aggregate.InterceptionRate < spec.MinInterceptionRate {
+		pass = false
+	}
+	if spec.MaxInterceptionRate > 0 && aggregate.InterceptionRate > spec.MaxInterceptionRate {
+		pass = false
+	}
+	if spec.MinMeanFocusHitsTaken > 0 && aggregate.MeanFocusHitsTaken < spec.MinMeanFocusHitsTaken {
+		pass = false
+	}
+	if spec.MaxMeanFocusHitsTaken > 0 && aggregate.MeanFocusHitsTaken > spec.MaxMeanFocusHitsTaken {
+		pass = false
+	}
+	if spec.MinMeanOpposingLosses > 0 && aggregate.MeanOpposingLosses < spec.MinMeanOpposingLosses {
+		pass = false
+	}
+	if spec.MaxMeanOpposingLosses > 0 && aggregate.MeanOpposingLosses > spec.MaxMeanOpposingLosses {
+		pass = false
+	}
 	return map[string]any{
 		"scenarioId":               spec.ScenarioID,
 		"category":                 spec.Category,
@@ -165,10 +183,14 @@ func (a *App) RunProvingGroundScenario(id string, trials int) (map[string]any, e
 		"meanFirstShotSeconds":     aggregate.MeanFirstShotSeconds,
 		"meanShotsFired":           aggregate.MeanShotsFired,
 		"meanHitsScored":           aggregate.MeanHitsScored,
+		"meanInterceptions":        aggregate.MeanInterceptions,
+		"interceptionRate":         aggregate.InterceptionRate,
 		"meanFuelExhaustions":      aggregate.MeanFuelExhaustions,
 		"meanReplenishments":       aggregate.MeanReplenishments,
 		"meanFocusLosses":          aggregate.MeanFocusLosses,
 		"meanOpposingLosses":       aggregate.MeanOpposingLosses,
+		"meanFocusHitsTaken":       aggregate.MeanFocusHitsTaken,
+		"meanOpposingHitsTaken":    aggregate.MeanOpposingHitsTaken,
 		"terminalReasons":          aggregate.TerminalReasons,
 		"sampleEvents":             aggregate.SampleEvents,
 		"pass":                     pass,
@@ -176,6 +198,12 @@ func (a *App) RunProvingGroundScenario(id string, trials int) (map[string]any, e
 		"maxFocusWinRate":          spec.MaxFocusWinRate,
 		"minTargetMissionKillRate": spec.MinTargetMissionKillRate,
 		"maxTargetMissionKillRate": spec.MaxTargetMissionKillRate,
+		"minInterceptionRate":      spec.MinInterceptionRate,
+		"maxInterceptionRate":      spec.MaxInterceptionRate,
+		"minMeanFocusHitsTaken":    spec.MinMeanFocusHitsTaken,
+		"maxMeanFocusHitsTaken":    spec.MaxMeanFocusHitsTaken,
+		"minMeanOpposingLosses":    spec.MinMeanOpposingLosses,
+		"maxMeanOpposingLosses":    spec.MaxMeanOpposingLosses,
 	}, nil
 }
 

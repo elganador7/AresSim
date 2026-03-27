@@ -31,10 +31,14 @@ type runSummary struct {
 	MeanFirstShotSeconds     float64                  `json:"meanFirstShotSeconds"`
 	MeanShotsFired           float64                  `json:"meanShotsFired"`
 	MeanHitsScored           float64                  `json:"meanHitsScored"`
+	MeanInterceptions        float64                  `json:"meanInterceptions"`
+	InterceptionRate         float64                  `json:"interceptionRate"`
 	MeanFuelExhaustions      float64                  `json:"meanFuelExhaustions"`
 	MeanReplenishments       float64                  `json:"meanReplenishments"`
 	MeanFocusLosses          float64                  `json:"meanFocusLosses"`
 	MeanOpposingLosses       float64                  `json:"meanOpposingLosses"`
+	MeanFocusHitsTaken       float64                  `json:"meanFocusHitsTaken"`
+	MeanOpposingHitsTaken    float64                  `json:"meanOpposingHitsTaken"`
 	Pass                     bool                     `json:"pass"`
 	TerminalReasons          map[string]int           `json:"terminalReasons,omitempty"`
 	SampleEvents             []sim.ProvingGroundEvent `json:"sampleEvents,omitempty"`
@@ -42,6 +46,12 @@ type runSummary struct {
 	MaxFocusWinRate          float64                  `json:"maxFocusWinRate,omitempty"`
 	MinTargetMissionKillRate float64                  `json:"minTargetMissionKillRate,omitempty"`
 	MaxTargetMissionKillRate float64                  `json:"maxTargetMissionKillRate,omitempty"`
+	MinInterceptionRate      float64                  `json:"minInterceptionRate,omitempty"`
+	MaxInterceptionRate      float64                  `json:"maxInterceptionRate,omitempty"`
+	MinMeanFocusHitsTaken    float64                  `json:"minMeanFocusHitsTaken,omitempty"`
+	MaxMeanFocusHitsTaken    float64                  `json:"maxMeanFocusHitsTaken,omitempty"`
+	MinMeanOpposingLosses    float64                  `json:"minMeanOpposingLosses,omitempty"`
+	MaxMeanOpposingLosses    float64                  `json:"maxMeanOpposingLosses,omitempty"`
 }
 
 func main() {
@@ -123,10 +133,14 @@ func main() {
 			MeanFirstShotSeconds:     aggregate.MeanFirstShotSeconds,
 			MeanShotsFired:           aggregate.MeanShotsFired,
 			MeanHitsScored:           aggregate.MeanHitsScored,
+			MeanInterceptions:        aggregate.MeanInterceptions,
+			InterceptionRate:         aggregate.InterceptionRate,
 			MeanFuelExhaustions:      aggregate.MeanFuelExhaustions,
 			MeanReplenishments:       aggregate.MeanReplenishments,
 			MeanFocusLosses:          aggregate.MeanFocusLosses,
 			MeanOpposingLosses:       aggregate.MeanOpposingLosses,
+			MeanFocusHitsTaken:       aggregate.MeanFocusHitsTaken,
+			MeanOpposingHitsTaken:    aggregate.MeanOpposingHitsTaken,
 			Pass:                     passesExpectedBands(aggregate, spec),
 			TerminalReasons:          aggregate.TerminalReasons,
 			SampleEvents:             aggregate.SampleEvents,
@@ -134,6 +148,12 @@ func main() {
 			MaxFocusWinRate:          spec.MaxFocusWinRate,
 			MinTargetMissionKillRate: spec.MinTargetMissionKillRate,
 			MaxTargetMissionKillRate: spec.MaxTargetMissionKillRate,
+			MinInterceptionRate:      spec.MinInterceptionRate,
+			MaxInterceptionRate:      spec.MaxInterceptionRate,
+			MinMeanFocusHitsTaken:    spec.MinMeanFocusHitsTaken,
+			MaxMeanFocusHitsTaken:    spec.MaxMeanFocusHitsTaken,
+			MinMeanOpposingLosses:    spec.MinMeanOpposingLosses,
+			MaxMeanOpposingLosses:    spec.MaxMeanOpposingLosses,
 		})
 	}
 
@@ -161,6 +181,24 @@ func passesExpectedBands(aggregate sim.ProvingGroundAggregate, spec scenario.Pro
 		pass = false
 	}
 	if spec.MaxTargetMissionKillRate > 0 && aggregate.TargetMissionKillRate > spec.MaxTargetMissionKillRate {
+		pass = false
+	}
+	if spec.MinInterceptionRate > 0 && aggregate.InterceptionRate < spec.MinInterceptionRate {
+		pass = false
+	}
+	if spec.MaxInterceptionRate > 0 && aggregate.InterceptionRate > spec.MaxInterceptionRate {
+		pass = false
+	}
+	if spec.MinMeanFocusHitsTaken > 0 && aggregate.MeanFocusHitsTaken < spec.MinMeanFocusHitsTaken {
+		pass = false
+	}
+	if spec.MaxMeanFocusHitsTaken > 0 && aggregate.MeanFocusHitsTaken > spec.MaxMeanFocusHitsTaken {
+		pass = false
+	}
+	if spec.MinMeanOpposingLosses > 0 && aggregate.MeanOpposingLosses < spec.MinMeanOpposingLosses {
+		pass = false
+	}
+	if spec.MaxMeanOpposingLosses > 0 && aggregate.MeanOpposingLosses > spec.MaxMeanOpposingLosses {
 		pass = false
 	}
 	return pass

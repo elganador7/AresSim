@@ -1179,3 +1179,79 @@ definitions:
       default_loadout: []
       default_weapon_configuration: ""
       weapon_configurations: []
+    - id: expeditionary-aircraft-maintenance-complex
+      name: Expeditionary Aircraft Maintenance Complex
+      description: Fixed maintenance and backshop area supporting turnaround, inspection, and battle-damage repair for deployed air wings.
+      domain: 1
+      form: 34
+      general_type: 91
+      specific_type: Aircraft Maintenance Complex
+      short_name: MX Complex
+      asset_class: hardened_infrastructure
+      target_class: hardened_infrastructure
+      stationary: true
+      affiliation: military
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2000
+      base_strength: 0.24
+      accuracy: 0.02
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.26
+      detection_range_m: 1000
+      radar_cross_section_m2: 26
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: theater-munitions-storage-area
+      name: Theater Munitions Storage Area
+      description: Fixed ammunition and precision-munition storage area supporting sustained sortie generation and theater strike operations.
+      domain: 1
+      form: 34
+      general_type: 91
+      specific_type: Theater Munitions Storage Area
+      short_name: MSA
+      asset_class: hardened_infrastructure
+      target_class: soft_infrastructure
+      stationary: true
+      affiliation: military
+      nation_of_origin: USA
+      operators:
+        - USA
+      employed_by:
+        - USA
+      service_entry_year: 2000
+      base_strength: 0.18
+      accuracy: 0.02
+      max_speed_mps: 0
+      cruise_speed_mps: 0
+      max_range_km: 0
+      survivability: 0.18
+      detection_range_m: 700
+      radar_cross_section_m2: 18
+      fuel_capacity_liters: 0
+      fuel_burn_rate_lph: 0
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []

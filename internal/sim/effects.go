@@ -65,6 +65,8 @@ func resolveImpactOutcome(effectType enginev1.WeaponEffectType, targetClass stri
 		switch targetClass {
 		case "runway":
 			return outcomeRunwayCrater
+		case "launcher":
+			return outcomeMissionKill
 		case "hardened_infrastructure", "civilian_energy", "civilian_water":
 			return outcomeMissionKill
 		case "soft_infrastructure":
@@ -87,6 +89,8 @@ func resolveImpactOutcome(effectType enginev1.WeaponEffectType, targetClass stri
 		switch targetClass {
 		case "runway":
 			return outcomeRunwayCrater
+		case "launcher":
+			return outcomeCatastrophicKill
 		case "hardened_infrastructure", "civilian_energy", "civilian_water":
 			return outcomeMissionKill
 		case "sam_battery":

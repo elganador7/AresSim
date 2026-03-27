@@ -18,9 +18,12 @@ type ProvingGroundTrialResult struct {
 	FirstShotSeconds            float64
 	ShotsFired                  int
 	HitsScored                  int
+	Interceptions               int
 	FuelExhaustions             int
 	FocusLosses                 int
 	OpposingLosses              int
+	FocusHitsTaken              int
+	OpposingHitsTaken           int
 	TerminalReason              string
 	TargetMissionKillTimeSecond float64
 	TargetDestroyedTimeSecond   float64
@@ -37,10 +40,14 @@ type ProvingGroundAggregate struct {
 	MeanFirstShotSeconds  float64
 	MeanShotsFired        float64
 	MeanHitsScored        float64
+	MeanInterceptions     float64
+	InterceptionRate      float64
 	MeanFuelExhaustions   float64
 	MeanReplenishments    float64
 	MeanFocusLosses       float64
 	MeanOpposingLosses    float64
+	MeanFocusHitsTaken    float64
+	MeanOpposingHitsTaken float64
 	TerminalReasons       map[string]int
 	SampleEvents          []ProvingGroundEvent
 }
@@ -177,6 +184,35 @@ func RunProvingGroundTrial(
 			}
 		}
 
+		munitionDetections := ApplyIntelSharing(DetectMunitions(units, defs, inFlight), rules)
+		var interceptShots []InterceptShot
+		inFlight, interceptShots = InterceptMunitionsTick(units, defs, weapons, inFlight, munitionDetections, rng)
+		for _, shot := range interceptShots {
+			if shot.Defender == nil || shot.Munition == nil {
+				continue
+			}
+			result.Events = append(result.Events, ProvingGroundEvent{
+				TimeSeconds:  simSeconds,
+				Type:         "interceptor_fired",
+				ActorUnitID:  shot.Defender.GetId(),
+				TargetUnitID: shot.Munition.TargetID,
+				WeaponID:     shot.WeaponID,
+				Detail:       shot.Munition.WeaponID,
+			})
+			if !shot.Success {
+				continue
+			}
+			result.Interceptions++
+			result.Events = append(result.Events, ProvingGroundEvent{
+				TimeSeconds:  simSeconds,
+				Type:         "munition_intercepted",
+				ActorUnitID:  shot.Defender.GetId(),
+				TargetUnitID: shot.Munition.TargetID,
+				WeaponID:     shot.WeaponID,
+				Detail:       shot.Munition.WeaponID,
+			})
+		}
+
 		var arrived []*InFlightMunition
 		inFlight, arrived = AdvanceMunitions(inFlight, 1.0, units, defs)
 		hits := ResolveArrivals(arrived, units, defs, weapons, rng)
@@ -185,6 +221,12 @@ func RunProvingGroundTrial(
 				continue
 			}
 			result.HitsScored++
+			switch unitTeamID(hit.Victim) {
+			case focusTeam:
+				result.FocusHitsTaken++
+			case opposingTeam:
+				result.OpposingHitsTaken++
+			}
 			result.Events = append(result.Events, ProvingGroundEvent{
 				TimeSeconds:  simSeconds,
 				Type:         "target_hit",
@@ -286,7 +328,7 @@ func AggregateProvingGroundResults(results []ProvingGroundTrialResult, focusTeam
 		return ProvingGroundAggregate{FocusTeam: focusTeam}
 	}
 	var wins, missionKills, destroyed int
-	var elapsed, firstShot, shotsFired, hitsScored, fuelExhaustions, replenishments, focusLosses, opposingLosses float64
+	var elapsed, firstShot, shotsFired, hitsScored, interceptions, fuelExhaustions, replenishments, focusLosses, opposingLosses, focusHitsTaken, opposingHitsTaken float64
 	var firstShotObserved int
 	terminalReasons := map[string]int{}
 	var sampleEvents []ProvingGroundEvent
@@ -303,10 +345,13 @@ func AggregateProvingGroundResults(results []ProvingGroundTrialResult, focusTeam
 		elapsed += result.ElapsedSeconds
 		shotsFired += float64(result.ShotsFired)
 		hitsScored += float64(result.HitsScored)
+		interceptions += float64(result.Interceptions)
 		fuelExhaustions += float64(result.FuelExhaustions)
 		replenishments += float64(countEventType(result.Events, "replenishment_started"))
 		focusLosses += float64(result.FocusLosses)
 		opposingLosses += float64(result.OpposingLosses)
+		focusHitsTaken += float64(result.FocusHitsTaken)
+		opposingHitsTaken += float64(result.OpposingHitsTaken)
 		if result.FirstShotSeconds >= 0 {
 			firstShot += result.FirstShotSeconds
 			firstShotObserved++
@@ -323,6 +368,10 @@ func AggregateProvingGroundResults(results []ProvingGroundTrialResult, focusTeam
 	if firstShotObserved > 0 {
 		meanFirstShot = firstShot / float64(firstShotObserved)
 	}
+	interceptionRate := 0.0
+	if interceptions+focusHitsTaken > 0 {
+		interceptionRate = interceptions / (interceptions + focusHitsTaken)
+	}
 	return ProvingGroundAggregate{
 		Trials:                len(results),
 		FocusTeam:             focusTeam,
@@ -333,10 +382,14 @@ func AggregateProvingGroundResults(results []ProvingGroundTrialResult, focusTeam
 		MeanFirstShotSeconds:  meanFirstShot,
 		MeanShotsFired:        shotsFired / n,
 		MeanHitsScored:        hitsScored / n,
+		MeanInterceptions:     interceptions / n,
+		InterceptionRate:      interceptionRate,
 		MeanFuelExhaustions:   fuelExhaustions / n,
 		MeanReplenishments:    replenishments / n,
 		MeanFocusLosses:       focusLosses / n,
 		MeanOpposingLosses:    opposingLosses / n,
+		MeanFocusHitsTaken:    focusHitsTaken / n,
+		MeanOpposingHitsTaken: opposingHitsTaken / n,
 		TerminalReasons:       terminalReasons,
 		SampleEvents:          sampleEvents,
 	}

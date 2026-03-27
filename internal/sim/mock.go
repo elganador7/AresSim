@@ -153,6 +153,47 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 			}
 
 			// ── Move in-flight munitions ───────────────────────────────────
+			munitionDetections := ApplyIntelSharing(DetectMunitions(units, defs, inFlight), rules)
+			var interceptShots []InterceptShot
+			inFlight, interceptShots = InterceptMunitionsTick(units, defs, weapons, inFlight, munitionDetections, rng)
+			interceptorFired := make(map[string]bool)
+			for _, shot := range interceptShots {
+				if shot.Defender == nil {
+					continue
+				}
+				if !interceptorFired[shot.Defender.Id] {
+					interceptorFired[shot.Defender.Id] = true
+					states := make([]*enginev1.WeaponState, len(shot.Defender.Weapons))
+					for i, ws := range shot.Defender.Weapons {
+						states[i] = &enginev1.WeaponState{
+							WeaponId:   ws.WeaponId,
+							CurrentQty: ws.CurrentQty,
+							MaxQty:     ws.MaxQty,
+						}
+					}
+					emit("batch_update", &enginev1.BatchUnitUpdate{
+						Deltas: []*enginev1.UnitDelta{{
+							UnitId:  shot.Defender.Id,
+							Weapons: states,
+						}},
+					})
+				}
+				if !shot.Success {
+					continue
+				}
+				targetID := shot.Munition.TargetID
+				narrative := fmt.Sprintf("%s intercepted %s inbound to %s", shot.Defender.DisplayName, shot.Munition.WeaponID, targetID)
+				if target := findUnitByID(units, targetID); target != nil {
+					narrative = fmt.Sprintf("%s intercepted %s inbound to %s", shot.Defender.DisplayName, shot.Munition.WeaponID, target.DisplayName)
+				}
+				emit("narrative", &enginev1.NarrativeEvent{
+					Text:     narrative,
+					Category: "air_defense",
+					UnitId:   shot.Defender.Id,
+					TeamId:   unitTeamID(shot.Defender),
+				})
+			}
+
 			var arrived []*InFlightMunition
 			inFlight, arrived = AdvanceMunitions(inFlight, timeScale, units, defs)
 
@@ -177,7 +218,7 @@ func MockLoop(ctx context.Context, units []*enginev1.Unit, defs map[string]DefSt
 				emit("detection_update", &enginev1.DetectionUpdate{
 					DetectingTeam:       side,
 					DetectedUnitIds:     detections[side],
-					DetectedMunitionIds: nil,
+					DetectedMunitionIds: munitionDetections[side],
 					UnitContacts:        protoContacts,
 				})
 			}

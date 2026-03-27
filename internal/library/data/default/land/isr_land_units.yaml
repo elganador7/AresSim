@@ -50,6 +50,94 @@ definitions:
           initial_qty: 18
       default_weapon_configuration: ""
       weapon_configurations: []
+    - id: arrow-battle-management-center
+      name: Arrow Battle Management Center
+      description: Mobile battle-management and weapon-control element coordinating Arrow batteries and cueing upper-tier ballistic missile defense engagements.
+      domain: 1
+      form: 31
+      general_type: 93
+      specific_type: Arrow Battle Management Center
+      short_name: Arrow BMC
+      asset_class: c2_site
+      target_class: sam_battery
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Represents mobile Citron Tree / battle-management vehicles associated with Israel's Arrow system.
+      service_entry_year: 2000
+      base_strength: 0.46
+      accuracy: 0.16
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.3
+      detection_range_m: 90000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 160000
+          target_states: [airborne]
+          fire_control: false
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 420
+      fuel_burn_rate_lph: 85
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: green-pine-radar-section
+      name: Green Pine Radar Section
+      description: Mobile long-range ballistic-missile warning and fire-control radar section associated with Arrow batteries.
+      domain: 1
+      form: 31
+      general_type: 94
+      specific_type: Green Pine Radar Section
+      short_name: Green Pine
+      asset_class: radar_site
+      target_class: sam_battery
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Represents EL/M-2080 Green Pine-class radar support to Israel's Arrow architecture.
+      service_entry_year: 1998
+      base_strength: 0.5
+      accuracy: 0.22
+      max_speed_mps: 14
+      cruise_speed_mps: 9
+      max_range_km: 450
+      survivability: 0.28
+      detection_range_m: 520000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 520000
+          target_states: [airborne]
+          fire_control: true
+      radar_cross_section_m2: 18
+      fuel_capacity_liters: 500
+      fuel_burn_rate_lph: 95
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
     - id: arrow3-battery
       name: Arrow-3 Battery
       description: Israeli strategic ballistic missile defense battery for high-altitude and exo-atmospheric intercepts.
@@ -232,6 +320,94 @@ definitions:
           initial_qty: 24
       default_weapon_configuration: ""
       weapon_configurations: []
+    - id: davids-sling-radar-section
+      name: David's Sling Radar Section
+      description: Mobile multi-mission radar section supporting David's Sling engagements against cruise missiles, aircraft, and ballistic threats.
+      domain: 1
+      form: 31
+      general_type: 94
+      specific_type: David's Sling Radar Section
+      short_name: Sling Radar
+      asset_class: radar_site
+      target_class: sam_battery
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Represents an EL/M-2084-class radar section task-organized to David's Sling.
+      service_entry_year: 2017
+      base_strength: 0.48
+      accuracy: 0.18
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.29
+      detection_range_m: 300000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 300000
+          target_states: [airborne]
+          fire_control: true
+      radar_cross_section_m2: 14
+      fuel_capacity_liters: 430
+      fuel_burn_rate_lph: 86
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: davids-sling-battle-management-center
+      name: David's Sling Battle Management Center
+      description: Mobile command-and-control element for David's Sling sector battle management and interceptor allocation.
+      domain: 1
+      form: 31
+      general_type: 93
+      specific_type: David's Sling Battle Management Center
+      short_name: Sling BMC
+      asset_class: c2_site
+      target_class: sam_battery
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Represents mobile battle-management and launcher-control vehicles for David's Sling batteries.
+      service_entry_year: 2017
+      base_strength: 0.44
+      accuracy: 0.16
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.28
+      detection_range_m: 70000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 180000
+          target_states: [airborne]
+          fire_control: false
+      radar_cross_section_m2: 10
+      fuel_capacity_liters: 400
+      fuel_burn_rate_lph: 80
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
     - id: eitan-afv
       name: Eitan AFV
       description: Israeli wheeled armored vehicle for fast protected mobility and infantry combat.
@@ -313,6 +489,180 @@ definitions:
         - weapon_id: sam-tamir
           max_qty: 60
           initial_qty: 60
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: iron-dome-radar-section
+      name: Iron Dome Radar Section
+      description: Mobile EL/M-2084-class radar section providing Iron Dome fire-control and local air-picture generation.
+      domain: 1
+      form: 31
+      general_type: 94
+      specific_type: Iron Dome Radar Section
+      short_name: Iron Dome Radar
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Represents the radar component of an Iron Dome firing unit; modeled separately to support richer package composition.
+      service_entry_year: 2011
+      base_strength: 0.52
+      accuracy: 0.2
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.28
+      detection_range_m: 180000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 180000
+          target_states: [airborne]
+          fire_control: true
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 450
+      fuel_burn_rate_lph: 90
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: iron-dome-battle-management-center
+      name: Iron Dome Battle Management Center
+      description: Mobile command-and-control element for Iron Dome sector tasking, engagement management, and local air-defense coordination.
+      domain: 1
+      form: 31
+      general_type: 93
+      specific_type: Iron Dome Battle Management Center
+      short_name: Iron Dome BMC
+      asset_class: c2_site
+      target_class: sam_battery
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Represents Iron Dome battle-management and weapon-control vehicles that coordinate one deployed firing battery.
+      service_entry_year: 2011
+      base_strength: 0.48
+      accuracy: 0.16
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.26
+      detection_range_m: 60000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 120000
+          target_states: [airborne]
+          fire_control: false
+      radar_cross_section_m2: 8
+      fuel_capacity_liters: 400
+      fuel_burn_rate_lph: 80
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: barak-mx-radar-section
+      name: Barak MX Radar Section
+      description: Mobile radar section for Barak MX regional air and missile defense cueing and fire control.
+      domain: 1
+      form: 31
+      general_type: 94
+      specific_type: Barak MX Radar Section
+      short_name: Barak Radar
+      asset_class: radar_site
+      target_class: sam_battery
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Represents a modular Barak MX radar/fire-control section for battery task organization.
+      service_entry_year: 2018
+      base_strength: 0.46
+      accuracy: 0.18
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.28
+      detection_range_m: 220000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 220000
+          target_states: [airborne]
+          fire_control: true
+      radar_cross_section_m2: 12
+      fuel_capacity_liters: 430
+      fuel_burn_rate_lph: 84
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
+      default_weapon_configuration: ""
+      weapon_configurations: []
+    - id: barak-mx-battle-management-center
+      name: Barak MX Battle Management Center
+      description: Mobile battle-management element coordinating Barak MX launchers, sensors, and sector engagements.
+      domain: 1
+      form: 31
+      general_type: 93
+      specific_type: Barak MX Battle Management Center
+      short_name: Barak BMC
+      asset_class: c2_site
+      target_class: sam_battery
+      nation_of_origin: ISR
+      operators:
+        - ISR
+      employed_by:
+        - ISR
+      data_confidence: medium
+      source_basis: reputable_analysis
+      source_notes: Represents Barak MX command vehicles and local engagement-control nodes.
+      service_entry_year: 2018
+      base_strength: 0.42
+      accuracy: 0.14
+      max_speed_mps: 16
+      cruise_speed_mps: 10
+      max_range_km: 500
+      survivability: 0.27
+      detection_range_m: 60000
+      sensor_suite:
+        - sensor_type: air_search
+          max_range_m: 160000
+          target_states: [airborne]
+          fire_control: false
+      radar_cross_section_m2: 9
+      fuel_capacity_liters: 390
+      fuel_burn_rate_lph: 78
+      embarked_fixed_wing_capacity: 0
+      embarked_rotary_wing_capacity: 0
+      embarked_uav_capacity: 0
+      embarked_surface_connector_capacity: 0
+      launch_capacity_per_interval: 0
+      recovery_capacity_per_interval: 0
+      sortie_interval_minutes: 0
+      default_loadout: []
       default_weapon_configuration: ""
       weapon_configurations: []
     - id: m109d-doher

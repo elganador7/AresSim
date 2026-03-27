@@ -157,6 +157,7 @@ export default function ScenarioLoadModal({
                         <strong>{benchmark.pass ? "PASS" : "FAIL"}</strong>
                         {` · Trials ${benchmark.trials} · ${benchmark.focusTeam} win ${(Number(benchmark.focusWinRate ?? 0) * 100).toFixed(0)}%`}
                         {Number(benchmark.targetMissionKillRate ?? 0) > 0 ? ` · mission kill ${(Number(benchmark.targetMissionKillRate) * 100).toFixed(0)}%` : ""}
+                        {Number(benchmark.interceptionRate ?? 0) > 0 ? ` · intercept ${(Number(benchmark.interceptionRate) * 100).toFixed(0)}%` : ""}
                         {` · mean ${(Number(benchmark.meanElapsedSeconds ?? 0) / 60).toFixed(1)} min`}
                       </div>
                     )}
@@ -165,9 +166,11 @@ export default function ScenarioLoadModal({
                         {Number(benchmark.meanFirstShotSeconds ?? -1) >= 0 ? `First shot ${(Number(benchmark.meanFirstShotSeconds) / 60).toFixed(1)} min` : "No shots fired"}
                         {` · shots ${Number(benchmark.meanShotsFired ?? 0).toFixed(1)}`}
                         {` · hits ${Number(benchmark.meanHitsScored ?? 0).toFixed(1)}`}
+                        {Number(benchmark.meanInterceptions ?? 0) > 0 ? ` · intercepts ${Number(benchmark.meanInterceptions ?? 0).toFixed(1)}` : ""}
                         {Number(benchmark.meanFuelExhaustions ?? 0) > 0 ? ` · fuel outs ${Number(benchmark.meanFuelExhaustions ?? 0).toFixed(1)}` : ""}
                         {Number(benchmark.meanReplenishments ?? 0) > 0 ? ` · replens ${Number(benchmark.meanReplenishments ?? 0).toFixed(1)}` : ""}
                         {` · losses ${Number(benchmark.meanFocusLosses ?? 0).toFixed(1)} / ${Number(benchmark.meanOpposingLosses ?? 0).toFixed(1)}`}
+                        {Number(benchmark.meanFocusHitsTaken ?? 0) > 0 ? ` · focus hits taken ${Number(benchmark.meanFocusHitsTaken ?? 0).toFixed(1)}` : ""}
                       </div>
                     )}
                     {benchmark && benchmark.terminalReasons && (

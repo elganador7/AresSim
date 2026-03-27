@@ -1,6 +1,7 @@
 package scenario
 
 import (
+	"fmt"
 	"time"
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
@@ -22,6 +23,12 @@ type ProvingGroundSpec struct {
 	MaxFocusWinRate           float64
 	MinTargetMissionKillRate  float64
 	MaxTargetMissionKillRate  float64
+	MinInterceptionRate       float64
+	MaxInterceptionRate       float64
+	MinMeanFocusHitsTaken     float64
+	MaxMeanFocusHitsTaken     float64
+	MinMeanOpposingLosses     float64
+	MaxMeanOpposingLosses     float64
 }
 
 type ProvingGroundSetupAction struct {
@@ -39,6 +46,166 @@ type ProvingGroundSetupAction struct {
 
 func ProvingGroundSpecs() map[string]ProvingGroundSpec {
 	return map[string]ProvingGroundSpec{
+		"pg-package-iron-dome-drill": {
+			ScenarioID:        "pg-package-iron-dome-drill",
+			Category:          "package",
+			Purpose:           "Validate the reusable Iron Dome package in isolation against a small missile raid.",
+			ExpectedSummary:   "The Iron Dome package should intercept some inbound projectiles, but a small amount of leakage should remain possible.",
+			RecommendedTrials: 10,
+			MaxSimSeconds:     1800,
+			FocusTeam:         "ISR",
+			OpposingTeam:      "IRN",
+			SetupActions: []ProvingGroundSetupAction{
+				{Kind: "set_player", TeamID: "ISR"},
+				{Kind: "assign_attack", UnitID: "pg-pkg-id-irn-kheibar-1", TargetUnitID: "pg-pkg-id-ashdod-port", OrderType: enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT, DesiredEffect: enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL},
+				{Kind: "assign_attack", UnitID: "pg-pkg-id-irn-kheibar-2", TargetUnitID: "pg-pkg-id-ashdod-port", OrderType: enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT, DesiredEffect: enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL},
+			},
+			MinInterceptionRate:   0.40,
+			MaxMeanFocusHitsTaken: 4,
+		},
+		"pg-package-al-udeid-sortie": {
+			ScenarioID:          "pg-package-al-udeid-sortie",
+			Category:            "package",
+			Purpose:             "Validate the reusable Al Udeid package for hosted launch, strike, return, reserve aircraft, and replenishment behavior.",
+			ExpectedSummary:     "The hosted strike element should launch from Al Udeid, hit Bushehr in a meaningful share of runs, and at least one aircraft should recover and enter replenishment while a second target remains available.",
+			RecommendedTrials:   10,
+			MaxSimSeconds:       5400,
+			FocusTeam:           "USA",
+			OpposingTeam:        "IRN",
+			TrackedTargetUnitID: "pg-pkg-au-bushehr",
+			SetupActions: []ProvingGroundSetupAction{
+				{Kind: "set_player", TeamID: "USA"},
+				{Kind: "preview_target", TeamID: "USA", TargetUnitID: "pg-pkg-au-bushehr", ExpectedShooterUnitID: "pg-pkg-au-f15e-lead"},
+				{Kind: "assign_attack", UnitID: "pg-pkg-au-f15e-lead", TargetUnitID: "pg-pkg-au-bushehr", OrderType: enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT, DesiredEffect: enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL},
+			},
+			MinTargetMissionKillRate: 0.40,
+		},
+		"pg-package-layered-israel-defense": {
+			ScenarioID:            "pg-package-layered-israel-defense",
+			Category:              "package",
+			Purpose:               "Validate package composition by combining reusable layered Israeli defense, Iranian launcher, and strike packages in one live scenario.",
+			ExpectedSummary:       "The layered package should intercept many inbound missiles while the counterstrike package destroys some launchers and some leakage still gets through.",
+			RecommendedTrials:     10,
+			MaxSimSeconds:         3600,
+			FocusTeam:             "ISR",
+			OpposingTeam:          "IRN",
+			MinInterceptionRate:   0.60,
+			MinMeanOpposingLosses: 0.50,
+			MaxMeanFocusHitsTaken: 8,
+		},
+		"pg-package-bahrain-maritime-presence": {
+			ScenarioID:                "pg-package-bahrain-maritime-presence",
+			Category:                  "package",
+			Purpose:                   "Validate the reusable Bahrain naval support package in a small Gulf littoral-defense scenario.",
+			ExpectedSummary:           "The Bahrain package should present a plausible mixed Bahraini/U.S. local naval presence and defeat a small Iranian surface raider in most runs.",
+			RecommendedTrials:         10,
+			MaxSimSeconds:             1800,
+			FocusTeam:                 "COALITION_WEST",
+			OpposingTeam:              "IRN",
+			TrackedTargetUnitID:       "pg-pkg-bh-irn-raider",
+			EndOnTrackedTargetDisable: true,
+			MinFocusWinRate:           0.70,
+			MinTargetMissionKillRate:  0.70,
+		},
+		"pg-package-al-dhafra-forward-strike": {
+			ScenarioID:                "pg-package-al-dhafra-forward-strike",
+			Category:                  "package",
+			Purpose:                   "Validate the reusable Al Dhafra package as a Gulf forward-strike and support package with sovereign/operator split preserved.",
+			ExpectedSummary:           "The Al Dhafra package should launch hosted F-35s and mission-kill Bandar Abbas in a meaningful share of runs.",
+			RecommendedTrials:         10,
+			MaxSimSeconds:             3600,
+			FocusTeam:                 "USA",
+			OpposingTeam:              "IRN",
+			TrackedTargetUnitID:       "pg-pkg-ad-bandar-abbas",
+			SetupActions: []ProvingGroundSetupAction{
+				{Kind: "set_player", TeamID: "USA"},
+				{Kind: "preview_target", TeamID: "USA", TargetUnitID: "pg-pkg-ad-bandar-abbas", ExpectedShooterUnitID: "pg-pkg-ad-f35a-lead"},
+				{Kind: "assign_attack", UnitID: "pg-pkg-ad-f35a-lead", TargetUnitID: "pg-pkg-ad-bandar-abbas", OrderType: enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT, DesiredEffect: enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL},
+			},
+			MinFocusWinRate:           0.70,
+			MinTargetMissionKillRate:  0.40,
+		},
+		"pg-package-gulf-regional-support-posture": {
+			ScenarioID:                "pg-package-gulf-regional-support-posture",
+			Category:                  "package",
+			Purpose:                   "Validate interoperability of reusable Gulf packages by combining Al Udeid, Al Dhafra, and Bahrain against Iranian air and littoral threats.",
+			ExpectedSummary:           "The composed Gulf posture should defend against at least one Iranian air and maritime threat while still generating a meaningful strike against Bushehr.",
+			RecommendedTrials:         10,
+			MaxSimSeconds:             3600,
+			FocusTeam:                 "USA",
+			OpposingTeam:              "IRN",
+			TrackedTargetUnitID:       "pg-pkg-grs-bushehr",
+			SetupActions: []ProvingGroundSetupAction{
+				{Kind: "set_player", TeamID: "USA"},
+				{Kind: "preview_target", TeamID: "USA", TargetUnitID: "pg-pkg-grs-bushehr", ExpectedShooterUnitID: "pg-pkg-grs-au-f15e-lead"},
+				{Kind: "assign_attack", UnitID: "pg-pkg-grs-au-f15e-lead", TargetUnitID: "pg-pkg-grs-bushehr", OrderType: enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT, DesiredEffect: enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL},
+				{Kind: "preview_target", TeamID: "USA", TargetUnitID: "pg-pkg-grs-bandar-abbas", ExpectedShooterUnitID: "pg-pkg-grs-ad-f35a-lead"},
+				{Kind: "assign_attack", UnitID: "pg-pkg-grs-ad-f35a-lead", TargetUnitID: "pg-pkg-grs-bandar-abbas", OrderType: enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT, DesiredEffect: enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL},
+			},
+			MinFocusWinRate:           0.40,
+			MinTargetMissionKillRate:  0.40,
+			MinMeanOpposingLosses:     1.00,
+		},
+		"pg-package-hormuz-coastal-denial": {
+			ScenarioID:                "pg-package-hormuz-coastal-denial",
+			Category:                  "package",
+			Purpose:                   "Validate the reusable Iranian Hormuz coastal-denial package against a mixed western Gulf transit group.",
+			ExpectedSummary:           "The coastal-denial package should produce meaningful mission effects on at least one transit combatant while still taking some attrition from the defending group.",
+			RecommendedTrials:         10,
+			MaxSimSeconds:             2400,
+			FocusTeam:                 "IRN",
+			OpposingTeam:              "USA",
+			TrackedTargetUnitID:       "pg-pkg-hcd-lcs",
+			EndOnTrackedTargetDisable: true,
+			MinFocusWinRate:           0.40,
+			MinTargetMissionKillRate:  0.40,
+			MinMeanOpposingLosses:     0.40,
+		},
+		"pg-package-uae-coastal-defense": {
+			ScenarioID:                "pg-package-uae-coastal-defense",
+			Category:                  "package",
+			Purpose:                   "Validate the reusable Emirati coastal-defense package against the Iranian Hormuz coastal-denial package.",
+			ExpectedSummary:           "The Emirati package should impose some attrition on the Iranian littoral package, but the exchange should still be dangerous and contested.",
+			RecommendedTrials:         10,
+			MaxSimSeconds:             2400,
+			FocusTeam:                 "ARE",
+			OpposingTeam:              "IRN",
+			TrackedTargetUnitID:       "pg-pkg-uacd-irn-soleimani",
+			EndOnTrackedTargetDisable: true,
+			MinFocusWinRate:           0.20,
+			MinTargetMissionKillRate:  0.20,
+			MinMeanOpposingLosses:     0.20,
+		},
+		"pg-package-oman-musandam-strait-guard": {
+			ScenarioID:                "pg-package-oman-musandam-strait-guard",
+			Category:                  "package",
+			Purpose:                   "Validate the reusable Omani Musandam package against the Iranian Hormuz coastal-denial package on the southern side of the strait.",
+			ExpectedSummary:           "The Omani package should contest the Iranian littoral package, inflict some losses, and keep the exchange dangerous rather than one-sided.",
+			RecommendedTrials:         10,
+			MaxSimSeconds:             2400,
+			FocusTeam:                 "OMN",
+			OpposingTeam:              "IRN",
+			TrackedTargetUnitID:       "pg-pkg-omsg-irn-soleimani",
+			EndOnTrackedTargetDisable: true,
+			MinFocusWinRate:           0.20,
+			MinTargetMissionKillRate:  0.20,
+			MinMeanOpposingLosses:     0.20,
+		},
+		"pg-package-strait-regional-control": {
+			ScenarioID:                "pg-package-strait-regional-control",
+			Category:                  "package",
+			Purpose:                   "Validate interoperability of reusable UAE, Oman, and Bahrain Gulf packages against the Iranian Hormuz coastal-denial package.",
+			ExpectedSummary:           "The western and southern Strait packages should collectively inflict losses on the Iranian denial package and usually neutralize at least one major threat unit, but the exchange should remain dangerous and contested.",
+			RecommendedTrials:         10,
+			MaxSimSeconds:             3000,
+			FocusTeam:                 "COALITION_WEST",
+			OpposingTeam:              "IRN",
+			TrackedTargetUnitID:       "pg-pkg-src-irn-soleimani",
+			EndOnTrackedTargetDisable: true,
+			MinFocusWinRate:           0.30,
+			MinTargetMissionKillRate:  0.30,
+			MinMeanOpposingLosses:     0.50,
+		},
 		"pg-modern-vs-legacy-air": {
 			ScenarioID:                "pg-modern-vs-legacy-air",
 			Category:                  "air",
@@ -104,6 +271,22 @@ func ProvingGroundSpecs() map[string]ProvingGroundSpec {
 			},
 			MinTargetMissionKillRate: 0.55,
 			MaxTargetMissionKillRate: 1.00,
+		},
+		"pg-israel-missile-defense-saturation": {
+			ScenarioID:            "pg-israel-missile-defense-saturation",
+			Category:              "missile_defense",
+			Purpose:               "Stress Israel's layered missile defense against a mass Iranian ballistic and cruise-missile salvo while also testing Israeli counterstrikes against launcher units.",
+			ExpectedSummary:       "Israel should intercept most inbound projectiles, absorb some leakage, and destroy a meaningful share of Iranian launchers while Iran still lands at least 10 impacts in Israel.",
+			RecommendedTrials:     10,
+			MaxSimSeconds:         5400,
+			FocusTeam:             "ISR",
+			OpposingTeam:          "IRN",
+			SetupActions:          israelMissileDefenseSetupActions(),
+			MinInterceptionRate:   0.75,
+			MinMeanFocusHitsTaken: 10,
+			MaxMeanFocusHitsTaken: 120,
+			MinMeanOpposingLosses: 3,
+			MaxMeanOpposingLosses: 12,
 		},
 		"pg-destroyer-vs-missile-boat": {
 			ScenarioID:                "pg-destroyer-vs-missile-boat",
@@ -391,9 +574,20 @@ func ProvingGroundSpecs() map[string]ProvingGroundSpec {
 
 func ProvingGroundBuiltins() []*enginev1.Scenario {
 	return []*enginev1.Scenario{
+		provingGroundPackageIronDomeDrill(),
+		provingGroundPackageAlUdeidSortie(),
+		provingGroundPackageLayeredIsraelDefense(),
+		provingGroundPackageBahrainMaritimePresence(),
+		provingGroundPackageAlDhafraForwardStrike(),
+		provingGroundPackageGulfRegionalSupportPosture(),
+		provingGroundPackageHormuzCoastalDenial(),
+		provingGroundPackageUAECoastalDefense(),
+		provingGroundPackageOMNMusandamStraitGuard(),
+		provingGroundPackageStraitRegionalControl(),
 		provingGroundModernVsLegacyAir(),
 		provingGroundAEWSupportedIntercept(),
 		provingGroundBallisticVsAirbase(),
+		provingGroundIsraelMissileDefenseSaturation(),
 		provingGroundDestroyerVsMissileBoat(),
 		provingGroundMaritimeTransitRules(),
 		provingGroundAirspaceRoutingRules(),
@@ -411,6 +605,18 @@ func ProvingGroundBuiltins() []*enginev1.Scenario {
 		provingGroundSortieRegenerationCycle(),
 		provingGroundGulfEscalationCycle(),
 		provingGroundHormuzMultiDomainSkirmish(),
+	}
+}
+
+func israelMissileDefenseSetupActions() []ProvingGroundSetupAction {
+	return []ProvingGroundSetupAction{{Kind: "set_player", TeamID: "ISR"}}
+}
+
+func attackOrder(targetID string, orderType enginev1.AttackOrderType, effect enginev1.DesiredEffect) *enginev1.AttackOrder {
+	return &enginev1.AttackOrder{
+		TargetUnitId:  targetID,
+		OrderType:     orderType,
+		DesiredEffect: effect,
 	}
 }
 
@@ -511,6 +717,102 @@ func provingGroundBallisticVsAirbase() *enginev1.Scenario {
 			}(),
 			provingGroundUnit("pg-nevatim-airbase", "Nevatim AB", "Israeli Strategic Air Base - Test Template", "ISR", "COALITION_WEST", "israel-strategic-airbase", 31.21, 35.01, 0, 0, 0),
 		},
+	}
+}
+
+func provingGroundIsraelMissileDefenseSaturation() *enginev1.Scenario {
+	units := []*enginev1.Unit{
+		provingGroundUnit("pg-imds-nevatim", "Nevatim AB", "Israeli Strategic Air Base - Missile Defense", "ISR", "COALITION_WEST", "israel-strategic-airbase", 31.21, 35.01, 0, 0, 0),
+		provingGroundUnit("pg-imds-hatzor", "Hatzor AB", "Israeli Strategic Air Base - Hatzor", "ISR", "COALITION_WEST", "israel-strategic-airbase", 31.73, 34.72, 0, 0, 0),
+		provingGroundUnit("pg-imds-palmachim", "Palmachim AB", "Israeli Strategic Air Base - Palmachim", "ISR", "COALITION_WEST", "israel-strategic-airbase", 31.89, 34.69, 0, 0, 0),
+		provingGroundUnit("pg-imds-telnof", "Tel Nof AB", "Israeli Strategic Air Base - Tel Nof", "ISR", "COALITION_WEST", "israel-strategic-airbase", 31.84, 34.82, 0, 0, 0),
+		provingGroundUnit("pg-imds-ramon", "Ramon AB", "Israeli Strategic Air Base - Ramon", "ISR", "COALITION_WEST", "israel-strategic-airbase", 30.61, 34.78, 0, 0, 0),
+		provingGroundUnit("pg-imds-arrow3-palmachim", "Arrow-3 Palmachim", "Arrow-3 Battery - Palmachim", "ISR", "COALITION_WEST", "arrow3-battery", 31.93, 34.69, 0, 0, 0),
+		provingGroundUnit("pg-imds-arrow2-central", "Arrow-2 Central", "Arrow-2 Battery - Central", "ISR", "COALITION_WEST", "arrow2-battery", 31.95, 34.78, 0, 0, 0),
+		provingGroundUnit("pg-imds-ds-dan", "David's Sling Dan", "David's Sling - Dan Region", "ISR", "COALITION_WEST", "davids-sling-battery", 32.08, 34.86, 0, 0, 0),
+		provingGroundUnit("pg-imds-id-dan", "Iron Dome Dan", "Iron Dome - Dan Region", "ISR", "COALITION_WEST", "iron-dome-battery", 32.09, 34.82, 0, 0, 0),
+		provingGroundUnit("pg-imds-id-negev", "Iron Dome Negev", "Iron Dome - Negev", "ISR", "COALITION_WEST", "iron-dome-battery", 31.04, 34.72, 0, 0, 0),
+	}
+
+	f15Targets := []string{"pg-imds-kheibar-1", "pg-imds-kheibar-2", "pg-imds-paveh-1", "pg-imds-paveh-2"}
+	for i := 0; i < 4; i++ {
+		u := provingAircraft(
+			fmt.Sprintf("pg-imds-isr-f15i-%d", i+1),
+			"F-15I",
+			"F-15I Ra'am Missile Defense Counterstrike",
+			"ISR",
+			"COALITION_WEST",
+			"f15i-raam",
+			33.55+float64(i)*0.05,
+			44.00+float64(i)*0.08,
+			9800,
+			80,
+			240,
+		)
+		u.LoadoutConfigurationId = "deep_strike"
+		u.AttackOrder = attackOrder(f15Targets[i], enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT, enginev1.DesiredEffect_DESIRED_EFFECT_DESTROY)
+		units = append(units, u)
+	}
+	units = append(units, provingAircraft("pg-imds-isr-eitam", "Eitam", "G550 Eitam Missile Defense Orbit", "ISR", "COALITION_WEST", "g550-eitam", 31.95, 34.88, 9500, 90, 210))
+
+	iranTargets := []string{"pg-imds-nevatim", "pg-imds-palmachim", "pg-imds-telnof", "pg-imds-ramon"}
+	for i := 0; i < 12; i++ {
+		u := provingGroundUnit(
+			fmt.Sprintf("pg-imds-kheibar-%d", i+1),
+			"Kheibar Brigade",
+			"Iranian Kheibar Shekan Brigade - Saturation Strike",
+			"IRN",
+			"COALITION_IRAN",
+			"kheibar-shekan-brigade",
+			34.10+0.08*float64(i),
+			45.45+0.12*float64(i),
+			0,
+			240,
+			0,
+		)
+		u.Weapons = []*enginev1.WeaponState{{WeaponId: "ssm-kheibar-shekan", CurrentQty: 10, MaxQty: 10}}
+		u.AttackOrder = attackOrder(iranTargets[i%len(iranTargets)], enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT, enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL)
+		units = append(units, u)
+	}
+	for i := 0; i < 12; i++ {
+		u := provingGroundUnit(
+			fmt.Sprintf("pg-imds-paveh-%d", i+1),
+			"Paveh Regiment",
+			"Iranian Paveh Cruise Missile Regiment - Saturation Strike",
+			"IRN",
+			"COALITION_IRAN",
+			"paveh-cruise-missile-regiment",
+			33.70+0.07*float64(i),
+			45.80+0.12*float64(i),
+			0,
+			240,
+			0,
+		)
+		u.Weapons = []*enginev1.WeaponState{{WeaponId: "ssm-paveh", CurrentQty: 10, MaxQty: 10}}
+		u.AttackOrder = attackOrder(iranTargets[(i+1)%len(iranTargets)], enginev1.AttackOrderType_ATTACK_ORDER_TYPE_STRIKE_UNTIL_EFFECT, enginev1.DesiredEffect_DESIRED_EFFECT_MISSION_KILL)
+		units = append(units, u)
+	}
+
+	return &enginev1.Scenario{
+		Id:             "pg-israel-missile-defense-saturation",
+		Name:           "Proving Ground: Israel Missile Defense Saturation",
+		Description:    "Large Iranian ballistic and cruise-missile salvo against Israel with layered Arrow, David's Sling, and Iron Dome defenses plus Israeli counterstrikes against launchers.",
+		Classification: "PROVING GROUND",
+		Author:         "AresSim Calibration",
+		Version:        "1.0.0",
+		StartTimeUnix:  float64(time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC).Unix()),
+		Settings: &enginev1.SimulationSettings{
+			TickRateHz: 10,
+			TimeScale:  1.0,
+		},
+		Map: clearWeatherMap(),
+		Relationships: []*enginev1.CountryRelationship{
+			{FromCountry: "ISR", ToCountry: "IRN", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true, DefensivePositioningAllowed: true},
+			{FromCountry: "IRN", ToCountry: "ISR", AirspaceTransitAllowed: true},
+			{FromCountry: "ISR", ToCountry: "JOR", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
+			{FromCountry: "ISR", ToCountry: "IRQ", AirspaceTransitAllowed: true, AirspaceStrikeAllowed: true},
+		},
+		Units: units,
 	}
 }
 
