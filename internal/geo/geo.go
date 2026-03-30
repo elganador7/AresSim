@@ -93,6 +93,7 @@ var (
 	loadMaritimeOnce      sync.Once
 	loadMaritimeErr       error
 	worldTransitPassages  []transitPassagePolygon
+	worldTransitErr       error
 )
 
 type featureCollectionJSON struct {
@@ -355,25 +356,37 @@ func BuildMaritimeRoute(start, end Point) ([]Point, bool) {
 }
 
 func init() {
-	worldTransitPassages = []transitPassagePolygon{
-		{
-			name: "Strait of Hormuz",
-			shape: mustPolygonShape([][][2]float64{
-				{
-					{55.70, 26.75},
-					{57.05, 26.75},
-					{57.05, 25.55},
-					{55.70, 25.55},
-					{55.70, 26.75},
-				},
-			}),
-		},
-	}
+	worldTransitPassages, worldTransitErr = buildWorldTransitPassages()
 }
 
-func mustPolygonShape(rings [][][2]float64) polygonShape {
+func ValidateStaticData() error {
+	return worldTransitErr
+}
+
+func buildWorldTransitPassages() ([]transitPassagePolygon, error) {
+	shape, err := polygonShapeFromRings([][][2]float64{
+		{
+			{55.70, 26.75},
+			{57.05, 26.75},
+			{57.05, 25.55},
+			{55.70, 25.55},
+			{55.70, 26.75},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return []transitPassagePolygon{
+		{
+			name:  "Strait of Hormuz",
+			shape: shape,
+		},
+	}, nil
+}
+
+func polygonShapeFromRings(rings [][][2]float64) (polygonShape, error) {
 	if len(rings) == 0 || len(rings[0]) < 3 {
-		panic("invalid transit passage polygon")
+		return polygonShape{}, fmt.Errorf("invalid transit passage polygon")
 	}
 	shape := polygonShape{
 		Exterior: rings[0],
@@ -385,7 +398,7 @@ func mustPolygonShape(rings [][][2]float64) polygonShape {
 			shape.Holes = append(shape.Holes, hole)
 		}
 	}
-	return shape
+	return shape, nil
 }
 
 func sampleSegment(start, end Point) GeoSegmentContext {

@@ -14,23 +14,25 @@ var defaultWeaponsJSON []byte
 var (
 	defaultWeaponDefs     []*enginev1.WeaponDefinition
 	defaultWeaponDefsOnce sync.Once
+	defaultWeaponDefsErr  error
 )
 
 // DefaultWeaponDefinitions returns the global weapon catalog seeded on startup.
 // The catalog is authored as embedded data rather than hardcoded Go literals so
 // library curation can scale without code-only edits.
-func DefaultWeaponDefinitions() []*enginev1.WeaponDefinition {
+func DefaultWeaponDefinitions() ([]*enginev1.WeaponDefinition, error) {
 	defaultWeaponDefsOnce.Do(func() {
 		var defs []*enginev1.WeaponDefinition
 		if err := json.Unmarshal(defaultWeaponsJSON, &defs); err != nil {
-			panic(err)
+			defaultWeaponDefsErr = err
+			return
 		}
 		for _, wd := range defs {
 			wd.EffectType = defaultWeaponEffectType(wd.Id, wd.DomainTargets)
 		}
 		defaultWeaponDefs = defs
 	})
-	return defaultWeaponDefs
+	return defaultWeaponDefs, defaultWeaponDefsErr
 }
 
 // weaponSlot is a shorthand used in the loadout table below.

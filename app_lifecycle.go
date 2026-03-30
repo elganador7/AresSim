@@ -11,8 +11,10 @@ import (
 
 	"github.com/aressim/internal/db"
 	"github.com/aressim/internal/db/repository"
+	"github.com/aressim/internal/geo"
 	"github.com/aressim/internal/library"
 	"github.com/aressim/internal/scenario"
+	"github.com/aressim/internal/sim"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -63,6 +65,25 @@ func (a *App) startup(ctx context.Context) {
 	a.weaponDefRepo = repository.NewWeaponDefRepo(rawDB)
 	a.checkpoint = db.NewCheckpointWriter(a.unitRepo, a.scenRepo)
 
+	if err := geo.ValidateStaticData(); err != nil {
+		slog.Error("geo static data", "err", err)
+		runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
+			Type:    runtime.ErrorDialog,
+			Title:   "Startup Error",
+			Message: fmt.Sprintf("Failed to initialize geography data: %v", err),
+		})
+		return
+	}
+	if err := sim.ValidateWeaponEffectivenessData(); err != nil {
+		slog.Error("weapon effectiveness data", "err", err)
+		runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
+			Type:    runtime.ErrorDialog,
+			Title:   "Startup Error",
+			Message: fmt.Sprintf("Failed to initialize weapon effectiveness data: %v", err),
+		})
+		return
+	}
+
 	// Seed default data synchronously so it is present before the frontend loads.
 	a.seedDefaults(ctx, cfg)
 
@@ -87,6 +108,12 @@ func (a *App) startup(ctx context.Context) {
 func (a *App) seedDefaults(ctx context.Context, cfg db.Config) {
 	slog.Info("seeding defaults")
 
+	defaultWeapons, err := scenario.DefaultWeaponDefinitions()
+	if err != nil {
+		slog.Error("load default weapons", "err", err)
+		return
+	}
+
 	for _, scen := range scenario.Builtins() {
 		if err := a.scenRepo.Save(ctx, scen.Id, scenarioRecord(scen)); err != nil {
 			slog.Warn("seed built-in scenario", "id", scen.Id, "name", scen.Name, "err", err)
@@ -106,7 +133,7 @@ func (a *App) seedDefaults(ctx context.Context, cfg db.Config) {
 		}
 	}
 
-	for _, wd := range scenario.DefaultWeaponDefinitions() {
+	for _, wd := range defaultWeapons {
 		if err := a.weaponDefRepo.Save(ctx, wd.Id, weaponDefinitionRecord(wd)); err != nil {
 			slog.Warn("seed weapon definition", "id", wd.Id, "err", err)
 		}
@@ -114,7 +141,7 @@ func (a *App) seedDefaults(ctx context.Context, cfg db.Config) {
 
 	slog.Info("seeding complete",
 		"library", len(libDefs),
-		"weapons", len(scenario.DefaultWeaponDefinitions()),
+		"weapons", len(defaultWeapons),
 	)
 }
 

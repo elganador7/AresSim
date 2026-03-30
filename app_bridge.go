@@ -523,7 +523,11 @@ func (a *App) ListWeaponDefinitions() ([]map[string]any, error) {
 
 // listWeaponDefsProto converts DB weapon definition rows into proto messages.
 func (a *App) listWeaponDefsProto() []*enginev1.WeaponDefinition {
-	defaults := scenario.DefaultWeaponDefinitions()
+	defaults, err := scenario.DefaultWeaponDefinitions()
+	if err != nil {
+		slog.Warn("listWeaponDefsProto: defaults", "err", err)
+		defaults = nil
+	}
 	mergedByID := make(map[string]*enginev1.WeaponDefinition, len(defaults))
 	for _, wd := range defaults {
 		if wd == nil || strings.TrimSpace(wd.GetId()) == "" {

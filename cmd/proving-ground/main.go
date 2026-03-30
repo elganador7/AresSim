@@ -70,7 +70,10 @@ func main() {
 		defsByID[def.ID] = def
 		simDefs[def.ID] = defStatsFromLibraryDefinition(def)
 	}
-	weapons := buildWeaponCatalog()
+	weapons, err := buildWeaponCatalog()
+	if err != nil {
+		log.Fatalf("load weapon catalog: %v", err)
+	}
 	specs := scenario.ProvingGroundSpecs()
 
 	ids := make([]string, 0, len(specs))
@@ -360,9 +363,13 @@ func defStatsFromLibraryDefinition(def library.Definition) sim.DefStats {
 	}
 }
 
-func buildWeaponCatalog() map[string]sim.WeaponStats {
+func buildWeaponCatalog() (map[string]sim.WeaponStats, error) {
 	catalog := make(map[string]sim.WeaponStats)
-	for _, wd := range scenario.DefaultWeaponDefinitions() {
+	defs, err := scenario.DefaultWeaponDefinitions()
+	if err != nil {
+		return nil, err
+	}
+	for _, wd := range defs {
 		if wd == nil {
 			continue
 		}
@@ -375,5 +382,5 @@ func buildWeaponCatalog() map[string]sim.WeaponStats {
 			EffectType:       wd.GetEffectType(),
 		}
 	}
-	return catalog
+	return catalog, nil
 }

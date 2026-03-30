@@ -28,23 +28,27 @@ type weaponEffectivenessEntry struct {
 var (
 	weaponTargetEffectiveness     map[targetClassEffectivenessKey]float64
 	weaponTargetEffectivenessOnce sync.Once
+	weaponTargetEffectivenessErr  error
 )
 
-func loadWeaponTargetEffectiveness() map[targetClassEffectivenessKey]float64 {
+func loadWeaponTargetEffectiveness() (map[targetClassEffectivenessKey]float64, error) {
 	weaponTargetEffectivenessOnce.Do(func() {
 		var entries []weaponEffectivenessEntry
 		if err := json.Unmarshal(weaponEffectivenessJSON, &entries); err != nil {
-			panic(err)
+			weaponTargetEffectivenessErr = err
+			return
 		}
 		weaponTargetEffectiveness = make(map[targetClassEffectivenessKey]float64, len(entries))
 		for _, entry := range entries {
 			effectType, err := parseWeaponEffectType(entry.EffectType)
 			if err != nil {
-				panic(err)
+				weaponTargetEffectivenessErr = err
+				return
 			}
 			targetClass := strings.TrimSpace(strings.ToLower(entry.TargetClass))
 			if targetClass == "" {
-				panic("weapon effectiveness entry has empty targetClass")
+				weaponTargetEffectivenessErr = fmt.Errorf("weapon effectiveness entry has empty targetClass")
+				return
 			}
 			weaponTargetEffectiveness[targetClassEffectivenessKey{
 				effectType:  effectType,
@@ -52,7 +56,12 @@ func loadWeaponTargetEffectiveness() map[targetClassEffectivenessKey]float64 {
 			}] = entry.Multiplier
 		}
 	})
-	return weaponTargetEffectiveness
+	return weaponTargetEffectiveness, weaponTargetEffectivenessErr
+}
+
+func ValidateWeaponEffectivenessData() error {
+	_, err := loadWeaponTargetEffectiveness()
+	return err
 }
 
 func parseWeaponEffectType(raw string) (enginev1.WeaponEffectType, error) {
@@ -164,8 +173,10 @@ func effectiveTargetClass(targetDef DefStats) string {
 
 func weaponEffectivenessMultiplier(effectType enginev1.WeaponEffectType, targetDef DefStats) float64 {
 	targetClass := effectiveTargetClass(targetDef)
-	if v, ok := loadWeaponTargetEffectiveness()[targetClassEffectivenessKey{effectType: effectType, targetClass: targetClass}]; ok {
-		return v
+	if table, err := loadWeaponTargetEffectiveness(); err == nil {
+		if v, ok := table[targetClassEffectivenessKey{effectType: effectType, targetClass: targetClass}]; ok {
+			return v
+		}
 	}
 	if outcome := resolveImpactOutcome(effectType, targetClass); outcome != outcomeNoEffect {
 		return 0.75

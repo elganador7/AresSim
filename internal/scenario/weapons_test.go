@@ -3,7 +3,10 @@ package scenario
 import "testing"
 
 func TestDefaultWeaponDefinitionsHaveUniqueIDs(t *testing.T) {
-	defs := DefaultWeaponDefinitions()
+	defs, err := DefaultWeaponDefinitions()
+	if err != nil {
+		t.Fatalf("DefaultWeaponDefinitions() error = %v", err)
+	}
 	if len(defs) == 0 {
 		t.Fatal("expected weapon definitions")
 	}
