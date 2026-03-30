@@ -101,26 +101,11 @@ func (a *App) SimulateOilShockHorizon(request map[string]any) (map[string]any, e
 }
 
 func loadGlobalOilGraph() (*oilnet.Graph, error) {
-	return oilruntime.LoadRealDataGraph(
-		"data/Global-Oil-and-Gas-Extraction-Tracker-March-2026.xlsx",
-		"data/GEM-GOIT-Oil-NGL-Pipelines-2025-03.geojson",
-	)
+	return oilruntime.LoadDefaultRealDataGraph()
 }
 
 func loadRenderableOilGraph() (*oilnet.Graph, error) {
-	const cachePath = "data/oil-renderable-cache-v2.json"
-	if cached, err := oilnet.LoadGraphJSON(cachePath); err == nil {
-		return cached, nil
-	}
-	graph, err := loadGlobalOilGraph()
-	if err != nil {
-		return nil, err
-	}
-	renderable := oilnet.BuildRenderableGraph(graph)
-	if err := oilnet.ValidateGraph(renderable); err != nil {
-		return nil, err
-	}
-	return renderable, nil
+	return oilruntime.LoadDefaultRenderableGraph()
 }
 
 func (a *App) cachedGlobalOilGraph() (*oilnet.Graph, error) {

@@ -11,9 +11,9 @@ import (
 )
 
 func main() {
-	extractionPath := flag.String("extraction", "data/Global-Oil-and-Gas-Extraction-Tracker-March-2026.xlsx", "path to extraction workbook")
-	pipelinesPath := flag.String("pipelines", "data/GEM-GOIT-Oil-NGL-Pipelines-2025-03.geojson", "path to pipeline geojson")
-	outputPath := flag.String("output", "data/oil-renderable-cache-v2.json", "output cache path")
+	extractionPath := flag.String("extraction", oilruntime.DefaultExtractionWorkbookPath, "path to extraction workbook")
+	pipelinesPath := flag.String("pipelines", oilruntime.DefaultPipelinesGeoJSONPath, "path to pipeline geojson")
+	outputPath := flag.String("output", oilruntime.DefaultRenderableCachePath, "output cache path")
 	flag.Parse()
 
 	graph, err := oilruntime.LoadRealDataGraph(*extractionPath, *pipelinesPath)
