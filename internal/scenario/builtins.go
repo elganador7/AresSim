@@ -4,11 +4,10 @@ import enginev1 "github.com/aressim/internal/gen/engine/v1"
 
 // Builtins returns the scenarios that should always be seeded into the DB.
 func Builtins() []*enginev1.Scenario {
-	return append([]*enginev1.Scenario{
-		Default(),
-		IranCoalitionWarSkeleton(),
-		DestroyerVisualScaleScenario(256, 16, 6),
-	}, ProvingGroundBuiltins()...)
+	builtins := append([]*enginev1.Scenario{}, coreBuiltins()...)
+	builtins = append(builtins, visualShowcaseBuiltins()...)
+	builtins = append(builtins, ProvingGroundBuiltins()...)
+	return builtins
 }
 
 func BuiltinByID(id string) *enginev1.Scenario {
