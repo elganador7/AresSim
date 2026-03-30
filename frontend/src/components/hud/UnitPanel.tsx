@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import {
   CancelMoveOrder,
   ListUnitDefinitions,
@@ -10,6 +11,7 @@ import {
   SetUnitLoadoutConfiguration,
 } from "../../../wailsjs/go/main/App";
 import { useSimStore, type PathViolationPreview, type Unit, type WeaponDef } from "../../store/simStore";
+import { selectUnitPanelState } from "../../store/simSelectors";
 import { reportError } from "../../utils/errors";
 import { formatDist, formatETA } from "../../utils/formatters";
 import { haversineM } from "../../utils/geo";
@@ -104,19 +106,21 @@ function isHostedAtBase(host: Unit, candidate: Unit): boolean {
 }
 
 export default function UnitPanel() {
-  const selectedUnitId = useSimStore((s) => s.selectedUnitId);
-  const units = useSimStore((s) => s.units);
-  const weaponDefs = useSimStore((s) => s.weaponDefs);
-  const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
-  const simSeconds = useSimStore((s) => s.simSeconds);
-  const selectUnit = useSimStore((s) => s.selectUnit);
-  const routePreview = useSimStore((s) => s.selectedRoutePreview);
-  const strikePreview = useSimStore((s) => s.selectedStrikePreview);
-  const setRoutePreview = useSimStore((s) => s.setSelectedRoutePreview);
-  const setStrikePreview = useSimStore((s) => s.setSelectedStrikePreview);
-  const mapCommandMode = useSimStore((s) => s.mapCommandMode);
-  const startRouteEdit = useSimStore((s) => s.startRouteEdit);
-  const clearMapCommandMode = useSimStore((s) => s.clearMapCommandMode);
+  const {
+    selectedUnitId,
+    units,
+    weaponDefs,
+    humanControlledTeam,
+    simSeconds,
+    selectUnit,
+    routePreview,
+    strikePreview,
+    setRoutePreview,
+    setStrikePreview,
+    mapCommandMode,
+    startRouteEdit,
+    clearMapCommandMode,
+  } = useSimStore(useShallow(selectUnitPanelState));
   const [definitionMap, setDefinitionMap] = useState<Map<string, UnitDefinitionPanelMeta>>(new Map());
   const [activeTab, setActiveTab] = useState<"overview" | "commands" | "status" | "armament">("overview");
 

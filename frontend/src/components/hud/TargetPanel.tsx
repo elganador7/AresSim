@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import {
   ListUnitDefinitions,
   PreviewTargetEngagementOptions,
@@ -7,6 +8,7 @@ import {
   SetUnitAttackOrder,
 } from "../../../wailsjs/go/main/App";
 import { useSimStore, type Unit } from "../../store/simStore";
+import { selectTargetPanelState } from "../../store/simSelectors";
 import { areFriendly } from "../../utils/allegiance";
 import { reportError } from "../../utils/errors";
 import { selectedPlayerTeam } from "../../utils/playerTeam";
@@ -64,13 +66,15 @@ function visibilityStatusForTarget(
 }
 
 export default function TargetPanel() {
-  const selectedTargetId = useSimStore((s) => s.selectedTargetId);
-  const units = useSimStore((s) => s.units);
-  const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
-  const detections = useSimStore((s) => s.detections);
-  const detectionContacts = useSimStore((s) => s.detectionContacts);
-  const selectTarget = useSimStore((s) => s.selectTarget);
-  const selectUnit = useSimStore((s) => s.selectUnit);
+  const {
+    selectedTargetId,
+    units,
+    humanControlledTeam,
+    detections,
+    detectionContacts,
+    selectTarget,
+    selectUnit,
+  } = useSimStore(useShallow(selectTargetPanelState));
   const target = selectedTargetId ? units.get(selectedTargetId) : undefined;
   const playerTeam = selectedPlayerTeam(humanControlledTeam);
 

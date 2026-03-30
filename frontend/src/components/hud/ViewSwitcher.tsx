@@ -1,15 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { ListUnitDefinitions } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
+import { selectViewSwitcherState } from "../../store/simSelectors";
 import { reportError } from "../../utils/errors";
 import { selectedPlayerTeam } from "../../utils/playerTeam";
 import { inferUnitTeamCode, type DefinitionTeamMeta } from "../../utils/unitTeams";
 
 export default function ViewSwitcher() {
-  const activeView = useSimStore((s) => s.activeView);
-  const setActiveView = useSimStore((s) => s.setActiveView);
-  const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
-  const units = useSimStore((s) => s.units);
+  const { activeView, setActiveView, humanControlledTeam, units } = useSimStore(useShallow(selectViewSwitcherState));
   const [definitionTeams, setDefinitionTeams] = useState<Map<string, DefinitionTeamMeta>>(new Map());
 
   useEffect(() => {

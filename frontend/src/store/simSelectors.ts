@@ -31,3 +31,36 @@ export const selectCesiumGlobeState = (state: SimStore) => ({
   oilGraph: state.oilGraph,
   oilFocusToken: state.oilFocusToken,
 });
+
+export const selectUnitPanelState = (state: SimStore) => ({
+  selectedUnitId: state.selectedUnitId,
+  units: state.units,
+  weaponDefs: state.weaponDefs,
+  humanControlledTeam: state.humanControlledTeam,
+  simSeconds: state.simSeconds,
+  selectUnit: state.selectUnit,
+  routePreview: state.selectedRoutePreview,
+  strikePreview: state.selectedStrikePreview,
+  setRoutePreview: state.setSelectedRoutePreview,
+  setStrikePreview: state.setSelectedStrikePreview,
+  mapCommandMode: state.mapCommandMode,
+  startRouteEdit: state.startRouteEdit,
+  clearMapCommandMode: state.clearMapCommandMode,
+});
+
+export const selectTargetPanelState = (state: SimStore) => ({
+  selectedTargetId: state.selectedTargetId,
+  units: state.units,
+  humanControlledTeam: state.humanControlledTeam,
+  detections: state.detections,
+  detectionContacts: state.detectionContacts,
+  selectTarget: state.selectTarget,
+  selectUnit: state.selectUnit,
+});
+
+export const selectViewSwitcherState = (state: SimStore) => ({
+  activeView: state.activeView,
+  setActiveView: state.setActiveView,
+  humanControlledTeam: state.humanControlledTeam,
+  units: state.units,
+});
