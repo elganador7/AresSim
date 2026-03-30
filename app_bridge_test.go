@@ -194,7 +194,7 @@ func TestGetRenderableOilNetworkReturnsFilteredGraph(t *testing.T) {
 
 func TestShouldRenderOilEdge_HidesLatentAndRetiredPipelines(t *testing.T) {
 	for _, status := range []string{"mothballed", "idle", "retired", "proposed"} {
-		if shouldRenderOilEdge(oilnet.Edge{
+		if oilnet.ShouldRenderEdge(oilnet.Edge{
 			Kind:         oilnet.EdgePipeline,
 			StatusDetail: status,
 			State:        oilnet.StateDegraded,
@@ -203,7 +203,7 @@ func TestShouldRenderOilEdge_HidesLatentAndRetiredPipelines(t *testing.T) {
 			t.Fatalf("expected pipeline status %q to be hidden from render graph", status)
 		}
 	}
-	if !shouldRenderOilEdge(oilnet.Edge{
+	if !oilnet.ShouldRenderEdge(oilnet.Edge{
 		Kind:         oilnet.EdgePipeline,
 		StatusDetail: "operating",
 		State:        oilnet.StateOperational,
@@ -214,20 +214,20 @@ func TestShouldRenderOilEdge_HidesLatentAndRetiredPipelines(t *testing.T) {
 }
 
 func TestShouldRenderOilNode_HidesLatentAndInactiveExtraction(t *testing.T) {
-	if shouldRenderOilNode(oilnet.Node{
+	if oilnet.ShouldRenderNode(oilnet.Node{
 		Kind:  oilnet.NodeExtractionSite,
 		State: oilnet.StateDegraded,
 		Tags:  []string{"status:mothballed"},
 	}) {
 		t.Fatal("expected mothballed extraction site to be hidden from render graph")
 	}
-	if shouldRenderOilNode(oilnet.Node{
+	if oilnet.ShouldRenderNode(oilnet.Node{
 		Kind:  oilnet.NodeProject,
 		State: oilnet.StateOffline,
 	}) {
 		t.Fatal("expected offline project to be hidden from render graph")
 	}
-	if !shouldRenderOilNode(oilnet.Node{
+	if !oilnet.ShouldRenderNode(oilnet.Node{
 		Kind:  oilnet.NodeExtractionSite,
 		State: oilnet.StateOperational,
 	}) {
