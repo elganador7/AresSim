@@ -1,5 +1,7 @@
 import { useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useSimStore } from "../../store/simStore";
+import { selectOilPanelState } from "../../store/simSelectors";
 
 function formatBpd(value?: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -22,11 +24,13 @@ function formatCommodity(value?: string): string {
 }
 
 export default function OilPanel() {
-  const oilGraph = useSimStore((s) => s.oilGraph);
-  const selectedOilNodeId = useSimStore((s) => s.selectedOilNodeId);
-  const selectedOilEdgeId = useSimStore((s) => s.selectedOilEdgeId);
-  const selectOilNode = useSimStore((s) => s.selectOilNode);
-  const selectOilEdge = useSimStore((s) => s.selectOilEdge);
+  const {
+    oilGraph,
+    selectedOilNodeId,
+    selectedOilEdgeId,
+    selectOilNode,
+    selectOilEdge,
+  } = useSimStore(useShallow(selectOilPanelState));
 
   const detail = useMemo(() => {
     if (!oilGraph) {

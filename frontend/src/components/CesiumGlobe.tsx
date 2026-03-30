@@ -18,6 +18,7 @@
  */
 
 import { useEffect, useRef } from "react";
+import { useShallow } from "zustand/react/shallow";
 import {
   Viewer,
   Ion,
@@ -31,6 +32,7 @@ import {
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { useSimStore } from "../store/simStore";
+import { selectCesiumGlobeState } from "../store/simSelectors";
 import { reportError } from "../utils/errors";
 import { type DefInfo } from "./cesium/helpers";
 import { setupCesiumInteractions } from "./cesium/interactions";
@@ -44,9 +46,7 @@ export default function CesiumGlobe() {
   const viewerRef = useRef<Viewer | null>(null);
   const borderDataSourceRef = useRef<GeoJsonDataSource | null>(null);
   const maritimeDataSourceRef = useRef<GeoJsonDataSource | null>(null);
-  const mapCommandMode = useSimStore((s) => s.mapCommandMode);
-  const oilGraph = useSimStore((s) => s.oilGraph);
-  const oilFocusToken = useSimStore((s) => s.oilFocusToken);
+  const { mapCommandMode, oilGraph, oilFocusToken } = useSimStore(useShallow(selectCesiumGlobeState));
   const draggingWaypointRef = useRef<{ unitId: string; waypointIndex: number } | null>(null);
   const suppressClickRef = useRef(false);
   // definitionId → { generalType, combatRangeM }, populated from DB on mount

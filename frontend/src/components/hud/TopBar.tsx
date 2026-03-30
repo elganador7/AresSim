@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { PauseSim, RequestSync, SetHumanControlledTeam, SetSimSpeed } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
+import { selectTopBarState } from "../../store/simSelectors";
 import { formatSimTime } from "../../utils/formatters";
 import { reportError } from "../../utils/errors";
 import { selectedPlayerTeam } from "../../utils/playerTeam";
@@ -35,21 +37,23 @@ export default function TopBar({
   onOpenScenario: () => void;
   debugViewMenuVisible: boolean;
 }) {
-  const scenarioName = useSimStore((s) => s.scenarioName);
-  const scenarioState = useSimStore((s) => s.scenarioState);
-  const simSeconds = useSimStore((s) => s.simSeconds);
-  const timeScale = useSimStore((s) => s.timeScale);
-  const tickNumber = useSimStore((s) => s.tickNumber);
-  const scores = useSimStore((s) => s.scores);
-  const units = useSimStore((s) => s.units);
-  const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
-  const oilLayerVisible = useSimStore((s) => s.oilLayerVisible);
-  const oilGraph = useSimStore((s) => s.oilGraph);
-  const oilLoadError = useSimStore((s) => s.oilLoadError);
-  const requestOilFocus = useSimStore((s) => s.requestOilFocus);
-  const setActiveView = useSimStore((s) => s.setActiveView);
-  const setHumanControlledTeam = useSimStore((s) => s.setHumanControlledTeam);
-  const setOilLayerVisible = useSimStore((s) => s.setOilLayerVisible);
+  const {
+    scenarioName,
+    scenarioState,
+    simSeconds,
+    timeScale,
+    tickNumber,
+    scores,
+    units,
+    humanControlledTeam,
+    oilLayerVisible,
+    oilGraph,
+    oilLoadError,
+    requestOilFocus,
+    setActiveView,
+    setHumanControlledTeam,
+    setOilLayerVisible,
+  } = useSimStore(useShallow(selectTopBarState));
   const [sharingOpen, setSharingOpen] = useState(false);
   const [briefingOpen, setBriefingOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
