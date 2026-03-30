@@ -29,6 +29,7 @@ import { PlacedUnits, SelectedUnitPanel } from "./ScenarioUnitPanels";
 import UnitPalette, { type DragPayload } from "./UnitPalette";
 import DropConfirmDialog from "./DropConfirmDialog";
 import UnitDefinitionManager from "./UnitDefinitionManager";
+import { reportError } from "../../utils/errors";
 import {
   base64ToBytes,
   draftPointsJSON,
@@ -52,7 +53,7 @@ function LoadModal({
   useEffect(() => {
     ListScenarios()
       .then((rows) => setItems(rows))
-      .catch(console.error)
+      .catch((error) => reportError("ScenarioEditor:ListScenarios", error))
       .finally(() => setBusy(false));
   }, []);
 

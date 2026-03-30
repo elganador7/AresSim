@@ -11,6 +11,7 @@ import {
   type UnitDefinitionDraft,
   type WeaponConfigurationDraft,
 } from "../../store/editorStore";
+import { reportError } from "../../utils/errors";
 import { ListUnitDefinitions } from "../../../wailsjs/go/main/App";
 import UnitTypeIcon from "../UnitTypeIcon";
 import { EDITOR_COUNTRIES, EDITOR_COUNTRY_NAME_BY_CODE } from "../../data/editorCountries";
@@ -140,7 +141,7 @@ export default function UnitPalette() {
   useEffect(() => {
     ListUnitDefinitions()
       .then((rows) => loadUnitDefinitions(rows.map(rowToDef)))
-      .catch(console.error);
+      .catch((error) => reportError("UnitPalette:ListUnitDefinitions", error));
   }, [loadUnitDefinitions]);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, def: UnitDefinitionDraft) => {

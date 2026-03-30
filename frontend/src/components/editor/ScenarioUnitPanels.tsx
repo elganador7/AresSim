@@ -7,6 +7,7 @@ import {
 } from "../../store/editorStore";
 import { areFriendly } from "../../utils/allegiance";
 import { assessLoadoutAgainstTarget, type WeaponDefLite } from "../../utils/loadoutValidation";
+import { reportError } from "../../utils/errors";
 import { teamColorHex } from "../../utils/teamColors";
 import { ATTACK_ORDER_TYPES, DESIRED_EFFECTS, ENGAGEMENT_BEHAVIORS, filterValidEditorTargets } from "../../utils/editorTasking";
 import { formatCountry } from "./scenarioSerialization";
@@ -452,7 +453,7 @@ export function SelectedUnitPanel({
         });
         setWeaponDefs(next);
       })
-      .catch(console.error);
+      .catch((error) => reportError("ScenarioUnitPanels:ListWeaponDefinitions", error));
   }, []);
 
   if (!editingUnit) {

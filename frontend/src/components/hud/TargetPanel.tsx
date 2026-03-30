@@ -8,6 +8,7 @@ import {
 } from "../../../wailsjs/go/main/App";
 import { useSimStore, type Unit } from "../../store/simStore";
 import { areFriendly } from "../../utils/allegiance";
+import { reportError } from "../../utils/errors";
 import { selectedPlayerTeam } from "../../utils/playerTeam";
 
 type UnitDefinitionTargetMeta = {
@@ -129,7 +130,7 @@ export default function TargetPanel() {
         }
         setDefinitionMap(defs);
       })
-      .catch(console.error);
+      .catch((error) => reportError("TargetPanel:ListUnitDefinitions", error));
     return () => {
       cancelled = true;
     };
@@ -164,6 +165,7 @@ export default function TargetPanel() {
         setOptions([]);
         setSummary(null);
         setError(err instanceof Error ? err.message : String(err));
+        reportError("TargetPanel:PreviewTargetEngagement", err);
       });
     return () => {
       cancelled = true;
@@ -233,7 +235,7 @@ export default function TargetPanel() {
       selectTarget(null);
       selectUnit(shooterId);
     } catch (err) {
-      console.error(err);
+      reportError("TargetPanel:SetUnitAttackOrder", err);
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setBusy(false);
@@ -352,7 +354,7 @@ export default function TargetPanel() {
                 <button
                   className="cancel-order-btn"
                   disabled={busy || !option.canAssign || option.pathBlocked}
-                  onClick={() => engage(option.shooterUnitId).catch(console.error)}
+                  onClick={() => engage(option.shooterUnitId).catch((error) => reportError("TargetPanel:SetUnitAttackOrder", error))}
                 >
                   {option.readyToFire ? "Launch" : option.canAssign ? "Assign" : "Blocked"}
                 </button>

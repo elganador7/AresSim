@@ -31,6 +31,7 @@ import {
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { useSimStore } from "../store/simStore";
+import { reportError } from "../utils/errors";
 import { type DefInfo } from "./cesium/helpers";
 import { setupCesiumInteractions } from "./cesium/interactions";
 import { loadTheaterOverlays, removeTheaterOverlays } from "./cesium/overlays";
@@ -86,7 +87,7 @@ export default function CesiumGlobe() {
         borderDataSourceRef.current = borderDataSource;
         maritimeDataSourceRef.current = maritimeDataSource;
       })
-      .catch(console.error);
+      .catch((error) => reportError("CesiumGlobe:loadTheaterOverlays", error));
 
     // Initial camera — Eastern Mediterranean.
     viewer.camera.flyTo({

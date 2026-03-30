@@ -52,6 +52,7 @@ import type { WeaponDefinition as ProtoWeaponDef } from "@proto/engine/v1/weapon
 import type { MoveOrder as ProtoMoveOrder } from "@proto/engine/v1/common_pb";
 import type { OperationalStatus } from "@proto/engine/v1/status_pb";
 import { ScenarioPlayState } from "@proto/engine/v1/events_pb";
+import { reportError } from "../utils/errors";
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -68,7 +69,7 @@ function decodeProtoEvent<T>(schema: DescMessage, eventName: string, b64: string
   try {
     return fromBinary(schema, b64ToBytes(b64)) as T;
   } catch (error) {
-    console.error(`[bridge] ${eventName} decode failed`, error);
+    reportError(`bridge:${eventName} decode failed`, error);
     return null;
   }
 }
@@ -390,7 +391,7 @@ export function initBridge(): void {
   GetRenderableOilNetwork()
     .then((graph) => store.setOilGraph(normalizeOilGraph(graph)))
     .catch((error) => {
-      console.error("[bridge] oil graph load failed", error);
+      reportError("bridge:oil graph load failed", error);
       store.setOilLoadError(error instanceof Error ? error.message : String(error));
     });
 
@@ -413,7 +414,6 @@ export function initBridge(): void {
     if (snap.simTime) {
       store.setSimTime(snap.simTime.secondsElapsed, Number(snap.simTime.tickNumber));
     }
-    console.log(`[bridge] snapshot loaded: ${units.length} units, ${weaponDefs.length} weapon defs, scenario="${snap.scenarioName}"`);
   });
 
   // ── Per-tick batch update ──────────────────────────────────────────────────
@@ -496,5 +496,4 @@ export function initBridge(): void {
     store.setMunitions(munitions);
   });
 
-  console.log("[bridge] event listeners registered");
 }

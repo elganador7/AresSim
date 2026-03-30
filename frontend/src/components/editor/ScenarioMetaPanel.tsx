@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PreviewDraftRelationships } from "../../../wailsjs/go/main/App";
 import { useEditorStore, type CountryRelationshipDraft } from "../../store/editorStore";
 import { buildCountryCoalitionMap, collectRelationshipCountries, normalizeCountryCode } from "../../utils/countryRelationships";
+import { reportError } from "../../utils/errors";
 import { formatCountry } from "./scenarioSerialization";
 
 const WEATHER_STATES = [
@@ -53,7 +54,7 @@ export default function ScenarioMetaPanel() {
           })));
         }
       })
-      .catch(console.error);
+      .catch((error) => reportError("ScenarioMetaPanel:PreviewDraftRelationships", error));
     return () => {
       cancelled = true;
     };

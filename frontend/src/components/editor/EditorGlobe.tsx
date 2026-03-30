@@ -37,6 +37,7 @@ import {
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { useEditorStore, type UnitDraft } from "../../store/editorStore";
 import type { DragPayload } from "./UnitPalette";
+import { reportError } from "../../utils/errors";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
 import { teamColorHex } from "../../utils/teamColors";
 import { loadTheaterOverlays, removeTheaterOverlays } from "../cesium/overlays";
@@ -122,7 +123,7 @@ export default function EditorGlobe({
         borderDataSourceRef.current = borderDataSource;
         maritimeDataSourceRef.current = maritimeDataSource;
       })
-      .catch(console.error);
+      .catch((error) => reportError("EditorGlobe:loadTheaterOverlays", error));
 
     viewer.camera.setView({
       destination: Cartesian3.fromDegrees(25.8, 35.8, 2_000_000),

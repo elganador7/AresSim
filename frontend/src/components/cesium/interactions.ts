@@ -11,6 +11,7 @@ import type { MutableRefObject } from "react";
 import { AppendMoveWaypoint, MoveUnit, UpdateMoveWaypoint } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
 import { areHostile } from "../../utils/allegiance";
+import { reportError } from "../../utils/errors";
 import { selectedPlayerTeam } from "../../utils/playerTeam";
 import type { DefInfo } from "./helpers";
 import { canMove, ensureBridgeSuccess } from "./helpers";
@@ -125,7 +126,7 @@ export function setupCesiumInteractions(
       UpdateMoveWaypoint(drag.unitId, drag.waypointIndex, next.lat, next.lon)
         .then(ensureBridgeSuccess)
         .catch((error) => {
-          console.error(error);
+          reportError("CesiumInteractions:UpdateMoveWaypoint", error);
           alert(error instanceof Error ? error.message : String(error));
         });
     },
@@ -235,7 +236,7 @@ export function setupCesiumInteractions(
           .then(ensureBridgeSuccess)
           .then(() => setSelectedRoutePreview(null))
           .catch((error) => {
-            console.error(error);
+            reportError("CesiumInteractions:AppendMoveWaypoint", error);
             alert(error instanceof Error ? error.message : String(error));
           });
         return;
@@ -249,7 +250,7 @@ export function setupCesiumInteractions(
           selectTarget(null);
         })
         .catch((error) => {
-          console.error(error);
+          reportError("CesiumInteractions:MoveUnit", error);
           alert(error instanceof Error ? error.message : String(error));
         });
     },

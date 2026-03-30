@@ -9,6 +9,7 @@ import TargetPanel from "./components/hud/TargetPanel";
 import TopBar from "./components/hud/TopBar";
 import UnitPanel from "./components/hud/UnitPanel";
 import { useSimStore } from "./store/simStore";
+import { reportError } from "./utils/errors";
 import { RequestSync } from "../wailsjs/go/main/App";
 import "./app.css";
 
@@ -36,8 +37,7 @@ export default function App() {
 
   useEffect(() => {
     initBridge();
-    RequestSync().catch((e) => console.warn("[App] RequestSync:", e));
-    console.log("[App] AresSim frontend initialized");
+    RequestSync().catch((error) => reportError("App:RequestSync", error));
   }, []);
 
   useEffect(() => {

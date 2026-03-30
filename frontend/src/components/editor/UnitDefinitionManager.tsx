@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { useEditorStore, type UnitDefinitionDraft } from "../../store/editorStore";
+import { reportError } from "../../utils/errors";
 import { SaveUnitDefinition, DeleteUnitDefinition, ListUnitDefinitions } from "../../../wailsjs/go/main/App";
 import UnitTypeIcon from "../UnitTypeIcon";
 
@@ -507,7 +508,9 @@ export default function UnitDefinitionManager({ onClose }: Props) {
     try {
       const rows = await ListUnitDefinitions();
       loadUnitDefinitions(rows.map(rowToDef));
-    } catch (e) { console.error(e); }
+    } catch (error) {
+      reportError("UnitDefinitionManager:ListUnitDefinitions", error);
+    }
   };
 
   const handleNew = () => {

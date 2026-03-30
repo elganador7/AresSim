@@ -20,6 +20,7 @@ import {
 import { ListUnitDefinitions } from "../../../wailsjs/go/main/App";
 import type { ExplosionFx, Munition, OilEdge, OilGraph, OilNode, Unit } from "../../store/simStore";
 import { useSimStore } from "../../store/simStore";
+import { reportError } from "../../utils/errors";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
 import {
   type ActiveView,
@@ -932,7 +933,7 @@ export function setupCesiumStoreSync({
         const { units, activeView, selectedUnitId, detections } = useSimStore.getState();
         syncUnits(units, activeView, selectedUnitId, detections);
       })
-      .catch(console.error);
+      .catch((error) => reportError("CesiumSync:ListUnitDefinitions", error));
 
   const renderInitialState = () => {
     const {

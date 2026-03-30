@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ListUnitDefinitions } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
+import { reportError } from "../../utils/errors";
 import { selectedPlayerTeam } from "../../utils/playerTeam";
 import { inferUnitTeamCode, type DefinitionTeamMeta } from "../../utils/unitTeams";
 
@@ -26,7 +27,7 @@ export default function ViewSwitcher() {
         });
         setDefinitionTeams(next);
       })
-      .catch(console.error);
+      .catch((error) => reportError("ViewSwitcher:ListUnitDefinitions", error));
     return () => {
       cancelled = true;
     };

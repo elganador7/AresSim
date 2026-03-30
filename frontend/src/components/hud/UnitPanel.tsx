@@ -10,6 +10,7 @@ import {
   SetUnitLoadoutConfiguration,
 } from "../../../wailsjs/go/main/App";
 import { useSimStore, type PathViolationPreview, type Unit, type WeaponDef } from "../../store/simStore";
+import { reportError } from "../../utils/errors";
 import { formatDist, formatETA } from "../../utils/formatters";
 import { haversineM } from "../../utils/geo";
 import { selectedPlayerTeam } from "../../utils/playerTeam";
@@ -216,7 +217,7 @@ export default function UnitPanel() {
         }
         setDefinitionMap(defs);
       })
-      .catch(console.error);
+      .catch((error) => reportError("UnitPanel:ListUnitDefinitions", error));
     return () => {
       cancelled = true;
     };
@@ -257,7 +258,7 @@ export default function UnitPanel() {
       })
       .catch((error) => {
         if (!cancelled) {
-          console.error(error);
+          reportError("UnitPanel:PreviewCurrentTransitPath", error);
           setRoutePreview(null);
         }
       });
@@ -281,7 +282,7 @@ export default function UnitPanel() {
       })
       .catch((error) => {
         if (!cancelled) {
-          console.error(error);
+          reportError("UnitPanel:PreviewCurrentEngagement", error);
           setEngagementPreview(null);
         }
       });
@@ -305,7 +306,7 @@ export default function UnitPanel() {
       })
       .catch((error) => {
         if (!cancelled) {
-          console.error(error);
+          reportError("UnitPanel:PreviewCurrentStrikePath", error);
           setStrikePreview(null);
         }
       });
@@ -324,7 +325,7 @@ export default function UnitPanel() {
       ensureSuccess(await SetUnitEngagement(unit.id, engagementBehavior, engagementPkillThreshold));
       ensureSuccess(await RequestSync());
     } catch (error) {
-      console.error(error);
+      reportError("UnitPanel:saveCommands", error);
       alert(error instanceof Error ? error.message : String(error));
     } finally {
       setBusy(false);
@@ -350,7 +351,7 @@ export default function UnitPanel() {
       ensureSuccess(await RemoveMoveWaypoint(unit.id, index));
       ensureSuccess(await RequestSync());
     } catch (error) {
-      console.error(error);
+      reportError("UnitPanel:removeWaypoint", error);
       alert(error instanceof Error ? error.message : String(error));
     } finally {
       setBusy(false);
@@ -364,7 +365,7 @@ export default function UnitPanel() {
       ensureSuccess(await ReturnUnitToBase(unit.id));
       ensureSuccess(await RequestSync());
     } catch (error) {
-      console.error(error);
+      reportError("UnitPanel:returnToBase", error);
       alert(error instanceof Error ? error.message : String(error));
     } finally {
       setBusy(false);
@@ -469,7 +470,7 @@ export default function UnitPanel() {
                       <button
                         className="waypoint-remove-btn"
                         disabled={busy}
-                        onClick={() => removeWaypoint(idx).catch(console.error)}
+                        onClick={() => removeWaypoint(idx).catch((error) => reportError("UnitPanel:removeWaypoint", error))}
                       >
                         ×
                       </button>
@@ -495,7 +496,7 @@ export default function UnitPanel() {
                   )}
                   <button
                     className="cancel-order-btn"
-                    onClick={() => CancelMoveOrder(unit.id).catch(console.error)}
+                    onClick={() => CancelMoveOrder(unit.id).catch((error) => reportError("UnitPanel:CancelMoveOrder", error))}
                   >
                     Cancel Order
                   </button>
@@ -636,11 +637,11 @@ export default function UnitPanel() {
               </>
             )}
             <div className="unit-command-buttons">
-              <button className="cancel-order-btn" disabled={busy} onClick={() => saveCommands().catch(console.error)}>
+              <button className="cancel-order-btn" disabled={busy} onClick={() => saveCommands().catch((error) => reportError("UnitPanel:saveCommands", error))}>
                 Apply Commands
               </button>
               {canReturnToBase && (
-                <button className="cancel-order-btn" disabled={busy} onClick={() => returnToBase().catch(console.error)}>
+                <button className="cancel-order-btn" disabled={busy} onClick={() => returnToBase().catch((error) => reportError("UnitPanel:returnToBase", error))}>
                   Return to Base
                 </button>
               )}

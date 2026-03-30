@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { PauseSim, RequestSync, SetHumanControlledTeam, SetSimSpeed } from "../../../wailsjs/go/main/App";
 import { useSimStore } from "../../store/simStore";
 import { formatSimTime } from "../../utils/formatters";
+import { reportError } from "../../utils/errors";
 import { selectedPlayerTeam } from "../../utils/playerTeam";
 import ObjectivePanel from "./ObjectivePanel";
 import RelationshipPanel from "./RelationshipPanel";
@@ -82,12 +83,12 @@ export default function TopBar({
   const isActive = scenarioState === "running" || scenarioState === "paused";
 
   const handlePauseToggle = () => {
-    PauseSim(scenarioState === "running").catch(console.error);
+    PauseSim(scenarioState === "running").catch((error) => reportError("TopBar:PauseSim", error));
   };
 
   const stepSpeed = (delta: -1 | 1) => {
     const next = SPEED_PRESETS[currentIdx + delta];
-    if (next !== undefined) SetSimSpeed(next).catch(console.error);
+    if (next !== undefined) SetSimSpeed(next).catch((error) => reportError("TopBar:SetSimSpeed", error));
   };
 
   const handleHumanTeamChange = (teamId: string) => {
@@ -98,14 +99,14 @@ export default function TopBar({
     SetHumanControlledTeam(teamId)
       .then((result) => {
         if (!result.success) {
-          console.error(result.error || "failed to set human-controlled team");
+          reportError("TopBar:SetHumanControlledTeam", result.error || "failed to set human-controlled team");
           setHumanControlledTeam(previousHumanTeam);
           setActiveView(selectedPlayerTeam(previousHumanTeam) || "debug");
           return;
         }
-        RequestSync().catch(console.error);
+        RequestSync().catch((error) => reportError("TopBar:RequestSync", error));
       })
-      .catch(console.error);
+      .catch((error) => reportError("TopBar:SetHumanControlledTeam", error));
   };
 
   const toggleMenuAction = (action: () => void) => {
