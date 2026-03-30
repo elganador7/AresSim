@@ -17,3 +17,8 @@ Scripts here should be safe to rerun and should encode repo conventions instead 
 
 Headless proving-ground calibration now lives at:
 - `go run ./cmd/proving-ground --scenario all --trials 25`
+
+Repo validation entrypoints now live at:
+- `./scripts/validate_fast.sh`
+- `./scripts/validate_full.sh`
+- `./scripts/validate_slow.sh`
