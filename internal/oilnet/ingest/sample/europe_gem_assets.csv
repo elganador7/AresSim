@@ -1,0 +1,5 @@
+id,name,asset_type,country_code,operator,lat,lon,capacity_bpd,commodity
+nl-rotterdam,Rotterdam Cluster,refinery,NLD,Multiple operators,51.949,4.142,1250000,crude
+uk-fawley,Fawley Refinery,refinery,GBR,ExxonMobil,50.821,-1.35,270000,crude
+be-antwerp,Antwerp Refining Cluster,refinery,BEL,Multiple operators,51.298,4.301,660000,crude
+de-wilhelmshaven,Wilhelmshaven Import Terminal,import_terminal,DEU,Multiple operators,53.528,8.146,900000,crude

@@ -6,6 +6,7 @@
  */
 
 import { EventsOn } from "../../wailsjs/runtime/runtime";
+import { GetRenderableOilNetwork } from "../../wailsjs/go/main/App";
 import {
   useSimStore,
   Unit,
@@ -18,6 +19,9 @@ import {
   DetectionContact,
   CountryRelationship,
   TeamScore,
+  OilGraph,
+  OilNode,
+  OilEdge,
 } from "../store/simStore";
 import { fromBinary, type DescMessage } from "@bufbuild/protobuf";
 
@@ -265,10 +269,130 @@ export function protoEventToLogEntry(e: NarrativeEvent, simSeconds: number): Eve
   };
 }
 
+function normalizeOilNode(node: Record<string, any>): OilNode {
+  return {
+    id: String(node.id ?? ""),
+    name: String(node.name ?? ""),
+    kind: String(node.kind ?? ""),
+    countryCode: String(node.countryCode ?? ""),
+    operator: node.operator ? String(node.operator) : undefined,
+    lat: Number(node.lat ?? 0),
+    lon: Number(node.lon ?? 0),
+    state: String(node.state ?? "operational"),
+    primaryCommodity: node.primaryCommodity ? String(node.primaryCommodity) : undefined,
+    parentProjectId: node.parentProjectId ? String(node.parentProjectId) : undefined,
+    childFieldIds: Array.isArray(node.childFieldIds) ? node.childFieldIds.map((value) => String(value)) : [],
+    capacityBpd: Number(node.capacityBpd ?? 0),
+    currentFlowBpd: Number(node.currentFlowBpd ?? 0),
+    spareCapacityBpd: Number(node.spareCapacityBpd ?? 0),
+    productionBpd: Number(node.productionBpd ?? 0),
+    reserveBbl: Number(node.reserveBbl ?? 0),
+    crudeIntakeBpd: Number(node.crudeIntakeBpd ?? 0),
+    productOutputs: Array.isArray(node.productOutputs) ? node.productOutputs.map((entry) => ({
+      commodity: String(entry.commodity ?? ""),
+      bpd: Number(entry.bpd ?? 0),
+    })) : [],
+    outlineRings: Array.isArray(node.outlineRings) ? node.outlineRings.map((ring) =>
+      Array.isArray(ring) ? ring.map((point) => ({
+        lat: Number(point.lat ?? 0),
+        lon: Number(point.lon ?? 0),
+      })) : [],
+    ) : [],
+    demandProfile: Array.isArray(node.demandProfile) ? node.demandProfile.map((entry) => ({
+      commodity: String(entry.commodity ?? ""),
+      bpd: Number(entry.bpd ?? 0),
+      barrels: Number(entry.barrels ?? 0),
+    })) : [],
+    inventory: Array.isArray(node.inventory) ? node.inventory.map((entry) => ({
+      commodity: String(entry.commodity ?? ""),
+      bpd: Number(entry.bpd ?? 0),
+      barrels: Number(entry.barrels ?? 0),
+    })) : [],
+    dailyDrawLimitBpd: Number(node.dailyDrawLimitBpd ?? 0),
+    storageCapacityBbl: Number(node.storageCapacityBbl ?? 0),
+    tags: Array.isArray(node.tags) ? node.tags.map((tag) => String(tag)) : [],
+    sources: Array.isArray(node.sources) ? node.sources.map((src) => ({
+      name: String(src.name ?? ""),
+      organization: String(src.organization ?? ""),
+      url: String(src.url ?? ""),
+      lastUpdated: src.lastUpdated ? String(src.lastUpdated) : undefined,
+      confidence: Number(src.confidence ?? 0),
+      notes: src.notes ? String(src.notes) : undefined,
+    })) : [],
+  };
+}
+
+function normalizeOilEdge(edge: Record<string, any>): OilEdge {
+  return {
+    id: String(edge.id ?? ""),
+    name: String(edge.name ?? ""),
+    kind: String(edge.kind ?? ""),
+    fromNodeId: String(edge.fromNodeId ?? ""),
+    toNodeId: String(edge.toNodeId ?? ""),
+    commodity: String(edge.commodity ?? ""),
+    commodities: Array.isArray(edge.commodities) ? edge.commodities.map((value) => String(value)) : [],
+    commodityLabel: edge.commodityLabel ? String(edge.commodityLabel) : undefined,
+    state: String(edge.state ?? "operational"),
+    capacityBpd: Number(edge.capacityBpd ?? 0),
+    currentFlowBpd: Number(edge.currentFlowBpd ?? 0),
+    transitDays: Number(edge.transitDays ?? 0),
+    lengthKm: Number(edge.lengthKm ?? 0),
+    reversible: Boolean(edge.reversible),
+    crossesChokepoint: edge.crossesChokepoint ? String(edge.crossesChokepoint) : undefined,
+    crossesChokepoints: Array.isArray(edge.crossesChokepoints)
+      ? edge.crossesChokepoints.map((value) => String(value))
+      : [],
+    route: Array.isArray(edge.route) ? edge.route.map((point) => ({
+      lat: Number(point.lat ?? 0),
+      lon: Number(point.lon ?? 0),
+    })) : [],
+    routes: Array.isArray(edge.routes) ? edge.routes.map((route) =>
+      Array.isArray(route) ? route.map((point) => ({
+        lat: Number(point.lat ?? 0),
+        lon: Number(point.lon ?? 0),
+      })) : [],
+    ) : [],
+    sources: Array.isArray(edge.sources) ? edge.sources.map((src) => ({
+      name: String(src.name ?? ""),
+      organization: String(src.organization ?? ""),
+      url: String(src.url ?? ""),
+      lastUpdated: src.lastUpdated ? String(src.lastUpdated) : undefined,
+      confidence: Number(src.confidence ?? 0),
+      notes: src.notes ? String(src.notes) : undefined,
+    })) : [],
+  };
+}
+
+function normalizeOilGraph(payload: Record<string, any>): OilGraph {
+  return {
+    id: String(payload.id ?? "global-oil-network"),
+    name: String(payload.name ?? "Global Oil Network"),
+    description: String(payload.description ?? ""),
+    version: String(payload.version ?? ""),
+    view: String(payload.view ?? "global"),
+    nodes: Array.isArray(payload.nodes) ? payload.nodes.map((node) => normalizeOilNode(node)) : [],
+    edges: Array.isArray(payload.edges) ? payload.edges.map((edge) => normalizeOilEdge(edge)) : [],
+    sources: Array.isArray(payload.sources) ? payload.sources.map((src) => ({
+      name: String(src.name ?? ""),
+      organization: String(src.organization ?? ""),
+      url: String(src.url ?? ""),
+      lastUpdated: src.lastUpdated ? String(src.lastUpdated) : undefined,
+      confidence: Number(src.confidence ?? 0),
+      notes: src.notes ? String(src.notes) : undefined,
+    })) : [],
+  };
+}
+
 // ─── EVENT SUBSCRIPTIONS ─────────────────────────────────────────────────────
 
 export function initBridge(): void {
   const store = useSimStore.getState();
+  GetRenderableOilNetwork()
+    .then((graph) => store.setOilGraph(normalizeOilGraph(graph)))
+    .catch((error) => {
+      console.error("[bridge] oil graph load failed", error);
+      store.setOilLoadError(error instanceof Error ? error.message : String(error));
+    });
 
   // ── Full state snapshot ────────────────────────────────────────────────────
   registerProtoEvent<FullStateSnapshot>("sim:full_state_snapshot", FullStateSnapshotSchema, (snap) => {

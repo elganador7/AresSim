@@ -10,6 +10,10 @@ export function DeleteScenario(arg1:string):Promise<main.BridgeResult>;
 
 export function DeleteUnitDefinition(arg1:string):Promise<main.BridgeResult>;
 
+export function GetGlobalOilNetwork():Promise<Record<string, any>>;
+
+export function GetRenderableOilNetwork():Promise<Record<string, any>>;
+
 export function GetScenario(arg1:string):Promise<string>;
 
 export function GetVersion():Promise<string>;
@@ -75,5 +79,9 @@ export function SetUnitAttackOrder(arg1:string,arg2:number,arg3:string,arg4:numb
 export function SetUnitEngagement(arg1:string,arg2:number,arg3:number):Promise<main.BridgeResult>;
 
 export function SetUnitLoadoutConfiguration(arg1:string,arg2:string):Promise<main.BridgeResult>;
+
+export function SimulateOilShock(arg1:Record<string, any>):Promise<Record<string, any>>;
+
+export function SimulateOilShockHorizon(arg1:Record<string, any>):Promise<Record<string, any>>;
 
 export function UpdateMoveWaypoint(arg1:string,arg2:number,arg3:number,arg4:number):Promise<main.BridgeResult>;

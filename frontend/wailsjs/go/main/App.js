@@ -18,6 +18,14 @@ export function DeleteUnitDefinition(arg1) {
   return window['go']['main']['App']['DeleteUnitDefinition'](arg1);
 }
 
+export function GetGlobalOilNetwork() {
+  return window['go']['main']['App']['GetGlobalOilNetwork']();
+}
+
+export function GetRenderableOilNetwork() {
+  return window['go']['main']['App']['GetRenderableOilNetwork']();
+}
+
 export function GetScenario(arg1) {
   return window['go']['main']['App']['GetScenario'](arg1);
 }
@@ -148,6 +156,14 @@ export function SetUnitEngagement(arg1, arg2, arg3) {
 
 export function SetUnitLoadoutConfiguration(arg1, arg2) {
   return window['go']['main']['App']['SetUnitLoadoutConfiguration'](arg1, arg2);
+}
+
+export function SimulateOilShock(arg1) {
+  return window['go']['main']['App']['SimulateOilShock'](arg1);
+}
+
+export function SimulateOilShockHorizon(arg1) {
+  return window['go']['main']['App']['SimulateOilShockHorizon'](arg1);
 }
 
 export function UpdateMoveWaypoint(arg1, arg2, arg3, arg4) {

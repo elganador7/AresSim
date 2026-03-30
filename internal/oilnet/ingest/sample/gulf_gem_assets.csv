@@ -1,0 +1,12 @@
+id,name,asset_type,country_code,operator,lat,lon,capacity_bpd,commodity
+sa-ghawar,Ghawar,field,SAU,Saudi Aramco,25.385,49.655,3800000,crude
+sa-abqaiq,Abqaiq,gathering_hub,SAU,Saudi Aramco,25.934,49.668,7000000,crude
+sa-ras-tanura,Ras Tanura,export_terminal,SAU,Saudi Aramco,26.647,50.163,6500000,crude
+ae-upper-zakum,Upper Zakum,field,ARE,ADNOC Offshore,25.025,53.513,1200000,crude
+ae-fujairah,Fujairah,export_terminal,ARE,ADNOC,25.124,56.342,1800000,crude
+kw-burgan,Greater Burgan,field,KWT,Kuwait Oil Company,29.079,47.942,1700000,crude
+kw-mina-al-ahmadi,Mina Al Ahmadi,refinery,KWT,KNPC,28.997,48.164,466000,crude
+iq-rumaila,Rumaila,field,IRQ,Basra Oil Company,30.418,47.491,1450000,crude
+iq-basra-oil-terminal,Basra Oil Terminal,export_terminal,IRQ,SOMO,29.781,48.812,3200000,crude
+ir-kharg,Kharg Island Terminal,export_terminal,IRN,NIOC,29.248,50.326,4500000,crude
+ir-abadan,Abadan,refinery,IRN,NIORDC,30.361,48.284,400000,crude

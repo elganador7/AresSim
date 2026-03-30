@@ -1,0 +1,5 @@
+id,name,asset_type,country_code,operator,lat,lon,capacity_bpd,commodity
+sg-singapore,Singapore Storage Hub,storage_hub,SGP,Multiple operators,1.255,103.73,1600000,diesel
+jp-chiba,Chiba Refining Cluster,refinery,JPN,ENEOS,35.607,140.106,450000,crude
+kr-ulsan,Ulsan Refining Cluster,refinery,KOR,SK Energy,35.503,129.37,840000,crude
+cn-ningbo,Ningbo Import Terminal,import_terminal,CHN,Multiple operators,29.943,121.869,1200000,crude

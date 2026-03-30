@@ -126,6 +126,92 @@ export interface PathViolationPreview {
   routePoints?: { lat: number; lon: number }[];
 }
 
+export interface OilSourceRef {
+  name: string;
+  organization: string;
+  url: string;
+  lastUpdated?: string;
+  confidence: number;
+  notes?: string;
+}
+
+export interface OilCommodityQuantity {
+  commodity: string;
+  bpd?: number;
+  barrels?: number;
+}
+
+export interface OilProductOutput {
+  commodity: string;
+  bpd: number;
+}
+
+export interface OilRoutePoint {
+  lat: number;
+  lon: number;
+}
+
+export interface OilNode {
+  id: string;
+  name: string;
+  kind: string;
+  countryCode: string;
+  operator?: string;
+  lat: number;
+  lon: number;
+  state: string;
+  primaryCommodity?: string;
+  parentProjectId?: string;
+  childFieldIds?: string[];
+  capacityBpd?: number;
+  currentFlowBpd?: number;
+  spareCapacityBpd?: number;
+  productionBpd?: number;
+  reserveBbl?: number;
+  crudeIntakeBpd?: number;
+  productOutputs?: OilProductOutput[];
+  outlineRings?: OilRoutePoint[][];
+  demandProfile?: OilCommodityQuantity[];
+  inventory?: OilCommodityQuantity[];
+  dailyDrawLimitBpd?: number;
+  storageCapacityBbl?: number;
+  tags?: string[];
+  sources?: OilSourceRef[];
+}
+
+export interface OilEdge {
+  id: string;
+  name: string;
+  kind: string;
+  fromNodeId: string;
+  toNodeId: string;
+  commodity: string;
+  commodities?: string[];
+  commodityLabel?: string;
+  state: string;
+  capacityBpd: number;
+  currentFlowBpd: number;
+  transitDays?: number;
+  lengthKm?: number;
+  reversible?: boolean;
+  crossesChokepoint?: string;
+  crossesChokepoints?: string[];
+  route?: OilRoutePoint[];
+  routes?: OilRoutePoint[][];
+  sources?: OilSourceRef[];
+}
+
+export interface OilGraph {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  view: string;
+  nodes: OilNode[];
+  edges: OilEdge[];
+  sources?: OilSourceRef[];
+}
+
 export interface Unit {
   id: string;
   displayName: string;
@@ -197,6 +283,10 @@ export interface SimStore {
   // team/nation code such as "ISR" or "USA".
   activeView: string;
   humanControlledTeam: string;
+  oilGraph: OilGraph | null;
+  oilLayerVisible: boolean;
+  oilFocusToken: number;
+  oilLoadError: string | null;
 
   // ── Detections ───────────────────────────────────────────────────────────
   // Maps detecting team → set of enemy unit IDs currently in sensor range.
@@ -208,6 +298,8 @@ export interface SimStore {
   // ── Selection ────────────────────────────────────────────────────────────
   selectedUnitId: string | null;
   selectedTargetId: string | null;
+  selectedOilNodeId: string | null;
+  selectedOilEdgeId: string | null;
   mapCommandMode: MapCommandMode;
   selectedRoutePreview: PathViolationPreview | null;
   selectedStrikePreview: PathViolationPreview | null;
@@ -240,6 +332,12 @@ export interface SimStore {
   setActiveView: (view: string) => void;
   setHumanControlledTeam: (team: string) => void;
   setDetections: (teamId: string, ids: string[], contacts?: DetectionContact[]) => void;
+  setOilGraph: (graph: OilGraph | null) => void;
+  setOilLoadError: (message: string | null) => void;
+  setOilLayerVisible: (visible: boolean) => void;
+  requestOilFocus: () => void;
+  selectOilNode: (id: string | null) => void;
+  selectOilEdge: (id: string | null) => void;
 }
 
 export interface EventLogEntry {
@@ -268,10 +366,16 @@ export const useSimStore = create<SimStore>((set) => ({
   munitionDetections: new Map(),
   activeView: "debug",
   humanControlledTeam: "",
+  oilGraph: null,
+  oilLayerVisible: true,
+  oilFocusToken: 0,
+  oilLoadError: null,
   detections: new Map(),
   detectionContacts: new Map(),
   selectedUnitId: null,
   selectedTargetId: null,
+  selectedOilNodeId: null,
+  selectedOilEdgeId: null,
   mapCommandMode: { type: "none", unitId: null },
   selectedRoutePreview: null,
   selectedStrikePreview: null,
@@ -291,6 +395,8 @@ export const useSimStore = create<SimStore>((set) => ({
       units: new Map(units.map((u) => [u.id, u])),
       selectedUnitId: null,
       selectedTargetId: null,
+      selectedOilNodeId: null,
+      selectedOilEdgeId: null,
       mapCommandMode: { type: "none", unitId: null },
       selectedRoutePreview: null,
       selectedStrikePreview: null,
@@ -361,11 +467,15 @@ export const useSimStore = create<SimStore>((set) => ({
     set((state) => ({
       selectedUnitId,
       selectedTargetId: selectedUnitId ? null : state.selectedTargetId,
+      selectedOilNodeId: selectedUnitId ? null : state.selectedOilNodeId,
+      selectedOilEdgeId: selectedUnitId ? null : state.selectedOilEdgeId,
     })),
   selectTarget: (selectedTargetId) =>
     set((state) => ({
       selectedTargetId,
       selectedUnitId: selectedTargetId ? null : state.selectedUnitId,
+      selectedOilNodeId: selectedTargetId ? null : state.selectedOilNodeId,
+      selectedOilEdgeId: selectedTargetId ? null : state.selectedOilEdgeId,
       mapCommandMode: selectedTargetId ? { type: "none", unitId: null } : state.mapCommandMode,
     })),
   startRouteEdit: (unitId) => set({ mapCommandMode: unitId ? { type: "route", unitId } : { type: "none", unitId: null } }),
@@ -374,6 +484,26 @@ export const useSimStore = create<SimStore>((set) => ({
   setSelectedStrikePreview: (selectedStrikePreview) => set({ selectedStrikePreview }),
   setActiveView: (activeView) => set({ activeView }),
   setHumanControlledTeam: (humanControlledTeam) => set({ humanControlledTeam }),
+  setOilGraph: (oilGraph) => set({ oilGraph, oilLoadError: null }),
+  setOilLoadError: (oilLoadError) => set({ oilLoadError }),
+  setOilLayerVisible: (oilLayerVisible) => set({ oilLayerVisible }),
+  requestOilFocus: () => set((state) => ({ oilFocusToken: state.oilFocusToken + 1 })),
+  selectOilNode: (selectedOilNodeId) =>
+    set({
+      selectedOilNodeId,
+      selectedOilEdgeId: null,
+      selectedUnitId: null,
+      selectedTargetId: null,
+      mapCommandMode: { type: "none", unitId: null },
+    }),
+  selectOilEdge: (selectedOilEdgeId) =>
+    set({
+      selectedOilEdgeId,
+      selectedOilNodeId: null,
+      selectedUnitId: null,
+      selectedTargetId: null,
+      mapCommandMode: { type: "none", unitId: null },
+    }),
 
   setDetections: (teamId, ids, contacts = []) =>
     set((state) => {

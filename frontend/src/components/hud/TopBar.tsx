@@ -42,8 +42,13 @@ export default function TopBar({
   const scores = useSimStore((s) => s.scores);
   const units = useSimStore((s) => s.units);
   const humanControlledTeam = useSimStore((s) => s.humanControlledTeam);
+  const oilLayerVisible = useSimStore((s) => s.oilLayerVisible);
+  const oilGraph = useSimStore((s) => s.oilGraph);
+  const oilLoadError = useSimStore((s) => s.oilLoadError);
+  const requestOilFocus = useSimStore((s) => s.requestOilFocus);
   const setActiveView = useSimStore((s) => s.setActiveView);
   const setHumanControlledTeam = useSimStore((s) => s.setHumanControlledTeam);
+  const setOilLayerVisible = useSimStore((s) => s.setOilLayerVisible);
   const [sharingOpen, setSharingOpen] = useState(false);
   const [briefingOpen, setBriefingOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -213,6 +218,19 @@ export default function TopBar({
                 onClick={() => toggleMenuAction(() => setSharingOpen((current) => !current))}
               >
                 {sharingOpen ? "Hide Relationships" : "Show Relationships"}
+              </button>
+              <button
+                className="top-bar-menu-item"
+                onClick={() => toggleMenuAction(requestOilFocus)}
+                disabled={!oilGraph}
+              >
+                Focus Oil Network{oilGraph ? ` (${oilGraph.nodes.length.toLocaleString()} nodes)` : oilLoadError ? " (Load Failed)" : " (Loading real datasets...)"}
+              </button>
+              <button
+                className={`top-bar-menu-item${oilLayerVisible ? " active" : ""}`}
+                onClick={() => toggleMenuAction(() => setOilLayerVisible(!oilLayerVisible))}
+              >
+                {oilLayerVisible ? "Hide Oil Network" : "Show Oil Network"}
               </button>
               <button
                 className="top-bar-menu-item"

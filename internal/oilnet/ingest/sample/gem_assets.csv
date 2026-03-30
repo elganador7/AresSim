@@ -1,0 +1,5 @@
+id,name,asset_type,country_code,operator,lat,lon,capacity_bpd,commodity
+sa-ghawar,Ghawar,field,SAU,Saudi Aramco,25.385,49.655,3800000,crude
+sa-ras-tanura,Ras Tanura,export_terminal,SAU,Saudi Aramco,26.647,50.163,6500000,crude
+kw-mina-al-ahmadi,Mina Al Ahmadi,refinery,KWT,KNPC,28.997,48.164,466000,crude
+nl-rotterdam,Rotterdam Cluster,refinery,NLD,Multiple operators,51.949,4.142,1250000,crude

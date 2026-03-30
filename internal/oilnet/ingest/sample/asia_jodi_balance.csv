@@ -1,0 +1,5 @@
+country_code,commodity,production_bpd,refinery_intake_bpd,demand_bpd,imports_bpd,exports_bpd
+JPN,jet_kerosene,0,450000,3600000,380000,0
+KOR,diesel,0,840000,900000,100000,220000
+CHN,crude,0,1200000,0,1400000,0
+SGP,diesel,0,0,450000,0,600000

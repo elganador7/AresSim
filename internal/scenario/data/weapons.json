@@ -750,7 +750,7 @@
     ],
     "speed_mps": 1450,
     "range_m": 200000,
-    "probability_of_hit": 0.79,
+    "probability_of_hit": 0.67,
     "guidance": 3,
     "effect_type": 7
   },
@@ -763,7 +763,7 @@
     ],
     "speed_mps": 1500,
     "range_m": 300000,
-    "probability_of_hit": 0.77,
+    "probability_of_hit": 0.64,
     "guidance": 3,
     "effect_type": 7
   },

@@ -23,16 +23,16 @@ definitions:
       source_notes: System performance claims vary widely; modeled as Iran's best indigenous long-range SAM, but with reduced effectiveness against low-observable aircraft due to the lack of verified public evidence of full-fidelity anti-stealth performance.
       service_entry_year: 2019
       base_strength: 0.66
-      accuracy: 0.62
+      accuracy: 0.56
       max_speed_mps: 0
       cruise_speed_mps: 0
       max_range_km: 0
       survivability: 0.34
-      detection_range_m: 220000
+      detection_range_m: 180000
       radar_cross_section_m2: 18
       sensor_suite:
         - sensor_type: air_search
-          max_range_m: 260000
+          max_range_m: 200000
           target_states: [airborne]
           fire_control: true
       fuel_capacity_liters: 0

@@ -1,0 +1,5 @@
+country_code,commodity,production_bpd,refinery_intake_bpd,demand_bpd,imports_bpd,exports_bpd
+SAU,crude,9000000,0,0,0,7000000
+KWT,crude,2600000,428000,0,0,2000000
+NLD,crude,0,1110000,0,1200000,0
+JPN,jet_kerosene,0,0,3600000,380000,0

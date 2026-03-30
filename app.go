@@ -10,6 +10,7 @@ import (
 	"github.com/aressim/internal/db"
 	"github.com/aressim/internal/db/repository"
 	"github.com/aressim/internal/library"
+	"github.com/aressim/internal/oilnet"
 	"github.com/aressim/internal/routing"
 	"github.com/aressim/internal/sim"
 
@@ -57,6 +58,12 @@ type App struct {
 
 	routeCacheMu sync.RWMutex
 	routeCache   map[string]routing.Result
+
+	oilGraphMu sync.RWMutex
+	oilGraph   *oilnet.Graph
+
+	oilRenderableGraphMu sync.RWMutex
+	oilRenderableGraph   *oilnet.Graph
 
 	// lastDetections stores the most recent DetectionSet emitted by SensorTick.
 	// RequestSync re-emits these so reconnecting frontends see current contacts.

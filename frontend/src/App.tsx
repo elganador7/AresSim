@@ -3,6 +3,7 @@ import { initBridge } from "./bridge/bridge";
 import CesiumGlobe from "./components/CesiumGlobe";
 import ScenarioEditor from "./components/editor/ScenarioEditor";
 import EventLog from "./components/hud/EventLog";
+import OilPanel from "./components/hud/OilPanel";
 import ScenarioLoadModal from "./components/hud/ScenarioLoadModal";
 import TargetPanel from "./components/hud/TargetPanel";
 import TopBar from "./components/hud/TopBar";
@@ -71,6 +72,7 @@ export default function App() {
         />
         <MapModeBanner />
         <EventLog />
+        <OilPanel />
         <UnitPanel />
         <TargetPanel />
         <ScenarioLoadModal open={scenarioLoadOpen} onClose={() => setScenarioLoadOpen(false)} />

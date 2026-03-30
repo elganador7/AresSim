@@ -24,8 +24,10 @@ import {
   OpenStreetMapImageryProvider,
   ImageryLayer,
   Cartesian3,
+  BoundingSphere,
   Color,
   GeoJsonDataSource,
+  ScreenSpaceEventType,
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { useSimStore } from "../store/simStore";
@@ -38,9 +40,12 @@ import { setupCesiumStoreSync } from "./cesium/sync";
 
 export default function CesiumGlobe() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const viewerRef = useRef<Viewer | null>(null);
   const borderDataSourceRef = useRef<GeoJsonDataSource | null>(null);
   const maritimeDataSourceRef = useRef<GeoJsonDataSource | null>(null);
   const mapCommandMode = useSimStore((s) => s.mapCommandMode);
+  const oilGraph = useSimStore((s) => s.oilGraph);
+  const oilFocusToken = useSimStore((s) => s.oilFocusToken);
   const draggingWaypointRef = useRef<{ unitId: string; waypointIndex: number } | null>(null);
   const suppressClickRef = useRef(false);
   // definitionId → { generalType, combatRangeM }, populated from DB on mount
@@ -74,6 +79,7 @@ export default function CesiumGlobe() {
 
     viewer.scene.globe.enableLighting = false;
     viewer.scene.backgroundColor = Color.fromCssColorString("#0f1115");
+    viewerRef.current = viewer;
 
     loadTheaterOverlays(viewer)
       .then(({ borderDataSource, maritimeDataSource }) => {
@@ -88,6 +94,9 @@ export default function CesiumGlobe() {
       duration: 0,
     });
 
+    // Default Cesium double-click zoom is too aggressive for unit interaction.
+    viewer.screenSpaceEventHandler.removeInputAction(ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
     setupCesiumInteractions(viewer, defInfoRef, draggingWaypointRef, suppressClickRef);
 
     const stopSync = setupCesiumStoreSync({ viewer, containerRef, defInfoRef });
@@ -98,11 +107,27 @@ export default function CesiumGlobe() {
         borderDataSource: borderDataSourceRef.current,
         maritimeDataSource: maritimeDataSourceRef.current,
       });
+      viewerRef.current = null;
       borderDataSourceRef.current = null;
       maritimeDataSourceRef.current = null;
       if (!viewer.isDestroyed()) viewer.destroy();
     };
   }, []);
+
+  useEffect(() => {
+    if (!viewerRef.current || !oilGraph || oilGraph.nodes.length === 0 || oilFocusToken === 0) {
+      return;
+    }
+    const positions = oilGraph.nodes
+      .slice(0, 4000)
+      .map((node) => Cartesian3.fromDegrees(node.lon, node.lat, 0));
+    if (positions.length === 0) {
+      return;
+    }
+    viewerRef.current.camera.flyToBoundingSphere(BoundingSphere.fromPoints(positions), {
+      duration: 1.2,
+    });
+  }, [oilFocusToken, oilGraph]);
 
   return (
     <div

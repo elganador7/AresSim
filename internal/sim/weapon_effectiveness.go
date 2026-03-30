@@ -102,9 +102,9 @@ func lowObservableEngagementFactor(weapon WeaponStats, targetDef DefStats) float
 	if rcs <= 0 {
 		return 1.0
 	}
-	factor := 0.25 + 0.75*clampPow(rcs, 0.2)
-	if factor < 0.2 {
-		return 0.2
+	factor := 0.1 + 0.9*clampPow(rcs, 0.25)
+	if factor < 0.12 {
+		return 0.12
 	}
 	if factor > 1.0 {
 		return 1.0

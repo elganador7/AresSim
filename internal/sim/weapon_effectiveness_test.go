@@ -72,6 +72,9 @@ func TestLaunchKillProbability_StealthAircraftReduceAntiAirEffectiveness(t *test
 	if stealthPk >= conventionalPk {
 		t.Fatalf("expected stealth aircraft to reduce anti-air pk: stealth=%f conventional=%f", stealthPk, conventionalPk)
 	}
+	if stealthPk > conventionalPk*0.4 {
+		t.Fatalf("expected stealth aircraft to reduce anti-air pk sharply: stealth=%f conventional=%f", stealthPk, conventionalPk)
+	}
 	if stealthPk <= 0 {
 		t.Fatalf("expected reduced but nonzero pk against stealth target, got %f", stealthPk)
 	}

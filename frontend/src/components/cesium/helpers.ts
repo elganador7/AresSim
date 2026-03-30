@@ -1,12 +1,22 @@
 import {
+  BillboardGraphics,
+  BoxGraphics,
   Cartesian3,
   Color,
+  ColorMaterialProperty,
   ConstantProperty,
+  DistanceDisplayCondition,
+  EllipsoidGraphics,
   Entity,
+  HeadingPitchRoll,
   HeightReference,
   HorizontalOrigin,
+  Math as CesiumMath,
+  ModelGraphics,
   NearFarScalar,
   PolylineDashMaterialProperty,
+  ShadowMode,
+  Transforms,
   VerticalOrigin,
 } from "cesium";
 import type { ExplosionFx, Munition, Unit, WeaponDef } from "../../store/simStore";
@@ -15,6 +25,8 @@ import { selectedPlayerTeam } from "../../utils/playerTeam";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
 import { inferUnitTeamCode } from "../../utils/unitTeams";
 import { areHostile } from "../../utils/allegiance";
+import { modelAssetFor } from "./modelAssets";
+import { resolveUnitVisualProfile } from "./visualModels";
 
 export type ActiveView = string;
 
@@ -27,6 +39,7 @@ export interface DefInfo {
   stationary?: boolean;
   assetClass?: string;
   coalitionId?: string;
+  visualModelId?: string;
 }
 
 export type Detections = Map<string, Set<string>>;
@@ -184,24 +197,119 @@ export function canMove(unit: Unit, view: ActiveView, defInfo: Record<string, De
   return teamForUnit(unit, defInfo) === controlTeam;
 }
 
-export function makeUnitEntity(unit: Unit, generalType: number, shortName: string): Entity {
-  const { humanControlledTeam, units } = useSimStore.getState();
-  const frameColor = relationshipColorHex(unit, humanControlledTeam, units);
-  return new Entity({
+export function makeUnitEntity(
+  unit: Unit,
+  generalType: number,
+  shortName: string,
+  domain?: number,
+  stationary?: boolean,
+  assetClass?: string,
+  visualModelId?: string,
+): Entity {
+  const entity = new Entity({
     id: unit.id,
     position: Cartesian3.fromDegrees(unit.position.lon, unit.position.lat, unit.position.altMsl),
     show: true,
-    billboard: {
-      image: getUnitBillboardUrl(generalType, frameColor, shortName),
-      width: 62,
-      height: 62,
-      verticalOrigin: VerticalOrigin.CENTER,
-      horizontalOrigin: HorizontalOrigin.CENTER,
-      scaleByDistance: new NearFarScalar(1.5e5, 1.2, 8e6, 0.4),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      heightReference: HeightReference.CLAMP_TO_GROUND,
-    },
   });
+  applyUnitEntityVisual(entity, unit, generalType, shortName, domain, stationary, assetClass, visualModelId, false, 1.0);
+  return entity;
+}
+
+export function applyUnitEntityVisual(
+  entity: Entity,
+  unit: Unit,
+  generalType: number,
+  shortName: string,
+  domain: number | undefined,
+  stationary: boolean | undefined,
+  assetClass: string | undefined,
+  visualModelId: string | undefined,
+  isSelected: boolean,
+  trackAlpha: number,
+) {
+  const { humanControlledTeam, units } = useSimStore.getState();
+  const frameColorHex = relationshipColorHex(unit, humanControlledTeam, units);
+  const frameColor = Color.fromCssColorString(frameColorHex);
+  const profile = resolveUnitVisualProfile(generalType, domain, stationary, assetClass, visualModelId);
+  const modelAsset = modelAssetFor(visualModelId);
+  entity.orientation = new ConstantProperty(
+    Transforms.headingPitchRollQuaternion(
+      Cartesian3.fromDegrees(unit.position.lon, unit.position.lat, unit.position.altMsl),
+      new HeadingPitchRoll(CesiumMath.toRadians(unit.position.heading || 0), 0, 0),
+    ),
+  );
+  entity.billboard = new BillboardGraphics({
+      image: new ConstantProperty(getUnitBillboardUrl(generalType, frameColorHex, shortName)),
+      width: new ConstantProperty(62),
+      height: new ConstantProperty(62),
+      verticalOrigin: new ConstantProperty(VerticalOrigin.CENTER),
+      horizontalOrigin: new ConstantProperty(HorizontalOrigin.CENTER),
+      scaleByDistance: new ConstantProperty(new NearFarScalar(1.5e5, 1.2, 8e6, 0.4)),
+      disableDepthTestDistance: new ConstantProperty(Number.POSITIVE_INFINITY),
+      heightReference: new ConstantProperty(HeightReference.CLAMP_TO_GROUND),
+      scale: new ConstantProperty(isSelected ? 1.2 : 1.0),
+      color: new ConstantProperty(Color.WHITE.withAlpha(trackAlpha)),
+      distanceDisplayCondition: new ConstantProperty(new DistanceDisplayCondition(
+        profile.kind === "billboard" && !modelAsset ? 0 : profile.billboardNearM * 0.6,
+        8e6,
+      )),
+    });
+
+  if (modelAsset) {
+    entity.model = new ModelGraphics({
+      uri: new ConstantProperty(modelAsset.uri),
+      scale: new ConstantProperty(modelAsset.scale),
+      minimumPixelSize: new ConstantProperty(modelAsset.minimumPixelSize),
+      maximumScale: modelAsset.maximumScale != null ? new ConstantProperty(modelAsset.maximumScale) : undefined,
+      color: new ConstantProperty(frameColor.withAlpha(0.22)),
+      silhouetteColor: new ConstantProperty(frameColor.withAlpha(0.95)),
+      silhouetteSize: new ConstantProperty(isSelected ? 2.5 : 0),
+      shadows: new ConstantProperty(ShadowMode.DISABLED),
+      runAnimations: new ConstantProperty(false),
+      distanceDisplayCondition: new ConstantProperty(
+        new DistanceDisplayCondition(0, modelAsset.closeDisplayM ?? profile.billboardNearM),
+      ),
+    });
+    entity.box = undefined;
+    entity.ellipsoid = undefined;
+    return;
+  }
+  entity.model = undefined;
+
+  if (profile.kind === "box") {
+    entity.box = new BoxGraphics({
+      dimensions: new ConstantProperty(
+        new Cartesian3(
+          profile.dimensions.x * (isSelected ? 1.08 : 1),
+          profile.dimensions.y * (isSelected ? 1.08 : 1),
+          profile.dimensions.z * (isSelected ? 1.08 : 1),
+        ),
+      ),
+      material: new ColorMaterialProperty(frameColor.withAlpha(Math.max(0.55, trackAlpha))),
+      outline: new ConstantProperty(true),
+      outlineColor: new ConstantProperty(Color.WHITE.withAlpha(0.85)),
+      distanceDisplayCondition: new ConstantProperty(new DistanceDisplayCondition(0, profile.billboardNearM)),
+    });
+    entity.ellipsoid = undefined;
+  } else if (profile.kind === "ellipsoid") {
+    entity.ellipsoid = new EllipsoidGraphics({
+      radii: new ConstantProperty(
+        new Cartesian3(
+          profile.dimensions.x * (isSelected ? 1.08 : 1),
+          profile.dimensions.y * (isSelected ? 1.08 : 1),
+          profile.dimensions.z * (isSelected ? 1.08 : 1),
+        ),
+      ),
+      material: new ColorMaterialProperty(frameColor.withAlpha(Math.max(0.55, trackAlpha))),
+      outline: new ConstantProperty(true),
+      outlineColor: new ConstantProperty(Color.WHITE.withAlpha(0.85)),
+      distanceDisplayCondition: new ConstantProperty(new DistanceDisplayCondition(0, profile.billboardNearM)),
+    });
+    entity.box = undefined;
+  } else {
+    entity.box = undefined;
+    entity.ellipsoid = undefined;
+  }
 }
 
 export function getExplosionBillboard(kind: ExplosionFx["kind"]): string {

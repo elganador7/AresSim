@@ -7,6 +7,7 @@ func Builtins() []*enginev1.Scenario {
 	return append([]*enginev1.Scenario{
 		Default(),
 		IranCoalitionWarSkeleton(),
+		DestroyerVisualScaleScenario(256, 16, 6),
 	}, ProvingGroundBuiltins()...)
 }
 

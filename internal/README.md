@@ -4,6 +4,7 @@ This directory contains the Go backend for the simulator.
 
 - `db/`: storage setup, schema, checkpoints, and DB process management.
 - `library/`: YAML-backed unit definition loading and normalization.
+- `oilnet/`: civilian global oil-network graph, ingest scaffolding, and future shock modeling.
 - `scenario/`: built-in scenarios and shared scenario seed data such as weapons.
 - `sim/`: detection, engagement, munition, and tick-resolution logic.
 - `gen/`: generated protobuf bindings for the Go backend. Do not edit by hand.

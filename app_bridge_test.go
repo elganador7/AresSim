@@ -7,6 +7,7 @@ import (
 
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
 	"github.com/aressim/internal/library"
+	"github.com/aressim/internal/oilnet"
 	"github.com/aressim/internal/scenario"
 	"github.com/aressim/internal/sim"
 )
@@ -75,6 +76,200 @@ func TestRunProvingGroundScenarioReturnsSummary(t *testing.T) {
 	}
 	if meanShots, ok := result["meanShotsFired"].(float64); !ok || meanShots <= 0 {
 		t.Fatalf("expected positive meanShotsFired, got %v (%T)", result["meanShotsFired"], result["meanShotsFired"])
+	}
+}
+
+func TestListUnitDefinitionsIncludesVisualModelIDsForKnownPlatforms(t *testing.T) {
+	app := loadTestAppWithLibrary(t)
+
+	rows, err := app.ListUnitDefinitions()
+	if err != nil {
+		t.Fatalf("ListUnitDefinitions failed: %v", err)
+	}
+	byID := make(map[string]map[string]any, len(rows))
+	for _, row := range rows {
+		id, _ := row["id"].(string)
+		byID[id] = row
+	}
+
+	if got := strings.TrimSpace(toString(byID["f35a-lightning"]["visual_model_id"])); got != "f35" {
+		t.Fatalf("expected f35a-lightning visual model id f35, got %q", got)
+	}
+	if got := strings.TrimSpace(toString(byID["ddg51-flight-iia"]["visual_model_id"])); got != "ddg51" {
+		t.Fatalf("expected ddg51-flight-iia visual model id ddg51, got %q", got)
+	}
+	if got := strings.TrimSpace(toString(byID["s300pmu2-battery-iran"]["visual_model_id"])); got != "s300" {
+		t.Fatalf("expected s300pmu2-battery-iran visual model id s300, got %q", got)
+	}
+	if got := strings.TrimSpace(toString(byID["bavar373-battery"]["visual_model_id"])); got != "bavar373" {
+		t.Fatalf("expected bavar373-battery visual model id bavar373, got %q", got)
+	}
+}
+
+func TestGetGlobalOilNetworkReturnsRenderableGraph(t *testing.T) {
+	app := loadTestAppWithLibrary(t)
+
+	directGraph, err := loadGlobalOilGraph()
+	if err != nil {
+		t.Fatalf("loadGlobalOilGraph failed: %v", err)
+	}
+	directFoundExtraction := false
+	for _, node := range directGraph.Nodes {
+		if strings.HasPrefix(node.ID, "extract-") {
+			directFoundExtraction = true
+			break
+		}
+	}
+	if !directFoundExtraction {
+		t.Fatal("expected direct real-data oil graph to contain extraction nodes")
+	}
+
+	graph, err := app.GetGlobalOilNetwork()
+	if err != nil {
+		t.Fatalf("GetGlobalOilNetwork failed: %v", err)
+	}
+	if got := toString(graph["id"]); got != "global-oil-network-realdata" {
+		t.Fatalf("expected oil graph id, got %q", got)
+	}
+	nodes, ok := graph["nodes"].([]any)
+	if !ok || len(nodes) < 10 {
+		t.Fatalf("expected at least 10 oil nodes, got %T len=%d", graph["nodes"], len(nodes))
+	}
+	edges, ok := graph["edges"].([]any)
+	if !ok || len(edges) < 10 {
+		t.Fatalf("expected at least 10 oil edges, got %T len=%d", graph["edges"], len(edges))
+	}
+	foundExtractionOverlay := false
+	foundPipelineNode := false
+	edgeList, _ := graph["edges"].([]any)
+	for _, raw := range nodes {
+		node, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		if strings.HasPrefix(toString(node["id"]), "extract-l100000321014") {
+			foundExtractionOverlay = true
+		}
+		if strings.HasPrefix(toString(node["id"]), "pipe-node-") {
+			foundPipelineNode = true
+		}
+	}
+	if !foundExtractionOverlay {
+		t.Fatal("expected extraction overlay node from workbook")
+	}
+	if !foundPipelineNode {
+		t.Fatal("expected pipeline endpoint node from geojson")
+	}
+	foundPipelineEdge := false
+	for _, raw := range edgeList {
+		edge, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		if toString(edge["kind"]) == string(oilnet.EdgePipeline) {
+			foundPipelineEdge = true
+			break
+		}
+	}
+	if !foundPipelineEdge {
+		t.Fatal("expected pipeline edges from geojson")
+	}
+}
+
+func TestGetRenderableOilNetworkReturnsFilteredGraph(t *testing.T) {
+	app := loadTestAppWithLibrary(t)
+	graph, err := app.GetRenderableOilNetwork()
+	if err != nil {
+		t.Fatalf("GetRenderableOilNetwork failed: %v", err)
+	}
+	nodes, ok := graph["nodes"].([]any)
+	if !ok || len(nodes) == 0 {
+		t.Fatalf("expected filtered oil nodes, got %T len=%d", graph["nodes"], len(nodes))
+	}
+	edges, ok := graph["edges"].([]any)
+	if !ok || len(edges) == 0 {
+		t.Fatalf("expected filtered oil edges, got %T len=%d", graph["edges"], len(edges))
+	}
+}
+
+func TestShouldRenderOilEdge_HidesLatentAndRetiredPipelines(t *testing.T) {
+	for _, status := range []string{"mothballed", "idle", "retired", "proposed"} {
+		if shouldRenderOilEdge(oilnet.Edge{
+			Kind:         oilnet.EdgePipeline,
+			StatusDetail: status,
+			State:        oilnet.StateDegraded,
+			CapacityBPD:  500_000,
+		}) {
+			t.Fatalf("expected pipeline status %q to be hidden from render graph", status)
+		}
+	}
+	if !shouldRenderOilEdge(oilnet.Edge{
+		Kind:         oilnet.EdgePipeline,
+		StatusDetail: "operating",
+		State:        oilnet.StateOperational,
+		CapacityBPD:  500_000,
+	}) {
+		t.Fatal("expected operating pipeline to remain renderable")
+	}
+}
+
+func TestShouldRenderOilNode_HidesLatentAndInactiveExtraction(t *testing.T) {
+	if shouldRenderOilNode(oilnet.Node{
+		Kind:  oilnet.NodeExtractionSite,
+		State: oilnet.StateDegraded,
+		Tags:  []string{"status:mothballed"},
+	}) {
+		t.Fatal("expected mothballed extraction site to be hidden from render graph")
+	}
+	if shouldRenderOilNode(oilnet.Node{
+		Kind:  oilnet.NodeProject,
+		State: oilnet.StateOffline,
+	}) {
+		t.Fatal("expected offline project to be hidden from render graph")
+	}
+	if !shouldRenderOilNode(oilnet.Node{
+		Kind:  oilnet.NodeExtractionSite,
+		State: oilnet.StateOperational,
+	}) {
+		t.Fatal("expected operating extraction site to remain renderable")
+	}
+}
+
+func TestSimulateOilShockReturnsSummariesAndImpacts(t *testing.T) {
+	app := loadTestAppWithLibrary(t)
+
+	result, err := app.SimulateOilShock(map[string]any{
+		"offlineNodeIds": []string{"om-hormuz"},
+	})
+	if err != nil {
+		t.Fatalf("SimulateOilShock failed: %v", err)
+	}
+	if _, ok := result["graph"].(map[string]any); !ok {
+		t.Fatalf("expected graph payload, got %T", result["graph"])
+	}
+	commodities, ok := result["commoditySummaries"].([]any)
+	if !ok || len(commodities) == 0 {
+		t.Fatalf("expected commodity summaries, got %T len=%d", result["commoditySummaries"], len(commodities))
+	}
+	impacts, ok := result["impactedComponents"].([]any)
+	if !ok || len(impacts) == 0 {
+		t.Fatalf("expected impacted components, got %T len=%d", result["impactedComponents"], len(impacts))
+	}
+}
+
+func TestSimulateOilShockHorizonReturnsMultiDayResults(t *testing.T) {
+	app := loadTestAppWithLibrary(t)
+
+	result, err := app.SimulateOilShockHorizon(map[string]any{
+		"offlineNodeIds": []string{"om-hormuz"},
+		"days":           3,
+	})
+	if err != nil {
+		t.Fatalf("SimulateOilShockHorizon failed: %v", err)
+	}
+	days, ok := result["days"].([]any)
+	if !ok || len(days) != 3 {
+		t.Fatalf("expected 3 horizon days, got %T len=%d", result["days"], len(days))
 	}
 }
 

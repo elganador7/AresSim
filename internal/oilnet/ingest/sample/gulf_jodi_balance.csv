@@ -1,0 +1,9 @@
+country_code,commodity,production_bpd,refinery_intake_bpd,demand_bpd,imports_bpd,exports_bpd
+SAU,crude,9000000,0,0,0,7000000
+ARE,crude,3300000,0,0,0,2800000
+KWT,crude,2600000,428000,0,0,2000000
+IRQ,crude,4300000,0,0,0,3600000
+IRN,crude,3200000,340000,0,0,1450000
+IND,crude,0,1160000,0,1500000,0
+NLD,crude,0,1110000,0,1200000,0
+JPN,jet_kerosene,0,0,3600000,380000,0
