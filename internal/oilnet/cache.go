@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const RenderableCacheSchemaVersion = "oil-renderable-cache/v2"
+const RenderableCacheSchemaVersion = "oil-renderable-cache/v3"
 
 type CacheMetadata struct {
 	SchemaVersion string `json:"schemaVersion"`

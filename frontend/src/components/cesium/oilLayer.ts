@@ -16,6 +16,29 @@ export const OIL_NODE_PREFIX = "oil_node_";
 export const OIL_EDGE_PREFIX = "oil_edge_";
 export const OIL_OUTLINE_PREFIX = "oil_outline_";
 
+export interface OilLayerSyncState {
+  nodeEntityIds: Set<string>;
+  edgeEntityIds: Set<string>;
+  outlineEntityIds: Set<string>;
+}
+
+export function createOilLayerSyncState(): OilLayerSyncState {
+  return {
+    nodeEntityIds: new Set<string>(),
+    edgeEntityIds: new Set<string>(),
+    outlineEntityIds: new Set<string>(),
+  };
+}
+
+export function hasGOGISource(node: OilNode): boolean {
+  return (node.tags ?? []).includes("source:gogi")
+    || (node.sources ?? []).some((source) => {
+      const org = String(source.organization ?? "").toLowerCase();
+      const name = String(source.name ?? "").toLowerCase();
+      return org.includes("edx") || name.includes("gogi");
+    });
+}
+
 function oilNodeColor(kind: string): Color {
   switch (kind) {
     case "project":
@@ -24,6 +47,8 @@ function oilNodeColor(kind: string): Color {
       return Color.fromCssColorString("#f97316");
     case "refinery":
       return Color.fromCssColorString("#38bdf8");
+    case "marine_terminal":
+      return Color.fromCssColorString("#facc15");
     case "export_terminal":
     case "import_terminal":
       return Color.fromCssColorString("#facc15");
@@ -79,6 +104,16 @@ export function oilNodePixelSize(node: OilNode, isSelected: boolean): number {
   return Math.max(8, Math.min(15, 8 + flow / 500_000));
 }
 
+export function oilNodeOutlineColor(node: OilNode, isSelected: boolean): Color {
+  if (isSelected) {
+    return Color.WHITE.withAlpha(0.95);
+  }
+  if (hasGOGISource(node)) {
+    return Color.fromCssColorString("#22c55e").withAlpha(0.95);
+  }
+  return Color.WHITE.withAlpha(0.9);
+}
+
 export function oilEdgeWidth(edge: OilEdge, isSelected: boolean): number {
   if (isSelected) {
     return 6;
@@ -116,6 +151,12 @@ export function shouldRenderOilNode(node: OilNode, selectedProjectId: string | n
   if (node.kind === "chokepoint") {
     return true;
   }
+  if (node.kind === "marine_terminal") {
+    return true;
+  }
+  if (hasGOGISource(node)) {
+    return true;
+  }
   return (node.currentFlowBpd ?? 0) >= 150_000
     || (node.capacityBpd ?? 0) >= 250_000
     || node.kind === "gathering_hub"
@@ -127,6 +168,9 @@ export function shouldRenderOilNode(node: OilNode, selectedProjectId: string | n
 }
 
 export function shouldRenderOilEdge(edge: OilEdge): boolean {
+  if (edge.kind === "seaborne_corridor") {
+    return false;
+  }
   return edge.kind === "pipeline"
     || edge.kind === "internal_transfer"
     || (edge.currentFlowBpd ?? 0) >= 200_000
@@ -140,6 +184,7 @@ export function syncOilGraph(
   visible: boolean,
   selectedNodeId: string | null,
   selectedEdgeId: string | null,
+  syncState: OilLayerSyncState,
 ) {
   const nodeIds = new Set<string>();
   const edgeIds = new Set<string>();
@@ -176,6 +221,7 @@ export function syncOilGraph(
     const existing = viewer.entities.getById(entityId);
     const isSelected = selectedNodeId === node.id;
     const color = oilNodeColor(node.kind);
+    const outlineColor = oilNodeOutlineColor(node, isSelected);
     const position = Cartesian3.fromDegrees(node.lon, node.lat, 0);
     if (existing) {
       existing.show = pointVisible;
@@ -183,6 +229,7 @@ export function syncOilGraph(
       if (existing.point) {
         existing.point.pixelSize = new ConstantProperty(oilNodePixelSize(node, isSelected));
         existing.point.color = new ConstantProperty(color.withAlpha(node.state === "offline" ? 0.45 : 0.95));
+        existing.point.outlineColor = new ConstantProperty(outlineColor);
         existing.point.outlineWidth = new ConstantProperty(isSelected ? 3 : 2);
         existing.point.disableDepthTestDistance = undefined;
       }
@@ -194,7 +241,7 @@ export function syncOilGraph(
         point: {
           pixelSize: oilNodePixelSize(node, isSelected),
           color: color.withAlpha(node.state === "offline" ? 0.45 : 0.95),
-          outlineColor: Color.WHITE.withAlpha(0.9),
+          outlineColor,
           outlineWidth: isSelected ? 3 : 2,
           heightReference: HeightReference.CLAMP_TO_GROUND,
           distanceDisplayCondition: new DistanceDisplayCondition(0, 1.4e7),
@@ -300,16 +347,22 @@ export function syncOilGraph(
     });
   }
 
-  Array.from(viewer.entities.values)
-    .map((entity) => entity.id as string)
-    .filter((id) => id.startsWith(OIL_NODE_PREFIX) && !nodeIds.has(id))
-    .forEach((id) => viewer.entities.removeById(id));
-  Array.from(viewer.entities.values)
-    .map((entity) => entity.id as string)
-    .filter((id) => id.startsWith(OIL_EDGE_PREFIX) && !edgeIds.has(id))
-    .forEach((id) => viewer.entities.removeById(id));
-  Array.from(viewer.entities.values)
-    .map((entity) => entity.id as string)
-    .filter((id) => id.startsWith(OIL_OUTLINE_PREFIX) && !outlineIds.has(id))
-    .forEach((id) => viewer.entities.removeById(id));
+  for (const id of syncState.nodeEntityIds) {
+    if (!nodeIds.has(id)) {
+      viewer.entities.removeById(id);
+    }
+  }
+  for (const id of syncState.edgeEntityIds) {
+    if (!edgeIds.has(id)) {
+      viewer.entities.removeById(id);
+    }
+  }
+  for (const id of syncState.outlineEntityIds) {
+    if (!outlineIds.has(id)) {
+      viewer.entities.removeById(id);
+    }
+  }
+  syncState.nodeEntityIds = nodeIds;
+  syncState.edgeEntityIds = edgeIds;
+  syncState.outlineEntityIds = outlineIds;
 }

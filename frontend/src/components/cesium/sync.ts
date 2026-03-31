@@ -22,7 +22,12 @@ import { useSimStore } from "../../store/simStore";
 import { reportError } from "../../utils/errors";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
 import { syncExplosions, syncMunitions } from "./effectsLayer";
-import { OIL_EDGE_PREFIX, OIL_NODE_PREFIX, syncOilGraph } from "./oilLayer";
+import {
+  OIL_EDGE_PREFIX,
+  OIL_NODE_PREFIX,
+  createOilLayerSyncState,
+  syncOilGraph,
+} from "./oilLayer";
 import {
   type ActiveView,
   type DefInfo,
@@ -58,6 +63,7 @@ export function setupCesiumStoreSync({
   containerRef,
   defInfoRef,
 }: SetupCesiumStoreSyncOptions) {
+  const oilLayerSyncState = createOilLayerSyncState();
   const activeViewContact = (view: ActiveView, unitId: string) => {
     if (view === "debug") {
       return undefined;
@@ -541,7 +547,7 @@ export function setupCesiumStoreSync({
     syncTrackLinks(units, selectedUnitId, activeView, detections, detectionContacts);
     syncMunitions(viewer, munitions, activeView, munitionDetections);
     syncExplosions(viewer, explosions);
-    syncOilGraph(viewer, oilGraph, oilLayerVisible, selectedOilNodeId, selectedOilEdgeId);
+    syncOilGraph(viewer, oilGraph, oilLayerVisible, selectedOilNodeId, selectedOilEdgeId, oilLayerSyncState);
   };
 
   const unsubscribe = useSimStore.subscribe((state, prev) => {
@@ -616,7 +622,14 @@ export function setupCesiumStoreSync({
       return;
     }
     if (oilGraphChanged || oilLayerChanged || oilSelectionChanged) {
-      syncOilGraph(viewer, state.oilGraph, state.oilLayerVisible, state.selectedOilNodeId, state.selectedOilEdgeId);
+      syncOilGraph(
+        viewer,
+        state.oilGraph,
+        state.oilLayerVisible,
+        state.selectedOilNodeId,
+        state.selectedOilEdgeId,
+        oilLayerSyncState,
+      );
       return;
     }
     if (munitionDetectChanged) {
@@ -645,25 +658,24 @@ export function setupCesiumStoreSync({
     }
   });
 
-  let oilCameraRerenderPending = false;
-  const handleOilCameraChanged = () => {
-    if (oilCameraRerenderPending) {
-      return;
-    }
-    oilCameraRerenderPending = true;
-    requestAnimationFrame(() => {
-      oilCameraRerenderPending = false;
-      const { oilGraph, oilLayerVisible, selectedOilNodeId, selectedOilEdgeId } = useSimStore.getState();
-      syncOilGraph(viewer, oilGraph, oilLayerVisible, selectedOilNodeId, selectedOilEdgeId);
-    });
+  const handleOilCameraMoveEnd = () => {
+    const { oilGraph, oilLayerVisible, selectedOilNodeId, selectedOilEdgeId } = useSimStore.getState();
+    syncOilGraph(
+      viewer,
+      oilGraph,
+      oilLayerVisible,
+      selectedOilNodeId,
+      selectedOilEdgeId,
+      oilLayerSyncState,
+    );
   };
-  viewer.camera.changed.addEventListener(handleOilCameraChanged);
+  viewer.camera.moveEnd.addEventListener(handleOilCameraMoveEnd);
 
   loadDefinitions();
   renderInitialState();
 
   return () => {
-    viewer.camera.changed.removeEventListener(handleOilCameraChanged);
+    viewer.camera.moveEnd.removeEventListener(handleOilCameraMoveEnd);
     unsubscribe();
   };
 }

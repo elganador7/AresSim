@@ -58,6 +58,9 @@ func ShouldRenderEdge(edge Edge) bool {
 	if isLatentOrInactiveEdge(edge) {
 		return false
 	}
+	if edge.Kind == EdgeSeaborneCorridor && isSeedMaritimeEdge(edge) {
+		return false
+	}
 	return edge.Kind == EdgePipeline ||
 		edge.Kind == EdgeSeaborneCorridor ||
 		edge.CurrentFlowBPD >= 300_000 ||
@@ -83,8 +86,8 @@ func isLatentOrInactiveEdge(edge Edge) bool {
 }
 
 func simplifyRenderableNode(node Node) Node {
-	node.Tags = nil
-	node.Sources = nil
+	node.Tags = filterRenderableTags(node.Tags)
+	node.Sources = simplifyRenderableSources(node.Sources)
 	node.DemandProfile = nil
 	node.Inventory = nil
 	if node.Kind != NodeRefinery {
@@ -94,9 +97,60 @@ func simplifyRenderableNode(node Node) Node {
 }
 
 func simplifyRenderableEdge(edge Edge) Edge {
-	edge.Sources = nil
+	edge.Sources = simplifyRenderableSources(edge.Sources)
 	edge.Route = simplifyRoute(edge.Route, 24)
 	return edge
+}
+
+func filterRenderableTags(tags []string) []string {
+	if len(tags) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(tags))
+	for _, tag := range tags {
+		if strings.HasPrefix(tag, "source:") || strings.HasPrefix(tag, "status:") {
+			out = append(out, tag)
+		}
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+func simplifyRenderableSources(sources []SourceRef) []SourceRef {
+	if len(sources) == 0 {
+		return nil
+	}
+	out := make([]SourceRef, 0, min(3, len(sources)))
+	for _, source := range sources {
+		out = append(out, SourceRef{
+			Name:         source.Name,
+			Organization: source.Organization,
+			Confidence:   source.Confidence,
+		})
+		if len(out) == 3 {
+			break
+		}
+	}
+	return out
+}
+
+func isSeedMaritimeEdge(edge Edge) bool {
+	for _, source := range edge.Sources {
+		if strings.EqualFold(strings.TrimSpace(source.Organization), "AresSim") ||
+			strings.Contains(strings.ToLower(source.Name), "seed maritime topology") {
+			return true
+		}
+	}
+	return false
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func simplifyRoute(route []RoutePoint, maxPoints int) []RoutePoint {

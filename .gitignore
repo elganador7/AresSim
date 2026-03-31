@@ -5,3 +5,10 @@ ne_10m_admin_0_countries/
 node_modules
 dist
 build/bin/
+data/GOGI_V10_2.gdb/
+data/GOGI_V10_2SHP/
+data/GOGI_V10_3.gdb/
+data/GOGI_V10_3SHP/
+data/GOGI_V10_3_1.gdb/
+data/gogi_v10_3_1shp/
+data/gogi-normalized-v1/

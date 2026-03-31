@@ -8,6 +8,11 @@ This folder contains maintenance and developer automation scripts.
 - `import_territorial_waters.py`: build canonical global and theater maritime
   GeoJSON from `World_12NM_v4_20231025_gpkg/eez_12nm_v4.gpkg`.
 - `reorganize_unit_yamls.go`: regroup unit library files by domain and country of origin.
+- `inspect_gogi.py`: inspect GOGI shapefile and ArcGIS geodatabase contents, including
+  layers, schemas, counts, bounds, and sample records.
+- `extract_gogi_oil.py`: normalize oil-relevant GOGI layers into NDJSON exports for
+  facilities, pipelines, wells, and source catalog rows. Supports `--layers`
+  for resumable per-layer exports into `data/gogi-normalized-v1/`.
 
 The raw shapefile / GeoPackage source folders are local preprocessing inputs
 and should stay out of version control; the generated JSON in

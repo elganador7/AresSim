@@ -23,6 +23,16 @@ function formatCommodity(value?: string): string {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function formatSourceBlend(sources: Array<{ organization?: string; name?: string }>): string {
+  const labels = Array.from(new Set(
+    sources
+      .map((source) => source.organization || source.name || "")
+      .map((value) => value.trim())
+      .filter(Boolean),
+  ));
+  return labels.length > 0 ? labels.join(", ") : "N/A";
+}
+
 export default function OilPanel() {
   const {
     oilGraph,
@@ -54,6 +64,7 @@ export default function OilPanel() {
           ["Spare Capacity", `${formatBpd(node.spareCapacityBpd)} bpd`],
           ["Primary Commodity", formatCommodity(node.primaryCommodity)],
           ["Operator", node.operator || "Unknown"],
+          ["Source Blend", formatSourceBlend(node.sources ?? [])],
           ["Fields", node.childFieldIds?.length ? `${node.childFieldIds.length}` : "N/A"],
         ],
         outputs: node.productOutputs ?? [],
@@ -77,6 +88,7 @@ export default function OilPanel() {
           ["Transit", edge.transitDays ? `${edge.transitDays.toFixed(1)} days` : "N/A"],
           ["Length", edge.lengthKm ? `${Math.round(edge.lengthKm).toLocaleString()} km` : "N/A"],
           ["Chokepoint", edge.crossesChokepoint || "None"],
+          ["Source Blend", formatSourceBlend(edge.sources ?? [])],
         ],
         outputs: [],
         sources: edge.sources ?? [],

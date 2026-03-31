@@ -12,14 +12,15 @@ const (
 	DefaultExtractionWorkbookPath = "data/Global-Oil-and-Gas-Extraction-Tracker-March-2026.xlsx"
 	DefaultPipelinesGeoJSONPath   = "data/GEM-GOIT-Oil-NGL-Pipelines-2025-03.geojson"
 	DefaultMaritimeTopologyPath   = "data/oil-maritime-topology.json"
+	DefaultGOGINormalizedPath     = "data/gogi-normalized-v1"
 	DefaultRenderableCachePath    = "data/oil-renderable-cache-v2.json"
 )
 
 func LoadDefaultRealDataGraph() (*oilnet.Graph, error) {
-	return LoadRealDataGraph(DefaultExtractionWorkbookPath, DefaultPipelinesGeoJSONPath, DefaultMaritimeTopologyPath)
+	return LoadRealDataGraph(DefaultExtractionWorkbookPath, DefaultPipelinesGeoJSONPath, DefaultMaritimeTopologyPath, DefaultGOGINormalizedPath)
 }
 
-func LoadRealDataGraph(extractionPath string, pipelinesPath string, maritimePath string) (*oilnet.Graph, error) {
+func LoadRealDataGraph(extractionPath string, pipelinesPath string, maritimePath string, gogiPath string) (*oilnet.Graph, error) {
 	extraction, err := ingest.LoadExtractionWorkbookGraph(extractionPath)
 	if err != nil {
 		return nil, fmt.Errorf("load extraction workbook: %w", err)
@@ -36,11 +37,16 @@ func LoadRealDataGraph(extractionPath string, pipelinesPath string, maritimePath
 	if err != nil {
 		return nil, fmt.Errorf("build maritime topology graph: %w", err)
 	}
+	gogiGraph, err := ingest.LoadGOGINormalizedGraph(gogiPath)
+	if err != nil {
+		return nil, fmt.Errorf("load gogi normalized overlay: %w", err)
+	}
 	merged := oilnet.MergeGraphs(extraction, pipelines)
 	merged = oilnet.MergeGraphs(merged, maritimeGraph)
+	merged = oilnet.ReconcileGOGIOverlay(merged, gogiGraph)
 	merged.ID = "global-oil-network-realdata"
 	merged.Name = "Global Oil Network Real Data"
-	merged.Description = "Global oil network built from the provided extraction workbook, pipeline GeoJSON, and seeded maritime petroleum topology."
+	merged.Description = "Global oil network built from the provided extraction workbook, pipeline GeoJSON, seeded maritime petroleum topology, and optional GOGI infrastructure overlay."
 	merged.View = "global"
 	if err := oilnet.ValidateGraph(merged); err != nil {
 		return nil, err
@@ -48,11 +54,11 @@ func LoadRealDataGraph(extractionPath string, pipelinesPath string, maritimePath
 	return merged, nil
 }
 
-func LoadRenderableGraph(cachePath string, extractionPath string, pipelinesPath string, maritimePath string) (*oilnet.Graph, error) {
+func LoadRenderableGraph(cachePath string, extractionPath string, pipelinesPath string, maritimePath string, gogiPath string) (*oilnet.Graph, error) {
 	if cached, err := oilnet.LoadRenderableCacheJSON(cachePath); err == nil {
 		return cached, nil
 	}
-	graph, err := LoadRealDataGraph(extractionPath, pipelinesPath, maritimePath)
+	graph, err := LoadRealDataGraph(extractionPath, pipelinesPath, maritimePath, gogiPath)
 	if err != nil {
 		return nil, err
 	}
@@ -69,5 +75,6 @@ func LoadDefaultRenderableGraph() (*oilnet.Graph, error) {
 		DefaultExtractionWorkbookPath,
 		DefaultPipelinesGeoJSONPath,
 		DefaultMaritimeTopologyPath,
+		DefaultGOGINormalizedPath,
 	)
 }

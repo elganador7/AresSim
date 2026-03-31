@@ -77,7 +77,10 @@ describe("OilPanel", () => {
           reserveBbl: 65_000_000_000,
           childFieldIds: ["field-1", "field-2", "field-3"],
           primaryCommodity: "crude",
-          sources: [{ name: "GEM", organization: "Global Energy Monitor", url: "", confidence: 0.9 }],
+          sources: [
+            { name: "GEM", organization: "Global Energy Monitor", url: "", confidence: 0.9 },
+            { name: "GOGI", organization: "EDX", url: "", confidence: 0.78 },
+          ],
         }],
         edges: [],
       } as any,
@@ -92,6 +95,8 @@ describe("OilPanel", () => {
     expect(container.textContent).toContain("Reserves");
     expect(container.textContent).toContain("Fields");
     expect(container.textContent).toContain("3");
+    expect(container.textContent).toContain("Source Blend");
+    expect(container.textContent).toContain("Global Energy Monitor, EDX");
   });
 
   it("shows pipeline product label and chokepoint details for selected edges", async () => {

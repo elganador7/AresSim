@@ -98,7 +98,7 @@ func TestBuildRenderableGraphFiltersAndSimplifies(t *testing.T) {
 					{Lat: 22, Lon: 39},
 					{Lat: 31, Lon: 32},
 				},
-				Sources: []SourceRef{{Name: "src", Confidence: 0.9}},
+				Sources: []SourceRef{{Name: "Seed Maritime Topology", Organization: "AresSim", Confidence: 0.4}},
 			},
 		},
 	}
@@ -107,11 +107,14 @@ func TestBuildRenderableGraphFiltersAndSimplifies(t *testing.T) {
 	if len(renderable.Nodes) != 3 {
 		t.Fatalf("expected 3 renderable nodes, got %d", len(renderable.Nodes))
 	}
-	if len(renderable.Edges) != 2 {
-		t.Fatalf("expected 2 renderable edges, got %d", len(renderable.Edges))
+	if len(renderable.Edges) != 1 {
+		t.Fatalf("expected 1 renderable edge, got %d", len(renderable.Edges))
 	}
-	if got := renderable.Nodes[0].Sources; got != nil {
-		t.Fatalf("expected node sources to be stripped, got %+v", got)
+	if got := renderable.Nodes[0].Sources; len(got) == 0 {
+		t.Fatalf("expected node sources summary to be retained")
+	}
+	if got := renderable.Nodes[0].Tags; len(got) == 0 {
+		t.Fatalf("expected source/status tags to be retained")
 	}
 	if got := renderable.Nodes[0].DemandProfile; got != nil {
 		t.Fatalf("expected node demand profile to be stripped, got %+v", got)
@@ -122,8 +125,8 @@ func TestBuildRenderableGraphFiltersAndSimplifies(t *testing.T) {
 	if got := renderable.Nodes[0].ProductOutputs; got != nil {
 		t.Fatalf("expected non-refinery product outputs to be stripped, got %+v", got)
 	}
-	if got := renderable.Edges[0].Sources; got != nil {
-		t.Fatalf("expected edge sources to be stripped, got %+v", got)
+	if got := renderable.Edges[0].Sources; len(got) == 0 {
+		t.Fatalf("expected edge source summary to be retained")
 	}
 }
 

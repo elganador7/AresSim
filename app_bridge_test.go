@@ -115,6 +115,7 @@ func TestGetGlobalOilNetworkReturnsRenderableGraph(t *testing.T) {
 	}
 	directFoundExtraction := false
 	directFoundMarineTerminal := false
+	directFoundGOGI := false
 	for _, node := range directGraph.Nodes {
 		if strings.HasPrefix(node.ID, "extract-") {
 			directFoundExtraction = true
@@ -122,12 +123,21 @@ func TestGetGlobalOilNetworkReturnsRenderableGraph(t *testing.T) {
 		if node.Kind == oilnet.NodeMarineTerminal {
 			directFoundMarineTerminal = true
 		}
+		for _, tag := range node.Tags {
+			if tag == "source:gogi" {
+				directFoundGOGI = true
+				break
+			}
+		}
 	}
 	if !directFoundExtraction {
 		t.Fatal("expected direct real-data oil graph to contain extraction nodes")
 	}
 	if !directFoundMarineTerminal {
 		t.Fatal("expected direct real-data oil graph to contain maritime terminal nodes")
+	}
+	if !directFoundGOGI {
+		t.Fatal("expected direct real-data oil graph to contain GOGI overlay nodes")
 	}
 
 	graph, err := app.GetGlobalOilNetwork()
@@ -149,6 +159,7 @@ func TestGetGlobalOilNetworkReturnsRenderableGraph(t *testing.T) {
 	foundPipelineNode := false
 	foundMarineTerminal := false
 	foundCanal := false
+	foundGOGIRefinery := false
 	edgeList, _ := graph["edges"].([]any)
 	for _, raw := range nodes {
 		node, ok := raw.(map[string]any)
@@ -167,6 +178,9 @@ func TestGetGlobalOilNetworkReturnsRenderableGraph(t *testing.T) {
 		if toString(node["kind"]) == string(oilnet.NodeCanal) {
 			foundCanal = true
 		}
+		if strings.HasPrefix(toString(node["id"]), "gogi:refinery:") {
+			foundGOGIRefinery = true
+		}
 	}
 	if !foundExtractionOverlay {
 		t.Fatal("expected extraction overlay node from workbook")
@@ -179,6 +193,9 @@ func TestGetGlobalOilNetworkReturnsRenderableGraph(t *testing.T) {
 	}
 	if !foundCanal {
 		t.Fatal("expected canal node from topology seed")
+	}
+	if !foundGOGIRefinery {
+		t.Fatal("expected refinery node from GOGI overlay")
 	}
 	foundPipelineEdge := false
 	foundSeaborneEdge := false
