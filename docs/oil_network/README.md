@@ -167,6 +167,72 @@ The parser reads the `Field-level main data` sheet directly and extracts field
 locations, fuel type, status, operator, and source URLs into extraction-site
 overlay nodes.
 
+## Source Validation
+
+The real-data parsers now fail explicitly when the source exports drift away
+from the shapes the app depends on.
+
+Extraction workbook validation:
+
+- required sheets:
+  - `Field-level main data`
+  - `Field-level production data`
+  - `Field-level reserves data`
+  - `Project-level main data`
+  - `Project-level production data`
+- required columns on the main sheets:
+  - field main:
+    - `Unit ID`
+    - `Unit Name`
+    - `Fuel type`
+    - `Country/Area`
+    - `Status`
+    - `Latitude`
+    - `Longitude`
+  - project main:
+    - `Project ID`
+    - `Project Name`
+    - `Fuel type`
+    - `Country/Area`
+    - `Status`
+
+Pipeline GeoJSON validation:
+
+- root `type` must be `FeatureCollection`
+- each parsed feature must provide:
+  - `ProjectID`
+  - `Fuel`
+- geometry must still decode into at least one valid line route
+
+These checks are meant to fail loudly when upstream exports change, instead of
+silently producing bad graphs.
+
+## Render Cache
+
+The render cache is now a wrapped JSON file, not just a raw graph blob.
+
+Current schema:
+
+- `metadata`
+  - `schemaVersion`
+  - `builtAt`
+  - `graphId`
+  - `graphVersion`
+- `diagnostics`
+  - total node and edge counts
+  - counts by node kind / edge kind
+  - counts by node state / edge state
+  - primary commodity counts
+- `graph`
+  - the renderable graph payload consumed by the app
+
+Current schema version:
+
+- `oil-renderable-cache/v1`
+
+The app still accepts older raw graph JSON caches for backward compatibility,
+but the cache builder now writes the wrapped format by default.
+
 ## Recommended Source Stack
 
 - Global Energy Monitor GOGET  

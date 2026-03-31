@@ -1,6 +1,11 @@
 package ingest
 
 import (
+	"archive/zip"
+	"bytes"
+	"os"
+	"sort"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -213,4 +218,121 @@ func TestPipelineCommoditiesDistinguishMixedProducts(t *testing.T) {
 	if commodities[0] != oilnet.CommodityNGL || commodities[1] != oilnet.CommodityRefinedProducts {
 		t.Fatalf("unexpected mixed-product mapping: %+v", commodities)
 	}
+}
+
+func TestLoadPipelinesGeoJSONRejectsMissingRequiredProperties(t *testing.T) {
+	dir := t.TempDir()
+	path := dir + "/bad-pipelines.geojson"
+	data := `{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"Fuel":"Oil","Countries":"USA"},"geometry":{"type":"LineString","coordinates":[[1,2],[3,4]]}}]}`
+	if err := os.WriteFile(path, []byte(data), 0o644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+	_, err := LoadPipelinesGeoJSON(path)
+	if err == nil || !strings.Contains(err.Error(), "missing required properties") {
+		t.Fatalf("expected missing properties error, got %v", err)
+	}
+}
+
+func TestParseExtractionWorkbookRejectsMissingRequiredSheets(t *testing.T) {
+	path := writeMinimalWorkbook(t, map[string]string{
+		"Field-level main data": "Unit ID,Unit Name,Fuel type,Country/Area,Status,Latitude,Longitude\nu1,Field,Oil,USA,Operating,1,2\n",
+	})
+	_, err := ParseExtractionWorkbook(path)
+	if err == nil || !strings.Contains(err.Error(), "missing required sheets") {
+		t.Fatalf("expected missing sheets error, got %v", err)
+	}
+}
+
+func TestParseExtractionWorkbookRejectsMissingRequiredColumns(t *testing.T) {
+	path := writeMinimalWorkbook(t, map[string]string{
+		"Field-level main data":           "Unit ID,Unit Name,Country/Area,Status,Latitude,Longitude\nu1,Field,USA,Operating,1,2\n",
+		"Field-level production data":     "Unit ID,Fuel description,Quantity (converted),Units (converted),Data Year\nu1,Oil,1000,bpd,2024\n",
+		"Field-level reserves data":       "Unit ID,Fuel description,Quantity (converted),Units (converted),Data Year\nu1,Oil,1000,bbl,2024\n",
+		"Project-level main data":         "Project ID,Project Name,Fuel type,Country/Area,Status\np1,Project,Oil,USA,Operating\n",
+		"Project-level production data":   "Project ID,Fuel description,Quantity (converted),Units (converted),Data Year\np1,Oil,1000,bpd,2024\n",
+		"Project-level reserves data":     "Project ID,Fuel description,Quantity (converted),Units (converted),Data Year\np1,Oil,1000,bbl,2024\n",
+	})
+	_, err := ParseExtractionWorkbook(path)
+	if err == nil || !strings.Contains(err.Error(), "missing required columns") {
+		t.Fatalf("expected missing columns error, got %v", err)
+	}
+}
+
+func writeMinimalWorkbook(t *testing.T, sheets map[string]string) string {
+	t.Helper()
+	var buf bytes.Buffer
+	zw := zip.NewWriter(&buf)
+	writeZipFile := func(name, contents string) {
+		w, err := zw.Create(name)
+		if err != nil {
+			t.Fatalf("Create(%q) error = %v", name, err)
+		}
+		if _, err := w.Write([]byte(contents)); err != nil {
+			t.Fatalf("Write(%q) error = %v", name, err)
+		}
+	}
+
+	writeZipFile("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/_rels/workbook.xml.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+</Types>`)
+
+	names := make([]string, 0, len(sheets))
+	for name := range sheets {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	var workbook strings.Builder
+	workbook.WriteString(`<?xml version="1.0" encoding="UTF-8"?><workbook xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>`)
+	var rels strings.Builder
+	rels.WriteString(`<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`)
+	index := 1
+	for _, name := range names {
+		rid := "rId" + strconv.Itoa(index)
+		sheetFile := "worksheets/sheet" + strconv.Itoa(index) + ".xml"
+		workbook.WriteString(`<sheet name="` + name + `" sheetId="` + strconv.Itoa(index) + `" r:id="` + rid + `"/>`)
+		rels.WriteString(`<Relationship Id="` + rid + `" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="` + sheetFile + `"/>`)
+		index++
+	}
+	workbook.WriteString(`</sheets></workbook>`)
+	rels.WriteString(`</Relationships>`)
+	writeZipFile("xl/workbook.xml", workbook.String())
+	writeZipFile("xl/_rels/workbook.xml.rels", rels.String())
+
+	index = 1
+	for _, name := range names {
+		writeZipFile("xl/worksheets/sheet"+strconv.Itoa(index)+".xml", worksheetXMLFromCSV(sheets[name]))
+		index++
+	}
+
+	if err := zw.Close(); err != nil {
+		t.Fatalf("zip.Close() error = %v", err)
+	}
+
+	path := t.TempDir() + "/minimal.xlsx"
+	if err := os.WriteFile(path, buf.Bytes(), 0o644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+	return path
+}
+
+func worksheetXMLFromCSV(csv string) string {
+	lines := strings.Split(strings.TrimSpace(csv), "\n")
+	var b strings.Builder
+	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?><worksheet><sheetData>`)
+	for rowIndex, line := range lines {
+		b.WriteString(`<row r="` + strconv.Itoa(rowIndex+1) + `">`)
+		cols := strings.Split(line, ",")
+		for colIndex, col := range cols {
+			cellRef := string(rune('A'+colIndex)) + strconv.Itoa(rowIndex+1)
+			b.WriteString(`<c r="` + cellRef + `" t="inlineStr"><is><t>`)
+			b.WriteString(col)
+			b.WriteString(`</t></is></c>`)
+		}
+		b.WriteString(`</row>`)
+	}
+	b.WriteString(`</sheetData></worksheet>`)
+	return b.String()
 }

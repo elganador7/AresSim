@@ -112,3 +112,39 @@ func TestLoadGraphJSON(t *testing.T) {
 		t.Fatalf("expected graph id json-graph, got %q", graph.ID)
 	}
 }
+
+func TestLoadGraphJSONWrappedCache(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "graph-cache.json")
+	graph := &Graph{
+		ID:      "wrapped-graph",
+		Version: "1.2.3",
+		Nodes:   []Node{{ID: "n1", Name: "Node", Kind: NodeProject, State: StateOperational}},
+		Edges:   []Edge{},
+	}
+	if err := WriteGraphCacheJSON(path, graph); err != nil {
+		t.Fatalf("WriteGraphCacheJSON() error = %v", err)
+	}
+	loaded, err := LoadGraphJSON(path)
+	if err != nil {
+		t.Fatalf("LoadGraphJSON() error = %v", err)
+	}
+	if loaded.ID != "wrapped-graph" {
+		t.Fatalf("expected wrapped graph id, got %q", loaded.ID)
+	}
+
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile() error = %v", err)
+	}
+	var wrapped GraphCacheFile
+	if err := json.Unmarshal(raw, &wrapped); err != nil {
+		t.Fatalf("Unmarshal() error = %v", err)
+	}
+	if wrapped.Metadata.SchemaVersion != RenderableCacheSchemaVersion {
+		t.Fatalf("expected schema version %q, got %q", RenderableCacheSchemaVersion, wrapped.Metadata.SchemaVersion)
+	}
+	if wrapped.Diagnostics.NodeCount != 1 {
+		t.Fatalf("expected one node in diagnostics, got %d", wrapped.Diagnostics.NodeCount)
+	}
+}

@@ -57,6 +57,22 @@ type extractionWorkbookData struct {
 	Projects []ExtractionProjectRow
 }
 
+var requiredExtractionSheets = []string{
+	"Field-level main data",
+	"Field-level production data",
+	"Field-level reserves data",
+	"Project-level main data",
+	"Project-level production data",
+}
+
+var requiredFieldMainColumns = []string{
+	"Unit ID", "Unit Name", "Fuel type", "Country/Area", "Status", "Latitude", "Longitude",
+}
+
+var requiredProjectMainColumns = []string{
+	"Project ID", "Project Name", "Fuel type", "Country/Area", "Status",
+}
+
 type xlsxWorkbook struct {
 	Sheets []xlsxSheet `xml:"sheets>sheet"`
 }
@@ -218,9 +234,15 @@ func loadExtractionWorkbookData(path string) (*extractionWorkbookData, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := requireWorkbookSheets(sheetByName, requiredExtractionSheets); err != nil {
+		return nil, err
+	}
 
 	fieldMainRows, err := parseWorksheetRecords(fileMap[sheetByName["Field-level main data"]], sharedStrings)
 	if err != nil {
+		return nil, err
+	}
+	if err := requireWorksheetColumns("Field-level main data", fieldMainRows, requiredFieldMainColumns); err != nil {
 		return nil, err
 	}
 	fieldProdRows, err := parseWorksheetRecords(fileMap[sheetByName["Field-level production data"]], sharedStrings)
@@ -233,6 +255,9 @@ func loadExtractionWorkbookData(path string) (*extractionWorkbookData, error) {
 	}
 	projectMainRows, err := parseWorksheetRecords(fileMap[sheetByName["Project-level main data"]], sharedStrings)
 	if err != nil {
+		return nil, err
+	}
+	if err := requireWorksheetColumns("Project-level main data", projectMainRows, requiredProjectMainColumns); err != nil {
 		return nil, err
 	}
 	projectProdRows, err := parseWorksheetRecords(fileMap[sheetByName["Project-level production data"]], sharedStrings)
@@ -389,6 +414,36 @@ func workbookSheetFiles(fileMap map[string]*zip.File) (map[string]string, error)
 		out[sheet.Name] = target
 	}
 	return out, nil
+}
+
+func requireWorkbookSheets(sheetByName map[string]string, required []string) error {
+	missing := make([]string, 0)
+	for _, name := range required {
+		if strings.TrimSpace(sheetByName[name]) == "" {
+			missing = append(missing, name)
+		}
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("extraction workbook missing required sheets: %s", strings.Join(missing, ", "))
+	}
+	return nil
+}
+
+func requireWorksheetColumns(sheetName string, rows []map[string]string, required []string) error {
+	if len(rows) == 0 {
+		return fmt.Errorf("worksheet %q has no data rows", sheetName)
+	}
+	row := rows[0]
+	missing := make([]string, 0)
+	for _, column := range required {
+		if _, ok := row[column]; !ok {
+			missing = append(missing, column)
+		}
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("worksheet %q missing required columns: %s", sheetName, strings.Join(missing, ", "))
+	}
+	return nil
 }
 
 func readSharedStrings(file *zip.File) ([]string, error) {

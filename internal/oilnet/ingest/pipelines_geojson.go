@@ -10,6 +10,11 @@ import (
 	"github.com/aressim/internal/oilnet"
 )
 
+var requiredPipelineProperties = []string{
+	"ProjectID",
+	"Fuel",
+}
+
 type pipelineFeatureCollection struct {
 	Type     string            `json:"type"`
 	Name     string            `json:"name"`
@@ -78,6 +83,7 @@ func LoadPipelinesGeoJSON(path string) (*oilnet.Graph, error) {
 	if delim, ok := root.(json.Delim); !ok || delim != '{' {
 		return nil, fmt.Errorf("unexpected geojson root token %v", root)
 	}
+	collectionTypeValidated := false
 	nodeIDs := map[string]struct{}{}
 	for decoder.More() {
 		keyToken, err := decoder.Token()
@@ -86,6 +92,15 @@ func LoadPipelinesGeoJSON(path string) (*oilnet.Graph, error) {
 		}
 		key, _ := keyToken.(string)
 		switch key {
+		case "type":
+			var collectionType string
+			if err := decoder.Decode(&collectionType); err != nil {
+				return nil, fmt.Errorf("decode pipelines geojson type: %w", err)
+			}
+			if strings.TrimSpace(collectionType) != "FeatureCollection" {
+				return nil, fmt.Errorf("unexpected geojson type %q", collectionType)
+			}
+			collectionTypeValidated = true
 		case "name":
 			if err := decoder.Decode(&graph.Name); err != nil {
 				return nil, fmt.Errorf("decode pipelines geojson name: %w", err)
@@ -105,6 +120,9 @@ func LoadPipelinesGeoJSON(path string) (*oilnet.Graph, error) {
 	if _, err := decoder.Token(); err != nil {
 		return nil, fmt.Errorf("decode pipelines geojson close: %w", err)
 	}
+	if !collectionTypeValidated {
+		return nil, fmt.Errorf("pipelines geojson missing required type field")
+	}
 	if err := oilnet.ValidateGraph(graph); err != nil {
 		return nil, err
 	}
@@ -123,6 +141,9 @@ func decodePipelineFeatures(decoder *json.Decoder, graph *oilnet.Graph, nodeIDs 
 		var feature pipelineFeature
 		if err := decoder.Decode(&feature); err != nil {
 			return fmt.Errorf("decode pipeline feature: %w", err)
+		}
+		if err := validatePipelineFeature(feature); err != nil {
+			return err
 		}
 		routes, err := featureRoutes(feature.Geometry)
 		if err != nil || len(routes) == 0 {
@@ -176,6 +197,27 @@ func decodePipelineFeatures(decoder *json.Decoder, graph *oilnet.Graph, nodeIDs 
 	_, err = decoder.Token()
 	if err != nil {
 		return fmt.Errorf("decode features close: %w", err)
+	}
+	return nil
+}
+
+func validatePipelineFeature(feature pipelineFeature) error {
+	if strings.TrimSpace(feature.Type) != "Feature" {
+		return fmt.Errorf("unexpected pipeline feature type %q", feature.Type)
+	}
+	missing := make([]string, 0)
+	props := map[string]string{
+		"ProjectID": feature.Properties.ProjectID,
+		"Fuel":      feature.Properties.Fuel,
+		"Status":    feature.Properties.Status,
+	}
+	for _, key := range requiredPipelineProperties {
+		if strings.TrimSpace(props[key]) == "" {
+			missing = append(missing, key)
+		}
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("pipeline feature missing required properties: %s", strings.Join(missing, ", "))
 	}
 	return nil
 }

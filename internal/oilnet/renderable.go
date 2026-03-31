@@ -1,23 +1,6 @@
 package oilnet
 
-import (
-	"encoding/json"
-	"fmt"
-	"os"
-	"strings"
-)
-
-func LoadGraphJSON(path string) (*Graph, error) {
-	raw, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	var graph Graph
-	if err := json.Unmarshal(raw, &graph); err != nil {
-		return nil, fmt.Errorf("decode oil graph json %s: %w", path, err)
-	}
-	return &graph, nil
-}
+import "strings"
 
 func BuildRenderableGraph(graph *Graph) *Graph {
 	if graph == nil {
