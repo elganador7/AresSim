@@ -20,13 +20,27 @@ import {
   isMunitionVisible,
 } from "./helpers";
 
+export interface EffectsLayerSyncState {
+  munitionEntityIds: Set<string>;
+  explosionEntityIds: Set<string>;
+}
+
+export function createEffectsLayerSyncState(): EffectsLayerSyncState {
+  return {
+    munitionEntityIds: new Set<string>(),
+    explosionEntityIds: new Set<string>(),
+  };
+}
+
 export function syncMunition(
   viewer: Viewer,
   munition: Munition,
   view: string,
   munitionDetections: MunitionDetections,
+  syncState?: EffectsLayerSyncState,
 ) {
   const entityId = `${MUNITION_ENTITY_PREFIX}${munition.id}`;
+  syncState?.munitionEntityIds.add(entityId);
   const visible = isMunitionVisible(munition, view, munitionDetections);
   const pos = Cartesian3.fromDegrees(munition.lon, munition.lat, munition.altMsl);
 
@@ -55,19 +69,24 @@ export function syncMunitions(
   munitions: Map<string, Munition>,
   view: string,
   munitionDetections: MunitionDetections,
+  syncState?: EffectsLayerSyncState,
 ) {
-  munitions.forEach((munition) => syncMunition(viewer, munition, view, munitionDetections));
+  munitions.forEach((munition) => syncMunition(viewer, munition, view, munitionDetections, syncState));
   const liveIds = new Set(
     Array.from(munitions.keys()).map((id) => `${MUNITION_ENTITY_PREFIX}${id}`),
   );
-  Array.from(viewer.entities.values)
-    .map((entity) => entity.id as string)
-    .filter((id) => id.startsWith(MUNITION_ENTITY_PREFIX) && !liveIds.has(id))
-    .forEach((id) => viewer.entities.removeById(id));
+  const trackedIds = syncState?.munitionEntityIds ?? liveIds;
+  Array.from(trackedIds).forEach((id) => {
+    if (!liveIds.has(id)) {
+      viewer.entities.removeById(id);
+      syncState?.munitionEntityIds.delete(id);
+    }
+  });
 }
 
-export function syncExplosion(viewer: Viewer, explosion: ExplosionFx) {
+export function syncExplosion(viewer: Viewer, explosion: ExplosionFx, syncState?: EffectsLayerSyncState) {
   const entityId = `${EXPLOSION_ENTITY_PREFIX}${explosion.id}`;
+  syncState?.explosionEntityIds.add(entityId);
   const pos = Cartesian3.fromDegrees(explosion.lon, explosion.lat, explosion.altMsl);
   const pixelSize = explosion.kind === "kill" ? 16 : 10;
   const color = explosion.kind === "kill" ? KILL_COLOR : IMPACT_COLOR;
@@ -107,13 +126,20 @@ export function syncExplosion(viewer: Viewer, explosion: ExplosionFx) {
   }
 }
 
-export function syncExplosions(viewer: Viewer, explosions: Map<string, ExplosionFx>) {
-  explosions.forEach((explosion) => syncExplosion(viewer, explosion));
+export function syncExplosions(
+  viewer: Viewer,
+  explosions: Map<string, ExplosionFx>,
+  syncState?: EffectsLayerSyncState,
+) {
+  explosions.forEach((explosion) => syncExplosion(viewer, explosion, syncState));
   const liveIds = new Set(
     Array.from(explosions.keys()).map((id) => `${EXPLOSION_ENTITY_PREFIX}${id}`),
   );
-  Array.from(viewer.entities.values)
-    .map((entity) => entity.id as string)
-    .filter((id) => id.startsWith(EXPLOSION_ENTITY_PREFIX) && !liveIds.has(id))
-    .forEach((id) => viewer.entities.removeById(id));
+  const trackedIds = syncState?.explosionEntityIds ?? liveIds;
+  Array.from(trackedIds).forEach((id) => {
+    if (!liveIds.has(id)) {
+      viewer.entities.removeById(id);
+      syncState?.explosionEntityIds.delete(id);
+    }
+  });
 }

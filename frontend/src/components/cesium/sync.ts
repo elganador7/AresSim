@@ -21,10 +21,13 @@ import type { Unit } from "../../store/simStore";
 import { useSimStore } from "../../store/simStore";
 import { reportError } from "../../utils/errors";
 import { getUnitBillboardUrl } from "../../utils/unitBillboard";
-import { syncExplosions, syncMunitions } from "./effectsLayer";
 import {
-  OIL_EDGE_PREFIX,
-  OIL_NODE_PREFIX,
+  createEffectsLayerSyncState,
+  syncExplosions,
+  syncMunitions,
+} from "./effectsLayer";
+import {
+  oilCameraBucketKey,
   createOilLayerSyncState,
   syncOilGraph,
 } from "./oilLayer";
@@ -33,7 +36,6 @@ import {
   type DefInfo,
   type Detections,
   BLOCKED_ROUTE_COLOR,
-  EXPLOSION_ENTITY_PREFIX,
   MUNITION_ENTITY_PREFIX,
   SENSOR_COLOR,
   STRIKE_PATH_COLOR,
@@ -64,6 +66,61 @@ export function setupCesiumStoreSync({
   defInfoRef,
 }: SetupCesiumStoreSyncOptions) {
   const oilLayerSyncState = createOilLayerSyncState();
+  const effectsLayerSyncState = createEffectsLayerSyncState();
+  const trackedUnitEntityIds = new Set<string>();
+  const trackedTrackLinkIds = new Set<string>();
+  const trackedWaypointIds = new Map<string, Set<string>>();
+  const trackedRouteSegmentIds = new Map<string, Set<string>>();
+  const trackedStrikeSegmentIds = new Map<string, Set<string>>();
+  const removeTrackedIds = (ids: Set<string>) => {
+    ids.forEach((id) => viewer.entities.removeById(id));
+    ids.clear();
+  };
+  const replaceTrackedIds = (map: Map<string, Set<string>>, key: string, nextIds: string[]) => {
+    const currentIds = map.get(key);
+    if (currentIds) {
+      removeTrackedIds(currentIds);
+    }
+    if (nextIds.length === 0) {
+      map.delete(key);
+      return;
+    }
+    map.set(key, new Set<string>(nextIds));
+  };
+  const clearTrackedForUnit = (unitId: string) => {
+    const waypointIds = trackedWaypointIds.get(unitId);
+    if (waypointIds) {
+      removeTrackedIds(waypointIds);
+      trackedWaypointIds.delete(unitId);
+    }
+    const routeSegmentIds = trackedRouteSegmentIds.get(unitId);
+    if (routeSegmentIds) {
+      removeTrackedIds(routeSegmentIds);
+      trackedRouteSegmentIds.delete(unitId);
+    }
+    const strikeSegmentIds = trackedStrikeSegmentIds.get(unitId);
+    if (strikeSegmentIds) {
+      removeTrackedIds(strikeSegmentIds);
+      trackedStrikeSegmentIds.delete(unitId);
+    }
+  };
+  const syncOilGraphNow = (
+    oilGraph: ReturnType<typeof useSimStore.getState>["oilGraph"],
+    oilLayerVisible: boolean,
+    selectedOilNodeId: string | null,
+    selectedOilEdgeId: string | null,
+  ) => {
+    const rect = viewer.camera.computeViewRectangle(viewer.scene.globe.ellipsoid);
+    const viewRect = rect ? {
+      west: CesiumMath.toDegrees(rect.west),
+      south: CesiumMath.toDegrees(rect.south),
+      east: CesiumMath.toDegrees(rect.east),
+      north: CesiumMath.toDegrees(rect.north),
+    } : null;
+    const cameraHeight = viewer.camera.positionCartographic?.height ?? 3_000_000;
+    oilLayerSyncState.lastCameraBucketKey = oilCameraBucketKey(cameraHeight, viewRect);
+    syncOilGraph(viewer, oilGraph, oilLayerVisible, selectedOilNodeId, selectedOilEdgeId, oilLayerSyncState);
+  };
   const activeViewContact = (view: ActiveView, unitId: string) => {
     if (view === "debug") {
       return undefined;
@@ -88,6 +145,7 @@ export function setupCesiumStoreSync({
     const assignedTargetMarkerId = `${unit.id}_assigned_target_marker`;
 
     if (!unit.status.isActive) {
+      trackedUnitEntityIds.delete(unit.id);
       viewer.entities.removeById(unit.id);
       viewer.entities.removeById(routeId);
       viewer.entities.removeById(destId);
@@ -95,20 +153,10 @@ export function setupCesiumStoreSync({
       viewer.entities.removeById(sensorId);
       viewer.entities.removeById(targetMarkerId);
       viewer.entities.removeById(assignedTargetMarkerId);
-      Array.from(viewer.entities.values)
-        .map((entity) => entity.id as string)
-        .filter((id) => id.startsWith(waypointPrefix))
-        .forEach((id) => viewer.entities.removeById(id));
-      Array.from(viewer.entities.values)
-        .map((entity) => entity.id as string)
-        .filter((id) => id.startsWith(routeSegmentPrefix))
-        .forEach((id) => viewer.entities.removeById(id));
-      Array.from(viewer.entities.values)
-        .map((entity) => entity.id as string)
-        .filter((id) => id.startsWith(strikeSegmentPrefix))
-        .forEach((id) => viewer.entities.removeById(id));
+      clearTrackedForUnit(unit.id);
       return;
     }
+    trackedUnitEntityIds.add(unit.id);
 
     const visible = isVisible(unit, view, detections, defInfoRef.current);
     const track = isTrack(unit, view, defInfoRef.current);
@@ -196,17 +244,15 @@ export function setupCesiumStoreSync({
         }));
       }
 
-      Array.from(viewer.entities.values)
-        .map((entity) => entity.id as string)
-        .filter((id) => id.startsWith(routeSegmentPrefix))
-        .forEach((id) => viewer.entities.removeById(id));
-
+      const routeSegmentIds: string[] = [];
       for (let idx = 0; idx < points.length - 1; idx += 1) {
         const start = points[idx];
         const end = points[idx + 1];
         const blocked = isSelected && selectedRoutePreview?.blocked && selectedRoutePreview.legIndex === idx + 1;
+        const segmentId = `${routeSegmentPrefix}${idx}`;
+        routeSegmentIds.push(segmentId);
         viewer.entities.add(new Entity({
-          id: `${routeSegmentPrefix}${idx}`,
+          id: segmentId,
           show: visible,
           polyline: {
             positions: new ConstantProperty([
@@ -221,6 +267,7 @@ export function setupCesiumStoreSync({
           },
         }));
       }
+      replaceTrackedIds(trackedRouteSegmentIds, unit.id, routeSegmentIds);
 
       const destEntity = viewer.entities.getById(destId);
       if (destEntity) {
@@ -242,15 +289,13 @@ export function setupCesiumStoreSync({
         }));
       }
 
-      Array.from(viewer.entities.values)
-        .map((entity) => entity.id as string)
-        .filter((id) => id.startsWith(waypointPrefix))
-        .forEach((id) => viewer.entities.removeById(id));
-
+      const waypointIds: string[] = [];
       if (isSelected) {
         renderedWaypoints.forEach((wp, idx) => {
+          const waypointId = `${waypointPrefix}${idx}`;
+          waypointIds.push(waypointId);
           viewer.entities.add(new Entity({
-            id: `${waypointPrefix}${idx}`,
+            id: waypointId,
             show: visible,
             position: Cartesian3.fromDegrees(wp.lon, wp.lat),
             point: {
@@ -277,23 +322,15 @@ export function setupCesiumStoreSync({
           }));
         });
       }
+      replaceTrackedIds(trackedWaypointIds, unit.id, waypointIds);
     } else {
       viewer.entities.removeById(routeId);
       viewer.entities.removeById(destId);
-      Array.from(viewer.entities.values)
-        .map((entity) => entity.id as string)
-        .filter((id) => id.startsWith(routeSegmentPrefix))
-        .forEach((id) => viewer.entities.removeById(id));
-      Array.from(viewer.entities.values)
-        .map((entity) => entity.id as string)
-        .filter((id) => id.startsWith(waypointPrefix))
-        .forEach((id) => viewer.entities.removeById(id));
+      replaceTrackedIds(trackedRouteSegmentIds, unit.id, []);
+      replaceTrackedIds(trackedWaypointIds, unit.id, []);
     }
 
-    Array.from(viewer.entities.values)
-      .map((entity) => entity.id as string)
-      .filter((id) => id.startsWith(strikeSegmentPrefix))
-      .forEach((id) => viewer.entities.removeById(id));
+    replaceTrackedIds(trackedStrikeSegmentIds, unit.id, []);
     viewer.entities.removeById(targetMarkerId);
     viewer.entities.removeById(assignedTargetMarkerId);
 
@@ -316,12 +353,15 @@ export function setupCesiumStoreSync({
           { lat: unit.position.lat, lon: unit.position.lon },
           ...routedStrikePoints,
         ];
+        const strikeSegmentIds: string[] = [];
         for (let idx = 0; idx < pathPoints.length - 1; idx += 1) {
           const start = pathPoints[idx];
           const end = pathPoints[idx + 1];
           const blocked = isSelected && selectedStrikePreview?.blocked && selectedStrikePreview.legIndex === idx + 1;
+          const segmentId = `${strikeSegmentPrefix}${idx}`;
+          strikeSegmentIds.push(segmentId);
           viewer.entities.add(new Entity({
-            id: `${strikeSegmentPrefix}${idx}`,
+            id: segmentId,
             show: true,
             polyline: {
               positions: new ConstantProperty([
@@ -336,6 +376,7 @@ export function setupCesiumStoreSync({
             },
           }));
         }
+        replaceTrackedIds(trackedStrikeSegmentIds, unit.id, strikeSegmentIds);
         viewer.entities.add(new Entity({
           id: targetMarkerId,
           show: true,
@@ -430,24 +471,19 @@ export function setupCesiumStoreSync({
     units.forEach((unit) => syncUnit(unit, view, selectedId, detections));
 
     const storeIds = new Set(units.keys());
-    Array.from(viewer.entities.values)
-      .map((e) => e.id as string)
-      .filter((id) =>
-        !id.endsWith("_route") &&
-        !id.endsWith("_dest") &&
-        !id.endsWith("_range") &&
-        !id.endsWith("_sensor") &&
-        !id.endsWith("_target_marker") &&
-        !id.endsWith("_assigned_target_marker") &&
-        !id.includes("_wp_") &&
-        !id.includes("_route_seg_") &&
-        !id.includes("_strike_seg_") &&
-        !id.startsWith(OIL_NODE_PREFIX) &&
-        !id.startsWith(OIL_EDGE_PREFIX) &&
-        !id.startsWith(MUNITION_ENTITY_PREFIX) &&
-        !id.startsWith(EXPLOSION_ENTITY_PREFIX) &&
-        !storeIds.has(id))
-      .forEach((id) => viewer.entities.removeById(id));
+    Array.from(trackedUnitEntityIds).forEach((id) => {
+      if (!storeIds.has(id)) {
+        viewer.entities.removeById(id);
+        viewer.entities.removeById(`${id}_route`);
+        viewer.entities.removeById(`${id}_dest`);
+        viewer.entities.removeById(`${id}_range`);
+        viewer.entities.removeById(`${id}_sensor`);
+        viewer.entities.removeById(`${id}_target_marker`);
+        viewer.entities.removeById(`${id}_assigned_target_marker`);
+        clearTrackedForUnit(id);
+        trackedUnitEntityIds.delete(id);
+      }
+    });
   };
 
   const syncTrackLinks = (
@@ -457,10 +493,7 @@ export function setupCesiumStoreSync({
     detections: Detections,
     detectionContacts: Map<string, Map<string, { unitId: string; sourceTeam: string; shared: boolean }>>,
   ) => {
-    Array.from(viewer.entities.values)
-      .map((entity) => entity.id as string)
-      .filter((id) => id.startsWith(TRACK_LINK_PREFIX))
-      .forEach((id) => viewer.entities.removeById(id));
+    removeTrackedIds(trackedTrackLinkIds);
 
     if (!selectedId || view === "debug") return;
     const selectedUnit = units.get(selectedId);
@@ -473,8 +506,10 @@ export function setupCesiumStoreSync({
       if (!target) continue;
       const meta = contactMeta.get(targetId);
       const shared = !!meta?.shared;
+      const trackLinkId = `${TRACK_LINK_PREFIX}${selectedId}_${targetId}`;
+      trackedTrackLinkIds.add(trackLinkId);
       viewer.entities.add(new Entity({
-        id: `${TRACK_LINK_PREFIX}${selectedId}_${targetId}`,
+        id: trackLinkId,
         polyline: {
           positions: new ConstantProperty([
             Cartesian3.fromDegrees(selectedUnit.position.lon, selectedUnit.position.lat, selectedUnit.position.altMsl),
@@ -545,9 +580,9 @@ export function setupCesiumStoreSync({
     } = useSimStore.getState();
     syncUnits(units, activeView, selectedUnitId, detections);
     syncTrackLinks(units, selectedUnitId, activeView, detections, detectionContacts);
-    syncMunitions(viewer, munitions, activeView, munitionDetections);
-    syncExplosions(viewer, explosions);
-    syncOilGraph(viewer, oilGraph, oilLayerVisible, selectedOilNodeId, selectedOilEdgeId, oilLayerSyncState);
+    syncMunitions(viewer, munitions, activeView, munitionDetections, effectsLayerSyncState);
+    syncExplosions(viewer, explosions, effectsLayerSyncState);
+    syncOilGraphNow(oilGraph, oilLayerVisible, selectedOilNodeId, selectedOilEdgeId);
   };
 
   const unsubscribe = useSimStore.subscribe((state, prev) => {
@@ -577,13 +612,13 @@ export function setupCesiumStoreSync({
     if (unitsChanged) {
       syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
       syncTrackLinks(state.units, state.selectedUnitId, state.activeView, state.detections, state.detectionContacts);
-      syncExplosions(viewer, state.explosions);
+      syncExplosions(viewer, state.explosions, effectsLayerSyncState);
       return;
     }
     if (viewChanged) {
       syncUnits(state.units, state.activeView, state.selectedUnitId, state.detections);
       syncTrackLinks(state.units, state.selectedUnitId, state.activeView, state.detections, state.detectionContacts);
-      syncMunitions(viewer, state.munitions, state.activeView, state.munitionDetections);
+      syncMunitions(viewer, state.munitions, state.activeView, state.munitionDetections, effectsLayerSyncState);
       return;
     }
     if (relationshipsChanged) {
@@ -614,21 +649,19 @@ export function setupCesiumStoreSync({
       return;
     }
     if (munitionsChanged) {
-      syncMunitions(viewer, state.munitions, state.activeView, state.munitionDetections);
+      syncMunitions(viewer, state.munitions, state.activeView, state.munitionDetections, effectsLayerSyncState);
       return;
     }
     if (explosionsChanged) {
-      syncExplosions(viewer, state.explosions);
+      syncExplosions(viewer, state.explosions, effectsLayerSyncState);
       return;
     }
     if (oilGraphChanged || oilLayerChanged || oilSelectionChanged) {
-      syncOilGraph(
-        viewer,
+      syncOilGraphNow(
         state.oilGraph,
         state.oilLayerVisible,
         state.selectedOilNodeId,
         state.selectedOilEdgeId,
-        oilLayerSyncState,
       );
       return;
     }
@@ -659,14 +692,25 @@ export function setupCesiumStoreSync({
   });
 
   const handleOilCameraMoveEnd = () => {
+    const rect = viewer.camera.computeViewRectangle(viewer.scene.globe.ellipsoid);
+    const viewRect = rect ? {
+      west: CesiumMath.toDegrees(rect.west),
+      south: CesiumMath.toDegrees(rect.south),
+      east: CesiumMath.toDegrees(rect.east),
+      north: CesiumMath.toDegrees(rect.north),
+    } : null;
+    const cameraHeight = viewer.camera.positionCartographic?.height ?? 3_000_000;
+    const nextBucketKey = oilCameraBucketKey(cameraHeight, viewRect);
+    if (oilLayerSyncState.lastCameraBucketKey === nextBucketKey) {
+      return;
+    }
+    oilLayerSyncState.lastCameraBucketKey = nextBucketKey;
     const { oilGraph, oilLayerVisible, selectedOilNodeId, selectedOilEdgeId } = useSimStore.getState();
-    syncOilGraph(
-      viewer,
+    syncOilGraphNow(
       oilGraph,
       oilLayerVisible,
       selectedOilNodeId,
       selectedOilEdgeId,
-      oilLayerSyncState,
     );
   };
   viewer.camera.moveEnd.addEventListener(handleOilCameraMoveEnd);

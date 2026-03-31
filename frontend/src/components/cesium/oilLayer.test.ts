@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { OilEdge, OilNode } from "../../store/simTypes";
 import {
+  oilCameraBucketKey,
   hasGOGISource,
   isOilPointVisible,
   oilEdgeWidth,
   oilNodeOutlineColor,
   oilNodePixelSize,
+  oilZoomBandForHeight,
   shouldRenderOilEdge,
   shouldRenderOilNode,
 } from "./oilLayer";
@@ -40,30 +42,32 @@ function makeEdge(overrides: Partial<OilEdge> = {}): OilEdge {
 
 describe("oilLayer helpers", () => {
   it("always renders project nodes even without selection", () => {
-    expect(shouldRenderOilNode(makeNode({ kind: "project" }), null, new Set())).toBe(true);
+    expect(shouldRenderOilNode(makeNode({ kind: "project" }), null, new Set(), "global", null)).toBe(true);
   });
 
   it("only renders extraction sites when their project is selected", () => {
     const field = makeNode({ kind: "extraction_site", id: "field-1", parentProjectId: "project-1" });
-    expect(shouldRenderOilNode(field, null, new Set())).toBe(false);
-    expect(shouldRenderOilNode(field, "project-1", new Set())).toBe(true);
-    expect(shouldRenderOilNode(field, "project-2", new Set(["field-1"]))).toBe(true);
+    expect(shouldRenderOilNode(field, null, new Set(), "local", null)).toBe(false);
+    expect(shouldRenderOilNode(field, "project-1", new Set(), "local", null)).toBe(true);
+    expect(shouldRenderOilNode(field, "project-2", new Set(["field-1"]), "local", null)).toBe(true);
   });
 
-  it("renders important infrastructure nodes without project selection", () => {
-    expect(shouldRenderOilNode(makeNode({ kind: "refinery", currentFlowBpd: 10_000 }), null, new Set())).toBe(true);
-    expect(shouldRenderOilNode(makeNode({ kind: "pipeline_terminal", currentFlowBpd: 10_000 }), null, new Set())).toBe(true);
-    expect(shouldRenderOilNode(makeNode({ kind: "marine_terminal", currentFlowBpd: 10_000 }), null, new Set())).toBe(true);
-    expect(shouldRenderOilNode(makeNode({ kind: "storage_hub", currentFlowBpd: 10_000 }), null, new Set())).toBe(false);
-    expect(shouldRenderOilNode(makeNode({ kind: "storage_hub", currentFlowBpd: 200_000 }), null, new Set())).toBe(true);
+  it("applies zoom-tiered node visibility", () => {
+    expect(shouldRenderOilNode(makeNode({ kind: "refinery", currentFlowBpd: 10_000 }), null, new Set(), "global", null)).toBe(true);
+    expect(shouldRenderOilNode(makeNode({ kind: "marine_terminal", currentFlowBpd: 10_000 }), null, new Set(), "global", null)).toBe(true);
+    expect(shouldRenderOilNode(makeNode({ kind: "pipeline_terminal", currentFlowBpd: 10_000 }), null, new Set(), "global", null)).toBe(false);
+    expect(shouldRenderOilNode(makeNode({ kind: "storage_hub", currentFlowBpd: 10_000 }), null, new Set(), "regional", null)).toBe(true);
+    expect(shouldRenderOilNode(makeNode({ kind: "gathering_hub", currentFlowBpd: 10_000 }), null, new Set(), "regional", null)).toBe(false);
+    expect(shouldRenderOilNode(makeNode({ kind: "gathering_hub", currentFlowBpd: 10_000, tags: ["source:gogi"] } as any), null, new Set(), "local", null)).toBe(true);
   });
 
-  it("renders pipelines and hides placeholder seaborne corridors", () => {
-    expect(shouldRenderOilEdge(makeEdge({ kind: "pipeline" }))).toBe(true);
-    expect(shouldRenderOilEdge(makeEdge({ kind: "internal_transfer", currentFlowBpd: 10_000 }))).toBe(true);
-    expect(shouldRenderOilEdge(makeEdge({ kind: "shipping_lane", currentFlowBpd: 50_000, crossesChokepoints: ["om-hormuz"] }))).toBe(true);
-    expect(shouldRenderOilEdge(makeEdge({ kind: "seaborne_corridor", currentFlowBpd: 500_000 } as any))).toBe(false);
-    expect(shouldRenderOilEdge(makeEdge({ kind: "shipping_lane", currentFlowBpd: 50_000 }))).toBe(false);
+  it("applies zoom-tiered edge visibility and hides placeholder seaborne corridors", () => {
+    expect(shouldRenderOilEdge(makeEdge({ kind: "pipeline", currentFlowBpd: 600_000 }), "global", null)).toBe(true);
+    expect(shouldRenderOilEdge(makeEdge({ kind: "pipeline", currentFlowBpd: 100_000 }), "global", null)).toBe(false);
+    expect(shouldRenderOilEdge(makeEdge({ kind: "internal_transfer", currentFlowBpd: 10_000 }), "regional", null)).toBe(true);
+    expect(shouldRenderOilEdge(makeEdge({ kind: "shipping_lane", currentFlowBpd: 50_000, crossesChokepoints: ["om-hormuz"] }), "local", null)).toBe(true);
+    expect(shouldRenderOilEdge(makeEdge({ kind: "seaborne_corridor", currentFlowBpd: 500_000 } as any), "local", null)).toBe(false);
+    expect(shouldRenderOilEdge(makeEdge({ kind: "shipping_lane", currentFlowBpd: 50_000 }), "local", null)).toBe(false);
   });
 
   it("culls points outside the current view rectangle including wrapped longitude ranges", () => {
@@ -98,6 +102,20 @@ describe("oilLayer helpers", () => {
     } as any);
     expect(hasGOGISource(gogiNode)).toBe(true);
     expect(oilNodeOutlineColor(gogiNode, false).toCssColorString()).toBe("rgba(34,197,94,0.95)");
-    expect(shouldRenderOilNode(gogiNode, null, new Set())).toBe(true);
+    expect(shouldRenderOilNode(gogiNode, null, new Set(), "local", null)).toBe(true);
+  });
+
+  it("maps camera height to oil zoom bands", () => {
+    expect(oilZoomBandForHeight(3_000_000)).toBe("global");
+    expect(oilZoomBandForHeight(1_000_000)).toBe("regional");
+    expect(oilZoomBandForHeight(300_000)).toBe("local");
+  });
+
+  it("coarsens nearby camera views into the same oil camera bucket", () => {
+    const a = oilCameraBucketKey(3_200_000, { west: 11.2, south: -4.1, east: 49.4, north: 22.3 });
+    const b = oilCameraBucketKey(3_100_000, { west: 12.0, south: -3.9, east: 48.7, north: 21.8 });
+    const c = oilCameraBucketKey(700_000, { west: 12.0, south: -3.9, east: 48.7, north: 21.8 });
+    expect(a).toBe(b);
+    expect(c).not.toBe(a);
   });
 });

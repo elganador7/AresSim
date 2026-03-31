@@ -20,14 +20,47 @@ export interface OilLayerSyncState {
   nodeEntityIds: Set<string>;
   edgeEntityIds: Set<string>;
   outlineEntityIds: Set<string>;
+  lastCameraBucketKey: string | null;
 }
+
+export type OilZoomBand = "global" | "regional" | "local";
 
 export function createOilLayerSyncState(): OilLayerSyncState {
   return {
     nodeEntityIds: new Set<string>(),
     edgeEntityIds: new Set<string>(),
     outlineEntityIds: new Set<string>(),
+    lastCameraBucketKey: null,
   };
+}
+
+export function oilZoomBandForHeight(heightM: number): OilZoomBand {
+  if (heightM >= 2_500_000) {
+    return "global";
+  }
+  if (heightM >= 600_000) {
+    return "regional";
+  }
+  return "local";
+}
+
+export function oilCameraBucketKey(
+  heightM: number,
+  viewRect: { west: number; south: number; east: number; north: number } | null,
+): string {
+  const zoomBand = oilZoomBandForHeight(heightM);
+  if (!viewRect) {
+    return `${zoomBand}:none`;
+  }
+  const gridDeg = zoomBand === "global" ? 10 : zoomBand === "regional" ? 3 : 1;
+  const bucket = (value: number) => Math.round(value / gridDeg) * gridDeg;
+  return [
+    zoomBand,
+    bucket(viewRect.west),
+    bucket(viewRect.south),
+    bucket(viewRect.east),
+    bucket(viewRect.north),
+  ].join(":");
 }
 
 export function hasGOGISource(node: OilNode): boolean {
@@ -141,7 +174,16 @@ export function isOilPointVisible(
     && lonInRange(lon, viewRect.west, viewRect.east);
 }
 
-export function shouldRenderOilNode(node: OilNode, selectedProjectId: string | null, selectedProjectChildIDs: Set<string>): boolean {
+export function shouldRenderOilNode(
+  node: OilNode,
+  selectedProjectId: string | null,
+  selectedProjectChildIDs: Set<string>,
+  zoomBand: OilZoomBand,
+  selectedNodeId: string | null,
+): boolean {
+  if (selectedNodeId === node.id) {
+    return true;
+  }
   if (node.kind === "project") {
     return true;
   }
@@ -151,8 +193,27 @@ export function shouldRenderOilNode(node: OilNode, selectedProjectId: string | n
   if (node.kind === "chokepoint") {
     return true;
   }
-  if (node.kind === "marine_terminal") {
-    return true;
+  if (zoomBand === "global") {
+    return node.kind === "marine_terminal"
+      || node.kind === "refinery"
+      || node.kind === "export_terminal"
+      || node.kind === "import_terminal"
+      || ((node.currentFlowBpd ?? 0) >= 500_000)
+      || ((node.capacityBpd ?? 0) >= 750_000);
+  }
+  if (zoomBand === "regional") {
+    if (node.kind === "marine_terminal"
+      || node.kind === "refinery"
+      || node.kind === "export_terminal"
+      || node.kind === "import_terminal"
+      || node.kind === "storage_hub"
+      || node.kind === "demand_center") {
+      return true;
+    }
+    if (hasGOGISource(node)) {
+      return node.kind !== "gathering_hub" || (node.currentFlowBpd ?? node.capacityBpd ?? 0) >= 150_000;
+    }
+    return (node.currentFlowBpd ?? 0) >= 200_000 || (node.capacityBpd ?? 0) >= 350_000;
   }
   if (hasGOGISource(node)) {
     return true;
@@ -167,9 +228,21 @@ export function shouldRenderOilNode(node: OilNode, selectedProjectId: string | n
     || node.kind === "demand_center";
 }
 
-export function shouldRenderOilEdge(edge: OilEdge): boolean {
+export function shouldRenderOilEdge(edge: OilEdge, zoomBand: OilZoomBand, selectedEdgeId: string | null): boolean {
+  if (selectedEdgeId === edge.id) {
+    return true;
+  }
   if (edge.kind === "seaborne_corridor") {
     return false;
+  }
+  if (zoomBand === "global") {
+    return edge.kind === "pipeline"
+      && ((edge.currentFlowBpd ?? 0) >= 500_000 || (edge.capacityBpd ?? 0) >= 750_000);
+  }
+  if (zoomBand === "regional") {
+    return edge.kind === "pipeline"
+      || edge.kind === "internal_transfer"
+      || (edge.currentFlowBpd ?? 0) >= 250_000;
   }
   return edge.kind === "pipeline"
     || edge.kind === "internal_transfer"
@@ -197,6 +270,8 @@ export function syncOilGraph(
     east: CesiumMath.toDegrees(rect.east),
     north: CesiumMath.toDegrees(rect.north),
   } : null;
+  const cameraHeight = viewer.camera.positionCartographic?.height ?? 3_000_000;
+  const zoomBand = oilZoomBandForHeight(cameraHeight);
   const selectedProjectId = (() => {
     if (!selectedNodeId || !oilGraph) {
       return null;
@@ -212,7 +287,7 @@ export function syncOilGraph(
     return new Set(selected?.childFieldIds ?? []);
   })();
   const visibleNodes = (oilGraph?.nodes ?? [])
-    .filter((node) => shouldRenderOilNode(node, selectedProjectId, selectedProjectChildIDs));
+    .filter((node) => shouldRenderOilNode(node, selectedProjectId, selectedProjectChildIDs, zoomBand, selectedNodeId));
   for (const node of visibleNodes) {
     const pointVisible = visible && isOilPointVisible(node.lat, node.lon, viewRect);
     nodesById.set(node.id, node);
@@ -283,7 +358,7 @@ export function syncOilGraph(
   }
 
   const visibleEdges = (oilGraph?.edges ?? [])
-    .filter((edge) => shouldRenderOilEdge(edge))
+    .filter((edge) => shouldRenderOilEdge(edge, zoomBand, selectedEdgeId))
     .slice(0, 7000);
 
   for (const edge of visibleEdges) {
