@@ -61,7 +61,7 @@ function oilEdgeColor(edge: OilEdge): Color {
   return Color.fromCssColorString("#64748b");
 }
 
-function oilNodePixelSize(node: OilNode, isSelected: boolean): number {
+export function oilNodePixelSize(node: OilNode, isSelected: boolean): number {
   if (isSelected) {
     return 16;
   }
@@ -79,21 +79,21 @@ function oilNodePixelSize(node: OilNode, isSelected: boolean): number {
   return Math.max(8, Math.min(15, 8 + flow / 500_000));
 }
 
-function oilEdgeWidth(edge: OilEdge, isSelected: boolean): number {
+export function oilEdgeWidth(edge: OilEdge, isSelected: boolean): number {
   if (isSelected) {
     return 6;
   }
   return Math.max(2.5, Math.min(7, 2.5 + (edge.currentFlowBpd ?? edge.capacityBpd ?? 0) / 500_000));
 }
 
-function lonInRange(lon: number, west: number, east: number): boolean {
+export function lonInRange(lon: number, west: number, east: number): boolean {
   if (west <= east) {
     return lon >= west && lon <= east;
   }
   return lon >= west || lon <= east;
 }
 
-function isOilPointVisible(
+export function isOilPointVisible(
   lat: number,
   lon: number,
   viewRect: { west: number; south: number; east: number; north: number } | null,
@@ -106,7 +106,7 @@ function isOilPointVisible(
     && lonInRange(lon, viewRect.west, viewRect.east);
 }
 
-function shouldRenderOilNode(node: OilNode, selectedProjectId: string | null, selectedProjectChildIDs: Set<string>): boolean {
+export function shouldRenderOilNode(node: OilNode, selectedProjectId: string | null, selectedProjectChildIDs: Set<string>): boolean {
   if (node.kind === "project") {
     return true;
   }
@@ -126,7 +126,7 @@ function shouldRenderOilNode(node: OilNode, selectedProjectId: string | null, se
     || node.kind === "demand_center";
 }
 
-function shouldRenderOilEdge(edge: OilEdge): boolean {
+export function shouldRenderOilEdge(edge: OilEdge): boolean {
   return edge.kind === "pipeline"
     || edge.kind === "internal_transfer"
     || (edge.currentFlowBpd ?? 0) >= 200_000
