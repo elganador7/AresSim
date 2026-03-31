@@ -154,6 +154,83 @@ export function oilEdgeWidth(edge: OilEdge, isSelected: boolean): number {
   return Math.max(2.5, Math.min(7, 2.5 + (edge.currentFlowBpd ?? edge.capacityBpd ?? 0) / 500_000));
 }
 
+function oilNodeImportance(node: OilNode): number {
+  let score = node.productionBpd ?? node.currentFlowBpd ?? node.capacityBpd ?? 0;
+  switch (node.kind) {
+    case "project":
+      score += 3_000_000;
+      break;
+    case "chokepoint":
+      score += 2_500_000;
+      break;
+    case "refinery":
+      score += 2_000_000;
+      break;
+    case "marine_terminal":
+    case "export_terminal":
+    case "import_terminal":
+      score += 1_600_000;
+      break;
+    case "storage_hub":
+      score += 900_000;
+      break;
+    case "demand_center":
+      score += 800_000;
+      break;
+    case "extraction_site":
+      score += 500_000;
+      break;
+    default:
+      break;
+  }
+  if (hasGOGISource(node)) {
+    score += 150_000;
+  }
+  if (node.state === "offline") {
+    score -= 200_000;
+  }
+  return score;
+}
+
+function oilEdgeImportance(edge: OilEdge): number {
+  let score = edge.currentFlowBpd ?? edge.capacityBpd ?? 0;
+  if (edge.kind === "pipeline") {
+    score += 1_000_000;
+  }
+  if (edge.kind === "internal_transfer") {
+    score += 400_000;
+  }
+  if (edge.kind === "shipping_lane" && ((edge.crossesChokepoints?.length ?? 0) > 0 || edge.crossesChokepoint)) {
+    score += 600_000;
+  }
+  if (edge.state === "offline") {
+    score -= 200_000;
+  }
+  return score;
+}
+
+function oilNodeLimit(zoomBand: OilZoomBand): number {
+  switch (zoomBand) {
+    case "global":
+      return 400;
+    case "regional":
+      return 1_000;
+    case "local":
+      return 2_000;
+  }
+}
+
+function oilEdgeLimit(zoomBand: OilZoomBand): number {
+  switch (zoomBand) {
+    case "global":
+      return 250;
+    case "regional":
+      return 700;
+    case "local":
+      return 1_500;
+  }
+}
+
 export function lonInRange(lon: number, west: number, east: number): boolean {
   if (west <= east) {
     return lon >= west && lon <= east;
@@ -287,7 +364,9 @@ export function syncOilGraph(
     return new Set(selected?.childFieldIds ?? []);
   })();
   const visibleNodes = (oilGraph?.nodes ?? [])
-    .filter((node) => shouldRenderOilNode(node, selectedProjectId, selectedProjectChildIDs, zoomBand, selectedNodeId));
+    .filter((node) => shouldRenderOilNode(node, selectedProjectId, selectedProjectChildIDs, zoomBand, selectedNodeId))
+    .sort((a, b) => oilNodeImportance(b) - oilNodeImportance(a))
+    .slice(0, oilNodeLimit(zoomBand));
   for (const node of visibleNodes) {
     const pointVisible = visible && isOilPointVisible(node.lat, node.lon, viewRect);
     nodesById.set(node.id, node);
@@ -359,7 +438,8 @@ export function syncOilGraph(
 
   const visibleEdges = (oilGraph?.edges ?? [])
     .filter((edge) => shouldRenderOilEdge(edge, zoomBand, selectedEdgeId))
-    .slice(0, 7000);
+    .sort((a, b) => oilEdgeImportance(b) - oilEdgeImportance(a))
+    .slice(0, oilEdgeLimit(zoomBand));
 
   for (const edge of visibleEdges) {
     const isSelected = selectedEdgeId === edge.id;

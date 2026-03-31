@@ -61,6 +61,13 @@ describe("oilLayer helpers", () => {
     expect(shouldRenderOilNode(makeNode({ kind: "gathering_hub", currentFlowBpd: 10_000, tags: ["source:gogi"] } as any), null, new Set(), "local", null)).toBe(true);
   });
 
+  it("always renders a selected node and selected edge regardless of normal tiering", () => {
+    const lowSignalNode = makeNode({ id: "node-1", kind: "gathering_hub", currentFlowBpd: 1_000 });
+    const lowSignalEdge = makeEdge({ id: "edge-1", kind: "shipping_lane", currentFlowBpd: 1_000, crossesChokepoints: [] });
+    expect(shouldRenderOilNode(lowSignalNode, null, new Set(), "global", "node-1")).toBe(true);
+    expect(shouldRenderOilEdge(lowSignalEdge, "global", "edge-1")).toBe(true);
+  });
+
   it("applies zoom-tiered edge visibility and hides placeholder seaborne corridors", () => {
     expect(shouldRenderOilEdge(makeEdge({ kind: "pipeline", currentFlowBpd: 600_000 }), "global", null)).toBe(true);
     expect(shouldRenderOilEdge(makeEdge({ kind: "pipeline", currentFlowBpd: 100_000 }), "global", null)).toBe(false);

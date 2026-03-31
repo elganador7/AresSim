@@ -6,6 +6,36 @@ import {
   Viewer,
 } from "cesium";
 
+type TheaterOverlayGeoJSON = {
+  type: "FeatureCollection";
+  features: unknown[];
+};
+
+let theaterBordersPromise: Promise<TheaterOverlayGeoJSON> | null = null;
+let theaterMaritimePromise: Promise<TheaterOverlayGeoJSON> | null = null;
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`failed to load ${url}: ${response.status} ${response.statusText}`);
+  }
+  return response.json() as Promise<T>;
+}
+
+function loadTheaterBorders() {
+  if (!theaterBordersPromise) {
+    theaterBordersPromise = fetchJson<TheaterOverlayGeoJSON>("/theater/theater_borders.json");
+  }
+  return theaterBordersPromise;
+}
+
+function loadTheaterMaritime() {
+  if (!theaterMaritimePromise) {
+    theaterMaritimePromise = fetchJson<TheaterOverlayGeoJSON>("/theater/theater_maritime.json");
+  }
+  return theaterMaritimePromise;
+}
+
 function styleBorderOverlay(dataSource: GeoJsonDataSource) {
   dataSource.entities.values.forEach((entity) => {
     if (entity.polygon) {
@@ -38,18 +68,18 @@ function styleMaritimeOverlay(dataSource: GeoJsonDataSource) {
 }
 
 export async function loadTheaterOverlays(viewer: Viewer) {
-  const [{ THEATER_BORDERS_GEOJSON }, { THEATER_MARITIME_GEOJSON }] = await Promise.all([
-    import("../../data/theaterBorders"),
-    import("../../data/theaterMaritime"),
+  const [theaterBorders, theaterMaritime] = await Promise.all([
+    loadTheaterBorders(),
+    loadTheaterMaritime(),
   ]);
   const [borderDataSource, maritimeDataSource] = await Promise.all([
-    GeoJsonDataSource.load(THEATER_BORDERS_GEOJSON as never, {
+    GeoJsonDataSource.load(theaterBorders as never, {
       stroke: Color.fromCssColorString("#9eb0c2"),
       fill: Color.fromCssColorString("#000000").withAlpha(0.01),
       strokeWidth: 1.2,
       clampToGround: true,
     }),
-    GeoJsonDataSource.load(THEATER_MARITIME_GEOJSON as never, {
+    GeoJsonDataSource.load(theaterMaritime as never, {
       stroke: Color.fromCssColorString("#67e8f9"),
       fill: Color.fromCssColorString("#155e75").withAlpha(0.06),
       strokeWidth: 0.9,
