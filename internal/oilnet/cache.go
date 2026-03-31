@@ -104,7 +104,7 @@ func LoadGraphJSON(path string) (*Graph, error) {
 
 func WriteGraphCacheJSON(path string, graph *Graph) error {
 	payload := NewGraphCacheFile(graph)
-	raw, err := json.MarshalIndent(payload, "", "  ")
+	raw, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("marshal oil graph cache: %w", err)
 	}
