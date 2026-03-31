@@ -16,7 +16,7 @@ import { selectedPlayerTeam } from "../../utils/playerTeam";
 import type { DefInfo } from "./helpers";
 import { canMove, ensureBridgeSuccess } from "./helpers";
 
-function resolvePickedEntity(picked: unknown): Entity | null {
+export function resolvePickedEntity(picked: unknown): Entity | null {
   const value = picked as {
     id?: unknown;
     primitive?: { id?: unknown };
@@ -77,6 +77,95 @@ function previewDraggedWaypoint(
     (destEntity.position as unknown as { setValue: (p: Cartesian3) => void })
       .setValue(Cartesian3.fromDegrees(lon, lat));
   }
+}
+
+type InteractionSelectionState = {
+  selectedUnitId: string | null;
+  selectedTargetId: string | null;
+  selectedOilNodeId: string | null;
+  selectedOilEdgeId: string | null;
+  oilGraphPresent: boolean;
+  activeView: string;
+  humanControlledTeam: string;
+  units: Map<string, ReturnType<typeof useSimStore.getState>["units"] extends Map<string, infer U> ? U : never>;
+};
+
+type InteractionSelectionActions = {
+  selectUnit: (id: string | null) => void;
+  selectTarget: (id: string | null) => void;
+  selectOilNode: (id: string | null) => void;
+  selectOilEdge: (id: string | null) => void;
+  clearMapCommandMode: () => void;
+  setSelectedRoutePreview: (preview: null) => void;
+};
+
+function clearTransientSelections(actions: InteractionSelectionActions) {
+  actions.clearMapCommandMode();
+  actions.setSelectedRoutePreview(null);
+}
+
+export function handlePickedSelection(
+  clickedId: string | null,
+  state: InteractionSelectionState,
+  actions: InteractionSelectionActions,
+): boolean {
+  if (clickedId) {
+    if (clickedId.startsWith("oil_node_")) {
+      const nodeId = clickedId.slice("oil_node_".length);
+      const nextId = state.selectedOilNodeId === nodeId ? null : nodeId;
+      actions.selectOilNode(nextId);
+      clearTransientSelections(actions);
+      return true;
+    }
+    if (clickedId.startsWith("oil_edge_")) {
+      const rawEdgeId = clickedId.slice("oil_edge_".length);
+      const edgeId = rawEdgeId.split("__part_")[0];
+      const nextId = state.selectedOilEdgeId === edgeId ? null : edgeId;
+      actions.selectOilEdge(nextId);
+      clearTransientSelections(actions);
+      return true;
+    }
+    if (state.units.has(clickedId)) {
+      const clickedUnit = state.units.get(clickedId);
+      const playerTeam = selectedPlayerTeam(state.humanControlledTeam);
+      const clickedTeam = (clickedUnit?.operatorTeamId ?? clickedUnit?.teamId ?? "").trim().toUpperCase();
+      const fallbackViewTeam = state.activeView !== "debug" ? state.activeView.trim().toUpperCase() : "";
+      if (!playerTeam) {
+        if (clickedUnit && (state.activeView === "debug" || clickedTeam === fallbackViewTeam)) {
+          const nextSelectedId = state.selectedUnitId === clickedId ? null : clickedId;
+          actions.selectUnit(nextSelectedId);
+          actions.selectTarget(null);
+          clearTransientSelections(actions);
+        }
+        return true;
+      }
+      const ownsClickedUnit = clickedUnit && clickedTeam === playerTeam;
+      if (!ownsClickedUnit) {
+        const playerReference = Array.from(state.units.values()).find((candidate) => (candidate.teamId ?? "").trim().toUpperCase() === playerTeam);
+        if (clickedUnit && playerReference && areHostile(playerReference, clickedUnit)) {
+          const nextSelectedTargetId = state.selectedTargetId === clickedId ? null : clickedId;
+          actions.selectTarget(nextSelectedTargetId);
+          clearTransientSelections(actions);
+        }
+        return true;
+      }
+      const nextSelectedId = state.selectedUnitId === clickedId ? null : clickedId;
+      actions.selectUnit(nextSelectedId);
+      actions.selectTarget(null);
+      clearTransientSelections(actions);
+      return true;
+    }
+  }
+
+  if (state.selectedOilNodeId || state.selectedOilEdgeId) {
+    actions.selectOilNode(null);
+    actions.selectOilEdge(null);
+    if (state.oilGraphPresent) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function setupCesiumInteractions(
@@ -161,66 +250,29 @@ export function setupCesiumInteractions(
       } = useSimStore.getState();
 
       const pickedEntity = resolvePickedEntity(viewer.scene.pick(evt.position));
-      if (pickedEntity) {
-        const clickedId = String(pickedEntity.id ?? "");
-        if (clickedId.startsWith("oil_node_")) {
-          const nodeId = clickedId.slice("oil_node_".length);
-          const nextId = selectedOilNodeId === nodeId ? null : nodeId;
-          selectOilNode(nextId);
-          clearMapCommandMode();
-          setSelectedRoutePreview(null);
-          return;
-        }
-        if (clickedId.startsWith("oil_edge_")) {
-          const rawEdgeId = clickedId.slice("oil_edge_".length);
-          const edgeId = rawEdgeId.split("__part_")[0];
-          const nextId = selectedOilEdgeId === edgeId ? null : edgeId;
-          selectOilEdge(nextId);
-          clearMapCommandMode();
-          setSelectedRoutePreview(null);
-          return;
-        }
-        if (units.has(clickedId)) {
-          const clickedUnit = units.get(clickedId);
-          const playerTeam = selectedPlayerTeam(humanControlledTeam);
-          const clickedTeam = (clickedUnit?.operatorTeamId ?? clickedUnit?.teamId ?? "").trim().toUpperCase();
-          const fallbackViewTeam = activeView !== "debug" ? activeView.trim().toUpperCase() : "";
-          if (!playerTeam) {
-            if (clickedUnit && (activeView === "debug" || clickedTeam === fallbackViewTeam)) {
-              const nextSelectedId = selectedUnitId === clickedId ? null : clickedId;
-              selectUnit(nextSelectedId);
-              selectTarget(null);
-              clearMapCommandMode();
-              setSelectedRoutePreview(null);
-            }
-            return;
-          }
-          const ownsClickedUnit = clickedUnit && clickedTeam === playerTeam;
-          if (!ownsClickedUnit) {
-            const playerReference = Array.from(units.values()).find((candidate) => (candidate.teamId ?? "").trim().toUpperCase() === playerTeam);
-            if (clickedUnit && playerReference && areHostile(playerReference, clickedUnit)) {
-              const nextSelectedTargetId = selectedTargetId === clickedId ? null : clickedId;
-              selectTarget(nextSelectedTargetId);
-              clearMapCommandMode();
-              setSelectedRoutePreview(null);
-            }
-            return;
-          }
-          const nextSelectedId = selectedUnitId === clickedId ? null : clickedId;
-          selectUnit(nextSelectedId);
-          selectTarget(null);
-          clearMapCommandMode();
-          setSelectedRoutePreview(null);
-          return;
-        }
-      }
-
-      if (selectedOilNodeId || selectedOilEdgeId) {
-        selectOilNode(null);
-        selectOilEdge(null);
-        if (oilGraph) {
-          return;
-        }
+      const handledSelection = handlePickedSelection(
+        pickedEntity ? String(pickedEntity.id ?? "") : null,
+        {
+          selectedUnitId,
+          selectedTargetId,
+          selectedOilNodeId,
+          selectedOilEdgeId,
+          oilGraphPresent: !!oilGraph,
+          activeView,
+          humanControlledTeam,
+          units,
+        },
+        {
+          selectUnit,
+          selectTarget,
+          selectOilNode,
+          selectOilEdge,
+          clearMapCommandMode,
+          setSelectedRoutePreview,
+        },
+      );
+      if (handledSelection) {
+        return;
       }
 
       if (!selectedUnitId) return;
