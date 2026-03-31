@@ -96,8 +96,20 @@ func cloneGraph(src *Graph) *Graph {
 	out.Nodes = make([]Node, len(src.Nodes))
 	copy(out.Nodes, src.Nodes)
 	for i := range out.Nodes {
+		if src.Nodes[i].ProductsHandled != nil {
+			out.Nodes[i].ProductsHandled = append([]Commodity(nil), src.Nodes[i].ProductsHandled...)
+		}
+		if src.Nodes[i].ChildFieldIDs != nil {
+			out.Nodes[i].ChildFieldIDs = append([]string(nil), src.Nodes[i].ChildFieldIDs...)
+		}
 		if src.Nodes[i].ProductOutputs != nil {
 			out.Nodes[i].ProductOutputs = append([]ProductOutput(nil), src.Nodes[i].ProductOutputs...)
+		}
+		if src.Nodes[i].OutlineRings != nil {
+			out.Nodes[i].OutlineRings = make([][]RoutePoint, len(src.Nodes[i].OutlineRings))
+			for j := range src.Nodes[i].OutlineRings {
+				out.Nodes[i].OutlineRings[j] = append([]RoutePoint(nil), src.Nodes[i].OutlineRings[j]...)
+			}
 		}
 		if src.Nodes[i].DemandProfile != nil {
 			out.Nodes[i].DemandProfile = append([]CommodityQuantity(nil), src.Nodes[i].DemandProfile...)

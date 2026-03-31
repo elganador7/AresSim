@@ -32,6 +32,26 @@ func TestBuildRenderableGraphFiltersAndSimplifies(t *testing.T) {
 				Sources:     []SourceRef{{Name: "src", Confidence: 0.9}},
 				CapacityBPD: 10,
 			},
+			{
+				ID:             "terminal-1",
+				Name:           "Marine Terminal",
+				Kind:           NodeMarineTerminal,
+				State:          StateOperational,
+				CurrentFlowBPD: 900_000,
+				ProductsHandled: []Commodity{
+					CommodityCrude,
+					CommodityRefinedProducts,
+				},
+				Sources: []SourceRef{{Name: "src", Confidence: 0.9}},
+			},
+			{
+				ID:             "canal-1",
+				Name:           "Canal",
+				Kind:           NodeCanal,
+				State:          StateOperational,
+				CurrentFlowBPD: 1_000_000,
+				Sources:        []SourceRef{{Name: "src", Confidence: 0.9}},
+			},
 		},
 		Edges: []Edge{
 			{
@@ -63,15 +83,32 @@ func TestBuildRenderableGraphFiltersAndSimplifies(t *testing.T) {
 				CapacityBPD:    500_000,
 				CurrentFlowBPD: 400_000,
 			},
+			{
+				ID:                 "edge-3",
+				Name:               "Seaborne",
+				Kind:               EdgeSeaborneCorridor,
+				FromNodeID:         "terminal-1",
+				ToNodeID:           "terminal-1",
+				State:              StateOperational,
+				CapacityBPD:        800_000,
+				CurrentFlowBPD:     700_000,
+				CrossesChokepoints: []string{"suez"},
+				Route: []RoutePoint{
+					{Lat: 25, Lon: 50},
+					{Lat: 22, Lon: 39},
+					{Lat: 31, Lon: 32},
+				},
+				Sources: []SourceRef{{Name: "src", Confidence: 0.9}},
+			},
 		},
 	}
 
 	renderable := BuildRenderableGraph(graph)
-	if len(renderable.Nodes) != 1 {
-		t.Fatalf("expected 1 renderable node, got %d", len(renderable.Nodes))
+	if len(renderable.Nodes) != 3 {
+		t.Fatalf("expected 3 renderable nodes, got %d", len(renderable.Nodes))
 	}
-	if len(renderable.Edges) != 1 {
-		t.Fatalf("expected 1 renderable edge, got %d", len(renderable.Edges))
+	if len(renderable.Edges) != 2 {
+		t.Fatalf("expected 2 renderable edges, got %d", len(renderable.Edges))
 	}
 	if got := renderable.Nodes[0].Sources; got != nil {
 		t.Fatalf("expected node sources to be stripped, got %+v", got)
@@ -146,5 +183,29 @@ func TestLoadGraphJSONWrappedCache(t *testing.T) {
 	}
 	if wrapped.Diagnostics.NodeCount != 1 {
 		t.Fatalf("expected one node in diagnostics, got %d", wrapped.Diagnostics.NodeCount)
+	}
+}
+
+func TestLoadRenderableCacheJSONRejectsStaleSchema(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "stale-cache.json")
+	raw, err := json.Marshal(GraphCacheFile{
+		Metadata: CacheMetadata{
+			SchemaVersion: "oil-renderable-cache/v1-stale",
+			BuiltAt:       "2026-03-30T00:00:00Z",
+		},
+		Graph: &Graph{
+			ID:    "stale-graph",
+			Nodes: []Node{{ID: "n1", Name: "Node", Kind: NodeProject, State: StateOperational}},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Marshal() error = %v", err)
+	}
+	if err := os.WriteFile(path, raw, 0o644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+	if _, err := LoadRenderableCacheJSON(path); err == nil {
+		t.Fatal("expected stale schema cache to be rejected")
 	}
 }

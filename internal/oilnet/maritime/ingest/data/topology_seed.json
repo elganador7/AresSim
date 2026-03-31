@@ -1,0 +1,119 @@
+{
+  "id": "oilnet-maritime-topology-seed",
+  "name": "Oil Maritime Topology Seed",
+  "description": "Seed maritime terminal and chokepoint topology for seaborne petroleum modeling.",
+  "version": "0.1.0",
+  "sources": [
+    {
+      "name": "Seed Maritime Topology",
+      "organization": "AresSim",
+      "url": "",
+      "confidence": 0.4,
+      "notes": "Temporary seed topology pending real terminal datasets."
+    }
+  ],
+  "terminals": [
+    {
+      "id": "terminal-sa-ras-tanura",
+      "name": "Ras Tanura Marine Terminal",
+      "countryCode": "SAU",
+      "lat": 26.640,
+      "lon": 50.155,
+      "state": "operational",
+      "terminalType": "crude_export",
+      "productsHandled": ["crude"],
+      "capacityBpd": 6500000,
+      "storageCapacityBbl": 35000000,
+      "berthCount": 6,
+      "draftClass": "vlcc"
+    },
+    {
+      "id": "terminal-jp-chiba-import",
+      "name": "Chiba Crude Import Terminal",
+      "countryCode": "JPN",
+      "lat": 35.604,
+      "lon": 140.119,
+      "state": "operational",
+      "terminalType": "crude_import",
+      "productsHandled": ["crude"],
+      "capacityBpd": 1800000,
+      "storageCapacityBbl": 12000000,
+      "berthCount": 4,
+      "draftClass": "vlcc"
+    },
+    {
+      "id": "terminal-nl-rotterdam-products",
+      "name": "Rotterdam Products Terminal",
+      "countryCode": "NLD",
+      "lat": 51.947,
+      "lon": 4.109,
+      "state": "operational",
+      "terminalType": "product_import",
+      "productsHandled": ["refined_products", "naphtha", "lpg"],
+      "capacityBpd": 1400000,
+      "storageCapacityBbl": 10000000,
+      "berthCount": 5,
+      "draftClass": "lr2"
+    }
+  ],
+  "canals": [
+    {
+      "id": "canal-suez",
+      "name": "Suez Canal",
+      "nodeId": "canal-eg-suez",
+      "countryCode": "EGY",
+      "lat": 29.966,
+      "lon": 32.55,
+      "state": "operational",
+      "capacityBpd": 5500000,
+      "typicalDelayDays": 0.5
+    }
+  ],
+  "corridors": [
+    {
+      "id": "corridor-ras-tanura-chiba-crude",
+      "name": "Ras Tanura to Chiba Crude Corridor",
+      "fromTerminalId": "terminal-sa-ras-tanura",
+      "toTerminalId": "terminal-jp-chiba-import",
+      "commodity": "crude",
+      "productsHandled": ["crude"],
+      "state": "operational",
+      "vesselClass": "vlcc",
+      "typicalCargoBbl": 2000000,
+      "capacityBpd": 1400000,
+      "currentFlowBpd": 1200000,
+      "transitDays": 19.5,
+      "lengthKm": 10200,
+      "crossesChokepoints": ["om-hormuz", "sg-malacca"],
+      "route": [
+        {"lat": 26.640, "lon": 50.155},
+        {"lat": 26.566, "lon": 56.250},
+        {"lat": 1.264, "lon": 103.830},
+        {"lat": 35.604, "lon": 140.119}
+      ]
+    },
+    {
+      "id": "corridor-ras-tanura-rotterdam-crude",
+      "name": "Ras Tanura to Rotterdam Crude Corridor",
+      "fromTerminalId": "terminal-sa-ras-tanura",
+      "toTerminalId": "terminal-nl-rotterdam-products",
+      "commodity": "crude",
+      "productsHandled": ["crude"],
+      "state": "operational",
+      "vesselClass": "vlcc",
+      "typicalCargoBbl": 2000000,
+      "capacityBpd": 900000,
+      "currentFlowBpd": 700000,
+      "transitDays": 17.0,
+      "lengthKm": 9200,
+      "crossesChokepoints": ["om-hormuz", "ye-bab-el-mandeb", "eg-suez"],
+      "route": [
+        {"lat": 26.640, "lon": 50.155},
+        {"lat": 26.566, "lon": 56.250},
+        {"lat": 12.585, "lon": 43.330},
+        {"lat": 29.966, "lon": 32.550},
+        {"lat": 51.947, "lon": 4.109}
+      ]
+    }
+  ]
+}

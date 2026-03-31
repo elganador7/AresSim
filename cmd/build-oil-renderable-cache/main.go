@@ -19,10 +19,11 @@ func main() {
 func run() error {
 	extractionPath := flag.String("extraction", oilruntime.DefaultExtractionWorkbookPath, "path to extraction workbook")
 	pipelinesPath := flag.String("pipelines", oilruntime.DefaultPipelinesGeoJSONPath, "path to pipeline geojson")
+	maritimePath := flag.String("maritime", oilruntime.DefaultMaritimeTopologyPath, "path to maritime topology json")
 	outputPath := flag.String("output", oilruntime.DefaultRenderableCachePath, "output cache path")
 	flag.Parse()
 
-	graph, err := oilruntime.LoadRealDataGraph(*extractionPath, *pipelinesPath)
+	graph, err := oilruntime.LoadRealDataGraph(*extractionPath, *pipelinesPath, *maritimePath)
 	if err != nil {
 		return fmt.Errorf("load real-data oil graph: %w", err)
 	}

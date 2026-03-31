@@ -37,7 +37,12 @@ func ShouldRenderNode(node Node) bool {
 	if isLatentOrInactiveNode(node) {
 		return false
 	}
-	if node.Kind == NodeChokepoint || node.Kind == NodeRefinery || node.Kind == NodeProject || node.Kind == NodeExtractionSite {
+	if node.Kind == NodeChokepoint ||
+		node.Kind == NodeCanal ||
+		node.Kind == NodeMarineTerminal ||
+		node.Kind == NodeRefinery ||
+		node.Kind == NodeProject ||
+		node.Kind == NodeExtractionSite {
 		return true
 	}
 	return node.CurrentFlowBPD >= 150_000 ||
@@ -54,6 +59,7 @@ func ShouldRenderEdge(edge Edge) bool {
 		return false
 	}
 	return edge.Kind == EdgePipeline ||
+		edge.Kind == EdgeSeaborneCorridor ||
 		edge.CurrentFlowBPD >= 300_000 ||
 		(edge.Kind == EdgeShipping && (edge.CrossesChokepoint != "" || len(edge.CrossesChokepoints) > 0))
 }
@@ -70,7 +76,7 @@ func isLatentOrInactiveNode(node Node) bool {
 
 func isLatentOrInactiveEdge(edge Edge) bool {
 	switch strings.TrimSpace(strings.ToLower(edge.StatusDetail)) {
-	case "mothballed", "idle", "shelved", "cancelled", "canceled", "retired", "proposed", "":
+	case "mothballed", "idle", "shelved", "cancelled", "canceled", "retired", "proposed":
 		return true
 	}
 	return edge.State == StateOffline

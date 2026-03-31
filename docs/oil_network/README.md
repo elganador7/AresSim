@@ -19,18 +19,25 @@ At runtime the map layer should support:
 
 The new domain lives in `internal/oilnet/`.
 
+There is now also a dedicated maritime petroleum submodel in:
+
+- `internal/oilnet/maritime/`
+
 - `Node`
   - `extraction_site`
   - `gathering_hub`
+  - `marine_terminal`
   - `export_terminal`
   - `import_terminal`
   - `refinery`
   - `storage_hub`
   - `demand_center`
   - `chokepoint`
+  - `canal`
 - `Edge`
   - `pipeline`
   - `shipping_lane`
+  - `seaborne_corridor`
   - `internal_transfer`
 - `Commodity`
   - `crude`
@@ -166,6 +173,42 @@ And the interpretation script lives in:
 The parser reads the `Field-level main data` sheet directly and extracts field
 locations, fuel type, status, operator, and source URLs into extraction-site
 overlay nodes.
+
+## Maritime Topology
+
+The first maritime petroleum slice now exists and is wired into the live oil
+runtime graph.
+
+Current files:
+
+- `internal/oilnet/maritime/model.go`
+- `internal/oilnet/maritime/ingest/topology.go`
+- `internal/oilnet/maritime/ingest/topology_file.go`
+- `internal/oilnet/maritime/ingest/data/topology_seed.json`
+
+What the current slice includes:
+
+- marine terminals
+- canals
+- seaborne corridors
+- tanker-class metadata
+- corridor chokepoint dependencies
+
+Runtime loading now prefers:
+
+1. `data/oil-maritime-topology.json`
+2. embedded seed topology fallback
+
+This keeps the app runnable today while giving us a clean ingest seam for real
+terminal and chokepoint datasets.
+
+Validation and conversion command:
+
+- `cmd/ingest-oil-maritime-topology`
+
+Example:
+
+- `go run ./cmd/ingest-oil-maritime-topology --input data/oil-maritime-topology.json`
 
 ## Source Validation
 

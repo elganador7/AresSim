@@ -114,14 +114,20 @@ func TestGetGlobalOilNetworkReturnsRenderableGraph(t *testing.T) {
 		t.Fatalf("loadGlobalOilGraph failed: %v", err)
 	}
 	directFoundExtraction := false
+	directFoundMarineTerminal := false
 	for _, node := range directGraph.Nodes {
 		if strings.HasPrefix(node.ID, "extract-") {
 			directFoundExtraction = true
-			break
+		}
+		if node.Kind == oilnet.NodeMarineTerminal {
+			directFoundMarineTerminal = true
 		}
 	}
 	if !directFoundExtraction {
 		t.Fatal("expected direct real-data oil graph to contain extraction nodes")
+	}
+	if !directFoundMarineTerminal {
+		t.Fatal("expected direct real-data oil graph to contain maritime terminal nodes")
 	}
 
 	graph, err := app.GetGlobalOilNetwork()
@@ -141,6 +147,8 @@ func TestGetGlobalOilNetworkReturnsRenderableGraph(t *testing.T) {
 	}
 	foundExtractionOverlay := false
 	foundPipelineNode := false
+	foundMarineTerminal := false
+	foundCanal := false
 	edgeList, _ := graph["edges"].([]any)
 	for _, raw := range nodes {
 		node, ok := raw.(map[string]any)
@@ -153,6 +161,12 @@ func TestGetGlobalOilNetworkReturnsRenderableGraph(t *testing.T) {
 		if strings.HasPrefix(toString(node["id"]), "pipe-node-") {
 			foundPipelineNode = true
 		}
+		if toString(node["kind"]) == string(oilnet.NodeMarineTerminal) {
+			foundMarineTerminal = true
+		}
+		if toString(node["kind"]) == string(oilnet.NodeCanal) {
+			foundCanal = true
+		}
 	}
 	if !foundExtractionOverlay {
 		t.Fatal("expected extraction overlay node from workbook")
@@ -160,7 +174,14 @@ func TestGetGlobalOilNetworkReturnsRenderableGraph(t *testing.T) {
 	if !foundPipelineNode {
 		t.Fatal("expected pipeline endpoint node from geojson")
 	}
+	if !foundMarineTerminal {
+		t.Fatal("expected maritime terminal node from topology seed")
+	}
+	if !foundCanal {
+		t.Fatal("expected canal node from topology seed")
+	}
 	foundPipelineEdge := false
+	foundSeaborneEdge := false
 	for _, raw := range edgeList {
 		edge, ok := raw.(map[string]any)
 		if !ok {
@@ -168,11 +189,16 @@ func TestGetGlobalOilNetworkReturnsRenderableGraph(t *testing.T) {
 		}
 		if toString(edge["kind"]) == string(oilnet.EdgePipeline) {
 			foundPipelineEdge = true
-			break
+		}
+		if toString(edge["kind"]) == string(oilnet.EdgeSeaborneCorridor) {
+			foundSeaborneEdge = true
 		}
 	}
 	if !foundPipelineEdge {
 		t.Fatal("expected pipeline edges from geojson")
+	}
+	if !foundSeaborneEdge {
+		t.Fatal("expected seaborne corridor edges from maritime topology seed")
 	}
 }
 
@@ -189,6 +215,34 @@ func TestGetRenderableOilNetworkReturnsFilteredGraph(t *testing.T) {
 	edges, ok := graph["edges"].([]any)
 	if !ok || len(edges) == 0 {
 		t.Fatalf("expected filtered oil edges, got %T len=%d", graph["edges"], len(edges))
+	}
+	foundMarineTerminal := false
+	foundSeaborneCorridor := false
+	for _, raw := range nodes {
+		node, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		if toString(node["kind"]) == string(oilnet.NodeMarineTerminal) {
+			foundMarineTerminal = true
+			break
+		}
+	}
+	for _, raw := range edges {
+		edge, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		if toString(edge["kind"]) == string(oilnet.EdgeSeaborneCorridor) {
+			foundSeaborneCorridor = true
+			break
+		}
+	}
+	if !foundMarineTerminal {
+		t.Fatal("expected renderable graph to retain maritime terminal nodes")
+	}
+	if !foundSeaborneCorridor {
+		t.Fatal("expected renderable graph to retain seaborne corridor edges")
 	}
 }
 

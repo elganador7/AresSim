@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const RenderableCacheSchemaVersion = "oil-renderable-cache/v1"
+const RenderableCacheSchemaVersion = "oil-renderable-cache/v2"
 
 type CacheMetadata struct {
 	SchemaVersion string `json:"schemaVersion"`
@@ -100,6 +100,33 @@ func LoadGraphJSON(path string) (*Graph, error) {
 		return nil, fmt.Errorf("decode oil graph json %s: %w", path, err)
 	}
 	return &graph, nil
+}
+
+func LoadRenderableCacheJSON(path string) (*Graph, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var wrapped GraphCacheFile
+	if err := json.Unmarshal(raw, &wrapped); err != nil {
+		return nil, fmt.Errorf("decode oil graph cache %s: %w", path, err)
+	}
+	if wrapped.Metadata.SchemaVersion == "" {
+		return nil, fmt.Errorf("oil graph cache %s missing schema version", path)
+	}
+	if wrapped.Metadata.SchemaVersion != RenderableCacheSchemaVersion {
+		return nil, fmt.Errorf(
+			"oil graph cache %s schema mismatch: got %s want %s",
+			path,
+			wrapped.Metadata.SchemaVersion,
+			RenderableCacheSchemaVersion,
+		)
+	}
+	if wrapped.Graph == nil {
+		return nil, fmt.Errorf("oil graph cache %s missing graph payload", path)
+	}
+	return wrapped.Graph, nil
 }
 
 func WriteGraphCacheJSON(path string, graph *Graph) error {
