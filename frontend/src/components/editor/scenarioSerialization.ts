@@ -85,6 +85,8 @@ export function draftToProtoB64(draft: ScenarioDraft): string {
                 lat: wp.lat,
                 lon: wp.lon,
                 altMsl: wp.altMsl,
+                h3Cell: wp.h3Cell ?? "",
+                h3ParentCell: wp.h3ParentCell ?? "",
               })),
             })
           : undefined,
@@ -94,6 +96,8 @@ export function draftToProtoB64(draft: ScenarioDraft): string {
           altMsl: u.altMsl,
           heading: u.heading,
           speed: u.speed,
+          h3Cell: u.h3Cell ?? "",
+          h3ParentCell: u.h3ParentCell ?? "",
         }),
         status: create(OperationalStatusSchema, {
           personnelStrength: u.personnelStrength,
@@ -126,6 +130,15 @@ export function draftRelationshipsJSON(relationships: CountryRelationshipDraft[]
   return JSON.stringify(relationships);
 }
 
-export function draftPointsJSON(points: { lat: number; lon: number }[]): string {
-  return JSON.stringify(points);
+export function pointLikeToDraftPoint<T extends { lat: number; lon: number; h3Cell?: string; h3ParentCell?: string }>(point: T) {
+  return {
+    lat: point.lat,
+    lon: point.lon,
+    h3Cell: point.h3Cell,
+    h3ParentCell: point.h3ParentCell,
+  };
+}
+
+export function draftPointsJSON(points: { lat: number; lon: number; h3Cell?: string; h3ParentCell?: string }[]): string {
+  return JSON.stringify(points.map((point) => pointLikeToDraftPoint(point)));
 }

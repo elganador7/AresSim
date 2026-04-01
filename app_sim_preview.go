@@ -1078,7 +1078,11 @@ func parseDraftPoints(pointsJSON string) ([]geo.Point, error) {
 	}
 	points := make([]geo.Point, 0, len(raw))
 	for _, point := range raw {
-		points = append(points, geo.Point{Lat: point.Lat, Lon: point.Lon})
+		points = append(points, geo.Point{
+			Lat:    point.Lat,
+			Lon:    point.Lon,
+			H3Cell: geo.H3Cell(point.H3Cell),
+		})
 	}
 	return points, nil
 }

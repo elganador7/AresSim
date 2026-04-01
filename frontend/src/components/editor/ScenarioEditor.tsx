@@ -325,11 +325,15 @@ export default function ScenarioEditor({
             waypoints: u.moveOrder.waypoints.map((wp) => ({
               lat: wp.lat,
               lon: wp.lon,
+              h3Cell: wp.h3Cell || undefined,
+              h3ParentCell: wp.h3ParentCell || undefined,
               altMsl: wp.altMsl,
             })),
           } : undefined,
           lat: u.position?.lat ?? 0,
           lon: u.position?.lon ?? 0,
+          h3Cell: u.position?.h3Cell || undefined,
+          h3ParentCell: u.position?.h3ParentCell || undefined,
           altMsl: u.position?.altMsl ?? 0,
           heading: u.position?.heading ?? 0,
           speed: u.position?.speed ?? 0,
@@ -357,7 +361,7 @@ export default function ScenarioEditor({
         }
         const start = unit.moveOrder?.waypoints?.length
           ? unit.moveOrder.waypoints[unit.moveOrder.waypoints.length - 1]
-          : { lat: unit.lat, lon: unit.lon };
+          : { lat: unit.lat, lon: unit.lon, h3Cell: unit.h3Cell, h3ParentCell: unit.h3ParentCell };
         const definition = unitDefinitions.find((def) => def.id === unit.definitionId);
         const transitViolation = await previewTransitViolation(
           unit.teamId,

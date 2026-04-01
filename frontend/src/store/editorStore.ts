@@ -23,6 +23,8 @@ export interface UnitDraft {
   natoSymbolSidc: string;
   lat: number;
   lon: number;
+  h3Cell?: string;
+  h3ParentCell?: string;
   altMsl: number;
   heading: number;       // degrees 0–359
   speed: number;         // m/s
@@ -52,6 +54,8 @@ export interface UnitDraft {
     waypoints: {
       lat: number;
       lon: number;
+      h3Cell?: string;
+      h3ParentCell?: string;
       altMsl: number;
     }[];
   };
