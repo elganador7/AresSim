@@ -4,6 +4,7 @@ package scenario
 import (
 	"time"
 
+	"github.com/aressim/internal/geo"
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
 )
 
@@ -40,13 +41,7 @@ func Default() *enginev1.Scenario {
 				CoalitionId:    "COALITION_WEST",
 				DefinitionId:   "destroyer-arleigh-burke-class",
 				NatoSymbolSidc: "SFSPCLDD--E----",
-				Position: &enginev1.Position{
-					Lat:     36.20,
-					Lon:     28.10,
-					AltMsl:  0,
-					Heading: 270,
-					Speed:   8.2, // ~16 knots in m/s
-				},
+				Position: geo.ProtoPosition(36.20, 28.10, 0, 270, 8.2), // ~16 knots in m/s
 				Status: &enginev1.OperationalStatus{
 					PersonnelStrength:   1.0,
 					EquipmentStrength:   1.0,
@@ -65,13 +60,7 @@ func Default() *enginev1.Scenario {
 				CoalitionId:    "COALITION_WEST",
 				DefinitionId:   "destroyer-arleigh-burke-class",
 				NatoSymbolSidc: "SFSPCLDD--E----",
-				Position: &enginev1.Position{
-					Lat:     35.40,
-					Lon:     23.50,
-					AltMsl:  0,
-					Heading: 90,
-					Speed:   7.7, // ~15 knots in m/s
-				},
+				Position: geo.ProtoPosition(35.40, 23.50, 0, 90, 7.7), // ~15 knots in m/s
 				Status: &enginev1.OperationalStatus{
 					PersonnelStrength:   0.95,
 					EquipmentStrength:   0.92,

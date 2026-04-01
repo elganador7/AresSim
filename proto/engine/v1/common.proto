@@ -8,6 +8,8 @@ message Position {
   double alt_msl  = 3; // Meters above mean sea level
   double heading  = 4; // True north bearing 0–360°
   double speed    = 5; // Meters per second
+  string h3_cell  = 6; // Canonical H3 cell at repo default precision (r12)
+  string h3_parent_cell = 7; // Aggregation parent H3 cell (typically r11)
 }
 
 message SimTime {
@@ -69,6 +71,8 @@ message Waypoint {
   double lat     = 1;
   double lon     = 2;
   double alt_msl = 3;
+  string h3_cell = 4;
+  string h3_parent_cell = 5;
 }
 
 // An ordered list of waypoints describing a unit's intended route.

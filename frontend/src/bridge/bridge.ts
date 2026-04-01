@@ -98,6 +98,8 @@ function protoMoveOrderToStore(m: ProtoMoveOrder | undefined): MoveOrder | undef
       lat: wp.lat,
       lon: wp.lon,
       altMsl: wp.altMsl,
+      h3Cell: wp.h3Cell || undefined,
+      h3ParentCell: wp.h3ParentCell || undefined,
     })),
   };
 }
@@ -155,6 +157,8 @@ export function protoUnitToStore(u: ProtoUnit): Unit {
       altMsl: u.position?.altMsl ?? 0,
       heading: u.position?.heading ?? 0,
       speed: u.position?.speed ?? 0,
+      h3Cell: u.position?.h3Cell || undefined,
+      h3ParentCell: u.position?.h3ParentCell || undefined,
     },
     status: protoStatusToStore(u.status),
     parentUnitId: u.parentUnitId || undefined,
@@ -202,6 +206,8 @@ function applyDelta(delta: UnitDelta): void {
       altMsl: delta.position.altMsl,
       heading: delta.position.heading,
       speed: delta.position.speed,
+      h3Cell: delta.position.h3Cell || undefined,
+      h3ParentCell: delta.position.h3ParentCell || undefined,
     };
   }
   if (delta.status) {

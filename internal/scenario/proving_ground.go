@@ -1,6 +1,9 @@
 package scenario
 
-import enginev1 "github.com/aressim/internal/gen/engine/v1"
+import (
+	"github.com/aressim/internal/geo"
+	enginev1 "github.com/aressim/internal/gen/engine/v1"
+)
 
 type ProvingGroundSpec struct {
 	ScenarioID                string
@@ -456,13 +459,7 @@ func provingGroundUnit(id, displayName, fullName, teamID, coalitionID, definitio
 		TeamId:       teamID,
 		CoalitionId:  coalitionID,
 		DefinitionId: definitionID,
-		Position: &enginev1.Position{
-			Lat:     lat,
-			Lon:     lon,
-			AltMsl:  altMsl,
-			Heading: heading,
-			Speed:   speed,
-		},
+		Position: geo.ProtoPosition(lat, lon, altMsl, heading, speed),
 		Status: &enginev1.OperationalStatus{
 			PersonnelStrength:   1,
 			EquipmentStrength:   1,

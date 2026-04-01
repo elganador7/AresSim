@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aressim/internal/geo"
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
 	"google.golang.org/protobuf/proto"
 )
@@ -90,13 +91,13 @@ func InstantiatePackage(template PackageTemplate, opts PackageInstanceOptions) (
 			clone.OperatorTeamId = opts.OperatorTeamID
 		}
 		if clone.GetPosition() != nil {
-			clone.Position = &enginev1.Position{
-				Lat:     clone.GetPosition().GetLat() + dLat,
-				Lon:     clone.GetPosition().GetLon() + dLon,
-				AltMsl:  clone.GetPosition().GetAltMsl(),
-				Heading: clone.GetPosition().GetHeading(),
-				Speed:   clone.GetPosition().GetSpeed(),
-			}
+			clone.Position = geo.ProtoPosition(
+				clone.GetPosition().GetLat()+dLat,
+				clone.GetPosition().GetLon()+dLon,
+				clone.GetPosition().GetAltMsl(),
+				clone.GetPosition().GetHeading(),
+				clone.GetPosition().GetSpeed(),
+			)
 		}
 		out = append(out, clone)
 	}

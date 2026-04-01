@@ -4,12 +4,16 @@ export interface Position {
   altMsl: number;
   heading: number;
   speed: number;
+  h3Cell?: string;
+  h3ParentCell?: string;
 }
 
 export interface Waypoint {
   lat: number;
   lon: number;
   altMsl: number;
+  h3Cell?: string;
+  h3ParentCell?: string;
 }
 
 export interface MoveOrder {

@@ -28,6 +28,7 @@ type Point struct {
 	Lat    float64
 	Lon    float64
 	AltMsl float64
+	H3Cell H3Cell
 }
 
 type GeoContext struct {

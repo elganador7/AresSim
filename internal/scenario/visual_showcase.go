@@ -5,6 +5,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/aressim/internal/geo"
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
 )
 
@@ -38,13 +39,7 @@ func DestroyerVisualScaleScenario(count int, columns int, spacingKm float64) *en
 			CoalitionId:    "COALITION_WEST",
 			DefinitionId:   "ddg51-flight-iia",
 			NatoSymbolSidc: "SFSPCLDD--E----",
-			Position: &enginev1.Position{
-				Lat:     lat,
-				Lon:     lon,
-				AltMsl:  0,
-				Heading: 90,
-				Speed:   0,
-			},
+			Position: geo.ProtoPosition(lat, lon, 0, 90, 0),
 			Status: &enginev1.OperationalStatus{
 				PersonnelStrength:   1.0,
 				EquipmentStrength:   1.0,
@@ -80,4 +75,3 @@ func DestroyerVisualScaleScenario(count int, columns int, spacingKm float64) *en
 		Units: units,
 	}
 }
-

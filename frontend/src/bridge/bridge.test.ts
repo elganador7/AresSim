@@ -67,12 +67,24 @@ describe("protoUnitToStore", () => {
   });
 
   it("maps position fields", () => {
-    const u = protoUnitToStore(makeProtoUnit());
+    const u = protoUnitToStore(makeProtoUnit({
+      position: {
+        lat: 10,
+        lon: 20,
+        altMsl: 500,
+        heading: 90,
+        speed: 15,
+        h3Cell: "8c2a1072b59b5ff",
+        h3ParentCell: "8b2a1072b4dffff",
+      },
+    }));
     expect(u.position.lat).toBe(10);
     expect(u.position.lon).toBe(20);
     expect(u.position.altMsl).toBe(500);
     expect(u.position.heading).toBe(90);
     expect(u.position.speed).toBe(15);
+    expect(u.position.h3Cell).toBe("8c2a1072b59b5ff");
+    expect(u.position.h3ParentCell).toBe("8b2a1072b4dffff");
   });
 
   it("defaults position fields to 0 when position is missing", () => {
@@ -103,7 +115,7 @@ describe("protoUnitToStore", () => {
     const u = protoUnitToStore(makeProtoUnit({
       moveOrder: {
         waypoints: [
-          { lat: 5, lon: 6, altMsl: 100 },
+          { lat: 5, lon: 6, altMsl: 100, h3Cell: "8c2a100d291b5ff", h3ParentCell: "8b2a100d291ffff" },
           { lat: 7, lon: 8, altMsl: 200 },
         ],
       },
@@ -111,6 +123,8 @@ describe("protoUnitToStore", () => {
     expect(u.moveOrder?.waypoints).toHaveLength(2);
     expect(u.moveOrder?.waypoints[0].lat).toBe(5);
     expect(u.moveOrder?.waypoints[1].lon).toBe(8);
+    expect(u.moveOrder?.waypoints[0].h3Cell).toBe("8c2a100d291b5ff");
+    expect(u.moveOrder?.waypoints[0].h3ParentCell).toBe("8b2a100d291ffff");
   });
 
   it("sets moveOrder to undefined when no moveOrder present", () => {

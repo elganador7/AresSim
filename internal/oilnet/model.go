@@ -90,6 +90,8 @@ type Node struct {
 	Operator           string              `json:"operator,omitempty"`
 	Lat                float64             `json:"lat"`
 	Lon                float64             `json:"lon"`
+	H3Cell             string              `json:"h3Cell,omitempty"`
+	H3ParentCell       string              `json:"h3ParentCell,omitempty"`
 	State              OperationalState    `json:"state"`
 	PrimaryCommodity   Commodity           `json:"primaryCommodity,omitempty"`
 	ProductsHandled    []Commodity         `json:"productsHandled,omitempty"`

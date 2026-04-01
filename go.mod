@@ -3,6 +3,7 @@ module github.com/aressim
 go 1.24.5
 
 require (
+	github.com/uber/h3-go/v4 v4.1.0
 	github.com/surrealdb/surrealdb.go v1.4.0
 	github.com/wailsapp/wails/v2 v2.11.0
 	google.golang.org/protobuf v1.36.11

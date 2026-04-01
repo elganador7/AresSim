@@ -48,6 +48,9 @@ func LoadRealDataGraph(extractionPath string, pipelinesPath string, maritimePath
 	merged.Name = "Global Oil Network Real Data"
 	merged.Description = "Global oil network built from the provided extraction workbook, pipeline GeoJSON, seeded maritime petroleum topology, and optional GOGI infrastructure overlay."
 	merged.View = "global"
+	if err := oilnet.PopulateNodeH3(merged); err != nil {
+		return nil, fmt.Errorf("populate oil node h3 cells: %w", err)
+	}
 	if err := oilnet.ValidateGraph(merged); err != nil {
 		return nil, err
 	}
