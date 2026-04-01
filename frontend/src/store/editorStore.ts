@@ -204,6 +204,72 @@ interface EditorState {
   setSelectedCountryCode: (code: string) => void;
 }
 
+function coordinatesChanged(
+  next: { lat: number; lon: number },
+  previous: { lat: number; lon: number },
+): boolean {
+  return next.lat !== previous.lat || next.lon !== previous.lon;
+}
+
+function mergeSpatialPoint<T extends { lat: number; lon: number; h3Cell?: string; h3ParentCell?: string }>(
+  existing: T,
+  patch: Partial<T>,
+): T {
+  const merged = { ...existing, ...patch } as T;
+  const hasExplicitH3 = Object.prototype.hasOwnProperty.call(patch, "h3Cell")
+    || Object.prototype.hasOwnProperty.call(patch, "h3ParentCell");
+  if (hasExplicitH3) {
+    return merged;
+  }
+  if (coordinatesChanged(merged, existing)) {
+    merged.h3Cell = undefined;
+    merged.h3ParentCell = undefined;
+  } else {
+    merged.h3Cell = existing.h3Cell;
+    merged.h3ParentCell = existing.h3ParentCell;
+  }
+  return merged;
+}
+
+function mergeMoveOrder(
+  existing: UnitDraft["moveOrder"],
+  patch: Partial<NonNullable<UnitDraft["moveOrder"]>>,
+): UnitDraft["moveOrder"] {
+  const nextWaypoints = patch.waypoints ?? existing?.waypoints ?? [];
+  return {
+    waypoints: nextWaypoints.map((waypoint, index) => {
+      const existingWaypoint = existing?.waypoints?.[index];
+      if (!existingWaypoint) {
+        return waypoint;
+      }
+      return mergeSpatialPoint(existingWaypoint, waypoint);
+    }),
+  };
+}
+
+function mergeUnitDraft(existing: UnitDraft, patch: Partial<UnitDraft>): UnitDraft {
+  const merged = { ...existing, ...patch } as UnitDraft;
+  const hasPositionPatch = Object.prototype.hasOwnProperty.call(patch, "lat")
+    || Object.prototype.hasOwnProperty.call(patch, "lon")
+    || Object.prototype.hasOwnProperty.call(patch, "h3Cell")
+    || Object.prototype.hasOwnProperty.call(patch, "h3ParentCell");
+  if (hasPositionPatch) {
+    const spatial = mergeSpatialPoint(existing, patch);
+    merged.lat = spatial.lat;
+    merged.lon = spatial.lon;
+    merged.h3Cell = spatial.h3Cell;
+    merged.h3ParentCell = spatial.h3ParentCell;
+  }
+  if (Object.prototype.hasOwnProperty.call(patch, "moveOrder")) {
+    if (patch.moveOrder?.waypoints) {
+      merged.moveOrder = mergeMoveOrder(existing.moveOrder, patch.moveOrder);
+    } else {
+      merged.moveOrder = patch.moveOrder;
+    }
+  }
+  return merged;
+}
+
 // ─── DEFAULT VALUES ────────────────────────────────────────────────────────────
 
 function blankDraft(): ScenarioDraft {
@@ -299,7 +365,7 @@ export const useEditorStore = create<EditorState>((set) => ({
     set((s) => ({
       draft: {
         ...s.draft,
-        units: s.draft.units.map((u) => (u.id === id ? { ...u, ...patch } : u)),
+        units: s.draft.units.map((u) => (u.id === id ? mergeUnitDraft(u, patch) : u)),
       },
       isDirty: true,
     })),
