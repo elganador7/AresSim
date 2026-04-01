@@ -140,6 +140,8 @@ export interface OilNode {
   operator?: string;
   lat: number;
   lon: number;
+  h3Cell?: string;
+  h3ParentCell?: string;
   state: string;
   primaryCommodity?: string;
   parentProjectId?: string;

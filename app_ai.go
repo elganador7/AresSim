@@ -358,9 +358,7 @@ func (a *App) planMajorActorStrikes(simSeconds float64) []*enginev1.UnitDelta {
 				}
 				waypoints = make([]*enginev1.Waypoint, 0, len(rerouted))
 				for _, routePoint := range rerouted {
-					waypoints = append(waypoints, &enginev1.Waypoint{
-						Lat: routePoint.Lat, Lon: routePoint.Lon, AltMsl: waypoint.GetAltMsl(),
-					})
+					waypoints = append(waypoints, geo.ProtoWaypoint(routePoint.Lat, routePoint.Lon, waypoint.GetAltMsl()))
 				}
 			}
 			shooter.MoveOrder = &enginev1.MoveOrder{

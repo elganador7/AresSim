@@ -285,6 +285,8 @@ function normalizeOilNode(node: Record<string, any>): OilNode {
     operator: node.operator ? String(node.operator) : undefined,
     lat: Number(node.lat ?? 0),
     lon: Number(node.lon ?? 0),
+    h3Cell: node.h3Cell ? String(node.h3Cell) : undefined,
+    h3ParentCell: node.h3ParentCell ? String(node.h3ParentCell) : undefined,
     state: String(node.state ?? "operational"),
     primaryCommodity: node.primaryCommodity ? String(node.primaryCommodity) : undefined,
     parentProjectId: node.parentProjectId ? String(node.parentProjectId) : undefined,

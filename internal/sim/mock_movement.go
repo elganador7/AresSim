@@ -3,6 +3,7 @@ package sim
 import (
 	"math"
 
+	"github.com/aressim/internal/geo"
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
 )
 
@@ -112,13 +113,7 @@ func processTick(units []*enginev1.Unit, defs map[string]DefStats, timeScale flo
 			newSpeed = 0
 		}
 
-		u.Position = &enginev1.Position{
-			Lat:     newLat,
-			Lon:     newLon,
-			AltMsl:  altMsl,
-			Heading: newHeading,
-			Speed:   newSpeed,
-		}
+		u.Position = geo.ProtoPosition(newLat, newLon, altMsl, newHeading, newSpeed)
 		u.MoveOrder = newOrder
 		if fuelBurnLiters > 0 {
 			status.FuelLevelLiters = float32(math.Max(0, float64(status.GetFuelLevelLiters())-fuelBurnLiters))

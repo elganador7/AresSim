@@ -76,6 +76,8 @@ describe("oil bridge integration", () => {
           countryCode: "OMN",
           lat: 26.566,
           lon: 56.25,
+          h3Cell: "8c3b0e8e33a89ff",
+          h3ParentCell: "8b3b0e8e33a9fff",
           state: "operational",
           currentFlowBpd: 20_000_000,
           capacityBpd: 23_000_000,
@@ -92,6 +94,8 @@ describe("oil bridge integration", () => {
     expect(appMocks.GetRenderableOilNetwork).toHaveBeenCalledTimes(1);
     expect(state.oilGraph?.id).toBe("oil-test");
     expect(state.oilGraph?.nodes).toHaveLength(1);
+    expect(state.oilGraph?.nodes[0].h3Cell).toBe("8c3b0e8e33a89ff");
+    expect(state.oilGraph?.nodes[0].h3ParentCell).toBe("8b3b0e8e33a9fff");
     expect(state.oilLoadError).toBeNull();
   });
 

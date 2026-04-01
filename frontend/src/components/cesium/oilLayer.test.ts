@@ -8,6 +8,7 @@ import {
   oilNodeOutlineColor,
   oilNodePixelSize,
   oilZoomBandForHeight,
+  selectOilNodesForRender,
   shouldRenderOilEdge,
   shouldRenderOilNode,
 } from "./oilLayer";
@@ -59,6 +60,27 @@ describe("oilLayer helpers", () => {
     expect(shouldRenderOilNode(makeNode({ kind: "storage_hub", currentFlowBpd: 10_000 }), null, new Set(), "regional", null)).toBe(true);
     expect(shouldRenderOilNode(makeNode({ kind: "gathering_hub", currentFlowBpd: 10_000 }), null, new Set(), "regional", null)).toBe(false);
     expect(shouldRenderOilNode(makeNode({ kind: "gathering_hub", currentFlowBpd: 10_000, tags: ["source:gogi"] } as any), null, new Set(), "local", null)).toBe(true);
+  });
+
+  it("deduplicates broad-view oil nodes by H3 cell while preserving the highest-signal node", () => {
+    const nodes = [
+      makeNode({ id: "terminal-1", kind: "marine_terminal", currentFlowBpd: 900_000, h3ParentCell: "parent-a", h3Cell: "cell-a1" }),
+      makeNode({ id: "storage-1", kind: "storage_hub", currentFlowBpd: 200_000, h3ParentCell: "parent-a", h3Cell: "cell-a2" }),
+      makeNode({ id: "refinery-1", kind: "refinery", currentFlowBpd: 700_000, h3ParentCell: "parent-b", h3Cell: "cell-b1" }),
+    ];
+    const rendered = selectOilNodesForRender(nodes, null, new Set(), "global", null);
+    expect(rendered.map((node) => node.id)).toContain("terminal-1");
+    expect(rendered.map((node) => node.id)).toContain("refinery-1");
+    expect(rendered.map((node) => node.id)).not.toContain("storage-1");
+  });
+
+  it("always preserves the selected node even if another node shares its H3 cell", () => {
+    const nodes = [
+      makeNode({ id: "terminal-1", kind: "marine_terminal", currentFlowBpd: 900_000, h3ParentCell: "parent-a", h3Cell: "cell-a1" }),
+      makeNode({ id: "storage-1", kind: "storage_hub", currentFlowBpd: 200_000, h3ParentCell: "parent-a", h3Cell: "cell-a2" }),
+    ];
+    const rendered = selectOilNodesForRender(nodes, null, new Set(), "global", "storage-1");
+    expect(rendered.map((node) => node.id)).toContain("storage-1");
   });
 
   it("always renders a selected node and selected edge regardless of normal tiering", () => {

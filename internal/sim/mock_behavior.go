@@ -4,6 +4,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/aressim/internal/geo"
 	enginev1 "github.com/aressim/internal/gen/engine/v1"
 )
 
@@ -107,11 +108,11 @@ func processBehaviorTick(units []*enginev1.Unit, defs map[string]DefStats, weapo
 		var waypoint *enginev1.Waypoint
 		switch u.GetEngagementBehavior() {
 		case enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_SHADOW_CONTACT:
-			waypoint = &enginev1.Waypoint{
-				Lat:    target.GetPosition().GetLat(),
-				Lon:    target.GetPosition().GetLon(),
-				AltMsl: TravelAltitudeM(u, defs[u.DefinitionId]),
-			}
+			waypoint = geo.ProtoWaypoint(
+				target.GetPosition().GetLat(),
+				target.GetPosition().GetLon(),
+				TravelAltitudeM(u, defs[u.DefinitionId]),
+			)
 		case enginev1.EngagementBehavior_ENGAGEMENT_BEHAVIOR_WITHDRAW_ON_DETECT:
 			waypoint = computeWithdrawWaypoint(u, target, defs[u.DefinitionId])
 		default:
@@ -164,11 +165,7 @@ func ComputeAttackWaypointForOrder(shooter, target *enginev1.Unit, defs map[stri
 	)
 	lat, lon := movePoint(shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(), brng, moveDist)
 	shooterDef := defs[normalizeDefinitionID(shooter.DefinitionId)]
-	return &enginev1.Waypoint{
-		Lat:    lat,
-		Lon:    lon,
-		AltMsl: TravelAltitudeM(shooter, shooterDef),
-	}
+	return geo.ProtoWaypoint(lat, lon, TravelAltitudeM(shooter, shooterDef))
 }
 
 func CanUnitAttackTarget(shooter, target *enginev1.Unit, defs map[string]DefStats, weapons map[string]WeaponStats) bool {
@@ -309,9 +306,5 @@ func computeWithdrawWaypoint(unit, threat *enginev1.Unit, def DefStats) *enginev
 	}
 	brng := bearingRad(threat.GetPosition().GetLat(), threat.GetPosition().GetLon(), unit.GetPosition().GetLat(), unit.GetPosition().GetLon())
 	lat, lon := movePoint(unit.GetPosition().GetLat(), unit.GetPosition().GetLon(), brng, distance)
-	return &enginev1.Waypoint{
-		Lat:    lat,
-		Lon:    lon,
-		AltMsl: TravelAltitudeM(unit, def),
-	}
+	return geo.ProtoWaypoint(lat, lon, TravelAltitudeM(unit, def))
 }

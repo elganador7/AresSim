@@ -1,6 +1,9 @@
 package sim
 
-import enginev1 "github.com/aressim/internal/gen/engine/v1"
+import (
+	"github.com/aressim/internal/geo"
+	enginev1 "github.com/aressim/internal/gen/engine/v1"
+)
 
 func canHostAircraft(def DefStats) bool {
 	if def.AssetClass == "airbase" {
@@ -49,13 +52,13 @@ func syncHostedAircraftToHostBases(units []*enginev1.Unit, defs map[string]DefSt
 			unit.GetPosition().GetAltMsl() == base.GetPosition().GetAltMsl() {
 			continue
 		}
-		unit.Position = &enginev1.Position{
-			Lat:     base.GetPosition().GetLat(),
-			Lon:     base.GetPosition().GetLon(),
-			AltMsl:  base.GetPosition().GetAltMsl(),
-			Heading: base.GetPosition().GetHeading(),
-			Speed:   base.GetPosition().GetSpeed(),
-		}
+		unit.Position = geo.ProtoPosition(
+			base.GetPosition().GetLat(),
+			base.GetPosition().GetLon(),
+			base.GetPosition().GetAltMsl(),
+			base.GetPosition().GetHeading(),
+			base.GetPosition().GetSpeed(),
+		)
 		deltas = append(deltas, &enginev1.UnitDelta{
 			UnitId:   unit.GetId(),
 			Position: unit.GetPosition(),
@@ -105,11 +108,11 @@ func returnToHostBaseWaypoint(unit *enginev1.Unit, def DefStats, unitByID map[st
 	if host == nil || host.GetPosition() == nil {
 		return nil
 	}
-	return &enginev1.Waypoint{
-		Lat:    host.GetPosition().GetLat(),
-		Lon:    host.GetPosition().GetLon(),
-		AltMsl: TravelAltitudeM(unit, def),
-	}
+	return geo.ProtoWaypoint(
+		host.GetPosition().GetLat(),
+		host.GetPosition().GetLon(),
+		TravelAltitudeM(unit, def),
+	)
 }
 
 func shouldLandAtHostBase(unit *enginev1.Unit, unitByID map[string]*enginev1.Unit, lat, lon float64) bool {

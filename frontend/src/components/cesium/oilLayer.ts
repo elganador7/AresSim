@@ -147,6 +147,16 @@ export function oilNodeOutlineColor(node: OilNode, isSelected: boolean): Color {
   return Color.WHITE.withAlpha(0.9);
 }
 
+function oilNodeCellKey(node: OilNode, zoomBand: OilZoomBand): string {
+  if (zoomBand === "global") {
+    return node.h3ParentCell || node.h3Cell || node.id;
+  }
+  if (zoomBand === "regional") {
+    return node.h3Cell || node.h3ParentCell || node.id;
+  }
+  return node.id;
+}
+
 export function oilEdgeWidth(edge: OilEdge, isSelected: boolean): number {
   if (isSelected) {
     return 6;
@@ -305,6 +315,56 @@ export function shouldRenderOilNode(
     || node.kind === "demand_center";
 }
 
+export function selectOilNodesForRender(
+  nodes: OilNode[],
+  selectedProjectId: string | null,
+  selectedProjectChildIDs: Set<string>,
+  zoomBand: OilZoomBand,
+  selectedNodeId: string | null,
+): OilNode[] {
+  const selectedNodes = nodes.filter((node) => selectedNodeId === node.id);
+  const selectedIds = new Set(selectedNodes.map((node) => node.id));
+  const ranked = nodes
+    .filter((node) => shouldRenderOilNode(node, selectedProjectId, selectedProjectChildIDs, zoomBand, selectedNodeId))
+    .sort((a, b) => oilNodeImportance(b) - oilNodeImportance(a));
+  const limit = oilNodeLimit(zoomBand);
+  if (zoomBand === "local") {
+    const out = [...selectedNodes];
+    for (const node of ranked) {
+      if (out.length >= limit) {
+        break;
+      }
+      if (!selectedIds.has(node.id)) {
+        out.push(node);
+      }
+    }
+    return out;
+  }
+
+  const out = [...selectedNodes];
+  const seenIds = new Set(selectedIds);
+  const usedCells = new Set<string>();
+  for (const node of selectedNodes) {
+    usedCells.add(oilNodeCellKey(node, zoomBand));
+  }
+  for (const node of ranked) {
+    if (out.length >= limit) {
+      break;
+    }
+    if (seenIds.has(node.id)) {
+      continue;
+    }
+    const cellKey = oilNodeCellKey(node, zoomBand);
+    if (usedCells.has(cellKey)) {
+      continue;
+    }
+    out.push(node);
+    seenIds.add(node.id);
+    usedCells.add(cellKey);
+  }
+  return out;
+}
+
 export function shouldRenderOilEdge(edge: OilEdge, zoomBand: OilZoomBand, selectedEdgeId: string | null): boolean {
   if (selectedEdgeId === edge.id) {
     return true;
@@ -363,10 +423,13 @@ export function syncOilGraph(
     const selected = oilGraph.nodes.find((node) => node.id === selectedProjectId);
     return new Set(selected?.childFieldIds ?? []);
   })();
-  const visibleNodes = (oilGraph?.nodes ?? [])
-    .filter((node) => shouldRenderOilNode(node, selectedProjectId, selectedProjectChildIDs, zoomBand, selectedNodeId))
-    .sort((a, b) => oilNodeImportance(b) - oilNodeImportance(a))
-    .slice(0, oilNodeLimit(zoomBand));
+  const visibleNodes = selectOilNodesForRender(
+    oilGraph?.nodes ?? [],
+    selectedProjectId,
+    selectedProjectChildIDs,
+    zoomBand,
+    selectedNodeId,
+  );
   for (const node of visibleNodes) {
     const pointVisible = visible && isOilPointVisible(node.lat, node.lon, viewRect);
     nodesById.set(node.id, node);
