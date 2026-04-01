@@ -370,8 +370,10 @@ type draftRelationshipInput struct {
 }
 
 type draftPointInput struct {
-	Lat float64 `json:"lat"`
-	Lon float64 `json:"lon"`
+	Lat          float64 `json:"lat"`
+	Lon          float64 `json:"lon"`
+	H3Cell       string  `json:"h3Cell,omitempty"`
+	H3ParentCell string  `json:"h3ParentCell,omitempty"`
 }
 
 func buildEffectiveRelationships(countries []string, rules sim.RelationshipRules, countryCoalitions map[string]string) []EffectiveRelationshipPreview {
@@ -1153,7 +1155,14 @@ func pointsToDraftInputs(points []geo.Point) []draftPointInput {
 	}
 	out := make([]draftPointInput, 0, len(points))
 	for _, point := range points {
-		out = append(out, draftPointInput{Lat: point.Lat, Lon: point.Lon})
+		_ = point.EnsureH3Cell()
+		parent, _ := point.H3CellAtResolution(geo.AggregateH3Resolution)
+		out = append(out, draftPointInput{
+			Lat:          point.Lat,
+			Lon:          point.Lon,
+			H3Cell:       string(point.H3Cell),
+			H3ParentCell: string(parent),
+		})
 	}
 	return out
 }

@@ -104,7 +104,7 @@ export interface PathViolationPreview {
   country?: string;
   legIndex?: number;
   reason?: string;
-  routePoints?: { lat: number; lon: number }[];
+  routePoints?: { lat: number; lon: number; h3Cell?: string; h3ParentCell?: string }[];
 }
 
 export interface OilSourceRef {
