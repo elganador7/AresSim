@@ -38,6 +38,7 @@ import {
   getUnitCountry,
   isMaritimeDomain,
 } from "./scenarioSerialization";
+import { pointH3Fields } from "../../utils/h3";
 import "./editor.css";
 
 function LoadModal({
@@ -169,7 +170,7 @@ export default function ScenarioEditor({
   const previewTransitViolation = useCallback(async (
     ownerCountry: string,
     maritime: boolean,
-    points: { lat: number; lon: number }[],
+    points: { lat: number; lon: number; h3Cell?: string; h3ParentCell?: string }[],
   ): Promise<string> => {
     const preview = await ((window as any).go?.main?.App?.PreviewDraftTransitPath?.(
       ownerCountry,
@@ -189,9 +190,14 @@ export default function ScenarioEditor({
       return "";
     }
     const points = [
-      { lat: unit.lat, lon: unit.lon },
-      ...(unit.moveOrder?.waypoints ?? []).map((wp) => ({ lat: wp.lat, lon: wp.lon })),
-      { lat: target.lat, lon: target.lon },
+      { lat: unit.lat, lon: unit.lon, h3Cell: unit.h3Cell, h3ParentCell: unit.h3ParentCell },
+      ...(unit.moveOrder?.waypoints ?? []).map((wp) => ({
+        lat: wp.lat,
+        lon: wp.lon,
+        h3Cell: wp.h3Cell,
+        h3ParentCell: wp.h3ParentCell,
+      })),
+      { lat: target.lat, lon: target.lon, h3Cell: target.h3Cell, h3ParentCell: target.h3ParentCell },
     ];
     const definition = unitDefinitions.find((def) => def.id === unit.definitionId);
     const preview = await ((window as any).go?.main?.App?.PreviewDraftStrikePath?.(
@@ -366,13 +372,16 @@ export default function ScenarioEditor({
         const transitViolation = await previewTransitViolation(
           unit.teamId,
           isMaritimeDomain(definition?.domain),
-          [start, { lat, lon }],
+          [start, { lat, lon, ...pointH3Fields(lat, lon) }],
         );
         if (transitViolation) {
           flash(transitViolation);
           return;
         }
-        const nextWaypoints = [...(unit.moveOrder?.waypoints ?? []), { lat, lon, altMsl: unit.altMsl }];
+        const nextWaypoints = [
+          ...(unit.moveOrder?.waypoints ?? []),
+          { lat, lon, altMsl: unit.altMsl, ...pointH3Fields(lat, lon) },
+        ];
         updateUnit(routeEditUnitId, { moveOrder: { waypoints: nextWaypoints } });
         selectUnit(routeEditUnitId);
         setEditingUnit(routeEditUnitId);

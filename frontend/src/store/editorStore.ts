@@ -7,6 +7,7 @@
  */
 
 import { create } from "zustand";
+import { pointH3Fields } from "../utils/h3";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -222,13 +223,19 @@ function mergeSpatialPoint<T extends { lat: number; lon: number; h3Cell?: string
     return merged;
   }
   if (coordinatesChanged(merged, existing)) {
-    merged.h3Cell = undefined;
-    merged.h3ParentCell = undefined;
+    Object.assign(merged, pointH3Fields(merged.lat, merged.lon));
   } else {
     merged.h3Cell = existing.h3Cell;
     merged.h3ParentCell = existing.h3ParentCell;
   }
   return merged;
+}
+
+function withSpatialH3<T extends { lat: number; lon: number; h3Cell?: string; h3ParentCell?: string }>(point: T): T {
+  if (point.h3Cell || point.h3ParentCell) {
+    return point;
+  }
+  return { ...point, ...pointH3Fields(point.lat, point.lon) };
 }
 
 function mergeMoveOrder(
@@ -240,7 +247,7 @@ function mergeMoveOrder(
     waypoints: nextWaypoints.map((waypoint, index) => {
       const existingWaypoint = existing?.waypoints?.[index];
       if (!existingWaypoint) {
-        return waypoint;
+        return withSpatialH3(waypoint);
       }
       return mergeSpatialPoint(existingWaypoint, waypoint);
     }),
@@ -306,6 +313,7 @@ export function blankUnit(lat = 35.0, lon = 25.0): UnitDraft {
     natoSymbolSidc: "",
     lat,
     lon,
+    ...pointH3Fields(lat, lon),
     altMsl: 0,
     heading: 0,
     speed: 0,
@@ -347,14 +355,30 @@ export const useEditorStore = create<EditorState>((set) => ({
     }),
 
   loadDraft: (draft) =>
-    set({ draft, selectedUnitId: null, editingUnitId: null, isDirty: false }),
+    set({
+      draft: {
+        ...draft,
+        units: draft.units.map((unit) => ({
+          ...withSpatialH3(unit),
+          moveOrder: unit.moveOrder
+            ? {
+                ...unit.moveOrder,
+                waypoints: unit.moveOrder.waypoints.map((waypoint) => withSpatialH3(waypoint)),
+              }
+            : undefined,
+        })),
+      },
+      selectedUnitId: null,
+      editingUnitId: null,
+      isDirty: false,
+    }),
 
   updateMeta: (patch) =>
     set((s) => ({ draft: { ...s.draft, ...patch }, isDirty: true })),
 
   addUnit: (unit) =>
     set((s) => ({
-      draft: { ...s.draft, units: [...s.draft.units, unit] },
+      draft: { ...s.draft, units: [...s.draft.units, withSpatialH3(unit)] },
       isDirty: true,
       editingUnitId: null,
       pendingPosition: null,

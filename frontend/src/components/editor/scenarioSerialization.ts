@@ -6,6 +6,7 @@ import { OperationalStatusSchema } from "@proto/engine/v1/status_pb";
 import { type CountryRelationshipDraft, type ScenarioDraft, type UnitDraft } from "../../store/editorStore";
 import { EDITOR_COUNTRY_NAME_BY_CODE } from "../../data/editorCountries";
 import { normalizeCountryCode } from "../../utils/countryRelationships";
+import { pointH3Fields } from "../../utils/h3";
 
 export function bytesToBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -131,11 +132,12 @@ export function draftRelationshipsJSON(relationships: CountryRelationshipDraft[]
 }
 
 export function pointLikeToDraftPoint<T extends { lat: number; lon: number; h3Cell?: string; h3ParentCell?: string }>(point: T) {
+  const fallbackH3 = (!point.h3Cell || !point.h3ParentCell) ? pointH3Fields(point.lat, point.lon) : {};
   return {
     lat: point.lat,
     lon: point.lon,
-    h3Cell: point.h3Cell,
-    h3ParentCell: point.h3ParentCell,
+    h3Cell: point.h3Cell ?? fallbackH3.h3Cell,
+    h3ParentCell: point.h3ParentCell ?? fallbackH3.h3ParentCell,
   };
 }
 
