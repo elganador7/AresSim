@@ -7,6 +7,7 @@ import {
   oilEdgeWidth,
   oilNodeOutlineColor,
   oilNodePixelSize,
+  oilNodeRenderPoint,
   oilZoomBandForHeight,
   selectOilNodesForRender,
   shouldRenderOilEdge,
@@ -81,6 +82,22 @@ describe("oilLayer helpers", () => {
     ];
     const rendered = selectOilNodesForRender(nodes, null, new Set(), "global", "storage-1");
     expect(rendered.map((node) => node.id)).toContain("storage-1");
+  });
+
+  it("renders broad-view H3-backed nodes at cell centroids while preserving exact positions for selected nodes", () => {
+    const node = makeNode({
+      id: "node-1",
+      kind: "marine_terminal",
+      lat: 37.775,
+      lon: -122.4183333,
+      h3Cell: "8a28308280f7fff",
+      h3ParentCell: "8928308280fffff",
+    });
+    const broad = oilNodeRenderPoint(node, "global", false);
+    const selected = oilNodeRenderPoint(node, "global", true);
+    expect(broad.lat).not.toBe(node.lat);
+    expect(broad.lon).not.toBe(node.lon);
+    expect(selected).toEqual({ lat: node.lat, lon: node.lon });
   });
 
   it("always renders a selected node and selected edge regardless of normal tiering", () => {

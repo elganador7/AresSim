@@ -10,6 +10,7 @@ import {
   PolylineDashMaterialProperty,
   Viewer,
 } from "cesium";
+import { cellToLatLng, isValidCell } from "h3-js";
 import type { OilEdge, OilGraph, OilNode } from "../../store/simStore";
 
 export const OIL_NODE_PREFIX = "oil_node_";
@@ -155,6 +156,31 @@ function oilNodeCellKey(node: OilNode, zoomBand: OilZoomBand): string {
     return node.h3Cell || node.h3ParentCell || node.id;
   }
   return node.id;
+}
+
+function oilNodeRenderCell(node: OilNode, zoomBand: OilZoomBand): string | null {
+  if (zoomBand === "global") {
+    return node.h3ParentCell || node.h3Cell || null;
+  }
+  if (zoomBand === "regional") {
+    return node.h3Cell || node.h3ParentCell || null;
+  }
+  return null;
+}
+
+export function oilNodeRenderPoint(
+  node: OilNode,
+  zoomBand: OilZoomBand,
+  isSelected: boolean,
+): { lat: number; lon: number } {
+  if (!isSelected) {
+    const cell = oilNodeRenderCell(node, zoomBand);
+    if (cell && isValidCell(cell)) {
+      const [lat, lon] = cellToLatLng(cell);
+      return { lat, lon };
+    }
+  }
+  return { lat: node.lat, lon: node.lon };
 }
 
 export function oilEdgeWidth(edge: OilEdge, isSelected: boolean): number {
@@ -430,16 +456,19 @@ export function syncOilGraph(
     zoomBand,
     selectedNodeId,
   );
+  const renderedNodePoints = new Map<string, { lat: number; lon: number }>();
   for (const node of visibleNodes) {
-    const pointVisible = visible && isOilPointVisible(node.lat, node.lon, viewRect);
+    const isSelected = selectedNodeId === node.id;
+    const renderPoint = oilNodeRenderPoint(node, zoomBand, isSelected);
+    const pointVisible = visible && isOilPointVisible(renderPoint.lat, renderPoint.lon, viewRect);
     nodesById.set(node.id, node);
+    renderedNodePoints.set(node.id, renderPoint);
     const entityId = `${OIL_NODE_PREFIX}${node.id}`;
     nodeIds.add(entityId);
     const existing = viewer.entities.getById(entityId);
-    const isSelected = selectedNodeId === node.id;
     const color = oilNodeColor(node.kind);
     const outlineColor = oilNodeOutlineColor(node, isSelected);
-    const position = Cartesian3.fromDegrees(node.lon, node.lat, 0);
+    const position = Cartesian3.fromDegrees(renderPoint.lon, renderPoint.lat, 0);
     if (existing) {
       existing.show = pointVisible;
       (existing.position as unknown as { setValue: (p: Cartesian3) => void }).setValue(position);
@@ -515,9 +544,11 @@ export function syncOilGraph(
             const from = nodesById.get(edge.fromNodeId);
             const to = nodesById.get(edge.toNodeId);
             if (!from || !to) return [];
+            const fromPoint = renderedNodePoints.get(edge.fromNodeId) ?? { lat: from.lat, lon: from.lon };
+            const toPoint = renderedNodePoints.get(edge.toNodeId) ?? { lat: to.lat, lon: to.lon };
             return [[
-              { lat: from.lat, lon: from.lon },
-              { lat: to.lat, lon: to.lon },
+              { lat: fromPoint.lat, lon: fromPoint.lon },
+              { lat: toPoint.lat, lon: toPoint.lon },
             ]];
           })();
     routes.forEach((route, partIndex) => {
