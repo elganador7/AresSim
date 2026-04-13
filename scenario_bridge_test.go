@@ -111,6 +111,43 @@ func TestScenarioRecordValuesRoundTrip(t *testing.T) {
 	}
 }
 
+func TestScenarioRecordBackfillsUnitAndWaypointH3(t *testing.T) {
+	scen := &enginev1.Scenario{
+		Id:   "h3-round-trip-id",
+		Name: "H3 Round Trip",
+		Units: []*enginev1.Unit{{
+			Id:           "u1",
+			DisplayName:  "UNIT-1",
+			TeamId:       "USA",
+			CoalitionId:  "COALITION_WEST",
+			DefinitionId: "some-def",
+			Position: &enginev1.Position{
+				Lat: 25.2854,
+				Lon: 51.5310,
+			},
+			MoveOrder: &enginev1.MoveOrder{
+				Waypoints: []*enginev1.Waypoint{{
+					Lat: 26.566,
+					Lon: 56.25,
+				}},
+			},
+		}},
+	}
+
+	rec := scenarioRecord(scen)
+	raw, _ := base64.StdEncoding.DecodeString(rec["scenario_pb"].(string))
+	got := &enginev1.Scenario{}
+	if err := proto.Unmarshal(raw, got); err != nil {
+		t.Fatalf("unmarshal scenario_pb: %v", err)
+	}
+	if got.Units[0].GetPosition().GetH3Cell() == "" || got.Units[0].GetPosition().GetH3ParentCell() == "" {
+		t.Fatalf("expected unit position h3 fields to be persisted")
+	}
+	if got.Units[0].GetMoveOrder().GetWaypoints()[0].GetH3Cell() == "" || got.Units[0].GetMoveOrder().GetWaypoints()[0].GetH3ParentCell() == "" {
+		t.Fatalf("expected waypoint h3 fields to be persisted")
+	}
+}
+
 // ── decodeScenarioB64 ─────────────────────────────────────────────────────────
 
 func TestDecodeScenarioB64RoundTrip(t *testing.T) {

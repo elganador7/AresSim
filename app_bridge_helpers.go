@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/aressim/internal/geo"
 	"github.com/surrealdb/surrealdb.go/pkg/models"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"google.golang.org/protobuf/proto"
@@ -112,6 +113,7 @@ func cmpFloat64(a, b float64) int {
 
 // scenarioRecord builds the SurrealDB map for a Scenario proto.
 func scenarioRecord(scen *enginev1.Scenario) map[string]any {
+	geo.PopulateProtoScenario(scen)
 	raw, _ := proto.Marshal(scen)
 	return map[string]any{
 		"name":             scen.Name,
@@ -134,6 +136,10 @@ func unitRecord(u *enginev1.Unit) map[string]any {
 		return nil
 	}
 	pos := u.GetPosition()
+	if pos == nil {
+		pos = &enginev1.Position{}
+	}
+	geo.PopulateProtoPosition(pos)
 	status := u.GetStatus()
 	combatEffects := status.GetCombatEffects()
 	record := map[string]any{
@@ -150,6 +156,8 @@ func unitRecord(u *enginev1.Unit) map[string]any {
 			Longitude: pos.GetLon(),
 			Latitude:  pos.GetLat(),
 		},
+		"h3_cell":                    emptyToNil(pos.GetH3Cell()),
+		"h3_parent_cell":             emptyToNil(pos.GetH3ParentCell()),
 		"alt_msl":                    pos.GetAltMsl(),
 		"heading":                    pos.GetHeading(),
 		"speed":                      pos.GetSpeed(),
@@ -210,6 +218,18 @@ func decodeScenarioB64(b64 string) (*enginev1.Scenario, error) {
 func (a *App) emitProtoEvent(eventName string, msg proto.Message) {
 	if a == nil || a.ctx == nil || a.ctx == context.Background() || a.ctx == context.TODO() {
 		return
+	}
+	switch typed := msg.(type) {
+	case *enginev1.FullStateSnapshot:
+		geo.PopulateProtoFullStateSnapshot(typed)
+	case *enginev1.BatchUnitUpdate:
+		geo.PopulateProtoBatchUpdate(typed)
+	case *enginev1.UnitSpawnedEvent:
+		geo.PopulateProtoUnitSpawned(typed)
+	case *enginev1.MunitionUpdate:
+		geo.PopulateProtoMunitionUpdate(typed)
+	case *enginev1.Scenario:
+		geo.PopulateProtoScenario(typed)
 	}
 	data, err := proto.Marshal(msg)
 	if err != nil {

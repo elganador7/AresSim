@@ -112,6 +112,8 @@ var schemaStatements = []string{
 	// Geospatial — geometry<point> enables spatial range queries in Phase 2.
 	// SurrealDB geometry uses GeoJSON coordinate order: [longitude, latitude].
 	`DEFINE FIELD IF NOT EXISTS position          ON unit TYPE geometry<point>`,
+	`DEFINE FIELD IF NOT EXISTS h3_cell           ON unit TYPE option<string>`,
+	`DEFINE FIELD IF NOT EXISTS h3_parent_cell    ON unit TYPE option<string>`,
 	`DEFINE FIELD IF NOT EXISTS alt_msl           ON unit TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS heading           ON unit TYPE float`,
 	`DEFINE FIELD IF NOT EXISTS speed             ON unit TYPE float`,
@@ -141,6 +143,8 @@ var schemaStatements = []string{
 	`DEFINE INDEX IF NOT EXISTS idx_unit_team     ON unit FIELDS team_id`,
 	`DEFINE INDEX IF NOT EXISTS idx_unit_active   ON unit FIELDS is_active`,
 	`DEFINE INDEX IF NOT EXISTS idx_unit_pos      ON unit FIELDS position`,
+	`DEFINE INDEX IF NOT EXISTS idx_unit_h3       ON unit FIELDS h3_cell`,
+	`DEFINE INDEX IF NOT EXISTS idx_unit_h3_parent ON unit FIELDS h3_parent_cell`,
 
 	// ── unit_definition ───────────────────────────────────────────────────────
 	// Canonical platform templates. Units reference these by definition_id slug.

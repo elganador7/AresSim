@@ -96,6 +96,20 @@ func haversineM(lat1, lon1, lat2, lon2 float64) float64 {
 	return earthRadiusM * 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
 }
 
+// approxDistanceM uses the equirectangular approximation, which is materially
+// cheaper than haversine and accurate enough for coarse engagement gating.
+// We intentionally accept small error here because the simulation only needs
+// approximate combat geometry, not survey-grade precision.
+func approxDistanceM(lat1, lon1, lat2, lon2 float64) float64 {
+	φ1 := lat1 * math.Pi / 180
+	φ2 := lat2 * math.Pi / 180
+	λ1 := lon1 * math.Pi / 180
+	λ2 := lon2 * math.Pi / 180
+	x := (λ2 - λ1) * math.Cos((φ1+φ2)/2)
+	y := φ2 - φ1
+	return math.Sqrt(x*x+y*y) * earthRadiusM
+}
+
 // bearingRad returns the initial bearing in radians from (lat1,lon1) to (lat2,lon2).
 func bearingRad(lat1, lon1, lat2, lon2 float64) float64 {
 	φ1 := lat1 * math.Pi / 180

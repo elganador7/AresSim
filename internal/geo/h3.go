@@ -135,3 +135,43 @@ func (p *Point) EnsureH3Cell() error {
 	p.H3Cell = cell
 	return nil
 }
+
+func H3GridRadiusForRange(rangeM float64, resolution int) int {
+	if rangeM <= 0 {
+		return 0
+	}
+	edgeM := h3.HexagonEdgeLengthAvgM(NormalizeH3Resolution(resolution))
+	if edgeM <= 0 {
+		return 0
+	}
+	return int(math.Ceil(rangeM/edgeM)) + 1
+}
+
+func GridDiskForRange(cell H3Cell, rangeM float64, resolution int) ([]H3Cell, error) {
+	if cell == "" {
+		return nil, fmt.Errorf("empty h3 cell")
+	}
+	parsed, err := cell.Parse()
+	if err != nil {
+		return nil, err
+	}
+	targetResolution := NormalizeH3Resolution(resolution)
+	if parsed.Resolution() > targetResolution {
+		parsed = parsed.Parent(targetResolution)
+	} else if parsed.Resolution() < targetResolution {
+		parsed = parsed.CenterChild(targetResolution)
+	}
+	if !parsed.IsValid() {
+		return nil, fmt.Errorf("could not normalize h3 cell %s to resolution %d", cell, targetResolution)
+	}
+	k := H3GridRadiusForRange(rangeM, targetResolution)
+	raw := parsed.GridDisk(k)
+	out := make([]H3Cell, 0, len(raw))
+	for _, neighbor := range raw {
+		if !neighbor.IsValid() {
+			continue
+		}
+		out = append(out, H3Cell(neighbor.String()))
+	}
+	return out, nil
+}

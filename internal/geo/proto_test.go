@@ -20,3 +20,24 @@ func TestPopulateProtoWaypointBackfillsH3(t *testing.T) {
 		t.Fatalf("expected H3 fields to be backfilled: %+v", waypoint)
 	}
 }
+
+func TestPopulateProtoBatchUpdateBackfillsDeltaLocationFields(t *testing.T) {
+	update := &enginev1.BatchUnitUpdate{
+		Deltas: []*enginev1.UnitDelta{{
+			UnitId: "u1",
+			Position: &enginev1.Position{
+				Lat: 25.2854, Lon: 51.5310, AltMsl: 1000,
+			},
+			MoveOrder: &enginev1.MoveOrder{
+				Waypoints: []*enginev1.Waypoint{{Lat: 26.566, Lon: 56.25, AltMsl: 0}},
+			},
+		}},
+	}
+	PopulateProtoBatchUpdate(update)
+	if update.Deltas[0].Position.GetH3Cell() == "" || update.Deltas[0].Position.GetH3ParentCell() == "" {
+		t.Fatalf("expected delta position h3 fields to be populated")
+	}
+	if update.Deltas[0].MoveOrder.GetWaypoints()[0].GetH3Cell() == "" || update.Deltas[0].MoveOrder.GetWaypoints()[0].GetH3ParentCell() == "" {
+		t.Fatalf("expected delta waypoint h3 fields to be populated")
+	}
+}

@@ -61,3 +61,70 @@ func PopulateProtoWaypoint(waypoint *enginev1.Waypoint) {
 	waypoint.H3Cell = string(point.H3Cell)
 	waypoint.H3ParentCell = string(parent)
 }
+
+func PopulateProtoMoveOrder(order *enginev1.MoveOrder) {
+	if order == nil {
+		return
+	}
+	for _, waypoint := range order.GetWaypoints() {
+		PopulateProtoWaypoint(waypoint)
+	}
+}
+
+func PopulateProtoUnit(unit *enginev1.Unit) {
+	if unit == nil {
+		return
+	}
+	PopulateProtoPosition(unit.Position)
+	PopulateProtoMoveOrder(unit.MoveOrder)
+}
+
+func PopulateProtoScenario(scenario *enginev1.Scenario) {
+	if scenario == nil {
+		return
+	}
+	for _, unit := range scenario.GetUnits() {
+		PopulateProtoUnit(unit)
+	}
+}
+
+func PopulateProtoBatchUpdate(update *enginev1.BatchUnitUpdate) {
+	if update == nil {
+		return
+	}
+	for _, delta := range update.GetDeltas() {
+		if delta == nil {
+			continue
+		}
+		PopulateProtoPosition(delta.Position)
+		PopulateProtoMoveOrder(delta.MoveOrder)
+	}
+}
+
+func PopulateProtoFullStateSnapshot(snapshot *enginev1.FullStateSnapshot) {
+	if snapshot == nil {
+		return
+	}
+	for _, unit := range snapshot.GetUnits() {
+		PopulateProtoUnit(unit)
+	}
+}
+
+func PopulateProtoUnitSpawned(event *enginev1.UnitSpawnedEvent) {
+	if event == nil {
+		return
+	}
+	PopulateProtoUnit(event.Unit)
+}
+
+func PopulateProtoMunitionUpdate(update *enginev1.MunitionUpdate) {
+	if update == nil {
+		return
+	}
+	for _, munition := range update.GetMunitions() {
+		if munition == nil {
+			continue
+		}
+		PopulateProtoPosition(munition.Position)
+	}
+}

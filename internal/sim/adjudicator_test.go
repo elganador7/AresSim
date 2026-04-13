@@ -575,6 +575,15 @@ func TestEvaluateEngagementDecision_HoldFireBlocksLaunch(t *testing.T) {
 	}
 }
 
+func TestApproxDistanceM_StaysCloseToHaversineAtOperationalRanges(t *testing.T) {
+	got := approxDistanceM(25.2854, 51.5310, 26.5660, 56.2500)
+	want := haversineM(25.2854, 51.5310, 26.5660, 56.2500)
+	diffFrac := math.Abs(got-want) / want
+	if diffFrac >= 0.01 {
+		t.Fatalf("expected approx distance error <1%%, got %.4f (got=%f want=%f)", diffFrac, got, want)
+	}
+}
+
 func TestAdjudicateTick_ConnectedSensorAllowsLauncherToFire(t *testing.T) {
 	parent := makeUnit("battery", "Blue", "command", 0, 0)
 	radar := makeChildUnit("radar", "Blue", "sensor", "battery", 0, 0)

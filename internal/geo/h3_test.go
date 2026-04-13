@@ -62,3 +62,27 @@ func TestCanonicalH3CellUsesExistingCell(t *testing.T) {
 		t.Fatalf("expected canonical cell %q, got %q", seed, got)
 	}
 }
+
+func TestGridDiskForRangeIncludesOriginCell(t *testing.T) {
+	cell, err := H3CellForLatLon(25.2854, 51.5310, DefaultH3Resolution)
+	if err != nil {
+		t.Fatalf("H3CellForLatLon returned error: %v", err)
+	}
+	cells, err := GridDiskForRange(cell, 50_000, DefaultH3Resolution)
+	if err != nil {
+		t.Fatalf("GridDiskForRange returned error: %v", err)
+	}
+	if len(cells) == 0 {
+		t.Fatal("expected non-empty grid disk")
+	}
+	found := false
+	for _, candidate := range cells {
+		if candidate == cell {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("expected origin cell %q in grid disk", cell)
+	}
+}

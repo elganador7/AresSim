@@ -1463,6 +1463,9 @@ func TestUnitRecord_UsesGeometryPointForPosition(t *testing.T) {
 	if position.Latitude != 25.12 || position.Longitude != 51.31 {
 		t.Fatalf("unexpected geometry point coordinates: %+v", position)
 	}
+	if record["h3_cell"] == nil || record["h3_parent_cell"] == nil {
+		t.Fatalf("expected persisted H3 fields on unit record, got %+v", record)
+	}
 }
 
 func TestPreviewTargetEngagementOptions_IncludesNonOperationalFriendlyShooterWithReason(t *testing.T) {

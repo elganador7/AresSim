@@ -144,7 +144,7 @@ func EvaluateEngagementDecision(
 		decision.Reason = EngagementReasonDesiredEffectMismatch
 		return decision
 	}
-	dist := haversineM(
+	dist := approxDistanceM(
 		shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(),
 		target.GetPosition().GetLat(), target.GetPosition().GetLon(),
 	)
@@ -204,7 +204,7 @@ func EvaluateAutonomousEngagementDecision(
 		decision.Reason = EngagementReasonStrikeCooldown
 		return decision
 	}
-	dist := haversineM(
+	dist := approxDistanceM(
 		shooter.GetPosition().GetLat(), shooter.GetPosition().GetLon(),
 		target.GetPosition().GetLat(), target.GetPosition().GetLon(),
 	)

@@ -38,6 +38,7 @@ func SensorTick(units []*enginev1.Unit, defs map[string]DefStats, rules Relation
 
 func buildTrackPicture(units []*enginev1.Unit, defs map[string]DefStats, rules RelationshipRules, previous detectionIndex, rng Rng) trackPicture {
 	groupForUnit := resolveTrackGroupIDs(units)
+	h3Index := buildUnitH3Index(units)
 	bySide := make(map[string]map[string]bool)
 	byGroup := make(detectionIndex)
 	byDetector := make(detectionIndex)
@@ -66,7 +67,8 @@ func buildTrackPicture(units []*enginev1.Unit, defs map[string]DefStats, rules R
 			continue
 		}
 		groupID := groupForUnit[detector.Id]
-		for _, target := range units {
+		candidates := candidateUnitsInRange(detector, maxDetectorSensorRange(detectorDef), h3Index, units)
+		for _, target := range candidates {
 			if !unitIsAlive(target) {
 				continue
 			}
@@ -78,7 +80,7 @@ func buildTrackPicture(units []*enginev1.Unit, defs map[string]DefStats, rules R
 			if !canObserve {
 				continue
 			}
-			dist := haversineM(
+			dist := approxDistanceM(
 				detector.GetPosition().GetLat(), detector.GetPosition().GetLon(),
 				target.GetPosition().GetLat(), target.GetPosition().GetLon(),
 			)

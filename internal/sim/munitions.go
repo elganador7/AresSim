@@ -141,7 +141,7 @@ func DetectMunitions(units []*enginev1.Unit, defs map[string]DefStats, munitions
 			if !canTargetDomain(m.TargetDomains, def.Domain) {
 				continue
 			}
-			dist := haversineM(detLat, detLon, m.CurLat, m.CurLon)
+			dist := approxDistanceM(detLat, detLon, m.CurLat, m.CurLon)
 			if dist <= def.DetectionRangeM {
 				bySide[teamID][m.ID] = true
 			}
@@ -206,7 +206,7 @@ func InterceptMunitionsTick(units []*enginev1.Unit, defs map[string]DefStats, we
 			if !ok {
 				continue
 			}
-			dist := haversineM(defender.GetPosition().GetLat(), defender.GetPosition().GetLon(), m.CurLat, m.CurLon)
+			dist := approxDistanceM(defender.GetPosition().GetLat(), defender.GetPosition().GetLon(), m.CurLat, m.CurLon)
 			if dist > weapon.RangeM {
 				continue
 			}
