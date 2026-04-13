@@ -12,3 +12,5 @@ data/GOGI_V10_3SHP/
 data/GOGI_V10_3_1.gdb/
 data/gogi_v10_3_1shp/
 data/gogi-normalized-v1/
+frontend/test-results/
+frontend/playwright-report/
