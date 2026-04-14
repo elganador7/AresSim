@@ -27,6 +27,7 @@ export default defineConfig({
           react: ["react", "react-dom"],
           zustand: ["zustand"],
           proto: ["@bufbuild/protobuf"],
+          h3: ["h3-js"],
         },
       },
     },

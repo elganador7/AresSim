@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { initBridge } from "./bridge/bridge";
 import CesiumGlobe from "./components/CesiumGlobe";
-import ScenarioEditor from "./components/editor/ScenarioEditor";
 import EventLog from "./components/hud/EventLog";
 import OilPanel from "./components/hud/OilPanel";
-import ScenarioLoadModal from "./components/hud/ScenarioLoadModal";
 import TargetPanel from "./components/hud/TargetPanel";
 import TopBar from "./components/hud/TopBar";
 import UnitPanel from "./components/hud/UnitPanel";
@@ -12,6 +10,9 @@ import { useSimStore } from "./store/simStore";
 import { reportError } from "./utils/errors";
 import { RequestSync } from "../wailsjs/go/main/App";
 import "./app.css";
+
+const ScenarioEditor = lazy(() => import("./components/editor/ScenarioEditor"));
+const ScenarioLoadModal = lazy(() => import("./components/hud/ScenarioLoadModal"));
 
 function MapModeBanner() {
   const mapCommandMode = useSimStore((s) => s.mapCommandMode);
@@ -53,10 +54,12 @@ export default function App() {
 
   if (appView === "editor") {
     return (
-      <ScenarioEditor
-        onExit={() => setAppView("sim")}
-        onPlay={() => setAppView("sim")}
-      />
+      <Suspense fallback={<div className="app-shell" />}>
+        <ScenarioEditor
+          onExit={() => setAppView("sim")}
+          onPlay={() => setAppView("sim")}
+        />
+      </Suspense>
     );
   }
 
@@ -75,7 +78,9 @@ export default function App() {
         <OilPanel />
         <UnitPanel />
         <TargetPanel />
-        <ScenarioLoadModal open={scenarioLoadOpen} onClose={() => setScenarioLoadOpen(false)} />
+        <Suspense fallback={null}>
+          <ScenarioLoadModal open={scenarioLoadOpen} onClose={() => setScenarioLoadOpen(false)} />
+        </Suspense>
       </div>
     </div>
   );
