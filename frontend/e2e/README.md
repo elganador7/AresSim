@@ -20,8 +20,10 @@ npm run --prefix frontend test:e2e
 
 - app shell boot
 - oil network startup state in the top-bar menu
-- scenario modal open/search surface
+- scenario modal open/search/filter behavior
 - switching from sim shell into the scenario editor
+- editor metadata editing
+- editor unit-palette country/search filtering
 
 ## Harness model
 
